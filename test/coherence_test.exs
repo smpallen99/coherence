@@ -1,8 +1,13 @@
 defmodule CoherenceTest do
-  use ExUnit.Case
+  use TestCoherence.ModelCase
   doctest Coherence
+  alias TestCoherence.User
 
-  test "the truth" do
-    assert 1 + 1 == 2
+  test "creates a user" do
+    changeset = User.changeset(%User{}, %{email: "test@example.com", password: "test", password_confirmation: "test"})
+    user = Repo.insert! changeset
+    assert user.email == "test@example.com"
   end
+
+
 end
