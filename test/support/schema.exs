@@ -5,9 +5,9 @@ defmodule TestCoherence.User do
 
   schema "users" do
     field :email, :string
-    field :encrypted_password, :string
-    field :password, :string, virtual: true
-    field :password_confirmation, :string, virtual: true
+    coherence_schema
+
+    timestamps
   end
 
   @required_fields ~w(email)

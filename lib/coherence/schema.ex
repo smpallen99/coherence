@@ -20,15 +20,9 @@ defmodule Coherence.Schema do
       def validate_password(changeset, params) do
         changeset
         |> validate_confirmation(:password)
-        # |> validate_password_match(params)
         |> set_password(params)
       end
-      # defp validate_password_match(changeset, _params) do
-      #   validate_change(changeset, :password, fn(:password, value) ->
-      #     if value == changeset.changes[:password_confirmation], do: [],
-      #       else: [{:password, {:must_match, :password_confirmation}}]
-      #   end)
-      # end
+
       defp set_password(changeset, _params) do
         if changeset.valid? and not is_nil(changeset.changes[:password]) do
           put_change changeset, :encrypted_password,
@@ -40,5 +34,13 @@ defmodule Coherence.Schema do
     end
   end
 
+  defmacro coherence_schema do
+    quote do
+      field :encrypted_password, :string
+      field :password, :string, virtual: true
+      field :password_confirmation, :string, virtual: true
+    end
+  end
 
+  def coherence_fields, do: ~w(encrypted_password password password_confirmation)
 end

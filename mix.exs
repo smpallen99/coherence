@@ -19,7 +19,7 @@ defmodule Coherence.Mixfile do
 
   defp deps do
     [
-      {:ecto, "~> 2.0.0-rc"},
+      {:ecto, "~> 2.0"},
       {:comeonin, "~> 2.4"},
       {:postgrex, ">= 0.0.0", only: :test},
     ]
