@@ -1,0 +1,2 @@
+defmodule Coherence do
+end
