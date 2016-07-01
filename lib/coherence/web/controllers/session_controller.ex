@@ -2,6 +2,7 @@ defmodule Coherence.SessionController do
   use Phoenix.Controller
   alias Coherence.Config
   import Ecto.Query
+  import Coherence.ControllerHelpers
 
   def new(conn, _params) do
     conn
@@ -27,7 +28,11 @@ defmodule Coherence.SessionController do
       |> put_session("user_return_to", nil)
       |> redirect(to: url)
     else
-      render(conn, :new, [email: email])
+      conn
+      |> put_layout({Coherence.CoherenceView, "app.html"})
+      |> put_view(Coherence.SessionView)
+      |> put_flash(:error, "Incorrect email or password.")
+      |> render(:new, [email: email])
     end
   end
 
@@ -43,15 +48,6 @@ defmodule Coherence.SessionController do
     |> put_view(Coherence.SessionView)
     |> render("new.html", email: "")
     |> halt
-  end
-
-  def logged_out_url(conn) do
-    # case Config.logged_out_url do
-    #   nil ->
-    #     Module.concat(Config.module, Router.Helpers).session_path(conn, :new)
-    #   url -> url
-    # end
-    Config.logged_out_url || Module.concat(Config.module, Router.Helpers).session_path(conn, :new)
   end
 
 end

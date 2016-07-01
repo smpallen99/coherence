@@ -2,6 +2,7 @@ defmodule Coherence.RegistrationController do
   use Phoenix.Controller
   alias Coherence.Config
   import Ecto.Query
+  import Coherence.ControllerHelpers
 
   plug :scrub_params, "registration" when action in [:create, :update]
 
@@ -34,10 +35,6 @@ defmodule Coherence.RegistrationController do
     apply(Config.auth_module, Config.delete_login, [conn])
     |> put_view(Admin1.LayoutView)
     |> redirect(to: logged_out_url(conn))
-  end
-
-  def logged_out_url(conn) do
-    Config.logged_out_url || Module.concat(Config.module, Router.Helpers).session_path(conn, :new)
   end
 
 end
