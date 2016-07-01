@@ -41,8 +41,9 @@ defmodule Coherence.PasswordController do
           %{reset_password_token: token, reset_password_sent_at: dt})
         Config.repo.update! cs
 
-        Coherence.UserEmail.password(user, url)
-        |> Coherence.Mailer.deliver
+        email = Coherence.UserEmail.password(user, url)
+        Logger.debug fn -> "password reset email: #{inspect email}" end
+        email |> Coherence.Mailer.deliver
 
         conn
         |> put_flash(:info, "Reset email send. Check your email for a reset link.")
