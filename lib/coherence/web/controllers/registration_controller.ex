@@ -5,6 +5,7 @@ defmodule Coherence.RegistrationController do
   import Coherence.ControllerHelpers
   require Logger
 
+  plug Coherence.ValidateOption, :registerable
   plug :scrub_params, "registration" when action in [:create, :update]
 
   def new(conn, _params) do

@@ -6,6 +6,7 @@ defmodule Coherence.InvitationController do
   require Logger
   use Timex
 
+  plug Coherence.ValidateOption, :invitable
   plug :scrub_params, "user" when action in [:create_user]
   plug :layout_view
 
