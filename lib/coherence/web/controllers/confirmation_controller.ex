@@ -18,7 +18,7 @@ defmodule Coherence.ConfirmationController do
         |> put_flash(:error, "Invalid confirmation token.")
         |> redirect(to: logged_out_url(conn))
       user ->
-        if expired? user.confirmation_send_at do
+        if expired? user.confirmation_send_at, days: Config.confirmation_token_expire_days do
           conn
           |> put_flash(:error, "Confirmation token expired.")
           |> redirect(to: logged_out_url(conn))
@@ -39,14 +39,6 @@ defmodule Coherence.ConfirmationController do
           end
         end
     end
-  end
-
-  def expired?(datetime) do
-    expire_on? = datetime
-    |> Ecto.DateTime.to_erl
-    |> Timex.DateTime.from_erl
-    |> Timex.shift(days: Config.confirmation_token_expire_days)
-    not Timex.before?(Timex.DateTime.now, expire_on?)
   end
 
 end

@@ -62,7 +62,7 @@ defmodule Coherence.PasswordController do
         |> put_flash(:error, "Invalid reset token.")
         |> redirect(to: logged_out_url(conn))
       user ->
-        if expired? user.reset_password_sent_at do
+        if expired? user.reset_password_sent_at, days: Config.reset_token_expire_days do
           clear_password_params(user, user_schema, %{})
           |> Config.repo.update
 
@@ -105,14 +105,6 @@ defmodule Coherence.PasswordController do
     params = Map.put(params, "reset_password_token", nil)
     |> Map.put("reset_password_sent_at", nil)
     user_schema.changeset(user, params)
-  end
-
-  def expired?(datetime) do
-    expire_on? = datetime
-    |> Ecto.DateTime.to_erl
-    |> Timex.DateTime.from_erl
-    |> Timex.shift(days: Config.reset_token_expire_days)
-    not Timex.before?(Timex.DateTime.now, expire_on?)
   end
 
 end

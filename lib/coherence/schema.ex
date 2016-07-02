@@ -16,6 +16,21 @@ defmodule Coherence.Schema do
           Keyword.get(unquote(opts), :confirmable, true)
       end
 
+      def trackable? do
+        Coherence.Config.has_option(:trackable) and
+          Keyword.get(unquote(opts), :trackable, true)
+      end
+
+      def recoverable? do
+        Coherence.Config.has_option(:recoverable) and
+          Keyword.get(unquote(opts), :recoverable, true)
+      end
+
+      def lockable? do
+        Coherence.Config.has_option(:lockable) and
+          Keyword.get(unquote(opts), :lockable, true)
+      end
+
       if  Coherence.Config.has_option(:confirmable) and
             Keyword.get(unquote(opts), :confirmable, true) do
         def confirmed?(user) do
@@ -24,6 +39,21 @@ defmodule Coherence.Schema do
 
         def confirm!(user) do
           Config.user_schema.changeset(user, %{confirmed_at: Ecto.DateTime.utc, confirmation_token: nil})
+          |> Config.repo.update
+        end
+      end
+
+      if  Coherence.Config.has_option(:lockable) and
+            Keyword.get(unquote(opts), :lockable, true) do
+
+        def locked?(user) do
+          !!user.locked_at and
+            !Coherence.ControllerHelpers.expired?(user.locked_at,
+                minutes: Config.unlock_timeout_minutes)
+        end
+
+        def unlock!(user) do
+          Config.user_schema.changeset(user, %{locked_at: nil, unlock_token: nil})
           |> Config.repo.update
         end
       end
@@ -83,7 +113,7 @@ defmodule Coherence.Schema do
         field :remember_created_at, Ecto.DateTime
       end
       if Coherence.Config.has_option(:trackable) do
-        field :sign_in_count, :integer
+        field :sign_in_count, :integer, default: 0
         field :current_sign_in_at, Ecto.DateTime
         field :last_sign_in_at, Ecto.DateTime
         field :current_sign_in_ip, :string

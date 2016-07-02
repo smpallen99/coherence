@@ -15,6 +15,8 @@ defmodule Coherence.Config do
     {:opts, []},
     {:reset_token_expire_days, 2},
     {:confirmation_token_expire_days, 5},
+    {:max_failed_login_attempts, 5},
+    {:unlock_timeout_minutes, 20}
   ]
   |> Enum.each(fn
         {key, default} ->
