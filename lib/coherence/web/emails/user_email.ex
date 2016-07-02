@@ -30,6 +30,14 @@ defmodule Coherence.UserEmail do
     |> subject("Confirm your new account")
     |> render_body("confirmation.html", %{url: url, name: first_name(user.name)})
   end
+  def invitation(invitation, url) do
+    %Email{}
+    |> from(from_email)
+    |> to(user_email(invitation))
+    |> add_reply_to
+    |> subject("Invitation to create a new account")
+    |> render_body("invitation.html", %{url: url, name: first_name(invitation.name)})
+  end
 
   defp add_reply_to(mail) do
     case Coherence.Config.email_reply_to do
