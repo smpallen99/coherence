@@ -13,7 +13,7 @@ defmodule Coherence.RegistrationController do
     conn
     |> put_layout({Coherence.CoherenceView, "app.html"})
     |> put_view(Coherence.RegistrationView)
-    |> render(:new, [email: "", changeset: cs])
+    |> render(:new, email: "", changeset: cs)
   end
 
   def create(conn, %{"registration" => registration_params}) do
