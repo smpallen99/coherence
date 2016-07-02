@@ -1,6 +1,6 @@
 defmodule Coherence.Config do
 
-  # opts: :all || [:resettable, :trackable, :lockable, :rememberable]
+  # opts: :all || [:resettable, :trackable, :lockable, :rememberable, :confirmable]
   [
     :module,
     :repo,
@@ -13,7 +13,8 @@ defmodule Coherence.Config do
     {:create_login, :create_login},
     {:delete_login, :delete_login},
     {:opts, []},
-    {:reset_token_expire_days, 2}
+    {:reset_token_expire_days, 2},
+    {:confirmation_token_expire_days, 5},
   ]
   |> Enum.each(fn
         {key, default} ->
@@ -29,6 +30,7 @@ defmodule Coherence.Config do
   def get(key, default \\ nil) do
     Application.get_env :coherence, key, default
   end
+
   def has_option(option) do
     if opts == :all or option in opts, do: true, else: false
   end

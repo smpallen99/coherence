@@ -3,6 +3,7 @@ defmodule Coherence.RegistrationController do
   alias Coherence.Config
   import Ecto.Query
   import Coherence.ControllerHelpers
+  require Logger
 
   plug :scrub_params, "registration" when action in [:create, :update]
 
@@ -19,9 +20,9 @@ defmodule Coherence.RegistrationController do
     user_schema = Config.user_schema
     cs = user_schema.changeset(user_schema.__struct__, registration_params)
     case Config.repo.insert(cs) do
-      {:ok, _} ->
+      {:ok, user} ->
         conn
-        |> put_flash(:info, "Registration created successfully.")
+        |> send_confirmation(user, user_schema)
         |> redirect(to: logged_out_url(conn))
       {:error, changeset} ->
         conn
@@ -31,10 +32,33 @@ defmodule Coherence.RegistrationController do
     end
   end
 
-  def delete(conn, _params) do
-    apply(Config.auth_module, Config.delete_login, [conn])
-    |> put_view(Admin1.LayoutView)
-    |> redirect(to: logged_out_url(conn))
+  # def delete(conn, _params) do
+  #   apply(Config.auth_module, Config.delete_login, [conn])
+  #   |> put_view(Admin1.LayoutView)
+  #   |> redirect(to: logged_out_url(conn))
+  # end
+
+  defp send_confirmation(conn, user, user_schema) do
+    if user_schema.confirmable? do
+      token = random_string 48
+      url = router_helpers.confirmation_url(conn, :edit, token)
+      Logger.debug "confirmation email url: #{inspect url}"
+      dt = Ecto.DateTime.utc
+      user_schema.changeset(user,
+        %{confirmation_token: token, confirmation_send_at: dt})
+      |> Config.repo.update!
+
+      email = Coherence.UserEmail.confirmation(user, url)
+      Logger.debug fn -> "confirmation email: #{inspect email}" end
+      email |> Coherence.Mailer.deliver
+
+      conn
+      |> put_flash(:info, "Confirmation email sent.")
+    else
+      conn
+      |> put_flash(:info, "Registration created successfully.")
+    end
+
   end
 
 end

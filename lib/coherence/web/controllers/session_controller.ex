@@ -18,15 +18,21 @@ defmodule Coherence.SessionController do
     u = Config.repo.one(from u in user_schema, where: u.email == ^email)
     # Logger.warn "user: #{inspect u}"
     if u != nil and user_schema.checkpw(password, u.encrypted_password) do
-      url = case get_session(conn, "user_return_to") do
-        nil -> "/"
-        value -> value
+      if confirmed? u do
+        url = case get_session(conn, "user_return_to") do
+          nil -> "/"
+          value -> value
+        end
+        # |> Coherence.Authentication.Database.create_login(u, Config.schema_key )
+        apply(Config.auth_module, Config.create_login, [conn, u, Config.schema_key])
+        |> put_flash(:notice, "Signed in successfully.")
+        |> put_session("user_return_to", nil)
+        |> redirect(to: url)
+      else
+        conn
+        |> put_flash(:error, "You must confirm your account before you can login.")
+        |> redirect(to: logged_out_url(conn))
       end
-      # |> Coherence.Authentication.Database.create_login(u, Config.schema_key )
-      apply(Config.auth_module, Config.create_login, [conn, u, Config.schema_key])
-      |> put_flash(:notice, "Signed in successfully.")
-      |> put_session("user_return_to", nil)
-      |> redirect(to: url)
     else
       conn
       |> put_layout({Coherence.CoherenceView, "app.html"})
@@ -48,6 +54,14 @@ defmodule Coherence.SessionController do
     |> put_view(Coherence.SessionView)
     |> render("new.html", email: "")
     |> halt
+  end
+
+  def confirmed?(user) do
+    if Config.user_schema.confirmable? do
+      Config.user_schema.confirmed?(user)
+    else
+      true
+    end
   end
 
 end

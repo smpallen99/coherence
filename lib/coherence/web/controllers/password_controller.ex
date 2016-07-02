@@ -107,12 +107,6 @@ defmodule Coherence.PasswordController do
     user_schema.changeset(user, params)
   end
 
-  def random_string(length) do
-    :crypto.strong_rand_bytes(length)
-    |> Base.url_encode64
-    |> binary_part(0, length)
-  end
-
   def expired?(datetime) do
     expire_on? = datetime
     |> Ecto.DateTime.to_erl
