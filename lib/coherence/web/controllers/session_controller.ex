@@ -36,7 +36,8 @@ defmodule Coherence.SessionController do
         else
           conn
           |> put_flash(:error, "Too many failed login attempts. Account has been locked.")
-          |> redirect(to: logged_out_url(conn))
+          |> assign(:locked, true)
+          |> render("new.html", email: "")
         end
       else
         conn
@@ -98,11 +99,6 @@ defmodule Coherence.SessionController do
 
   @flash_invalid "Incorrect email or password."
   @flash_locked "Maximum Login attempts exceeded. Your account has been locked."
-  @lockable_failure "Failed to update lockable attributes "
-
-  defp lockable_failure(changeset) do
-    Logger.error @lockable_failure <> inspect(changeset.errors)
-  end
 
   defp log_lockable_update({:error, changeset}) do
     lockable_failure changeset
@@ -119,11 +115,12 @@ defmodule Coherence.SessionController do
 
   defp failed_login(conn, %{} = user, true) do
     attempts = user.failed_attempts + 1
-    {flash, params} =
+    {conn, flash, params} =
       if attempts >= Config.max_failed_login_attempts do
-        {@flash_locked, %{locked_at: Ecto.DateTime.utc}}
+        new_conn = assign(conn, :locked, true)
+        {new_conn, @flash_locked, %{locked_at: Ecto.DateTime.utc}}
       else
-        {@flash_invalid, %{}}
+        {conn, @flash_invalid, %{}}
       end
 
     user.__struct__.changeset(user, Map.put(params, :failed_attempts, attempts))

@@ -1,5 +1,8 @@
 defmodule Coherence.ControllerHelpers do
   alias Coherence.Config
+  require Logger
+
+  @lockable_failure "Failed to update lockable attributes "
 
   def router_helpers do
     Module.concat(Config.module, Router.Helpers)
@@ -21,5 +24,9 @@ defmodule Coherence.ControllerHelpers do
     |> Timex.DateTime.from_erl
     |> Timex.shift(opts)
     not Timex.before?(Timex.DateTime.now, expire_on?)
+  end
+
+  def lockable_failure(changeset) do
+    Logger.error @lockable_failure <> inspect(changeset.errors)
   end
 end

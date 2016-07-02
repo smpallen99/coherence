@@ -1,0 +1,12 @@
+<div>
+  <p>Hello <%= @name %>!<p>
+  <p>
+    You requested unlock instructions for your locked account. Please click the
+    link below to unlock your account.
+  </p>
+  <p>
+    <a href="<%= @url %>">Unlock my Account</a>
+  </p>
+  <p>Thank you!</p>
+</div>
+
