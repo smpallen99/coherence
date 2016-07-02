@@ -6,21 +6,6 @@ defmodule Coherence.ConfirmationController do
   require Logger
   use Timex
 
-  # plug :layout_view
-
-  # def layout_view(conn, _) do
-  #   conn
-  #   |> put_layout({Coherence.CoherenceView, "app.html"})
-  #   |> put_view(Coherence.ConfirmationView)
-  # end
-
-  # def new(conn, _params) do
-  #   user_schema = Config.user_schema
-  #   cs = user_schema.changeset(user_schema.__struct__)
-  #   conn
-  #   |> render(:new, [email: "", changeset: cs])
-  # end
-
   def edit(conn, params) do
     user_schema = Config.user_schema
     token = params["id"]
@@ -55,56 +40,6 @@ defmodule Coherence.ConfirmationController do
         end
     end
   end
-
-  # def edit(conn, params) do
-  #   user_schema = Config.user_schema
-  #   token = params["id"]
-  #   user = where(user_schema, [u], u.reset_password_token == ^token)
-  #   |> Config.repo.one
-  #   case user do
-  #     nil ->
-  #       conn
-  #       |> put_flash(:error, "Invalid reset token.")
-  #       |> redirect(to: logged_out_url(conn))
-  #     user ->
-  #       if expired? user.reset_password_sent_at do
-  #         clear_password_params(user, user_schema, %{})
-  #         |> Config.repo.update
-
-  #         conn
-  #         |> put_flash(:error, "Password reset token expired.")
-  #         |> redirect(to: logged_out_url(conn))
-  #       else
-  #         changeset = user_schema.changeset(user)
-  #         conn
-  #         |> render("edit.html", changeset: changeset)
-  #       end
-  #   end
-  # end
-
-  # def update(conn, %{"password" => password_params}) do
-  #   user_schema = Config.user_schema
-  #   token = password_params["reset_password_token"]
-  #   user = where(user_schema, [u], u.reset_password_token == ^token)
-  #   |> Config.repo.one
-  #   case user do
-  #     nil ->
-  #       conn
-  #       |> put_flash(:error, "Invalid reset token")
-  #       |> redirect(to: logged_out_url(conn))
-  #     user ->
-  #       cs = clear_password_params(user, user_schema, password_params)
-  #       case Config.repo.update(cs) do
-  #         {:ok, user} ->
-  #           conn
-  #           |> put_flash(:info, "Password updated successfully.")
-  #           |> redirect(to: logged_out_url(conn))
-  #         {:error, changeset} ->
-  #           conn
-  #           |> render("edit.html", changeset: changeset)
-  #       end
-  #   end
-  # end
 
   def expired?(datetime) do
     expire_on? = datetime
