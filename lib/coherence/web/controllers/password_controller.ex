@@ -1,8 +1,5 @@
 defmodule Coherence.PasswordController do
-  use Phoenix.Controller
-  alias Coherence.Config
-  import Ecto.Query
-  import Coherence.ControllerHelpers
+  use Coherence.Web, :controller
   require Logger
   use Timex
 
@@ -10,7 +7,7 @@ defmodule Coherence.PasswordController do
 
   def layout_view(conn, _) do
     conn
-    |> put_layout({Coherence.CoherenceView, "app.html"})
+    |> put_layout({Coherence.LayoutView, "app.html"})
     |> put_view(Coherence.PasswordView)
   end
 
@@ -90,7 +87,7 @@ defmodule Coherence.PasswordController do
       user ->
         cs = clear_password_params(user, user_schema, password_params)
         case Config.repo.update(cs) do
-          {:ok, user} ->
+          {:ok, _user} ->
             conn
             |> put_flash(:info, "Password updated successfully.")
             |> redirect(to: logged_out_url(conn))

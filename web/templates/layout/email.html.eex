@@ -1,4 +1,4 @@
-<html>
+<%# <html>
   <head>
     <title><%= @email.subject %></title>
   </head>
@@ -6,3 +6,4 @@
     <%= render @view_module, @view_template, assigns %>
   </body>
 </html>
+ %>

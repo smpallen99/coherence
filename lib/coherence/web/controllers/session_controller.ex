@@ -1,13 +1,10 @@
 defmodule Coherence.SessionController do
-  use Phoenix.Controller
-  alias Coherence.Config
-  import Ecto.Query
-  import Coherence.ControllerHelpers
+  use Coherence.Web, :controller
   require Logger
 
   def new(conn, _params) do
     conn
-    |> put_layout({Coherence.CoherenceView, "app.html"})
+    |> put_layout({Coherence.LayoutView, "app.html"})
     |> put_view(Coherence.SessionView)
     |> render(:new, [email: ""])
   end
@@ -18,7 +15,6 @@ defmodule Coherence.SessionController do
     password = params["session"]["password"]
     user = Config.repo.one(from u in user_schema, where: u.email == ^email)
     lockable? = user_schema.lockable?
-    # Logger.warn "user: #{inspect u}"
     if user != nil and user_schema.checkpw(password, user.encrypted_password) do
       if confirmed? user do
         url = case get_session(conn, "user_return_to") do
@@ -47,7 +43,7 @@ defmodule Coherence.SessionController do
     else
       conn
       |> failed_login(user, lockable?)
-      |> put_layout({Coherence.CoherenceView, "app.html"})
+      |> put_layout({Coherence.LayoutView, "app.html"})
       |> put_view(Coherence.SessionView)
       |> render(:new, email: email)
     end
@@ -135,13 +131,12 @@ defmodule Coherence.SessionController do
     user = conn.assigns[:authenticated_user]
     apply(Config.auth_module, Config.delete_login, [conn])
     |> track_logout(user, user.__struct__.trackable?)
-    |> put_view(Admin1.LayoutView)
     |> redirect(to: logged_out_url(conn))
   end
 
   def login_callback(conn) do
     conn
-    |> put_layout({Coherence.CoherenceView, "app.html"})
+    |> put_layout({Coherence.LayoutView, "app.html"})
     |> put_view(Coherence.SessionView)
     |> render("new.html", email: "")
     |> halt

@@ -1,8 +1,5 @@
 defmodule Coherence.ConfirmationController do
-  use Phoenix.Controller
-  alias Coherence.Config
-  import Ecto.Query
-  import Coherence.ControllerHelpers
+  use Coherence.Web, :controller
   require Logger
   use Timex
 
@@ -32,7 +29,7 @@ defmodule Coherence.ConfirmationController do
               conn
               |> put_flash(:info, "User confirmed successfully.")
               |> redirect(to: logged_out_url(conn))
-            {:error, changeset} ->
+            {:error, _changeset} ->
               conn
               |> put_flash(:error, "Problem confirming user. Please contact the system administrator.")
               |> redirect(to: logged_out_url(conn))

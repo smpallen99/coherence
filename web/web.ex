@@ -13,13 +13,12 @@ defmodule Coherence.Web do
   def controller do
     quote do
       use Phoenix.Controller
+      import Coherence.ControllerHelpers
 
-      # alias UcxLicensing.Repo
       import Ecto
-      import Ecto.Query, only: [from: 1, from: 2]
+      import Ecto.Query
 
-      # import UcxLicensing.Router.Helpers
-      # import UcxLicensing.Gettext
+      alias Coherence.Config
     end
   end
 

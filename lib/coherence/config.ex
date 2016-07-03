@@ -1,6 +1,6 @@
 defmodule Coherence.Config do
 
-  # opts: :all || [:resettable, :trackable, :lockable, :rememberable, :confirmable]
+  # opts: :all || [:trackable, :lockable, :rememberable, :confirmable]
   [
     :module,
     :repo,

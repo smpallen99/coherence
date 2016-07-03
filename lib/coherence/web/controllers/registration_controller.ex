@@ -1,8 +1,5 @@
 defmodule Coherence.RegistrationController do
-  use Phoenix.Controller
-  alias Coherence.Config
-  import Ecto.Query
-  import Coherence.ControllerHelpers
+  use Coherence.Web, :controller
   require Logger
 
   plug Coherence.ValidateOption, :registerable
@@ -12,7 +9,7 @@ defmodule Coherence.RegistrationController do
     user_schema = Config.user_schema
     cs = user_schema.changeset(user_schema.__struct__)
     conn
-    |> put_layout({Coherence.CoherenceView, "app.html"})
+    |> put_layout({Coherence.LayoutView, "app.html"})
     |> put_view(Coherence.RegistrationView)
     |> render(:new, email: "", changeset: cs)
   end
@@ -27,7 +24,7 @@ defmodule Coherence.RegistrationController do
         |> redirect(to: logged_out_url(conn))
       {:error, changeset} ->
         conn
-        |> put_layout({Coherence.CoherenceView, "app.html"})
+        |> put_layout({Coherence.LayoutView, "app.html"})
         |> put_view(Coherence.RegistrationView)
         |> render("new.html", changeset: changeset)
     end

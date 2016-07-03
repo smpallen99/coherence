@@ -1,8 +1,5 @@
 defmodule Coherence.UnlockController do
-  use Phoenix.Controller
-  alias Coherence.Config
-  import Ecto.Query
-  import Coherence.ControllerHelpers
+  use Coherence.Web, :controller
   require Logger
   use Timex
 
@@ -11,7 +8,7 @@ defmodule Coherence.UnlockController do
 
   def layout_view(conn, _) do
     conn
-    |> put_layout({Coherence.CoherenceView, "app.html"})
+    |> put_layout({Coherence.LayoutView, "app.html"})
     |> put_view(Coherence.UnlockView)
   end
 
@@ -62,7 +59,7 @@ defmodule Coherence.UnlockController do
   def edit(conn, params) do
     user_schema = Config.user_schema
     token = params["id"]
-    user = where(user_schema, [u], u.unlock_token == ^token)
+    where(user_schema, [u], u.unlock_token == ^token)
     |> Config.repo.one
     |> case do
       nil ->

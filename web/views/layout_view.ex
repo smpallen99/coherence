@@ -1,3 +1,3 @@
-defmodule Coherence.LayoutView do
-  use Coherence.Web, :view
-end
+# defmodule Coherence.LayoutView do
+#   use Coherence.Web, :view
+# end

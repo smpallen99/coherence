@@ -11,6 +11,11 @@ defmodule Coherence.Schema do
           Keyword.get(unquote(opts), :authenticatable, true)
       end
 
+      def registerable? do
+        Coherence.Config.has_option(:registerable) and
+          Keyword.get(unquote(opts), :registerable, true)
+      end
+
       def confirmable? do
         Coherence.Config.has_option(:confirmable) and
           Keyword.get(unquote(opts), :confirmable, true)
@@ -96,6 +101,42 @@ defmodule Coherence.Schema do
       end
     end
   end
+
+  def schema_fields, do: [
+    authenticatable: [
+      "# authenticatable",
+      "add :encrypted_password, :string",
+    ],
+    recoverable: [
+      "# recoverable",
+      "add :reset_password_token, :string",
+      "add :reset_password_sent_at, :datetime"
+    ],
+    rememberable: [
+      "# rememberable",
+      "add :remember_created_at, :datetime"
+    ],
+    trackable: [
+      "# trackable",
+      "add :sign_in_count, :integer, default: 0",
+      "add :current_sign_in_at, :datetime",
+      "add :last_sign_in_at, :datetime",
+      "add :current_sign_in_ip, :string",
+      "add :last_sign_in_ip, :string"
+    ],
+    lockable: [
+      "# lockable",
+      "add :failed_attempts, :integer, default: 0",
+      "add :unlock_token, :string",
+      "add :locked_at, :datetime",
+    ],
+    confirmable: [
+      "# confirmable",
+      "add :confirmation_token, :string",
+      "add :confirmed_at, :datetime",
+      "add :confirmation_send_at, :datetime"
+    ]
+  ]
 
   defmacro coherence_schema do
     quote do

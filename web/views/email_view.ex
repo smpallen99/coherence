@@ -1,4 +1,4 @@
-defmodule Coherence.EmailView do
-  use Coherence.Web, :view
+# defmodule Coherence.EmailView do
+#   use Coherence.Web, :view
 
-end
+# end

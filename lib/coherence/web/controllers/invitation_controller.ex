@@ -1,8 +1,6 @@
 defmodule Coherence.InvitationController do
-  use Phoenix.Controller
+  use Coherence.Web, :controller
   alias Coherence.{Config, Invitation}
-  import Ecto.Query
-  import Coherence.ControllerHelpers
   require Logger
   use Timex
 
@@ -12,7 +10,7 @@ defmodule Coherence.InvitationController do
 
   def layout_view(conn, _) do
     conn
-    |> put_layout({Coherence.CoherenceView, "app.html"})
+    |> put_layout({Coherence.LayoutView, "app.html"})
     |> put_view(Coherence.InvitationView)
   end
 
@@ -73,7 +71,7 @@ defmodule Coherence.InvitationController do
       invite ->
         changeset = user_schema.changeset(user_schema.__struct__, params["user"])
         case repo.insert changeset do
-          {:ok, user} ->
+          {:ok, _user} ->
             repo.delete invite
             conn
             |> put_flash(:info, "Account created.")
