@@ -12,7 +12,7 @@ defmodule TestCoherence.Router do
 
   scope "/" do
     pipe_through :browser
-    coherence_routes
+    coherence_routes :public
   end
 end
 

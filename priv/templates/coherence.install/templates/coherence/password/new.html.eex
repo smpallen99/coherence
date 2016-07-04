@@ -5,8 +5,8 @@
 <%%= form_for @changeset, password_path(@conn, :create), [as: :password], fn f  -> %>
 
   <div class="form-group">
-    <%%= label f, :email, class: "control-label" %>
-    <%%= text_input f, :email, class: "form-control" %>
+    <%%= required_label f, :email, class: "control-label" %>
+    <%%= text_input f, :email, class: "form-control", required: "" %>
     <%%= error_tag f, :email %>
   </div>
 

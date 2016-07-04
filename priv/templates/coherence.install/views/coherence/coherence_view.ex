@@ -34,4 +34,13 @@ defmodule Coherence.CoherenceView do
       []
     end
   end
+
+  def required_label(f, name, opts \\ []) do
+    label f, name, opts do
+      [
+        "#{humanize(name)}\n",
+        content_tag(:abbr, "*", class: "required", title: "required")
+      ]
+    end
+  end
 end

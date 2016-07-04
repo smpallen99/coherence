@@ -12,6 +12,7 @@ defmodule <%= base %>.Coherence.Web do
       import <%= base %>.Router.Helpers
       import <%= base %>.ErrorHelpers
       import <%= base %>.Gettext
+      import Coherence.CoherenceView, only: [required_label: 2, required_label: 3]
     end
   end
 

@@ -396,8 +396,13 @@ config :coherence, #{base}.Coherence.Mailer,
 
       scope "/" do
         pipe_through :public
-        coherence_routes           # Add this
+        coherence_routes :public          # Add this
         get "/", Admin1.PageController, :index
+      end
+
+      scope "/" do
+        pipe_through :browser
+        coherence_routes :private         # Add this
       end
       # ...
     end
