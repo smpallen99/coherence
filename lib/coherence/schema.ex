@@ -1,4 +1,69 @@
 defmodule Coherence.Schema do
+  @moduledoc """
+  Add Coherence support to a User schema module.
+
+  Add `use Coherence.Schema` to your User module to add a number of
+  Module functions and helpers.
+
+  The following functions are added regardless of the options configured:
+
+  * `authenticatable?/0` - Returns true if the option is configured.
+  * `registerable?/0` - Returns true if the option is configured.
+  * `confirmable?/0` - Returns true if the option is configured.
+  * `trackable?/0` - Returns true if the option is configured.
+  * `recoverable?/0` - Returns true if the option is configured.
+  * `lockable?/0` - Returns true if the option is configured.
+  * `invitable?/0` - Returns true if the option is configured.
+
+  The following functions are available when `authenticatable?/0` returns true:
+
+  * `checkpw/2` - Validate password.
+  * `encrypt_password/1` - encrypted a password using `Comeonin.Bcrypt.hashpwsalt`
+  * `validate_coherence/2` - run the coherence password validations.
+  * `validate_password/2` - Used by `validate_coherence for password validation`
+
+  The following functions are available when `confirmable?/0` returns true.
+
+  * `confirmed?/1` - Has the given user been confirmed?
+  * `confirm!/1` - Confirm the given user
+
+  The following functions are available when `lockable?/0` returns true.
+
+  * `locked?/1` - Is the given user locked?
+  * `unlock!/1` - Unlock the given user
+
+  The `coherence_schema/1` macro is used to add the configured schema fields to the User models schema.
+
+  The `coherence_fields/0` function is used to return the validation fields appropriate for the selected options.
+
+  ## Examples:
+
+  The following is an example User module when the :authenticatable is used:
+
+      defmodule MyProject.User do
+        use MyProject.Web, :model
+        use Coherence.Schema
+
+        schema "users" do
+          field :name, :string
+          field :email, :string
+          coherence_schema
+
+          timestamps
+        end
+
+        @required_fields ~w(name email)
+        @optional_fields ~w() ++ coherence_fields
+
+        def changeset(model, params \\ %{}) do
+          model
+          |> cast(params, @required_fields, @optional_fields)
+          |> unique_constraint(:email)
+          |> validate_coherence(params)
+        end
+      end
+
+  """
 
   defmacro __using__(opts \\ []) do
     quote do
@@ -107,6 +172,16 @@ defmodule Coherence.Schema do
     end
   end
 
+  @doc """
+  Get list of migration schema fields for each option.
+
+  Helper function to return a keyword list of the migration fields for each
+  of the supported options.
+
+  TODO: Does this really belong here? Should it not be in a migration support
+  module?
+  """
+
   def schema_fields, do: [
     authenticatable: [
       "# authenticatable",
@@ -143,6 +218,50 @@ defmodule Coherence.Schema do
     ]
   ]
 
+  @doc """
+  Add configure schema fields.
+
+  Adds the schema fields to the schema block for the options selected.
+  Only the fields for configured options are added.
+
+  For example, for `Coherence.Config.opts == [:authenticatable, :recoverable]`
+  `coherence_schema` used in the following context:
+
+      defmodule MyProject.User do
+        use MyProject.Web, :model
+        use Coherence.Schema
+
+        schema "users" do
+          field :name, :string
+          field :email, :string
+          coherence_schema
+
+          timestamps
+        end
+
+  Will compile a schema to the following:
+
+      defmodule MyProject.User do
+        use MyProject.Web, :model
+        use Coherence.Schema
+
+        schema "users" do
+          field :name, :string
+          field :email, :string
+
+          # authenticatable
+          field :encrypted_password, :string
+          field :password, :string, virtual: true
+          field :password_confirmation, :string, virtual: true
+
+          # recoverable
+          field :reset_password_token, :string
+          field :reset_password_sent_at, Ecto.DateTime
+
+          timestamps
+        end
+
+  """
   defmacro coherence_schema do
     quote do
       if Coherence.Config.has_option(:authenticatable) do
@@ -188,6 +307,17 @@ defmodule Coherence.Schema do
     confirmable: ~w(confirmation_token confirmed_at confirmation_send_at)
   }
 
+  @doc """
+  Get a list of the configured database fields.
+
+  Returns a list of fields that can be appended to your @option_fields used
+  in your models changeset cast.
+
+  For example, for `Coherence.Config.opts == [:authenticatable, :recoverable]`
+  `coherence_fiels/0` will return:
+
+      ~w(encrypted_password password password_confirmation reset_password_token reset_password_sent_at)
+  """
   def coherence_fields do
     []
     |> options_fields(:authenticatable)

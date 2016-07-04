@@ -1,8 +1,25 @@
 defmodule Coherence.ConfirmationController do
+  @moduledoc """
+  Handle confirmation actions.
+
+  A single action, `edit`, is required for the confirmation module.
+
+  """
   use Coherence.Web, :controller
   require Logger
   use Timex
 
+  plug Coherence.ValidateOption, :confirmable
+
+  @doc """
+  Handle the user's click on the confirm link in the confirmation email.
+
+  Validate that the confirmation token has not expired and sets `confirmation_send_at`
+  field to nil, marking the user as confirmed.
+
+  TODO: Need to support a resend confirmation email.
+
+  """
   def edit(conn, params) do
     user_schema = Config.user_schema
     token = params["id"]

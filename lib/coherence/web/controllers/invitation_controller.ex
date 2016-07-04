@@ -26,9 +26,7 @@ defmodule Coherence.InvitationController do
     cs = Invitation.changeset(%Invitation{}, params)
     case Config.repo.insert cs do
       {:ok, invitation} ->
-        # email = Coherence.UserEmail.invitation(invitation, url)
-        # Logger.debug fn -> "invitation email: #{inspect email}" end
-        # email |> Coherence.Mailer.deliver
+
         send_user_email :invitation, invitation, url
 
         conn
