@@ -4,21 +4,16 @@ defmodule <%= base %>.Coherence.UserEmail do
   use Phoenix.Swoosh, view: Coherence.EmailView, layout: {Coherence.LayoutView, :email}
   alias Swoosh.Email
   require Logger
+  alias Coherence.Config
 
-  def welcome(user) do
-    %Email{}
-    |> from(from_email)
-    |> to(user.email)
-    |> subject("Hello, Avengers!")
-    |> render_body("welcome.html", %{username: user.email})
-  end
+  defp site_name, do: Config.site_name(inspect Config.module)
 
   def password(user, url) do
     %Email{}
     |> from(from_email)
     |> to(user_email(user))
     |> add_reply_to
-    |> subject("Reset password instructions")
+    |> subject("#{site_name} - Reset password instructions")
     |> render_body("password.html", %{url: url, name: first_name(user.name)})
   end
 
@@ -27,7 +22,7 @@ defmodule <%= base %>.Coherence.UserEmail do
     |> from(from_email)
     |> to(user_email(user))
     |> add_reply_to
-    |> subject("Confirm your new account")
+    |> subject("#{site_name} - Confirm your new account")
     |> render_body("confirmation.html", %{url: url, name: first_name(user.name)})
   end
 
@@ -36,7 +31,7 @@ defmodule <%= base %>.Coherence.UserEmail do
     |> from(from_email)
     |> to(user_email(invitation))
     |> add_reply_to
-    |> subject("Invitation to create a new account")
+    |> subject("#{site_name} - Invitation to create a new account")
     |> render_body("invitation.html", %{url: url, name: first_name(invitation.name)})
   end
 
@@ -45,7 +40,7 @@ defmodule <%= base %>.Coherence.UserEmail do
     |> from(from_email)
     |> to(user_email(user))
     |> add_reply_to
-    |> subject("Unlock Instructions")
+    |> subject("#{site_name} - Unlock Instructions")
     |> render_body("unlock.html", %{url: url, name: first_name(user.name)})
   end
 

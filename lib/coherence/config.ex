@@ -8,13 +8,14 @@ defmodule Coherence.Config do
 
   The following items are supported:
 
-  * :module`: the name of project module (`module: MyProject`)
-  * :repo`: the module name of your Repo (`repo: MyProject.Repo`)
+  * :module: the name of project module (`module: MyProject`)
+  * :repo: the module name of your Repo (`repo: MyProject.Repo`)
   * :user_schema
   * :schema_key
   * :logged_out_url
   * :email_from
   * :email_reply_to
+  * :site_name - The site name used for email
   * :auth_module (Coherence.Authentication.Database)
   * :create_login (:create_login)
   * :delete_login (:delete_login})
@@ -42,6 +43,7 @@ defmodule Coherence.Config do
     :logged_out_url,
     :email_from,
     :email_reply_to,
+    :site_name,
     {:auth_module, Coherence.Authentication.Database},
     {:create_login, :create_login},
     {:delete_login, :delete_login},
