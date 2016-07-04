@@ -23,6 +23,7 @@ defmodule Coherence.PasswordController do
     email = password_params["email"]
     user = where(user_schema, [u], u.email == ^email)
     |> Config.repo.one
+
     case user do
       nil ->
         changeset = user_schema.changeset(user_schema.__struct__)
@@ -38,10 +39,8 @@ defmodule Coherence.PasswordController do
           %{reset_password_token: token, reset_password_sent_at: dt})
         Config.repo.update! cs
 
-        # email = Coherence.UserEmail.password(user, url)
-        # Logger.debug fn -> "password reset email: #{inspect email}" end
-        # email |> Coherence.Mailer.deliver
         send_user_email :password, user, url
+
         conn
         |> put_flash(:info, "Reset email send. Check your email for a reset link.")
         |> redirect(to: logged_out_url(conn))
@@ -76,18 +75,22 @@ defmodule Coherence.PasswordController do
 
   def update(conn, %{"password" => password_params}) do
     user_schema = Config.user_schema
+    repo = Config.repo
     token = password_params["reset_password_token"]
     user = where(user_schema, [u], u.reset_password_token == ^token)
-    |> Config.repo.one
+    |> repo.one
     case user do
       nil ->
         conn
         |> put_flash(:error, "Invalid reset token")
         |> redirect(to: logged_out_url(conn))
       user ->
-        cs = clear_password_params(user, user_schema, password_params)
-        case Config.repo.update(cs) do
-          {:ok, _user} ->
+        cs = user_schema.changeset(user, password_params)
+        case repo.update(cs) do
+          {:ok, user} ->
+            clear_password_params(user, user_schema, %{})
+            |> repo.update
+
             conn
             |> put_flash(:info, "Password updated successfully.")
             |> redirect(to: logged_out_url(conn))
