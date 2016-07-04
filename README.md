@@ -261,6 +261,7 @@ If the controllers are generated, you will need to change your router to use the
   end
   # ...
 end
+```
 
 ## License
 
