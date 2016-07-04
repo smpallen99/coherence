@@ -17,7 +17,7 @@ defmodule Mix.Tasks.Coherence.Install do
   * Generate appropriate migration files.
   * Generate appropriate view files.
   * Generate appropriate template files.
-  # Generate a `web/coherence_web.ex` file.
+  * Generate a `web/coherence_web.ex` file.
 
   ## Examples
 
@@ -147,6 +147,7 @@ defmodule Mix.Tasks.Coherence.Install do
   defp do_clean(config), do: config
 
   defp do_run(%{clean: false} = config) do
+    # IO.puts "config: #{inspect config}"
     config
     |> gen_coherence_config
     |> gen_migration
@@ -289,7 +290,7 @@ config :coherence, #{base}.Coherence.Mailer,
   @view_files [
     all: "coherence_view.ex",
     confirmable: "confirmation_view.ex",
-    has_email?: "email_view.ex",
+    use_email?: "email_view.ex",
     invitable: "invitation_view.ex",
     all: "layout_view.ex",
     recoverable: "password_view.ex",
@@ -308,7 +309,7 @@ config :coherence, #{base}.Coherence.Mailer,
   def gen_coherence_views(config), do: config
 
   @template_files [
-    email: {:has_email?, ~w(confirmation invitation password unlock)},
+    email: {:use_email?, ~w(confirmation invitation password unlock)},
     invitation: {:invitable, ~w(edit new)},
     layout: {:all, ~w(app email)},
     password: {:recoverable, ~w(edit new)},
@@ -318,7 +319,7 @@ config :coherence, #{base}.Coherence.Mailer,
   ]
 
   defp validate_option(_, :all), do: true
-  defp validate_option(%{has_email?: true}, :has_email?), do: true
+  defp validate_option(%{use_email?: true}, :use_email?), do: true
   defp validate_option(%{opts: opts}, opt) do
     if opt in opts, do: true, else: false
   end
