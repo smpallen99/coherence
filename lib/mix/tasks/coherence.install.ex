@@ -136,6 +136,7 @@ defmodule Mix.Tasks.Coherence.Install do
   defp do_clean(%{clean: true} = config) do
     if Mix.shell.yes? "Are you sure you want to delete coherence files?" do
       rm_dir! "web/views/coherence"
+      rm_dir! "web/controllers/coherence"
       rm_dir! "web/templates/coherence"
       rm_dir! "web/emails"
       rm! "web/coherence_web.ex"
