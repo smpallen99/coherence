@@ -13,10 +13,11 @@ defmodule Mix.Tasks.Coherence.InstallTest do
   @all_template_dirs ~w(layout session email invitation password registration unlock)
   @all_views ~w(coherence_view.ex confirmation_view.ex email_view.ex invitation_view.ex) ++
     ~w(layout_view.ex password_view.ex registration_view.ex session_view.ex unlock_view.ex)
+  @all_controllers Enum.map(@all_template_dirs -- ~w(layout email), &("#{&1}_controller.ex"))
 
   test "generates_files_for_authenticatable" do
     in_tmp "generates_views_for_authenticatable", fn ->
-      ~w(--repo=TestCoherence.Repo --log-only --no-migrations)
+      ~w(--repo=TestCoherence.Repo --log-only --no-migrations --controllers --module=TestCoherence)
       |> Mix.Tasks.Coherence.Install.run
 
       ~w(session_view.ex coherence_view.ex layout_view.ex)
@@ -24,12 +25,19 @@ defmodule Mix.Tasks.Coherence.InstallTest do
 
       ~w(layout session)
       |> assert_dirs(@all_template_dirs, "web/templates/coherence/")
+
+      ~w(session_controller.ex)
+      |> assert_file_list(@all_controllers, "web/controllers/coherence/")
+
+      assert_file "web/controllers/coherence/session_controller.ex", fn file ->
+        assert file =~ "defmodule TestCoherence.Coherence.SessionController do"
+      end
     end
   end
 
   test "generates files for authenticatable recoverable" do
     in_tmp "generates_files_for_authenticatable_recoverable", fn ->
-      ~w(--repo=TestCoherence.Repo  --authenticatable --recoverable --log-only --no-migrations)
+      ~w(--repo=TestCoherence.Repo  --authenticatable --recoverable --log-only --no-migrations --controllers)
       |> Mix.Tasks.Coherence.Install.run
 
       ~w(session_view.ex coherence_view.ex layout_view.ex password_view.ex email_view.ex)
@@ -37,12 +45,15 @@ defmodule Mix.Tasks.Coherence.InstallTest do
 
       ~w(layout session password email)
       |> assert_dirs(@all_template_dirs, "web/templates/coherence/")
+
+      ~w(session_controller.ex password_controller.ex)
+      |> assert_file_list(@all_controllers, "web/controllers/coherence/")
     end
   end
 
   test "generates files for authenticatable recoverable invitable" do
     in_tmp "generates_files_for_authenticatable_recoverable_invitable", fn ->
-      ~w(--repo=TestCoherence.Repo  --authenticatable --recoverable --invitable --log-only --no-migrations)
+      ~w(--repo=TestCoherence.Repo  --authenticatable --recoverable --invitable --log-only --no-migrations --controllers --module=TestCoherence)
       |> Mix.Tasks.Coherence.Install.run
 
       ~w(session_view.ex coherence_view.ex layout_view.ex password_view.ex invitation_view.ex email_view.ex)
@@ -50,6 +61,19 @@ defmodule Mix.Tasks.Coherence.InstallTest do
 
       ~w(layout session password invitation email)
       |> assert_dirs(@all_template_dirs, "web/templates/coherence/")
+
+      ~w(session_controller.ex password_controller.ex invitation_controller.ex)
+      |> assert_file_list(@all_controllers, "web/controllers/coherence/")
+
+      assert_file "web/controllers/coherence/session_controller.ex", fn file ->
+        assert file =~ "defmodule TestCoherence.Coherence.SessionController do"
+      end
+      assert_file "web/controllers/coherence/password_controller.ex", fn file ->
+        assert file =~ "defmodule TestCoherence.Coherence.PasswordController do"
+      end
+      assert_file "web/controllers/coherence/invitation_controller.ex", fn file ->
+        assert file =~ "defmodule TestCoherence.Coherence.InvitationController do"
+      end
     end
   end
 
@@ -63,12 +87,13 @@ defmodule Mix.Tasks.Coherence.InstallTest do
 
       ~w(layout session password registration email)
       |> assert_dirs(@all_template_dirs, "web/templates/coherence/")
+
     end
   end
 
   test "generates files for authenticatable recoverable unlockable_with_token" do
     in_tmp "generates_files_for_authenticatable_recoverable_registerable_unlockable_with_token", fn ->
-      ~w(--repo=TestCoherence.Repo  --authenticatable --recoverable --registerable --lockable --unlockable-with-token --log-only --no-migrations)
+      ~w(--repo=TestCoherence.Repo  --authenticatable --recoverable --registerable --lockable --unlockable-with-token --log-only --no-migrations --controllers)
       |> Mix.Tasks.Coherence.Install.run
 
       ~w(session_view.ex coherence_view.ex layout_view.ex password_view.ex registration_view.ex unlock_view.ex email_view.ex)
@@ -76,6 +101,9 @@ defmodule Mix.Tasks.Coherence.InstallTest do
 
       ~w(layout session password registration unlock email)
       |> assert_dirs(@all_template_dirs, "web/templates/coherence/")
+
+      ~w(session_controller.ex password_controller.ex registration_controller.ex unlock_controller.ex)
+      |> assert_file_list(@all_controllers, "web/controllers/coherence/")
     end
   end
 
@@ -102,6 +130,9 @@ defmodule Mix.Tasks.Coherence.InstallTest do
 
       ~w()
       |> assert_dirs(@all_template_dirs, "web/templates/coherence/")
+
+      ~w()
+      |> assert_file_list(@all_controllers, "web/controllers/coherence/")
     end
   end
 

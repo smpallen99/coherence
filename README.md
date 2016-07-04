@@ -230,6 +230,33 @@ The `coherence.install` mix task generates a bunch of boiler plate code so you c
 
 Also, checkout the Coherence.Config module for a list of config items you can use to tune the behaviour of Coherence.
 
+### Custom Controllers
+
+By default, controller boilerplate is not generated unless the `--controllers` option is provided to `mix coherence.install`.
+
+The generated controllers are named `MyProject.Coherence.SessionController` as an example. Generated controllers are located in `web/controllers/coherence/`
+
+If the controllers are generated, you will need to change your router to use the new names. For example:
+
+```elixir
+  # web/router.ex
+  use MyProject.Web, :router
+  use Coherence.Router
+
+  # ...
+
+  scope "/", MyProject do   # note the addition of MyProject
+    pipe_through :public
+    coherence_routes :public
+  end
+
+  scope "/", MyProject do   # note the addition of MyProject
+    pipe_through :browser
+    coherence_routes :private
+  end
+  # ...
+end
+
 ## License
 
 `coherence` is Copyright (c) 2016 E-MetroTel

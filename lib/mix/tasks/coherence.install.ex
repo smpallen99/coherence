@@ -72,6 +72,12 @@ defmodule Mix.Tasks.Coherence.Install do
 
   A `--registerable` option provide support for new users to register for an account`
 
+  A `--migration-path` option to set the migration path
+
+  A `--controllers` option to generate controllers boilerplate (not default)
+
+  A `--module` option to override the module
+
   A `--clean` option will all the coherence boilerplate
 
   ## Disable Options
@@ -110,8 +116,8 @@ defmodule Mix.Tasks.Coherence.Install do
   @config_marker_end   "%% End Coherence Configuration %%"
 
   def run(args) do
-    switches = [user: :string, repo: :string, clean: :boolean, migration_path: :string] ++
-      Enum.map(@boolean_options, &({String.to_atom(&1), :boolean}))
+    switches = [user: :string, repo: :string, clean: :boolean, migration_path: :string,
+     controllers: :boolean, module: :string] ++ Enum.map(@boolean_options, &({String.to_atom(&1), :boolean}))
     {opts, _parsed, _} = OptionParser.parse(args, switches: switches)
 
     # IO.puts "args: #{inspect args}"
@@ -155,6 +161,7 @@ defmodule Mix.Tasks.Coherence.Install do
     |> gen_coherence_views
     |> gen_coherence_templates
     |> gen_coherence_mailer
+    |> gen_coherence_controllers
     |> print_instructions
   end
   defp do_run(config), do: config
@@ -371,6 +378,24 @@ config :coherence, #{base}.Coherence.Mailer,
   end
   defp gen_coherence_mailer(config), do: config
 
+  @controller_files [
+    confirmable: "confirmation_controller.ex",
+    invitable: "invitation_controller.ex",
+    recoverable: "password_controller.ex",
+    registerable: "registration_controller.ex",
+    authenticatable: "session_controller.ex",
+    unlockable_with_token: "unlock_controller.ex"
+  ]
+
+  defp gen_coherence_controllers(%{controllers: true, boilerplate: true, binding: binding} = config) do
+    files = Enum.filter_map(@controller_files, &(validate_option(config, elem(&1,0))), &(elem(&1, 1)))
+    |> Enum.map(&({:eex, &1, "web/controllers/coherence/#{&1}"}))
+
+    Mix.Phoenix.copy_from paths(), "priv/templates/coherence.install/controllers/coherence", "", binding, files
+    config
+  end
+  defp gen_coherence_controllers(config), do: config
+
   defp schema_instructions(%{base: base}), do: """
     Add the following items to your User model.
 
@@ -502,8 +527,10 @@ config :coherence, #{base}.Coherence.Mailer,
 
     # IO.puts "binding: #{inspect binding}"
 
-    base = binding[:base]
+    base = opts[:module] || binding[:base]
     repo = (opts[:repo] || "#{base}.Repo")
+
+    binding = Keyword.put binding ,:base, base
 
     {user_schema, user_table_name} = parse_model(opts[:model], base)
 
@@ -520,7 +547,9 @@ config :coherence, #{base}.Coherence.Mailer,
     |> Map.put(:opts, bin_opts)
     |> Map.put(:binding, binding)
     |> Map.put(:log_only, opts[:log_only])
+    |> Map.put(:controllers, opts[:controllers])
     |> Map.put(:migration_path, opts[:migration_path])
+    |> Map.put(:module, opts[:module])
     |> do_default_config(opts)
   end
 
