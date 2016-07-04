@@ -113,9 +113,10 @@ defmodule Mix.Tasks.Coherence.Install do
     switches = [user: :string, repo: :string, clean: :boolean, migration_path: :string] ++
       Enum.map(@boolean_options, &({String.to_atom(&1), :boolean}))
     {opts, _parsed, _} = OptionParser.parse(args, switches: switches)
-    IO.puts "args: #{inspect args}"
-    IO.puts "opts: #{inspect opts}"
-    # true = false
+
+    # IO.puts "args: #{inspect args}"
+    # IO.puts "opts: #{inspect opts}"
+
     {bin_opts, opts} = parse_options(opts)
 
     # IO.puts "bin_opts: #{inspect bin_opts}"

@@ -148,6 +148,26 @@ defmodule Mix.Tasks.Coherence.InstallTest do
         end
       end
     end
+    test "for_invitible" do
+      in_tmp "for_invitible", fn ->
+        (~w(--repo=TestCoherence.Repo  --authenticatable --invitable --log-only --no-views --no-templates --migration-path=migrations))
+        |> Mix.Tasks.Coherence.Install.run
+
+        assert [migration] = Path.wildcard("migrations/*_create_coherence_invitable.exs")
+
+        assert_file migration, fn file ->
+          assert file =~ "defmodule TestCoherence.Repo.Migrations.CreateCoherenceInvitable do"
+
+          assert file =~ "create table(:invitations) do"
+          assert file =~ "add :name, :string"
+          assert file =~ "add :email, :string"
+          assert file =~ "add :token, :string"
+          assert file =~ "timestamps"
+          assert file =~ "create unique_index(:invitations, [:email])"
+          assert file =~ "create index(:invitations, [:token])"
+        end
+      end
+    end
   end
 
   def assert_dirs(dirs, full_dirs, path) do
