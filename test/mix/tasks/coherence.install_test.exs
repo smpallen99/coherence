@@ -105,6 +105,51 @@ defmodule Mix.Tasks.Coherence.InstallTest do
     end
   end
 
+  describe "generates migrations" do
+    test "for_default_model" do
+      in_tmp "for_default_model", fn ->
+        path = "migrations"
+        (~w(--repo=TestCoherence.Repo  --authenticatable --recoverable --log-only --no-views --no-templates --migration-path=#{path}))
+        |> Mix.Tasks.Coherence.Install.run
+
+        assert [migration] = Path.wildcard("migrations/*_add_coherence_to_user.exs")
+
+        assert_file migration, fn file ->
+          assert file =~ "defmodule TestCoherence.Repo.Migrations.AddCoherenceToUser do"
+          assert file =~ "alter table(:users) do"
+          assert file =~ "add :encrypted_password, :string"
+          assert file =~ "add :reset_password_token, :string"
+          assert file =~ "add :reset_password_sent_at, :datetime"
+        end
+      end
+    end
+    test "for_custom_model" do
+      in_tmp "for_custom_model", fn ->
+        path = "migrations"
+        (~w(--repo=TestCoherence.Repo  --full --log-only --no-views --no-templates --migration-path=#{path}) ++ ["--model=Account accounts"])
+        |> Mix.Tasks.Coherence.Install.run
+
+        assert [migration] = Path.wildcard("migrations/*_add_coherence_to_account.exs")
+
+        assert_file migration, fn file ->
+          assert file =~ "defmodule TestCoherence.Repo.Migrations.AddCoherenceToAccount do"
+          assert file =~ "alter table(:accounts) do"
+          assert file =~ "add :encrypted_password, :string"
+          assert file =~ "add :reset_password_token, :string"
+          assert file =~ "add :reset_password_sent_at, :datetime"
+          assert file =~ "add :failed_attempts, :integer, default: 0"
+          assert file =~ "add :unlock_token, :string"
+          assert file =~ "add :locked_at, :datetime"
+          assert file =~ "add :sign_in_count, :integer, default: 0"
+          assert file =~ "add :current_sign_in_at, :datetime"
+          assert file =~ "add :last_sign_in_at, :datetime"
+          assert file =~ "add :current_sign_in_ip, :string"
+          assert file =~ "add :last_sign_in_ip, :string"
+        end
+      end
+    end
+  end
+
   def assert_dirs(dirs, full_dirs, path) do
     Enum.each dirs, fn dir ->
       assert File.dir? path <> dir

@@ -110,11 +110,12 @@ defmodule Mix.Tasks.Coherence.Install do
   @config_marker_end   "%% End Coherence Configuration %%"
 
   def run(args) do
-    switches = [user: :string, repo: :string, clean: :boolean] ++
+    switches = [user: :string, repo: :string, clean: :boolean, migration_path: :string] ++
       Enum.map(@boolean_options, &({String.to_atom(&1), :boolean}))
-
     {opts, _parsed, _} = OptionParser.parse(args, switches: switches)
-    # IO.puts "opts: #{inspect opts}"
+    IO.puts "args: #{inspect args}"
+    IO.puts "opts: #{inspect opts}"
+    # true = false
     {bin_opts, opts} = parse_options(opts)
 
     # IO.puts "bin_opts: #{inspect bin_opts}"
@@ -219,8 +220,24 @@ config :coherence, #{base}.Coherence.Mailer,
   end
   defp write_config(string, _config), do: string
 
+  defp module_to_string(module) when is_atom(module) do
+    Module.split(module)
+    |> Enum.reverse
+    |> hd
+    |> to_string
+  end
+  defp module_to_string(module) when is_binary(module) do
+    String.split(module, ".")
+    |> Enum.reverse
+    |> hd
+  end
+
   defp gen_migration(%{migrations: true, boilerplate: true} = config) do
-    do_gen_migration config, "add_coherence_to_user", fn repo, _path, file, name ->
+    table_name = config[:user_table_name]
+    name = config[:user_schema]
+    |> module_to_string
+    |> String.downcase
+    do_gen_migration config, "add_coherence_to_#{name}", fn repo, _path, file, name ->
       adds =
         Enum.reduce(config[:opts], [], fn opt, acc ->
           case Coherence.Schema.schema_fields[opt] do
@@ -232,7 +249,7 @@ config :coherence, #{base}.Coherence.Mailer,
         |> Enum.join("\n")
 
       change = """
-          alter table(:users) do
+          alter table(:#{table_name}) do
       #{adds}
           end
       """
@@ -270,7 +287,11 @@ config :coherence, #{base}.Coherence.Mailer,
     |> String.split(".")
     |> Module.concat
     ensure_repo(repo, [])
-    path = Path.relative_to(migrations_path(repo), Mix.Project.app_path)
+    path = case config[:migration_path] do
+      path when is_binary(path) -> path
+      _ ->
+        Path.relative_to(migrations_path(repo), Mix.Project.app_path)
+    end
     file = Path.join(path, "#{timestamp()}_#{underscore(name)}.exs")
     fun.(repo, path, file, name)
   end
@@ -483,6 +504,8 @@ config :coherence, #{base}.Coherence.Mailer,
     base = binding[:base]
     repo = (opts[:repo] || "#{base}.Repo")
 
+    {user_schema, user_table_name} = parse_model(opts[:model], base)
+
     bin_opts
     |> Enum.map(&({&1, true}))
     |> Enum.into(%{})
@@ -490,12 +513,30 @@ config :coherence, #{base}.Coherence.Mailer,
     |> Map.put(:instructions, "")
     |> Map.put(:base, base)
     |> Map.put(:use_email?, Enum.any?(bin_opts, &(&1 in @email_options)))
-    |> Map.put(:user_schema, opts[:model] || "#{base}.User")
+    |> Map.put(:user_schema, user_schema)
+    |> Map.put(:user_table_name, user_table_name)
     |> Map.put(:repo, repo)
     |> Map.put(:opts, bin_opts)
     |> Map.put(:binding, binding)
     |> Map.put(:log_only, opts[:log_only])
+    |> Map.put(:migration_path, opts[:migration_path])
     |> do_default_config(opts)
+  end
+
+  defp parse_model(model, base) when is_binary(model) do
+    case String.split(model, " ", trim: true) do
+      [model, table] ->
+        {model, String.to_atom(table)}
+      [model] ->
+        Mix.raise """
+        The mix coherence.install --model option expects both singular and plural names. For example:
+
+            mix coherence.install --model="Account accounts"
+        """
+    end
+  end
+  defp parse_model(_, base) do
+    {"#{base}.User", :users}
   end
 
   defp parse_options(opts) do
