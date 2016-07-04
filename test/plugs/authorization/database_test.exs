@@ -23,11 +23,11 @@ defmodule CoherenceTest.Plug.Database do
     |> fetch_session
   end
 
-  defp encrypt_conn(conn) do
-    put_in(conn.secret_key_base, @secret)
-    |> Plug.Session.call(@encrypted_opts)
-    |> fetch_session
-  end
+  # defp encrypt_conn(conn) do
+  #   put_in(conn.secret_key_base, @secret)
+  #   |> Plug.Session.call(@encrypted_opts)
+  #   |> fetch_session
+  # end
 
   defmodule TestPlug do
     use Plug.Builder

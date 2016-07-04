@@ -14,6 +14,7 @@ defmodule Coherence.Schema do
   * `recoverable?/0` - Returns true if the option is configured.
   * `lockable?/0` - Returns true if the option is configured.
   * `invitable?/0` - Returns true if the option is configured.
+  * `unlockable_with_token?/0` - Returns true if the option is configured.
 
   The following functions are available when `authenticatable?/0` returns true:
 
@@ -104,6 +105,11 @@ defmodule Coherence.Schema do
       def invitable? do
         Coherence.Config.has_option(:invitable) and
           Keyword.get(unquote(opts), :invitable, true)
+      end
+
+      def unlockable_with_token? do
+        Coherence.Config.has_option(:unlockable_with_token) and
+          Keyword.get(unquote(opts), :unlockable_with_token, true)
       end
 
       if  Coherence.Config.has_option(:confirmable) and

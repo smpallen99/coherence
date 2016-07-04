@@ -11,7 +11,7 @@ defmodule Mix.Tasks.Coherence.InstallTest do
   # opts: [:invitable, :authenticatable, :recoverable, :lockable, :trackable, :unlockable_with_token, :registerable]
 
   @all_template_dirs ~w(layout session email invitation password registration unlock)
-  @all_views ~w(coherence_view.ex confirmation_view.ex email_view.ex invitation_view.ex) ++
+  @all_views ~w(coherence_view_helpers.ex coherence_view.ex confirmation_view.ex email_view.ex invitation_view.ex) ++
     ~w(layout_view.ex password_view.ex registration_view.ex session_view.ex unlock_view.ex)
   @all_controllers Enum.map(@all_template_dirs -- ~w(layout email), &("#{&1}_controller.ex"))
 
@@ -20,7 +20,7 @@ defmodule Mix.Tasks.Coherence.InstallTest do
       ~w(--repo=TestCoherence.Repo --log-only --no-migrations --controllers --module=TestCoherence)
       |> Mix.Tasks.Coherence.Install.run
 
-      ~w(session_view.ex coherence_view.ex layout_view.ex)
+      ~w(session_view.ex coherence_view.ex layout_view.ex coherence_view_helpers.ex)
       |> assert_file_list(@all_views, "web/views/coherence/")
 
       ~w(layout session)
@@ -40,7 +40,7 @@ defmodule Mix.Tasks.Coherence.InstallTest do
       ~w(--repo=TestCoherence.Repo  --authenticatable --recoverable --log-only --no-migrations --controllers)
       |> Mix.Tasks.Coherence.Install.run
 
-      ~w(session_view.ex coherence_view.ex layout_view.ex password_view.ex email_view.ex)
+      ~w(session_view.ex coherence_view.ex layout_view.ex password_view.ex email_view.ex coherence_view_helpers.ex)
       |> assert_file_list(@all_views, "web/views/coherence/")
 
       ~w(layout session password email)
@@ -56,7 +56,7 @@ defmodule Mix.Tasks.Coherence.InstallTest do
       ~w(--repo=TestCoherence.Repo  --authenticatable --recoverable --invitable --log-only --no-migrations --controllers --module=TestCoherence)
       |> Mix.Tasks.Coherence.Install.run
 
-      ~w(session_view.ex coherence_view.ex layout_view.ex password_view.ex invitation_view.ex email_view.ex)
+      ~w(session_view.ex coherence_view.ex layout_view.ex password_view.ex invitation_view.ex email_view.ex coherence_view_helpers.ex)
       |> assert_file_list(@all_views, "web/views/coherence/")
 
       ~w(layout session password invitation email)
@@ -82,7 +82,7 @@ defmodule Mix.Tasks.Coherence.InstallTest do
       ~w(--repo=TestCoherence.Repo  --authenticatable --recoverable --registerable --log-only --no-migrations)
       |> Mix.Tasks.Coherence.Install.run
 
-      ~w(session_view.ex coherence_view.ex layout_view.ex password_view.ex registration_view.ex email_view.ex)
+      ~w(session_view.ex coherence_view.ex layout_view.ex password_view.ex registration_view.ex email_view.ex coherence_view_helpers.ex)
       |> assert_file_list(@all_views, "web/views/coherence/")
 
       ~w(layout session password registration email)
@@ -96,7 +96,7 @@ defmodule Mix.Tasks.Coherence.InstallTest do
       ~w(--repo=TestCoherence.Repo  --authenticatable --recoverable --registerable --lockable --unlockable-with-token --log-only --no-migrations --controllers)
       |> Mix.Tasks.Coherence.Install.run
 
-      ~w(session_view.ex coherence_view.ex layout_view.ex password_view.ex registration_view.ex unlock_view.ex email_view.ex)
+      ~w(session_view.ex coherence_view.ex layout_view.ex password_view.ex registration_view.ex unlock_view.ex email_view.ex coherence_view_helpers.ex)
       |> assert_file_list(@all_views, "web/views/coherence/")
 
       ~w(layout session password registration unlock email)
@@ -112,7 +112,7 @@ defmodule Mix.Tasks.Coherence.InstallTest do
       ~w(--repo=TestCoherence.Repo  --full-invitable --no-registerable --log-only --no-migrations)
       |> Mix.Tasks.Coherence.Install.run
 
-      ~w(session_view.ex coherence_view.ex layout_view.ex password_view.ex invitation_view.ex unlock_view.ex email_view.ex)
+      ~w(session_view.ex coherence_view.ex layout_view.ex password_view.ex invitation_view.ex unlock_view.ex email_view.ex coherence_view_helpers.ex)
       |> assert_file_list(@all_views, "web/views/coherence/")
 
       ~w(layout session password invitation unlock email)

@@ -20,7 +20,7 @@
   </div>
 
   <div class="form-group">
-    <%%= Coherence.CoherenceView.coherence_links(@conn, :new_session) %>
+    <%%= coherence_links(@conn, :new_session) %>
   </div>
 
 <%% end %>

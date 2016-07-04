@@ -320,6 +320,7 @@ config :coherence, #{base}.Coherence.Mailer,
     use_email?: "email_view.ex",
     invitable: "invitation_view.ex",
     all: "layout_view.ex",
+    all: "coherence_view_helpers.ex",
     recoverable: "password_view.ex",
     registerable: "registration_view.ex",
     authenticatable: "session_view.ex",
@@ -554,11 +555,11 @@ config :coherence, #{base}.Coherence.Mailer,
     |> do_default_config(opts)
   end
 
-  defp parse_model(model, base) when is_binary(model) do
+  defp parse_model(model, _base) when is_binary(model) do
     case String.split(model, " ", trim: true) do
       [model, table] ->
         {model, String.to_atom(table)}
-      [model] ->
+      [_] ->
         Mix.raise """
         The mix coherence.install --model option expects both singular and plural names. For example:
 
