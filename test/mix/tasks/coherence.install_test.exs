@@ -79,6 +79,19 @@ defmodule Mix.Tasks.Coherence.InstallTest do
     end
   end
 
+  test "generates files for --full-invitable --no-registerable" do
+    in_tmp "generates_files_for_fill_invitable_no_registerable", fn ->
+      ~w(--repo=TestCoherence.Repo  --full-invitable --no-registerable --log-only --no-migrations)
+      |> Mix.Tasks.Coherence.Install.run
+
+      ~w(session_view.ex coherence_view.ex layout_view.ex password_view.ex invitation_view.ex unlock_view.ex email_view.ex)
+      |> assert_file_list(@all_views, "web/views/coherence/")
+
+      ~w(layout session password invitation unlock email)
+      |> assert_dirs(@all_template_dirs, "web/templates/coherence/")
+    end
+  end
+
   test "does not generate files for full" do
     in_tmp "does_not_generate_files_for_full", fn ->
       ~w(--repo=TestCoherence.Repo  --full --log-only --no-migrations --no-boilerplate)

@@ -73,7 +73,7 @@ defmodule Coherence.SessionController do
     |> Config.repo.update
     |> case do
       {:ok, _} -> nil
-      {:error, changeset} ->
+      {:error, _changeset} ->
         Logger.error ("Failed to update tracking!")
     end
     conn
@@ -81,7 +81,6 @@ defmodule Coherence.SessionController do
 
   defp track_logout(conn, _, false), do: conn
   defp track_logout(conn, user, true) do
-    ip = conn.peer |> elem(0) |> inspect
     user.__struct__.changeset(user,
       %{
         last_sign_in_at: user.current_sign_in_at,

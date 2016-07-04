@@ -117,9 +117,6 @@ defmodule Mix.Tasks.Coherence.Install do
     # IO.puts "opts: #{inspect opts}"
     {bin_opts, opts} = parse_options(opts)
 
-
-    # IO.puts "config: #{inspect config}"
-
     # IO.puts "bin_opts: #{inspect bin_opts}"
     # IO.puts "opts: #{inspect opts}"
 

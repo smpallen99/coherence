@@ -1,6 +1,6 @@
 defmodule Coherence.Router do
 
-  defmacro __using__(opts \\ []) do
+  defmacro __using__(_opts \\ []) do
     quote do
       import unquote(__MODULE__)
     end
