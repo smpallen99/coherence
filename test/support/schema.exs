@@ -5,18 +5,19 @@ defmodule TestCoherence.User do
 
   schema "users" do
     field :email, :string
+    field :name, :string
     coherence_schema
 
     timestamps
   end
 
-  @required_fields ~w(email)
-  @optional_fields ~w(encrypted_password password password_confirmation)
+  @required_fields ~w(email name)
+  @optional_fields ~w() ++ coherence_fields
 
   def changeset(model, params \\ %{}) do
     model
     |> cast(params, @required_fields, @optional_fields)
     |> unique_constraint(:email)
-    |> validate_password(params)
+    |> validate_coherence(params)
   end
 end

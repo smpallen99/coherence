@@ -6,6 +6,7 @@ Code.require_file "./support/migrations.exs", __DIR__
 Code.require_file "./support/router.exs", __DIR__
 Code.require_file "./support/endpoint.exs", __DIR__
 Code.require_file "./support/model_case.exs", __DIR__
+Code.require_file "./support/views.exs", __DIR__
 
 defmodule Coherence.RepoSetup do
   use ExUnit.CaseTemplate

@@ -34,10 +34,10 @@ defmodule Coherence.UnlockController do
       |> case do
         {:ok, _} ->
           if user_schema.locked?(user) do
-            email = Coherence.UserEmail.unlock(user, url)
-            Logger.debug fn -> "unlock email: #{inspect email}" end
-            email |> Coherence.Mailer.deliver
-
+            # email = Coherence.UserEmail.unlock(user, url)
+            # Logger.debug fn -> "unlock email: #{inspect email}" end
+            # email |> Coherence.Mailer.deliver
+            send_user_email :unlock, user, url
             conn
             |> put_flash(:info, "Unlock Instructions sent.")
             |> redirect(to: logged_out_url(conn))

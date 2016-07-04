@@ -16,3 +16,12 @@ config :coherence, TestCoherence.Repo,
   database: "coherence_test",
   hostname: "localhost",
   pool: Ecto.Adapters.SQL.Sandbox
+
+config :coherence,
+  user_schema: TestCoherence.User,
+  repo: TestCoherence.Repo,
+  module: TestCoherence,
+  logged_out_url: "/",
+  email_from: {"Your Name", "yourname@example.com"},
+  opts: [:authenticatable, :recoverable, :lockable, :trackable, :unlockable_with_token, :invitable, :registerable]
+

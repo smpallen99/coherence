@@ -46,10 +46,10 @@ defmodule Coherence.RegistrationController do
         %{confirmation_token: token, confirmation_send_at: dt})
       |> Config.repo.update!
 
-      email = Coherence.UserEmail.confirmation(user, url)
-      Logger.debug fn -> "confirmation email: #{inspect email}" end
-      email |> Coherence.Mailer.deliver
-
+      # email = Coherence.UserEmail.confirmation(user, url)
+      # Logger.debug fn -> "confirmation email: #{inspect email}" end
+      # email |> Coherence.Mailer.deliver
+      send_user_email :confirmation, user, url
       conn
       |> put_flash(:info, "Confirmation email sent.")
     else

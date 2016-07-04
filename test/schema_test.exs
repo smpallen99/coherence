@@ -8,18 +8,18 @@ defmodule CoherenceTest.Schema do
 
   @email "schema@test.com"
   test "validates correct password" do
-    cs = User.changeset(%User{}, %{email: @email, password: "12345", password_confirmation: "12345"})
+    cs = User.changeset(%User{}, %{name: "test", email: @email, password: "12345", password_confirmation: "12345"})
     assert cs.valid?
   end
 
   test "invalidates incorrect password" do
-    cs = User.changeset(%User{}, %{email: @email, password: "12345", password_confirmation: ""})
+    cs = User.changeset(%User{}, %{name: "test", email: @email, password: "12345", password_confirmation: ""})
     refute cs.valid?
-    cs = User.changeset(%User{}, %{email: @email, password: "12345", password_confirmation: "99"})
+    cs = User.changeset(%User{}, %{name: "test", email: @email, password: "12345", password_confirmation: "99"})
     refute cs.valid?
   end
   test "checkpw" do
-    params = %{email: "schema@test.com", password: "test", password_confirmation: "test"}
+    params = %{name: "test", email: "schema@test.com", password: "test", password_confirmation: "test"}
     user = Repo.insert! User.changeset(%User{}, params)
     assert User.checkpw("test", user.encrypted_password)
     refute User.checkpw("t", user.encrypted_password)

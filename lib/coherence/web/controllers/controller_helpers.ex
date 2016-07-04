@@ -29,4 +29,11 @@ defmodule Coherence.ControllerHelpers do
   def lockable_failure(changeset) do
     Logger.error @lockable_failure <> inspect(changeset.errors)
   end
+
+  def send_user_email(fun, model, url) do
+    email = apply(Module.concat(Config.module, Coherence.UserEmail), fun, [model, url])
+    # email = Coherence.UserEmail.invitation(invitation, url)
+    Logger.debug fn -> "#{fun} email: #{inspect email}" end
+    apply(Module.concat(Config.module, Coherence.Mailer), :deliver, [email])
+  end
 end
