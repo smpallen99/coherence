@@ -79,6 +79,19 @@ defmodule Mix.Tasks.Coherence.InstallTest do
     end
   end
 
+  test "does not generate files for full" do
+    in_tmp "does_not_generate_files_for_full", fn ->
+      ~w(--repo=TestCoherence.Repo  --full --log-only --no-migrations --no-boilerplate)
+      |> Mix.Tasks.Coherence.Install.run
+
+      ~w()
+      |> assert_file_list(@all_views, "web/views/coherence/")
+
+      ~w()
+      |> assert_dirs(@all_template_dirs, "web/templates/coherence/")
+    end
+  end
+
   def assert_dirs(dirs, full_dirs, path) do
     Enum.each dirs, fn dir ->
       assert File.dir? path <> dir
