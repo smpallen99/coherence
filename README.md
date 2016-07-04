@@ -1,5 +1,10 @@
 # Coherence
 
+[![Build Status](https://travis-ci.org/smpallen99/coherence.png?branch=master)](https://travis-ci.org/smpallen99/coherence)  [![License][license-img]][license]
+
+[license-img]: http://img.shields.io/badge/license-MIT-brightgreen.svg
+[license]: http://opensource.org/licenses/MIT
+
 Coherence is a full featured, configurable authentication system for Phoenix, with the following modules:
 
 * [Database Authenticatable](#authenticatable): handles hashing and storing an encrypted password in the database.
