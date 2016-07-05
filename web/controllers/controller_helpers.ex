@@ -75,4 +75,5 @@ defmodule Coherence.ControllerHelpers do
     Logger.debug fn -> "#{fun} email: #{inspect email}" end
     apply(Module.concat(Config.module, Coherence.Mailer), :deliver, [email])
   end
+
 end

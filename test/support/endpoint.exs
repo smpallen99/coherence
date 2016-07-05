@@ -1,6 +1,10 @@
 defmodule TestCoherence.Endpoint do
   use Phoenix.Endpoint, otp_app: :coherence
 
+  # def config(one, two) do
+  #   IO.puts "endpoint config one: #{inspect one}, two: #{inspect two}"
+  #   String.duplicate("abcdefgh", 8)
+  # end
   # Serve at "/" the static files from "priv/static" directory.
   #
   # You should set gzip to true if you are running phoenix.digest

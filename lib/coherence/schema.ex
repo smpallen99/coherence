@@ -112,6 +112,11 @@ defmodule Coherence.Schema do
           Keyword.get(unquote(opts), :unlockable_with_token, true)
       end
 
+      def rememberable? do
+        Coherence.Config.has_option(:rememberable) and
+          Keyword.get(unquote(opts), :rememberable, true)
+      end
+
       if  Coherence.Config.has_option(:confirmable) and
             Keyword.get(unquote(opts), :confirmable, true) do
         def confirmed?(user) do

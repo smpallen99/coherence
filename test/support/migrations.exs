@@ -23,5 +23,15 @@ defmodule TestCoherence.Migrations do
       timestamps
     end
     create unique_index(:users, [:email])
+
+    create table(:rememberables) do
+      add :series, :string
+      add :token, :string
+      add :token_created_at, :datetime
+      add :user_id, references(:users, on_delete: :nothing)
+
+      timestamps
+    end
+    create index(:rememberables, [:user_id])
   end
 end

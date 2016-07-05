@@ -87,11 +87,12 @@ defmodule Coherence.Authentication.Database do
     to your pipeline. This module is derived from https://github.com/lexmag/blaguth
   """
 
-  @session_key Application.get_env(:plug_auth, :database_session_key, "database_auth")
+  @session_key Application.get_env(:coherence, :database_session_key, "database_auth")
 
   @behaviour Plug
   import Plug.Conn
   import Coherence.Authentication.Utils
+  alias Coherence.{Rememberable, Config}
 
   @doc """
     Create a login for a user. `user_data` can be any term but must not be `nil`.
@@ -126,21 +127,25 @@ defmodule Coherence.Authentication.Database do
   # end
 
   def init(opts) do
-    error = Keyword.get(opts, :error, "HTTP Authentication Required")
-    login = Keyword.get(opts, :login, &Coherence.SessionController.login_callback/1)
-    db_model = Keyword.get(opts, :db_model)
-    id_key = Keyword.get(opts, :id, :id)
-    # unless login do
-    #   raise RuntimeError, message: "Coherence.Database requires a login redirect callback"
-    # end
-    %{login: login,  error: error, db_model: db_model, id_key: id_key}
+    # TODO: need to fix the default login callback
+    %{
+      login: Keyword.get(opts, :login, &Coherence.SessionController.login_callback/1),
+      error: Keyword.get(opts, :error, "HTTP Authentication Required"),
+      db_model: Keyword.get(opts, :db_model),
+      id_key: Keyword.get(opts, :id, :id),
+      login_key: Keyword.get(opts, :login_cookie, Config.login_cookie),
+      rememberable: Keyword.get(opts, :rememberable, Config.user_schema.rememberable?),
+      cookie_expire: Keyword.get(opts, :login_cookie_expire_hours, Config.rememberable_cookie_expire_hours) * 60 * 60
+    }
   end
 
   def call(conn, opts) do
+    # IO.puts ".. opts: #{inspect opts}"
     unless get_authenticated_user(conn) do
       conn
       |> get_session_data
       |> verify_auth_key(opts)
+      |> verify_rememberable(opts)
       |> assert_login(opts[:login])
     else
       conn
@@ -151,6 +156,24 @@ defmodule Coherence.Authentication.Database do
     {conn, get_session(conn, @session_key) }
   end
 
+  defp verify_rememberable({conn, nil}, %{rememberable: true, login_key: key} = opts) do
+    case conn.cookies[key] do
+      nil -> {conn, nil}
+      cookie ->
+        case String.split cookie, " " do
+          [id, series, token] ->
+            case opts[:rememberable_callback] do
+              nil ->
+                Coherence.SessionController.remberable_callback(conn, id, series, token, opts)
+              fun ->
+                fun.(conn, id, series, token, opts)
+            end
+          _ -> {conn, nil}   # invalid cookie
+        end
+    end
+  end
+  defp verify_rememberable(other, _opts), do: other
+
   defp verify_auth_key({conn, nil}, _), do: {conn, nil}
   defp verify_auth_key({conn, auth_key}, %{db_model: db_model, id_key: id_key}),
     do: {conn, Coherence.CredentialStore.get_user_data(auth_key, db_model, id_key)}
@@ -160,4 +183,5 @@ defmodule Coherence.Authentication.Database do
     |> login.()
   end
   defp assert_login({conn, user_data}, _), do: assign_user_data(conn, user_data)
+  defp assert_login(conn, _), do: conn
 end

@@ -42,3 +42,7 @@ defmodule Coherence.LayoutView do
   # import TestCoherence.Router.Helpers
 
 end
+
+defmodule TestCoherence.ErrorView do
+  def render("500.html", _), do: "Error!!"
+end

@@ -34,6 +34,7 @@ defmodule Coherence.Mixfile do
       {:uuid, "~> 1.0"},
       {:phoenix_swoosh, "~> 0.1.3"},
       {:phoenix_timex, "~> 1.0.0"},
+      {:timex_ecto, "~> 1.1"},
       {:postgrex, ">= 0.0.0", only: :test},
     ]
   end
