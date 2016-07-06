@@ -1,20 +1,26 @@
 defmodule Coherence.Mixfile do
   use Mix.Project
 
+  @version "0.0.1"
   def project do
-    [app: :coherence,
-     version: "0.0.1",
-     elixir: "~> 1.3",
-     elixirc_paths: elixirc_paths(Mix.env),
-     compilers: [:phoenix, :gettext] ++ Mix.compilers,
-     build_embedded: Mix.env == :prod,
-     start_permanent: Mix.env == :prod,
-     deps: deps]
+    [ app: :coherence,
+      version: @version,
+      elixir: "~> 1.3",
+      elixirc_paths: elixirc_paths(Mix.env),
+      compilers: [:phoenix, :gettext] ++ Mix.compilers,
+      build_embedded: Mix.env == :prod,
+      start_permanent: Mix.env == :prod,
+      docs: [extras: ["README.md"], main: "ExAdmin"],
+      deps: deps,
+      package: package,
+      name: "Coherence",
+      description: """
+      A full featured, configurable authentication and user management system for Phoenix.
+      """
+    ]
   end
 
   # Configuration for the OTP application
-  #
-  # Type "mix help compile.app" for more information
   def application do
     [mod: {Coherence, []},
      applications: [:logger, :comeonin, :ecto, :uuid, :phoenix_swoosh,
@@ -35,7 +41,15 @@ defmodule Coherence.Mixfile do
       {:phoenix_swoosh, "~> 0.1.3"},
       {:phoenix_timex, "~> 1.0.0"},
       {:timex_ecto, "~> 1.1"},
+      {:ex_doc, "~> 0.11", only: :dev},
       {:postgrex, ">= 0.0.0", only: :test},
     ]
+  end
+
+  defp package do
+    [ maintainers: ["Stephen Pallen"],
+      licenses: ["MIT"],
+      links: %{ "Github" => "https://github.com/smpallen99/coherence" },
+      files: ~w(lib priv web README.md mix.exs LICENSE)]
   end
 end
