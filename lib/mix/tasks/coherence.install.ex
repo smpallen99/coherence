@@ -117,10 +117,14 @@ defmodule Mix.Tasks.Coherence.Install do
   @config_marker_start "%% Coherence Configuration %%"
   @config_marker_end   "%% End Coherence Configuration %%"
 
-  def run(args) do
-    switches = [user: :string, repo: :string, clean: :boolean, migration_path: :string,
+
+  @switches [user: :string, repo: :string, clean: :boolean, migration_path: :string, model: :string, log_only: :boolean,
      controllers: :boolean, module: :string] ++ Enum.map(@boolean_options, &({String.to_atom(&1), :boolean}))
-    {opts, _parsed, _} = OptionParser.parse(args, switches: switches)
+
+  @switch_names Enum.map(@switches, &(elem(&1, 0)))
+
+  def run(args) do
+    {opts, _parsed, _} = OptionParser.parse(args, switches: @switches)
 
     # IO.puts "args: #{inspect args}"
     # IO.puts "opts: #{inspect opts}"
@@ -268,7 +272,6 @@ config :coherence, #{base}.Coherence.Mailer,
       assigns = [mod: Module.concat([repo, Migrations, camelize(name)]),
                        change: change]
       create_file file, migration_template(assigns)
-      config
     end
   end
   defp gen_migration(config), do: config
@@ -288,7 +291,6 @@ config :coherence, #{base}.Coherence.Mailer,
       assigns = [mod: Module.concat([repo, Migrations, camelize(name)]),
                        change: change]
       create_file file, migration_template(assigns)
-      config
     end
   end
   defp gen_invitable_migration(config), do: config
@@ -313,13 +315,12 @@ config :coherence, #{base}.Coherence.Mailer,
       assigns = [mod: Module.concat([repo, Migrations, camelize(name)]),
                        change: change]
       create_file file, migration_template(assigns)
-      config
     end
   end
   defp gen_rememberable_migration(config), do: config
 
 
-  defp do_gen_migration(config, name, fun) do
+  defp do_gen_migration(%{timestamp: timestamp} = config, name, fun) do
     repo = config[:repo]
     |> String.split(".")
     |> Module.concat
@@ -329,8 +330,9 @@ config :coherence, #{base}.Coherence.Mailer,
       _ ->
         Path.relative_to(migrations_path(repo), Mix.Project.app_path)
     end
-    file = Path.join(path, "#{timestamp()}_#{underscore(name)}.exs")
+    file = Path.join(path, "#{timestamp}_#{underscore(name)}.exs")
     fun.(repo, path, file, name)
+    Map.put(config, :timestamp, timestamp + 1)
   end
 
   defp gen_coherence_web(%{web: true, boilerplate: true, binding: binding} = config) do
@@ -427,7 +429,7 @@ config :coherence, #{base}.Coherence.Mailer,
   defp gen_coherence_controllers(config), do: config
 
   defp schema_instructions(%{base: base}), do: """
-    Add the following items to your User model.
+    Add the following items to your User model (Phoenix v1.2).
 
     defmodule #{base}.User do
       use #{base}.Web, :model
@@ -441,18 +443,19 @@ config :coherence, #{base}.Coherence.Mailer,
         timestamps
       end
 
-      @required_fields ~w(name email)
-      @optional_fields ~w() ++ coherence_fields   # Add this
-
       def changeset(model, params \\ %{}) do
         model
-        |> cast(params, @required_fields, @optional_fields)
+        |> cast(params, [:name, :email] ++ coherence_fields)
+        |> validate_required([:name, :email])
         |> unique_constraint(:email)
         |> validate_coherence(params)             # Add this
       end
     end
     """
-  defp router_instructions(%{base: base}), do: """
+  defp router_instructions(%{base: base, controllers: controllers}) do
+    namespace = if controllers, do: ", #{base}", else: ""
+    no_base = if controllers, do: "", else: "#{base}."
+    """
     Add the following to your router.ex file.
 
     defmodule #{base}.Router do
@@ -461,29 +464,38 @@ config :coherence, #{base}.Coherence.Mailer,
 
       pipeline :browser do
         plug :accepts, ["html"]
-        # ...
+        plug :fetch_session
+        plug :fetch_flash
+        plug :protect_from_forgery
+        plug :put_secure_browser_headers
         plug Coherence.Authentication.Database, db_model: #{base}.User  # Add this
       end
 
       pipeline :public do
         plug :accepts, ["html"]
-        # ...
+        plug :fetch_session
+        plug :fetch_flash
+        plug :protect_from_forgery
+        plug :put_secure_browser_headers
         plug Coherence.Authentication.Database, db_model: #{base}.User, login: false  # Add this
       end
 
-      scope "/" do
+      scope "/"#{namespace} do
         pipe_through :public
         coherence_routes :public          # Add this
-        get "/", Admin1.PageController, :index
+        get "/", #{no_base}PageController, :index
+        # Add your remaining unprotected routes here
       end
 
-      scope "/" do
+      scope "/"#{namespace} do
         pipe_through :browser
         coherence_routes :private         # Add this
+        # Add your protected routes here
       end
       # ...
     end
     """
+  end
 
   defp migrate_instructions(%{migrations: true, boilerplate: true}), do: """
     Don't forget to run the new migrations with:
@@ -580,6 +592,7 @@ config :coherence, #{base}.Coherence.Mailer,
     |> Map.put(:controllers, opts[:controllers])
     |> Map.put(:migration_path, opts[:migration_path])
     |> Map.put(:module, opts[:module])
+    |> Map.put(:timestamp, timestamp() |> String.to_integer)
     |> do_default_config(opts)
   end
 
@@ -616,7 +629,22 @@ config :coherence, #{base}.Coherence.Mailer,
       opt, {acc_bin, acc} ->
         {acc_bin, [opt | acc]}
     end
-    {Enum.uniq(opts_bin), opts}
+    opts_bin = Enum.uniq(opts_bin)
+    opts_names = Enum.map opts, &(elem(&1, 0))
+    with  [] <- Enum.filter(opts_bin, &(not &1 in @switch_names)),
+          [] <- Enum.filter(opts_names, &(not &1 in @switch_names)) do
+            {opts_bin, opts}
+    else
+      list ->
+        list = Enum.map(list, fn option ->
+          "--" <> Atom.to_string(option) |> String.replace("_", "-")
+        end)
+        |> Enum.join(", ")
+        Mix.raise """
+        The following option(s) are not supported:
+            #{inspect list}
+        """
+    end
   end
 
   # TODO: Remove this later if we never use it

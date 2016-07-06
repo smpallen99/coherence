@@ -18,6 +18,9 @@ defmodule <%= base %>.Coherence.SessionController do
   end
 
   def new(conn, _params) do
+    # if cookie = get_login_cookie(conn) do
+    #   Logger.debug "Found cookie #{Rememberable.log_cookie cookie}"
+    # end
     conn
     |> put_layout({Coherence.LayoutView, "app.html"})
     |> put_view(Coherence.SessionView)
@@ -38,7 +41,7 @@ defmodule <%= base %>.Coherence.SessionController do
           value -> value
         end
         unless lockable? and user_schema.locked?(user) do
-          apply(Config.auth_module, Config.create_login, [conn, user, Config.schema_key])
+          apply(Config.auth_module, Config.create_login, [conn, user, [id_key: Config.schema_key]])
           |> reset_failed_attempts(user, lockable?)
           |> track_login(user, user_schema.trackable?)
           |> put_flash(:notice, "Signed in successfully.")
@@ -176,17 +179,20 @@ defmodule <%= base %>.Coherence.SessionController do
 
   def remberable_callback(conn, id, series, token, opts) do
     repo = Config.repo
+    cred_store = Coherence.Authentication.Utils.get_credential_store
     validate_login(id, series, token)
     |> case do
       {:ok, rememberable} ->
+        # Logger.debug "Valid login :ok"
         user = case repo.get(Config.user_schema, id) do
           nil -> {:error, :not_found}
           user ->
             gen_cookie(id, series, token)
-            |> Coherence.CredentialStore.delete_credentials
+            |> cred_store.delete_credentials
             {changeset, new_token} = Rememberable.update_login(rememberable)
-            gen_cookie(id, series, new_token)
-            |> Coherence.CredentialStore.put_credentials(Config.user_schema, Config.schema_key)
+
+            cred_store.put_credentials({gen_cookie(id, series, new_token), Config.user_schema, Config.schema_key})
+
             Config.repo.update! changeset
             conn = save_login_cookie(conn, id, series, new_token, opts[:login_key], opts[:cookie_expire])
             |> assign(:remembered, true)
@@ -230,6 +236,8 @@ defmodule <%= base %>.Coherence.SessionController do
     hash_series = hash series
     hash_token = hash token
     repo = Config.repo
+    # Logger.debug "user_id: #{user_id}, series: #{series}, token: #{token}"
+    # Logger.debug "           hash_series: #{hash_series}, hash_token: #{hash_token}"
 
     delete_expired_tokens!(repo)   # TODO: move the following to an task
 

@@ -69,13 +69,19 @@ defmodule MyProject.Router do
 
   pipeline :browser do
     plug :accepts, ["html"]
-    # ...
+    plug :fetch_session
+    plug :fetch_flash
+    plug :protect_from_forgery
+    plug :put_secure_browser_headers
     plug Coherence.Authentication.Database, db_model: MyProject.User  # Add this
   end
 
   pipeline :public do
     plug :accepts, ["html"]
-    # ...
+    plug :fetch_session
+    plug :fetch_flash
+    plug :protect_from_forgery
+    plug :put_secure_browser_headers
     plug Coherence.Authentication.Database, db_model: MyProject.User, login: false  # Add this
   end
 
@@ -99,24 +105,21 @@ Update your user model like:
 
 defmodule MyProject.User do
   use MyProject.Web, :model
-  use Coherence.Schema     # Add this
+  use Coherence.Schema                                    # Add this
 
   schema "users" do
     field :name, :string
     field :email, :string
-    coherence_schema       # Add this
+    coherence_schema                                      # Add this
 
     timestamps
   end
 
-  @required_fields ~w(name email)
-  @optional_fields ~w() ++ coherence_fields   # Add this
-
   def changeset(model, params \\ %{}) do
     model
-    |> cast(params, @required_fields, @optional_fields)
-    |> unique_constraint(:email)
-    |> validate_coherence(params)             # Add this
+    |> cast(params, [:name, :email] ++ coherence_fields)  # Add this
+    |> validate_required([:name, :email])
+    |> validate_coherence(params)                         # Add this
   end
 end
 ```
