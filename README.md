@@ -5,6 +5,14 @@
 [license-img]: http://img.shields.io/badge/license-MIT-brightgreen.svg
 [license]: http://opensource.org/licenses/MIT
 
+> <div style="font-color: red">Alert: Project under active development!</div>
+>
+> This is really a 0.0.1 version. It has not been fully acceptance tested. For experimental use only!
+>
+> When I think its ready, I release it on hex!
+>
+> Thanks for your interest.
+
 Coherence is a full featured, configurable authentication system for Phoenix, with the following modules:
 
 * [Database Authenticatable](#authenticatable): handles hashing and storing an encrypted password in the database.

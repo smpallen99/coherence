@@ -18,21 +18,25 @@ defmodule Coherence.Authentication.Database do
   @doc """
     Create a login for a user. `user_data` can be any term but must not be `nil`.
   """
-  def create_login(conn, user_data, id_key \\ :id) do
+  def create_login(conn, user_data, opts  \\ []) do
+    id_key = Keyword.get(opts, :id_key, :id)
+    store = Keyword.get(opts, :store, Coherence.CredentialStore.Database)
     id = UUID.uuid1
-    id |> Coherence.CredentialStore.put_credentials(user_data, id_key)
+
+    store.put_credentials({id, user_data, id_key})
     put_session(conn, @session_key, id)
   end
 
   @doc """
     Delete a login.
   """
-  def delete_login(conn) do
+  def delete_login(conn, opts \\ []) do
+    store = Keyword.get(opts, :store, Coherence.CredentialStore.Database)
     case get_session(conn, @session_key) do
       nil -> conn
 
       key ->
-        Coherence.CredentialStore.delete_credentials(key)
+        store.delete_credentials(key)
         put_session(conn, @session_key, nil)
         |> put_session("user_return_to", nil)
     end
@@ -54,6 +58,8 @@ defmodule Coherence.Authentication.Database do
       error: Keyword.get(opts, :error, "HTTP Authentication Required"),
       db_model: Keyword.get(opts, :db_model),
       id_key: Keyword.get(opts, :id, :id),
+      store: Keyword.get(opts, :store, Coherence.CredentialStore.Database),
+      assign_key: Keyword.get(opts, :assign_key, :authenticated_user),
       login_key: Keyword.get(opts, :login_cookie, Config.login_cookie),
       rememberable: Keyword.get(opts, :rememberable, Config.user_schema.rememberable?),
       cookie_expire: Keyword.get(opts, :login_cookie_expire_hours, Config.rememberable_cookie_expire_hours) * 60 * 60
@@ -65,9 +71,9 @@ defmodule Coherence.Authentication.Database do
     unless get_authenticated_user(conn) do
       conn
       |> get_session_data
-      |> verify_auth_key(opts)
+      |> verify_auth_key(opts, opts[:store])
       |> verify_rememberable(opts)
-      |> assert_login(opts[:login])
+      |> assert_login(opts[:login], opts[:assign_key])
     else
       conn
     end
@@ -96,20 +102,19 @@ defmodule Coherence.Authentication.Database do
   end
   defp verify_rememberable(other, _opts), do: other
 
-  defp verify_auth_key({conn, nil}, _), do: {conn, nil}
-  defp verify_auth_key({conn, auth_key}, %{db_model: db_model, id_key: id_key}),
-    do: {conn, Coherence.CredentialStore.get_user_data(auth_key, db_model, id_key)}
+  defp verify_auth_key({conn, nil}, _, _), do: {conn, nil}
+  defp verify_auth_key({conn, auth_key}, %{db_model: db_model, id_key: id_key}, store),
+    do: {conn, store.get_user_data({auth_key, db_model, id_key})}
 
-  defp assert_login({conn, nil}, login) when is_function(login) do
+  defp assert_login({conn, nil}, login, _) when is_function(login) do
     put_session(conn, "user_return_to", Path.join(["/" | conn.path_info]))
     |> login.()
   end
-  # defp assert_login({conn, user_data}, _), do: assign_user_data(conn, user_data)
-  defp assert_login({conn, user_data}, _) do
+  defp assert_login({conn, user_data}, _, assign_key) do
     # if cookie = Coherence.SessionController.get_login_cookie(conn) do
     #   Logger.debug "** cookie ** #{Rememberable.log_cookie cookie}"
     # end
-    assign_user_data(conn, user_data)
+    assign_user_data(conn, user_data, assign_key)
   end
-  defp assert_login(conn, _), do: conn
+  defp assert_login(conn, _, _), do: conn
 end

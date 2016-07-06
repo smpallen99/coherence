@@ -1,12 +1,17 @@
 defmodule Coherence.Authentication.Utils do
   import Plug.Conn
+  alias Coherence.Config
 
   @param_key Application.get_env :coherence, :token_param_key, "param_key"
 
   def param_key, do: @param_key
 
-  def assign_user_data(conn, user_data), do: assign(conn, :authenticated_user, user_data)
-  def get_authenticated_user(conn), do: conn.assigns[:authenticated_user]
+  def assign_user_data(conn, user_data, key \\ :authenticated_user) do
+    assign(conn, key, user_data)
+  end
+  def get_authenticated_user(conn, key \\ :authenticated_user) do
+    conn.assigns[key]
+  end
   def halt_with_error(conn, msg \\ "unauthorized") do
     conn
     |> send_resp(401, msg)
@@ -19,6 +24,15 @@ defmodule Coherence.Authentication.Utils do
     case get_session(conn, param_key) do
       nil -> conn
       param -> put_session(conn, param, nil)
+    end
+  end
+
+  def get_credential_store do
+    case Config.auth_module do
+      Coherence.Authentication.Database ->
+        Coherence.CredentialStore.Database
+      Coherence.Authentication.Agent ->
+        Coherence.CredentialStore.Agent
     end
   end
 
