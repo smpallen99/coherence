@@ -14,6 +14,7 @@ Coherence is a full featured, configurable authentication system for Phoenix, wi
 * [Trackable](#trackable): saves login statics like login counts, timestamps, and IP address for each user.
 * [Lockable](#lockable): locks an account when a specified number of failed sign-in attempts has been exceeded.
 * [Unlockable With Token](#unlockable): provides a link to send yourself an unlock email.
+* [Rememberable](#rememberable): provides persistent login with 'Remember me?' check box on login page.
 
 Coherence provides flexibility by adding namespaced templates and views for only the options specified by the `mix coherence.install` command. This boiler plate code is added to your `web/templates/coherence` and `web/views/coherence` directories.
 
@@ -112,7 +113,7 @@ defmodule MyProject.User do
 end
 ```
 
-## Options Descriptions
+## Option Overview
 
 ### <a name="authenticatable"></a>Authenticatable
 
@@ -202,6 +203,38 @@ add :locked_at, :datetime
 Provides a link to send yourself an unlock email. When the user clicks the link, the user is presented a form to enter their email address and password. If the token has not expired and the email and password are valid, a unlock email is sent to the user's email address with an expiring token.
 
 The default expiry time can be changed with the `:unlock_token_expire_minutes` config entry.
+
+### <a name="rememberable"></a>Remember Me
+
+The `rememberable` option provides persistent login when the 'Remember Me?' box is checked during login.
+
+With this feature, you will automatically be logged in from the same browser when your current login session dies using a configurable expiring persistent cookie.
+
+For security, both a token and series number stored in the cookie on initial login. Each new creates a new token, but preserves the series number, providing protection against fraud. As well, both the token and series numbers are hashed before saving them to the database, providing protection if the database is compromised.
+
+The following defaults can be changed with the following config entries:
+
+* :rememberable_cookie_expire_hours (2*24)
+* :login_cookie                     ("coherence_login")
+
+The following table is created by the generated `<timestamp>_create_coherence_rememberable.exs` migration:
+
+```elixir
+create table(:rememberables) do
+  add :series_hash, :string
+  add :token_hash, :string
+  add :token_created_at, :datetime
+  add :user_id, references(:users, on_delete: :delete_all)
+
+  timestamps
+end
+create index(:rememberables, [:user_id])
+create index(:rememberables, [:series_hash])
+create index(:rememberables, [:token_hash])
+create unique_index(:rememberables, [:user_id, :series_hash, :token_hash])
+```
+
+The `--rememberable` install option is not provided in any of the installer group options. You must provide the `--rememberable` option to install the migration and its support.
 
 ## <a name="installer"></a>Installer
 

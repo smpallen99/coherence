@@ -27,15 +27,14 @@ defmodule TestCoherence.Rememberable do
   alias Coherence.Config
 
   schema "rememberables" do
-    field :series, :string
-    field :token, :string
-    field :token_created_at, Ecto.DateTime
-    belongs_to :user, TestCoherence.User
-
+    field :series_hash, :string
+    field :token_hash, :string
+    field :token_created_at, Timex.Ecto.DateTime
+    belongs_to :user, Module.concat(Config.module, Config.user_schema)
     timestamps
   end
 
-  @required_fields ~w(series token token_created_at user_id)
+  @required_fields ~w(series_hash token_hash token_created_at user_id)
   @optional_fields ~w()
 
   def changeset(model, params \\ %{}) do

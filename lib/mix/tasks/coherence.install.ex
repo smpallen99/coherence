@@ -72,6 +72,8 @@ defmodule Mix.Tasks.Coherence.Install do
 
   A `--registerable` option provide support for new users to register for an account`
 
+  A `--rememberable` option provide a remember me? check box for persistent logins`
+
   A `--migration-path` option to set the migration path
 
   A `--controllers` option to generate controllers boilerplate (not default)
@@ -92,14 +94,14 @@ defmodule Mix.Tasks.Coherence.Install do
   """
 
   # :rememberable not supported yet
-  @all_options       ~w(authenticatable recoverable lockable trackable) ++
+  @all_options       ~w(authenticatable recoverable lockable trackable rememberable) ++
                        ~w(unlockable_with_token confirmable invitable registerable)
   @all_options_atoms Enum.map(@all_options, &(String.to_atom(&1)))
 
   @default_options   ~w(authenticatable)
-  @full_options      @all_options -- ~w(confirmable invitable)
-  @full_confirmable  @all_options -- ~w(invitable)
-  @full_invitable    @all_options -- ~w(confirmable)
+  @full_options      @all_options -- ~w(confirmable invitable rememberable)
+  @full_confirmable  @all_options -- ~w(invitable rememberable)
+  @full_invitable    @all_options -- ~w(confirmable rememberable)
 
   # the options that default to true, and can be disabled with --no-option
   @default_booleans  ~w(config web views migrations templates boilerplate)
@@ -158,6 +160,7 @@ defmodule Mix.Tasks.Coherence.Install do
     |> gen_coherence_config
     |> gen_migration
     |> gen_invitable_migration
+    |> gen_rememberable_migration
     |> gen_coherence_web
     |> gen_coherence_views
     |> gen_coherence_templates
@@ -289,6 +292,31 @@ config :coherence, #{base}.Coherence.Mailer,
     end
   end
   defp gen_invitable_migration(config), do: config
+
+  defp gen_rememberable_migration(%{rememberable: true, migrations: true, boilerplate: true} = config) do
+    table_name = config[:user_table_name]
+    do_gen_migration config, "create_coherence_rememberable", fn repo, _path, file, name ->
+      change = """
+          create table(:rememberables) do
+            add :series_hash, :string
+            add :token_hash, :string
+            add :token_created_at, :datetime
+            add :user_id, references(:#{table_name}, on_delete: :delete_all)
+
+            timestamps
+          end
+          create index(:rememberables, [:user_id])
+          create index(:rememberables, [:series_hash])
+          create index(:rememberables, [:token_hash])
+          create unique_index(:rememberables, [:user_id, :series_hash, :token_hash])
+      """
+      assigns = [mod: Module.concat([repo, Migrations, camelize(name)]),
+                       change: change]
+      create_file file, migration_template(assigns)
+      config
+    end
+  end
+  defp gen_rememberable_migration(config), do: config
 
 
   defp do_gen_migration(config, name, fun) do

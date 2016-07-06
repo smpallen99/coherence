@@ -199,6 +199,52 @@ defmodule Mix.Tasks.Coherence.InstallTest do
         end
       end
     end
+    test "for_rememberable" do
+      in_tmp "for_rememberable", fn ->
+        (~w(--repo=TestCoherence.Repo  --authenticatable --rememberable --log-only --no-views --no-templates --migration-path=migrations))
+        |> Mix.Tasks.Coherence.Install.run
+
+        assert [migration] = Path.wildcard("migrations/*_create_coherence_rememberable.exs")
+
+        assert_file migration, fn file ->
+          assert file =~ "defmodule TestCoherence.Repo.Migrations.CreateCoherenceRememberable do"
+
+          assert file =~ "create table(:rememberables) do"
+          assert file =~ "add :series_hash, :string"
+          assert file =~ "add :token_hash, :string"
+          assert file =~ "add :token_created_at, :datetime"
+          assert file =~ "add :user_id, references(:users, on_delete: :delete_all)"
+          assert file =~ "timestamps"
+          assert file =~ "create index(:rememberables, [:user_id])"
+          assert file =~ "create index(:rememberables, [:series_hash])"
+          assert file =~ "create index(:rememberables, [:token_hash])"
+          assert file =~ "create unique_index(:rememberables, [:user_id, :series_hash, :token_hash])"
+        end
+      end
+    end
+    test "for_rememberable_with_accounts_schema" do
+      in_tmp "for_rememberable", fn ->
+        (~w(--repo=TestCoherence.Repo  --authenticatable --rememberable --log-only --no-views --no-templates --migration-path=migrations)++ ["--model=Account accounts"])
+        |> Mix.Tasks.Coherence.Install.run
+
+        assert [migration] = Path.wildcard("migrations/*_create_coherence_rememberable.exs")
+
+        assert_file migration, fn file ->
+          assert file =~ "defmodule TestCoherence.Repo.Migrations.CreateCoherenceRememberable do"
+
+          assert file =~ "create table(:rememberables) do"
+          assert file =~ "add :series_hash, :string"
+          assert file =~ "add :token_hash, :string"
+          assert file =~ "add :token_created_at, :datetime"
+          assert file =~ "add :user_id, references(:accounts, on_delete: :delete_all)"
+          assert file =~ "timestamps"
+          assert file =~ "create index(:rememberables, [:user_id])"
+          assert file =~ "create index(:rememberables, [:series_hash])"
+          assert file =~ "create index(:rememberables, [:token_hash])"
+          assert file =~ "create unique_index(:rememberables, [:user_id, :series_hash, :token_hash])"
+        end
+      end
+    end
   end
 
   def assert_dirs(dirs, full_dirs, path) do

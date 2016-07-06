@@ -182,7 +182,7 @@ defmodule Coherence.SessionController do
     validate_login(id, series, token)
     |> case do
       {:ok, rememberable} ->
-        Logger.debug "Valid login :ok"
+        # Logger.debug "Valid login :ok"
         user = case repo.get(Config.user_schema, id) do
           nil -> {:error, :not_found}
           user ->
@@ -234,8 +234,8 @@ defmodule Coherence.SessionController do
     hash_series = hash series
     hash_token = hash token
     repo = Config.repo
-    Logger.debug "user_id: #{user_id}, series: #{series}, token: #{token}"
-    Logger.debug "           hash_series: #{hash_series}, hash_token: #{hash_token}"
+    # Logger.debug "user_id: #{user_id}, series: #{series}, token: #{token}"
+    # Logger.debug "           hash_series: #{hash_series}, hash_token: #{hash_token}"
 
     delete_expired_tokens!(repo)   # TODO: move the following to an task
 
@@ -245,32 +245,22 @@ defmodule Coherence.SessionController do
   end
 
   defp get_invalid_login!(repo, user_id, series, token) do
-    query = from p in Rememberable,
-      where: p.user_id == ^user_id and p.series == ^series and p.token != ^token,
-      select: count(p.id)
-
-    case repo.one query do
+    case repo.one Rememberable.get_invalid_login(user_id, series, token) do
       0 -> :ok
       _ ->
-        repo.delete_all from p in Rememberable, where: p.user_id == ^user_id
+        repo.delete_all Rememberable.delete_all(user_id)
         {:error, :invalid_token}
     end
   end
+
   defp get_valid_login!(repo, user_id, series, token) do
-    query = from p in Rememberable,
-      where: p.user_id == ^user_id and p.series == ^series and p.token == ^token
-    case repo.all query do
-      [item] -> {:ok, item}
-      []     -> {:error, :not_found}
-      [h|t]  ->
-        ids = Enum.map t, &(&1.id)
-        repo.delete_all from p in Rememberable, where: p.id in ^ids
-        Logger.error "Found multiple matching records. Deleted the duplicates."
-        {:ok, h}
+    case repo.one Rememberable.get_valid_login(user_id, series, token) do
+      nil   -> {:error, :not_found}
+      item  -> {:ok, item}
     end
   end
-  def delete_expired_tokens!(repo) do
-    expire_datetime = Timex.shift(DateTime.now, hours: -Config.rememberable_cookie_expire_hours)
-    repo.delete_all from p in Rememberable, where: p.token_created_at < ^expire_datetime
+
+  defp delete_expired_tokens!(repo) do
+    repo.delete_all Rememberable.delete_expired_tokens
   end
 end

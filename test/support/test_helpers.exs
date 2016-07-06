@@ -18,8 +18,8 @@ defmodule TestCoherence.TestHelpers do
     changes = changeset.changes
     changes = Dict.merge(%{
       user_id: user.id,
-      series: changes[:series],
-      token: changes[:token],
+      series_hash: changes[:series_hash],
+      token_hash: changes[:token_hash],
       token_created_at: changes[:token_created_at]
       }, attrs)
     r1 = %Rememberable{}
