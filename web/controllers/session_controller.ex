@@ -1,27 +1,34 @@
 defmodule Coherence.SessionController do
   use Coherence.Web, :controller
+  use Timex
   require Logger
   alias Coherence.{Config, Rememberable}
   import Ecto.Query
+  import Rememberable, only: [hash: 1, gen_cookie: 3]
 
 
   def login_cookie, do: "coherence_login"
 
+  def get_login_cookie(conn) do
+    conn.cookies[Config.login_cookie]
+  end
+
+  defp rememberable_enabled? do
+    if Config.user_schema.rememberable?, do: true, else: false
+  end
+
   def new(conn, _params) do
-    remember = if Config.user_schema.rememberable? do
-      true
-    else
-      false
-    end
+    # if cookie = get_login_cookie(conn) do
+    #   Logger.debug "Found cookie #{Rememberable.log_cookie cookie}"
+    # end
     conn
     |> put_layout({Coherence.LayoutView, "app.html"})
     |> put_view(Coherence.SessionView)
-    |> render(:new, [email: "", remember: remember])
+    |> render(:new, [email: "", remember: rememberable_enabled?])
   end
 
   def create(conn, params) do
     remember = if Config.user_schema.rememberable?, do: params["remember"], else: false
-    IO.puts ".... remember: #{remember}"
     user_schema = Config.user_schema
     email = params["session"]["email"]
     password = params["session"]["password"]
@@ -34,7 +41,6 @@ defmodule Coherence.SessionController do
           value -> value
         end
         unless lockable? and user_schema.locked?(user) do
-          # |> Coherence.Authentication.Database.create_login(user, Config.schema_key )
           apply(Config.auth_module, Config.create_login, [conn, user, Config.schema_key])
           |> reset_failed_attempts(user, lockable?)
           |> track_login(user, user_schema.trackable?)
@@ -46,7 +52,7 @@ defmodule Coherence.SessionController do
           conn
           |> put_flash(:error, "Too many failed login attempts. Account has been locked.")
           |> assign(:locked, true)
-          |> render("new.html", email: "")
+          |> render("new.html", email: "", remember: rememberable_enabled?)
         end
       else
         conn
@@ -58,14 +64,12 @@ defmodule Coherence.SessionController do
       |> failed_login(user, lockable?)
       |> put_layout({Coherence.LayoutView, "app.html"})
       |> put_view(Coherence.SessionView)
-      |> render(:new, email: email)
+      |> render(:new, email: email, remember: rememberable_enabled?)
     end
   end
 
   def delete(conn, _params) do
     user = conn.assigns[:authenticated_user]
-
-    IO.puts "....... user: #{inspect user}"
     apply(Config.auth_module, Config.delete_login, [conn])
     |> track_logout(user, user.__struct__.trackable?)
     |> delete_rememberable(user)
@@ -150,18 +154,17 @@ defmodule Coherence.SessionController do
   defp failed_login(conn, _user, _), do: put_flash(conn, :error, @flash_invalid)
 
   def delete_rememberable(conn, %{id: id}) do
-    IO.puts "....... id: #{inspect id}"
-    where(Rememberable, [u], u.user_id == ^id)
-    |> Config.repo.delete_all
-    conn
-    |> delete_resp_cookie(Config.login_cookie)
+    if Config.has_option :rememberable do
+      where(Rememberable, [u], u.user_id == ^id)
+      |> Config.repo.delete_all
+      conn
+      |> delete_resp_cookie(Config.login_cookie)
+    else
+      conn
+    end
   end
 
   def login_callback(conn) do
-    # conn
-    # |> put_layout({Coherence.LayoutView, "app.html"})
-    # |> put_view(Coherence.SessionView)
-    # |> render("new.html", email: "")
     new(conn, %{})
     |> halt
   end
@@ -175,29 +178,36 @@ defmodule Coherence.SessionController do
   end
 
   def remberable_callback(conn, id, series, token, opts) do
-    get_rememberables(id)
-    |> Coherence.Rememberable.validate_login(id, series, token)
+    repo = Config.repo
+    validate_login(id, series, token)
     |> case do
-      :ok ->
-        user = Config.user_schema
-        |> Config.repo.get(id)
-        {changeset, new_series} = Rememberable.update_login(user)
-        conn = save_login_cookie(conn, id, new_series, token, opts[:login_key], opts[:cookie_expire])
-        |> assign(:remembered, true)
-        {conn, user}
+      {:ok, rememberable} ->
+        Logger.debug "Valid login :ok"
+        user = case repo.get(Config.user_schema, id) do
+          nil -> {:error, :not_found}
+          user ->
+            gen_cookie(id, series, token)
+            |> Coherence.CredentialStore.delete_credentials
+            {changeset, new_token} = Rememberable.update_login(rememberable)
+            gen_cookie(id, series, new_token)
+            |> Coherence.CredentialStore.put_credentials(Config.user_schema, Config.schema_key)
+            Config.repo.update! changeset
+            conn = save_login_cookie(conn, id, series, new_token, opts[:login_key], opts[:cookie_expire])
+            |> assign(:remembered, true)
+            {conn, user}
+        end
       {:error, :not_found} ->
+        Logger.debug "No valid login found"
         {conn, nil}
       {:error, :invalid_token} ->
         # this is a case of potential fraud
-        where(Rememberable, [u], u.user_id == ^id)
-        |> Config.repo.delete_all
+        Logger.warn "Invalid token. Potential Fraud."
 
         conn
         |> delete_req_header(opts[:login_key])
         |> put_flash(:error, """
-          Found an issue with your login session suggesting that someone else
-          may have accessed your account. Your remembered login sessions have
-          been removed!
+          You are using an invalid security token for this site! This security
+          violation has been logged.
           """)
         |> redirect(to: logged_out_url(conn))
         |> halt
@@ -205,13 +215,13 @@ defmodule Coherence.SessionController do
   end
 
   def save_login_cookie(conn, id, series, token, key \\ "coherence_login", expire \\ 2*24*60*60) do
-    put_resp_cookie conn, key, "#{id} #{series} #{token}", max_age: expire
+    put_resp_cookie conn, key, gen_cookie(id, series, token), max_age: expire
   end
 
   defp save_rememberable(conn, _user, nil), do: conn
   defp save_rememberable(conn, user, _) do
     {changeset, series, token} = Rememberable.create_login(user)
-    Config.repo.insert changeset
+    Config.repo.insert! changeset
     save_login_cookie conn, user.id, series, token, Config.login_cookie, Config.rememberable_cookie_expire_hours * 60 * 60
   end
 
@@ -220,4 +230,47 @@ defmodule Coherence.SessionController do
     |> Config.repo.all
   end
 
+  def validate_login(user_id, series, token) do
+    hash_series = hash series
+    hash_token = hash token
+    repo = Config.repo
+    Logger.debug "user_id: #{user_id}, series: #{series}, token: #{token}"
+    Logger.debug "           hash_series: #{hash_series}, hash_token: #{hash_token}"
+
+    delete_expired_tokens!(repo)   # TODO: move the following to an task
+
+    with :ok <- get_invalid_login!(repo, user_id, hash_series, hash_token),
+         {:ok, rememberable} <- get_valid_login!(repo, user_id, hash_series, hash_token),
+           do: {:ok, rememberable}
+  end
+
+  defp get_invalid_login!(repo, user_id, series, token) do
+    query = from p in Rememberable,
+      where: p.user_id == ^user_id and p.series == ^series and p.token != ^token,
+      select: count(p.id)
+
+    case repo.one query do
+      0 -> :ok
+      _ ->
+        repo.delete_all from p in Rememberable, where: p.user_id == ^user_id
+        {:error, :invalid_token}
+    end
+  end
+  defp get_valid_login!(repo, user_id, series, token) do
+    query = from p in Rememberable,
+      where: p.user_id == ^user_id and p.series == ^series and p.token == ^token
+    case repo.all query do
+      [item] -> {:ok, item}
+      []     -> {:error, :not_found}
+      [h|t]  ->
+        ids = Enum.map t, &(&1.id)
+        repo.delete_all from p in Rememberable, where: p.id in ^ids
+        Logger.error "Found multiple matching records. Deleted the duplicates."
+        {:ok, h}
+    end
+  end
+  def delete_expired_tokens!(repo) do
+    expire_datetime = Timex.shift(DateTime.now, hours: -Config.rememberable_cookie_expire_hours)
+    repo.delete_all from p in Rememberable, where: p.token_created_at < ^expire_datetime
+  end
 end

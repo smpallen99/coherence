@@ -11,7 +11,7 @@ defmodule TestCoherence.Router do
     plug :accepts, ["html", "text"]
     plug :fetch_session
     plug :fetch_flash
-    plug :protect_from_forgery
+    # plug :protect_from_forgery
     plug :put_secure_browser_headers
     plug Coherence.Authentication.Database, db_model: TestCoherence.User, rememberable: true, login: &__MODULE__.login_callback/1
   end
@@ -20,20 +20,10 @@ defmodule TestCoherence.Router do
     plug :accepts, ["html", "text"]
     plug :fetch_session
     plug :fetch_flash
-    plug :protect_from_forgery
+    # plug :protect_from_forgery
     plug :put_secure_browser_headers
     plug Coherence.Authentication.Database, db_model: TestCoherence.User, login: false
   end
-
-  # not sure if we will use this
-  # pipeline :rememberable do
-  #   plug :accepts, ["html"]
-  #   plug :fetch_session
-  #   plug :fetch_flash
-  #   plug :protect_from_forgery
-  #   plug :put_secure_browser_headers
-  #   plug Coherence.Authentication.Database, db_model: TestCoherence.User, rememberable: true
-  # end
 
   scope "/" do
     pipe_through :browser

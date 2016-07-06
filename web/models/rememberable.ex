@@ -1,11 +1,13 @@
 defmodule Coherence.Rememberable do
   use Coherence.Web, :model
+  use Timex
   alias Coherence.Config
+  require Logger
 
   schema "rememberables" do
     field :series, :string
     field :token, :string
-    field :token_created_at, Ecto.DateTime
+    field :token_created_at, Timex.Ecto.DateTime
     belongs_to :user, Module.concat(Config.module, Config.user_schema)
 
     timestamps
@@ -33,36 +35,19 @@ defmodule Coherence.Rememberable do
     {changeset, series, token}
   end
 
-  def update_login(user) do
+  def update_login(rememberable) do
     token = gen_token
-    changeset = changeset(%__MODULE__{}, %{token_created_at: created_at, user_id: user.id, token: hash(token)})
-    {changeset, token}
+    {changeset(rememberable, %{token: hash(token)}), token}
   end
 
-  def validate_login(rememberables, %{id: id} = user, series, token) do
-    validate_login(rememberables, id, series, token)
-  end
-  def validate_login(rememberables, user_id, series, token) when is_binary(user_id) do
-    validate_login(rememberables, String.to_integer(user_id), series, token)
-  end
-  def validate_login(rememberables, user_id, series, token) do
-    hashed_series = hash series
-    rememberables
-    |> Enum.filter(fn item -> item.user_id == user_id and item.series == hashed_series end)
-    |> check_tokens(hash(token))
+  def log_cookie(cookie) do
+    [_id, series, token] = String.split cookie, " "
+    cookie <> " : #{hash series}  #{hash token}"
   end
 
-  defp check_tokens([], _token) do
-    {:error, :not_found}
-  end
-  defp check_tokens(rememberables, token) do
-    Enum.filter(rememberables, &(&1.token != token))
-    |> return_result
-  end
-  defp return_result([]), do: :ok
-  defp return_result([item]), do: {:error, :invalid_token}
+  def gen_cookie(user_id, series, token), do: "#{user_id} #{series} #{token}"
 
-  defp created_at, do: Ecto.DateTime.utc
+  defp created_at, do: DateTime.now
 
   defp gen_token do
     Coherence.ControllerHelpers.random_string 24
@@ -71,7 +56,7 @@ defmodule Coherence.Rememberable do
     Coherence.ControllerHelpers.random_string 10
   end
 
-  defp hash(string) do
+  def hash(string) do
     :crypto.hash(:sha, String.to_char_list(string))
     |> Base.url_encode64
   end

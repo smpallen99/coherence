@@ -111,7 +111,7 @@ defmodule CoherenceTest.Plug.Database do
       cookie = "#{id} #{series} #{token}"
 
       conn = call_cookie(RememberablePlug, [], cookie)
-      assert get_in(conn.private, [:phoenix_flash, "error"]) =~ "Found an issue with your login session suggesting"
+      assert get_in(conn.private, [:phoenix_flash, "error"]) =~ "You are using an invalid security token for this site!"
       assert conn.status == 302
       refute conn.assigns[:remembered]
 

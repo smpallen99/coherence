@@ -1,18 +1,18 @@
 defmodule CoherenceTest.Rememberable do
   use TestCoherence.ConnCase
-  alias Coherence.{Rememberable, SessionController}
-  alias TestCoherence.{User}
+  alias Coherence.{Rememberable, SessionController, Config}
+  alias TestCoherence.{User, Repo}
   import TestCoherence.Router.Helpers
+  import Ecto.Query
 
   def with_session(conn) do
-    session_opts = Plug.Session.init(store: :cookie, key: "_app",
-                                     encryption_salt: "abc", signing_salt: "abc")
+    session_opts = Plug.Session.init(store: :cookie, key: "_binaryid_key",
+                                     signing_salt: "JFbk5iZ6")
     conn
-    |> Map.put(:secret_key_base, String.duplicate("abcdefgh", 8))
+    |> Map.put(:secret_key_base, "HL0pikQMxNSA58Dv4mf26O/eh1e4vaJDmX0qLgqBcnS94gbKu9Xn3x114D+mHYcX")
     |> Plug.Session.call(session_opts)
     |> Plug.Conn.fetch_session()
     |> Plug.Conn.fetch_query_params()
-    # |> Plug.Conn.fetch_params()
     |> accepts(["html"])
   end
 
@@ -20,43 +20,39 @@ defmodule CoherenceTest.Rememberable do
     Phoenix.Controller.accepts(conn, opts)
   end
 
-  setup_all do
-    {:ok, _pid } = TestCoherence.Endpoint.start_link
-      # on_exit fn ->
-      #    Supervisor.stop(pid)
-      # end
-    :ok
-  end
-
   def login_cookie(%{conn: conn}) do
     user = insert_user
-    {r1, series, token} = rememberable = insert_rememberable(user)
+    {_, series, token} = rememberable = insert_rememberable(user)
     conn = conn
     |> with_session
     |> SessionController.save_login_cookie(user.id, series, token)
     {:ok, conn: conn, user: user, rememberable: rememberable}
   end
 
+  setup_all do
+    {:ok, _pid } = TestCoherence.Endpoint.start_link
+    :ok
+  end
+
   describe "public" do
     test "get public page", %{conn: conn} do
-      conn = get conn, "/dummies"
+      conn = get conn, dummy_path(conn, :index)
       assert html_response(conn, 200) =~ "Index rendered"
     end
 
     test "private page protected", %{conn: conn} do
-      conn = get conn, "/dummies/new"
+      conn = get conn, dummy_path(conn, :new)
       assert html_response(conn, 200) =~ "Login callback rendered"
       assert conn.halted
       assert conn.private[:plug_session]["user_return_to"] == "/dummies/new"
     end
   end
 
-  # @tag :login_cookie
   describe "login cookie" do
     setup [:login_cookie]
 
     test "authenticates with correct login cookie", %{conn: conn} = meta do
-      conn = get conn, "/dummies/new" # dummy_path(conn, :new)
+      conn = get conn, dummy_path(conn, :new)
       assert html_response(conn, 200) =~ "New rendered"
       assert conn.assigns[:remembered]
       assert conn.assigns[:authenticated_user].id == meta[:user].id
@@ -64,19 +60,21 @@ defmodule CoherenceTest.Rememberable do
     # test "logout deletes the login cookie", %{conn: conn} = meta  do
     #   conn = conn
     #   |> Coherence.Authentication.Database.create_login(meta[:user])
-    #   |> delete("/sessions/#{meta[:user].id}")
+    #   |> delete(session_path(conn, :delete, meta[:user].id))
     #   refute conn.cookies["coherence_login"]
-    #   # refute Plug.Conn.fetch_session conn
+    #   refute Plug.Conn.fetch_session conn
     # end
 
     test "expired", %{conn: conn} = meta do
+      {rememberable, _, _} = meta[:rememberable]
+      datetime = Timex.shift rememberable.token_created_at, months: -1
+      Rememberable.changeset(rememberable, %{token_created_at: datetime})
+      |> TestCoherence.Repo.update!
+      conn = get conn, dummy_path(conn, :new)
 
+      assert Repo.one(from r in Rememberable, select: count(r.id)) == 0
+      assert html_response(conn, 200) =~ "Login callback rendered"
     end
   end
-
-  describe "no login cookie" do
-
-  end
-
 
 end

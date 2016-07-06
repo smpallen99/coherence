@@ -62,7 +62,7 @@ defmodule Coherence.Router do
       end
   """
   defmacro coherence_routes(mode, opts \\ [])
-  defmacro coherence_routes(:public, opts) do
+  defmacro coherence_routes(:public, _opts) do
     quote do
       if Coherence.Config.has_option(:authenticatable) do
         resources "/sessions", Coherence.SessionController, only: [:new, :create, :delete]
@@ -81,7 +81,7 @@ defmodule Coherence.Router do
       end
     end
   end
-  defmacro coherence_routes(:private, opts) do
+  defmacro coherence_routes(:private, _opts) do
     quote do
       if Coherence.Config.has_option(:invitable) do
         resources "/invitations", Coherence.InvitationController, only: [:new, :create, :edit]

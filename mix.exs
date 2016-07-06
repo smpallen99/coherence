@@ -18,7 +18,7 @@ defmodule Coherence.Mixfile do
   def application do
     [mod: {Coherence, []},
      applications: [:logger, :comeonin, :ecto, :uuid, :phoenix_swoosh,
-                    :phoenix_timex, :tzdata]]
+                    :phoenix_timex, :timex_ecto, :tzdata]]
   end
 
   defp elixirc_paths(:test), do: ["lib", "web", "test/support"]

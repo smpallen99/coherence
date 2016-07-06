@@ -1,5 +1,6 @@
 defmodule Coherence.RememberableTest do
   use TestCoherence.ModelCase
+  use Timex
 
   alias Coherence.{Rememberable, Config}
 
@@ -38,38 +39,27 @@ defmodule Coherence.RememberableTest do
   end
 
   test "update_login", %{user: user} do
-    {%{changes: changes}, series, token} = Rememberable.create_login(user)
-    :timer.sleep 1100
-    {%{changes: new_changes}, new_token} = Rememberable.update_login(user)
-    assert new_changes[:token_created_at]
+    {%{changes: changes}, _series, _token} = Rememberable.create_login(user)
+    {%{changes: new_changes}, _new_token} =
+      build_rememberable(changes)
+      |> Rememberable.update_login
     assert new_changes[:token]
     refute new_changes[:series]
-    refute new_changes[:token_created_at] == changes[:token_created_at]
     refute new_changes[:token] == changes[:token]
   end
 
-  def now, do: Ecto.DateTime.utc
-  @now Ecto.DateTime.utc
+  def now, do: DateTime.now
 
-  @rememberables [
-    %Rememberable{user_id: 10, series: "123", token: "abc", token_created_at: @now},
-    %Rememberable{user_id:  1, series: "123", token: "abc", token_created_at: @now},
+  def rememberables, do: [
+    %Rememberable{user_id: 10, series: "123", token: "abc", token_created_at: now},
+    %Rememberable{user_id:  1, series: "123", token: "abc", token_created_at: now },
   ]
-  test "validate_login single", %{user: user} do
-    {changeset, series, token} = Rememberable.create_login(user)
-    r1 = build_rememberable changeset.changes
-    assert Rememberable.validate_login([r1], user, series, token) == :ok
-
-    {changeset, series, token} = Rememberable.create_login(user)
-    r1 = build_rememberable changeset.changes
-    assert Rememberable.validate_login([r1 | @rememberables], user, series, token) == :ok
-  end
-  test "validate_login theft", %{user: user} do
-    {changeset, series, token} = Rememberable.create_login(user)
-    r1 = build_rememberable changeset.changes
-    r2 = struct(r1, token: "abc")
-    assert Rememberable.validate_login([r1, r2 | @rememberables], user, series, token) == {:error, :invalid_token}
-  end
+  @dt Timex.shift DateTime.now, months: -2
+  @expired_list [
+    %Rememberable{user_id: 10, series: "124", token: "abca", token_created_at: @dt},
+    %Rememberable{user_id:  1, series: "12345", token: "abcd", token_created_at: @dt },
+    %Rememberable{user_id:  1, series: "12", token: "ab", token_created_at: @dt },
+  ]
 
   def build_rememberable(changes) do
     struct(%Rememberable{}, changes)
