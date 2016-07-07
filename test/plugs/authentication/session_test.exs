@@ -1,7 +1,7 @@
-defmodule CoherenceTest.Plug.Database do
+defmodule CoherenceTest.Plug.Session do
   use ExUnit.Case, async: true
   use Plug.Test
-  alias Coherence.Authentication.Database
+  alias Coherence.Authentication.Session
   alias Coherence.{Rememberable, Config}
   alias TestCoherence.User
   require Ecto.Query
@@ -38,7 +38,7 @@ defmodule CoherenceTest.Plug.Database do
 
     plug :accepts, ["html"]
     plug :fetch_session
-    plug Coherence.Authentication.Database, db_model: TestCoherence.User #, login: &Coherence.SessionController.login_callback/1
+    plug Coherence.Authentication.Session, login: true
     plug :index
 
     defp index(conn, _opts), do: send_resp(conn, 200, "Authorized")
@@ -52,7 +52,7 @@ defmodule CoherenceTest.Plug.Database do
     plug :accepts, ["html"]
     plug :fetch_session
     plug :fetch_flash
-    plug Coherence.Authentication.Database, db_model: TestCoherence.User, rememberable: true
+    plug Coherence.Authentication.Session, login: true, rememberable: true
     plug :index
 
     defp index(conn, _opts), do: send_resp(conn, 200, "Authorized")
@@ -68,7 +68,7 @@ defmodule CoherenceTest.Plug.Database do
   end
 
   setup do
-    # Coherence.Authentication.Database.add_credentials("Admin", "SecretPass", %{role: :admin})
+    # Coherence.Authentication.Session.add_credentials("Admin", "SecretPass", %{role: :admin})
     :ok
   end
 
@@ -124,7 +124,7 @@ defmodule CoherenceTest.Plug.Database do
       conn = conn(:get, "/", headers: [])
       |> sign_conn
       |> put_resp_cookie("coherence_login", meta[:cookie])
-      |> Database.create_login(meta[:user])
+      |> Session.create_login(meta[:user])
       |> RememberablePlug.call([])
       assert conn.status == 200
       assert conn.resp_body == "Authorized"
@@ -156,8 +156,8 @@ defmodule CoherenceTest.Plug.Database do
   #   user = %{id: 1, email: "test@example.com"}
   #   conn = call(TestPlug, [])
   #   # |> sign_conn
-  #   |> Database.create_login(user)
+  #   |> Session.create_login(user)
 
-  #   assert conn.assigns[:authenticated_user] ==  user
+  #   assert conn.assigns[:current_user] ==  user
   # end
 end

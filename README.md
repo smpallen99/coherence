@@ -73,7 +73,7 @@ defmodule MyProject.Router do
     plug :fetch_flash
     plug :protect_from_forgery
     plug :put_secure_browser_headers
-    plug Coherence.Authentication.Database, db_model: MyProject.User  # Add this
+    plug Coherence.Authentication.Session, login: true
   end
 
   pipeline :public do
@@ -82,7 +82,7 @@ defmodule MyProject.Router do
     plug :fetch_flash
     plug :protect_from_forgery
     plug :put_secure_browser_headers
-    plug Coherence.Authentication.Database, db_model: MyProject.User, login: false  # Add this
+    plug Coherence.Authentication.Session
   end
 
   scope "/" do

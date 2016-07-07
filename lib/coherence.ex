@@ -164,12 +164,20 @@ defmodule Coherence do
   Run `$ mix help coherence.install` for more information.
   """
   use Application
+  alias Coherence.Config
 
   @doc false
   def start(_type, _args) do
     Coherence.Supervisor.start_link()
   end
 
-  def current_user(conn), do: conn.assigns[:authenticated_user]
+  @doc """
+  Get the currently logged in user data.
+  """
+  def current_user(conn), do: conn.assigns[Config.assigns_key]
+
+  @doc """
+  Check if user is logged in.
+  """
   def logged_in?(conn), do: !!current_user(conn)
 end

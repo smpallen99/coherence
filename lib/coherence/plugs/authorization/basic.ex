@@ -31,7 +31,7 @@ defmodule Coherence.Authentication.Basic do
       realm: Keyword.get(opts, :realm, "Restricted Area"),
       error: Keyword.get(opts, :error, "HTTP Authentication Required"),
       store: Keyword.get(opts, :store, Coherence.CredentialStore.Agent),
-      assign_key: Keyword.get(opts, :assign_key, :authenticated_user),
+      assigns_key: Keyword.get(opts, :assigns_key, :current_user),
     }
   end
 
@@ -39,7 +39,7 @@ defmodule Coherence.Authentication.Basic do
     conn
     |> get_auth_header
     |> verify_creds(opts[:store])
-    |> assert_creds(opts[:realm], opts[:error], opts[:assign_key])
+    |> assert_creds(opts[:realm], opts[:error], opts[:assigns_key])
   end
 
   defp get_auth_header(conn), do: {conn, get_first_req_header(conn, "authorization")}

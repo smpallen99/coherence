@@ -21,13 +21,13 @@ defmodule Coherence.Authentication.Basic.Test do
   defp assert_unauthorized(conn, realm) do
     assert conn.status == 401
     assert get_resp_header(conn, "www-authenticate") == [~s{Basic realm="#{realm}"}]
-    refute conn.assigns[:authenticated_user]
+    refute conn.assigns[:current_user]
   end
 
   defp assert_authorized(conn, content) do
     assert conn.status == 200
     assert conn.resp_body == content
-    assert conn.assigns[:authenticated_user] == %{role: :admin}
+    assert conn.assigns[:current_user] == %{role: :admin}
   end
 
   defp auth_header(creds) do

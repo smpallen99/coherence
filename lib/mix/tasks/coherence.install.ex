@@ -468,7 +468,7 @@ config :coherence, #{base}.Coherence.Mailer,
         plug :fetch_flash
         plug :protect_from_forgery
         plug :put_secure_browser_headers
-        plug Coherence.Authentication.Database, db_model: #{base}.User  # Add this
+        plug Coherence.Authentication.Session, login: true  # Add this
       end
 
       pipeline :public do
@@ -477,7 +477,7 @@ config :coherence, #{base}.Coherence.Mailer,
         plug :fetch_flash
         plug :protect_from_forgery
         plug :put_secure_browser_headers
-        plug Coherence.Authentication.Database, db_model: #{base}.User, login: false  # Add this
+        plug Coherence.Authentication.Session               # Add this
       end
 
       scope "/"#{namespace} do

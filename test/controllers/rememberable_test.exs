@@ -55,11 +55,11 @@ defmodule CoherenceTest.Rememberable do
       conn = get conn, dummy_path(conn, :new)
       assert html_response(conn, 200) =~ "New rendered"
       assert conn.assigns[:remembered]
-      assert conn.assigns[:authenticated_user].id == meta[:user].id
+      assert conn.assigns[:current_user].id == meta[:user].id
     end
     # test "logout deletes the login cookie", %{conn: conn} = meta  do
     #   conn = conn
-    #   |> Coherence.Authentication.Database.create_login(meta[:user])
+    #   |> Coherence.Authentication.Session.create_login(meta[:user])
     #   |> delete(session_path(conn, :delete, meta[:user].id))
     #   refute conn.cookies["coherence_login"]
     #   refute Plug.Conn.fetch_session conn

@@ -69,7 +69,7 @@ defmodule <%= base %>.Coherence.SessionController do
   end
 
   def delete(conn, _params) do
-    user = conn.assigns[:authenticated_user]
+    user = conn.assigns[Config.assigns_key]
     apply(Config.auth_module, Config.delete_login, [conn])
     |> track_logout(user, user.__struct__.trackable?)
     |> delete_rememberable(user)

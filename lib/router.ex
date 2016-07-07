@@ -13,13 +13,13 @@ defmodule Coherence.Router do
         pipeline :browser do
           plug :accepts, ["html"]
           # ...
-          plug Coherence.Authentication.Database, db_model: MyProject.User
+          plug Coherence.Authentication.Session, db_model: MyProject.User
         end
 
         pipeline :public do
           plug :accepts, ["html"]
           # ...
-          plug Coherence.Authentication.Database, db_model: MyProject.User, login: false  # Add this
+          plug Coherence.Authentication.Session, db_model: MyProject.User, login: false  # Add this
         end
 
         scope "/" do

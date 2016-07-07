@@ -17,7 +17,7 @@ defmodule Coherence.Config do
   * :email_reply_to
   * :site_name                                        - The site name used for email
   * :login_cookie ("coherence_login")                 - The name of the login cookie
-  * :auth_module (Coherence.Authentication.Database)
+  * :auth_module (Coherence.Authentication.Session)
   * :create_login (:create_login)
   * :delete_login (:delete_login})
   * :opts ([])
@@ -26,7 +26,7 @@ defmodule Coherence.Config do
   * :max_failed_login_attempts (5)
   * :unlock_timeout_minutes (20)
   * :unlock_token_expire_minutes (5)
-  * :database_session_key ("database_auth")
+  * :session_key ("session_auth")
   * :rememberable_cookie_expire_hours (2*24)
 
   ## Examples
@@ -48,16 +48,17 @@ defmodule Coherence.Config do
     :email_reply_to,
     :site_name,
     {:login_cookie, "coherence_login"},
-    {:auth_module, Coherence.Authentication.Database},
+    {:auth_module, Coherence.Authentication.Session},
     {:create_login, :create_login},
     {:delete_login, :delete_login},
     {:opts, []},
+    {:assigns_key, :current_user},
     {:reset_token_expire_days, 2},
     {:confirmation_token_expire_days, 5},
     {:max_failed_login_attempts, 5},
     {:unlock_timeout_minutes, 20},
     {:unlock_token_expire_minutes, 5},
-    {:database_session_key, "database_auth"},
+    {:session_key, "session_auth"},
     {:rememberable_cookie_expire_hours, 2*24 }
   ]
   |> Enum.each(fn

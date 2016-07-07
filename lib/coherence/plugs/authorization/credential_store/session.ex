@@ -1,4 +1,4 @@
-defmodule Coherence.CredentialStore.Database do
+defmodule Coherence.CredentialStore.Session do
   @doc """
   Starts a new credentials store.
   """

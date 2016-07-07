@@ -1,15 +1,75 @@
-defmodule Coherence.Authentication.Database do
+defmodule Coherence.Authentication.Session do
   @moduledoc """
-    Implements Database authentication.
+  Implements Session based authentication. By default, it uses an Agent for
+  session state. Additionally, a the session can be stored in a database with
+  an Agent based cache.
+
+  The plug can be used to force a login for unauthenticated users for routes
+  that need to be protected with a password.
+
+  For example:
+
+      plug Coherence.Authentication.Session, login: true
+
+  will present the user for a login if they are accessing a route or controller
+  that uses this plug.
+
+  For pages that don't require authorization but would like to present logged in
+  information on unprotected pages, use the default:
+
+      plug Coherence.Authentication.Session
+
+  This will set the current_user for use in templates, but not allow access to
+  protected pages.
+
+  By default, the user model for a logged-in user can be accessed with
+  `conn.assigns[:current_user]`. This can be changed with the global :assigns_key
+  config option.
+
+  ## Database Persistence
+
+  To enable database persistence, implement [Coherence.DbStore] protocol for your
+  user model. As well, you will need to provide the :db_model option to the plug. For
+  example:
+
+      defimpl Coherence.DbStore, for: MyProject.User do
+        def get_user_data(_, creds, _id_key) do
+          alias MyProject.{Session, Repo}
+          case Repo.one from s in Session, where: s.creds == ^creds, preload: :user do
+            %{user: user} -> user
+            _ -> nil
+          end
+        end
+
+        def put_credentials(user, creds , _) do
+          case Repo.one from s in Session, where: s.creds == ^creds do
+            nil -> %Session{creds: creds}
+            session -> session
+          end
+          |> Session.changeset(%{user_id: user.id})
+          |> Repo.insert_or_update
+        end
+
+        def delete_credentials(_, creds) do
+          case Repo.one from s in Session, where: s.creds == ^creds do
+            nil -> nil
+            session ->
+              Repo.delete session
+          end
+        end
+      end
+
+      plug Coherence.Authentication.Session, db_model: MyProject.User, login: true
+
+  You should be aware that the Agent is still used to fetch the user data if can
+  be found. If the key is not found, it checks the database. If a record is found
+  in the database, the agent is updated and the user data returned.
 
 
-
-      plug Coherence.Authentication.Database, login: &MyController.login_callback/1
-
-    to your pipeline. This module is derived from https://github.com/lexmag/blaguth
+  This module is derived from https://github.com/lexmag/blaguth
   """
 
-  @session_key Application.get_env(:coherence, :database_session_key, "database_auth")
+  @session_key Application.get_env(:coherence, :session_key, "session_auth")
 
   @behaviour Plug
   import Plug.Conn
@@ -22,7 +82,7 @@ defmodule Coherence.Authentication.Database do
   """
   def create_login(conn, user_data, opts  \\ []) do
     id_key = Keyword.get(opts, :id_key, :id)
-    store = Keyword.get(opts, :store, Coherence.CredentialStore.Database)
+    store = Keyword.get(opts, :store, Coherence.CredentialStore.Session)
     id = UUID.uuid1
 
     store.put_credentials({id, user_data, id_key})
@@ -33,7 +93,7 @@ defmodule Coherence.Authentication.Database do
     Delete a login.
   """
   def delete_login(conn, opts \\ []) do
-    store = Keyword.get(opts, :store, Coherence.CredentialStore.Database)
+    store = Keyword.get(opts, :store, Coherence.CredentialStore.Session)
     case get_session(conn, @session_key) do
       nil -> conn
 
@@ -45,14 +105,7 @@ defmodule Coherence.Authentication.Database do
     |> delete_token_session
   end
 
-  # @doc """
-  #   Fetch user data from the credential store
-  # """
-  # def get_user_data(conn) do
-  #   get_session(conn, @session_key)
-  #   |> Coherence.CredentialStore.get_user_data
-  # end
-
+  @doc false
   def init(opts) do
     # TODO: need to fix the default login callback
     login = case opts[:login] do
@@ -64,14 +117,15 @@ defmodule Coherence.Authentication.Database do
       error: Keyword.get(opts, :error, "HTTP Authentication Required"),
       db_model: Keyword.get(opts, :db_model),
       id_key: Keyword.get(opts, :id, :id),
-      store: Keyword.get(opts, :store, Coherence.CredentialStore.Database),
-      assign_key: Keyword.get(opts, :assign_key, :authenticated_user),
+      store: Keyword.get(opts, :store, Coherence.CredentialStore.Session),
+      assigns_key: Keyword.get(opts, :assigns_key, :current_user),
       login_key: Keyword.get(opts, :login_cookie, Config.login_cookie),
       rememberable: Keyword.get(opts, :rememberable, Config.user_schema.rememberable?),
       cookie_expire: Keyword.get(opts, :login_cookie_expire_hours, Config.rememberable_cookie_expire_hours) * 60 * 60
     }
   end
 
+  @doc false
   def call(conn, opts) do
     # IO.puts ".. opts: #{inspect opts}"
     unless get_authenticated_user(conn) do
@@ -79,7 +133,7 @@ defmodule Coherence.Authentication.Database do
       |> get_session_data
       |> verify_auth_key(opts, opts[:store])
       |> verify_rememberable(opts)
-      |> assert_login(opts[:login], opts[:assign_key])
+      |> assert_login(opts[:login], opts[:assigns_key])
     else
       conn
     end
@@ -117,9 +171,6 @@ defmodule Coherence.Authentication.Database do
     |> login.()
   end
   defp assert_login({conn, user_data}, _, assign_key) do
-    # if cookie = Coherence.SessionController.get_login_cookie(conn) do
-    #   Logger.debug "** cookie ** #{Rememberable.log_cookie cookie}"
-    # end
     assign_user_data(conn, user_data, assign_key)
   end
   defp assert_login(conn, _, _), do: conn

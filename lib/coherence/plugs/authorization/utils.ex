@@ -6,10 +6,10 @@ defmodule Coherence.Authentication.Utils do
 
   def param_key, do: @param_key
 
-  def assign_user_data(conn, user_data, key \\ :authenticated_user) do
+  def assign_user_data(conn, user_data, key \\ :current_user) do
     assign(conn, key, user_data)
   end
-  def get_authenticated_user(conn, key \\ :authenticated_user) do
+  def get_authenticated_user(conn, key \\ :current_user) do
     conn.assigns[key]
   end
   def halt_with_error(conn, msg \\ "unauthorized") do
@@ -29,8 +29,8 @@ defmodule Coherence.Authentication.Utils do
 
   def get_credential_store do
     case Config.auth_module do
-      Coherence.Authentication.Database ->
-        Coherence.CredentialStore.Database
+      Coherence.Authentication.Session ->
+        Coherence.CredentialStore.Session
       Coherence.Authentication.Basic ->
         Coherence.CredentialStore.Agent
     end
