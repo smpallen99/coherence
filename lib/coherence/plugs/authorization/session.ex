@@ -26,6 +26,10 @@ defmodule Coherence.Authentication.Session do
   `conn.assigns[:current_user]`. This can be changed with the global :assigns_key
   config option.
 
+  ## Controller Based Authentication
+
+  This plug can be used in either the router.ex file or in a controller file.
+
   ## Database Persistence
 
   To enable database persistence, implement [Coherence.DbStore] protocol for your
