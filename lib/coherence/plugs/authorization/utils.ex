@@ -31,7 +31,7 @@ defmodule Coherence.Authentication.Utils do
     case Config.auth_module do
       Coherence.Authentication.Database ->
         Coherence.CredentialStore.Database
-      Coherence.Authentication.Agent ->
+      Coherence.Authentication.Basic ->
         Coherence.CredentialStore.Agent
     end
   end

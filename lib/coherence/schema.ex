@@ -2,8 +2,18 @@ defmodule Coherence.Schema do
   @moduledoc """
   Add Coherence support to a User schema module.
 
-  Add `use Coherence.Schema` to your User module to add a number of
+  Add `use Coherence.Schema, opts \\ []` to your User module to add a number of
   Module functions and helpers.
+
+  The optional `opt` parameter can be used to disable options enabled in the
+  global configuration by passing `option: false`
+
+  For example,
+
+      defmodule MyProject.User do
+        use MyProject.Web, :model
+        use Coherence.Schema, invitable: false
+
 
   The following functions are added regardless of the options configured:
 
@@ -36,6 +46,7 @@ defmodule Coherence.Schema do
   The `coherence_schema/1` macro is used to add the configured schema fields to the User models schema.
 
   The `coherence_fields/0` function is used to return the validation fields appropriate for the selected options.
+
 
   ## Examples:
 

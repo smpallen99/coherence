@@ -12,18 +12,27 @@ defmodule Coherence.Authentication.Basic do
   @behaviour Plug
   import Plug.Conn
   import Coherence.Authentication.Utils
+  alias Coherence.Config
+  import Coherence.Authentication.Utils
 
   @doc """
     Returns the encoded form for the given `user` and `password` combination.
   """
   def encode_credentials(user, password), do: Base.encode64("#{user}:#{password}")
 
+  def create_login(email, password, user_data, opts \\ []) do
+    creds = encode_credentials(email, password)
+    store = get_credential_store
+    store.put_credentials(creds, user_data)
+  end
+
   def init(opts) do
-    realm = Keyword.get(opts, :realm, "Restricted Area")
-    error = Keyword.get(opts, :error, "HTTP Authentication Required")
-    store = Keyword.get(opts, :store, Coherence.CredentialStore.Agent)
-    assign_key = Keyword.get(opts, :assign_key, :authenticated_user)
-    %{realm: realm, error: error, store: store, assign_key: assign_key}
+    %{
+      realm: Keyword.get(opts, :realm, "Restricted Area"),
+      error: Keyword.get(opts, :error, "HTTP Authentication Required"),
+      store: Keyword.get(opts, :store, Coherence.CredentialStore.Agent),
+      assign_key: Keyword.get(opts, :assign_key, :authenticated_user),
+    }
   end
 
   def call(conn, opts) do
