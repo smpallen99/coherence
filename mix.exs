@@ -10,7 +10,7 @@ defmodule Coherence.Mixfile do
       compilers: [:phoenix, :gettext] ++ Mix.compilers,
       build_embedded: Mix.env == :prod,
       start_permanent: Mix.env == :prod,
-      docs: [extras: ["README.md"], main: "ExAdmin"],
+      docs: [extras: ["README.md"], main: "Coherence"],
       deps: deps,
       package: package,
       name: "Coherence",
@@ -41,7 +41,8 @@ defmodule Coherence.Mixfile do
       {:phoenix_swoosh, "~> 0.1.3"},
       {:phoenix_timex, "~> 1.0.0"},
       {:timex_ecto, "~> 1.1"},
-      {:ex_doc, "~> 0.11", only: :dev},
+      {:ex_doc, "== 0.11.5", only: :dev},
+      {:earmark, "== 0.2.1", only: :dev, override: true},
       {:postgrex, ">= 0.0.0", only: :test},
     ]
   end

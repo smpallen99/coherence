@@ -21,8 +21,8 @@ Coherence is a full featured, configurable authentication system for Phoenix, wi
 * [Recoverable](#recoverable): provides a link to generate a password reset link with token expiry.
 * [Trackable](#trackable): saves login statics like login counts, timestamps, and IP address for each user.
 * [Lockable](#lockable): locks an account when a specified number of failed sign-in attempts has been exceeded.
-* [Unlockable With Token](#unlockable): provides a link to send yourself an unlock email.
-* [Rememberable](#rememberable): provides persistent login with 'Remember me?' check box on login page.
+* [Unlockable With Token](#unlockable-with-token): provides a link to send yourself an unlock email.
+* [Rememberable](#remember-me): provides persistent login with 'Remember me?' check box on login page.
 
 Coherence provides flexibility by adding namespaced templates and views for only the options specified by the `mix coherence.install` command. This boiler plate code is added to your `web/templates/coherence` and `web/views/coherence` directories.
 
@@ -126,7 +126,7 @@ end
 
 ## Option Overview
 
-### <a name="authenticatable"></a>Authenticatable
+### Authenticatable
 
 Handles hashing and storing an encrypted password in the database.
 
@@ -137,7 +137,7 @@ The following columns are added the `<timestamp>_add_coherence_to_user.exs` migr
 
 * :encrypted_password, :string - the encrypted password
 
-### <a name="invitable"></a>Invitable
+### Invitable
 
 Handles sending invites to new users with a sign-up link, allowing the user to create their account with their own password.
 
@@ -157,7 +157,7 @@ create table(:invitations) do
 end
 ```
 
-### <a name="registerable"></a>Registerable
+### Registerable
 
 Allows anonymous users to register a users email address and password.
 
@@ -168,7 +168,7 @@ Adds a `Register New Account` to the log-in page.
 It is recommended that the :confirmable option is used with :registerable to
 ensure a valid email address is captured.
 
-### <a name="recoverable"></a>Recoverable
+### Recoverable
 
 Allows users to reset their password using an expiring token send by email.
 
@@ -178,7 +178,7 @@ Adds a "Forgot your password?" link to the log-in form. When clicked, the user p
 
 The expiry timeout can be changed with the `:reset_token_expire_days` config entry.
 
-### <a name="trackable"></a>Trackable
+### Trackable
 
 Saves login statics like login counts, timestamps, and IP address for each user.
 
@@ -192,7 +192,7 @@ add :current_sign_in_ip, :string          # the current login IP adddress
 add :last_sign_in_ip, :string             # the IP address of the previous login
 ```
 
-### <a name="lockable"></a>Lockable
+### Lockable
 
 Locks an account when a specified number of failed sign-in attempts has been exceeded.
 
@@ -209,13 +209,13 @@ add :unlock_token, :string
 add :locked_at, :datetime
 ```
 
-### <a name="unlockable"></a>Unlockable with Token
+### Unlockable with Token
 
 Provides a link to send yourself an unlock email. When the user clicks the link, the user is presented a form to enter their email address and password. If the token has not expired and the email and password are valid, a unlock email is sent to the user's email address with an expiring token.
 
 The default expiry time can be changed with the `:unlock_token_expire_minutes` config entry.
 
-### <a name="rememberable"></a>Remember Me
+### Remember Me
 
 The `rememberable` option provides persistent login when the 'Remember Me?' box is checked during login.
 
@@ -247,7 +247,7 @@ create unique_index(:rememberables, [:user_id, :series_hash, :token_hash])
 
 The `--rememberable` install option is not provided in any of the installer group options. You must provide the `--rememberable` option to install the migration and its support.
 
-## <a name="installer"></a>Installer
+## Installer
 
 The following examples illustrate various configuration scenarios for the install mix task:
 
