@@ -65,7 +65,7 @@ defmodule Coherence.Router do
   defmacro coherence_routes(:public, _opts) do
     quote do
       if Coherence.Config.has_option(:authenticatable) do
-        resources "/sessions", Coherence.SessionController, only: [:new, :create, :delete]
+        resources "/sessions", Coherence.SessionController, only: [:new, :create]
       end
       if Coherence.Config.has_option(:registerable) do
         resources "/registrations", Coherence.RegistrationController, only: [:new, :create, :edit, :update, :delete]
@@ -86,6 +86,9 @@ defmodule Coherence.Router do
       if Coherence.Config.has_option(:invitable) do
         resources "/invitations", Coherence.InvitationController, only: [:new, :create, :edit]
         post "/invitations/create", Coherence.InvitationController, :create_user
+      end
+      if Coherence.Config.has_option(:authenticatable) do
+        resources "/sessions", Coherence.SessionController, only: [:delete]
       end
     end
   end

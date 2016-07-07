@@ -1,6 +1,8 @@
 defmodule Coherence.Authentication.Database do
   @moduledoc """
-    Implements Database authentication. To use add:
+    Implements Database authentication.
+
+
 
       plug Coherence.Authentication.Database, login: &MyController.login_callback/1
 
@@ -53,8 +55,12 @@ defmodule Coherence.Authentication.Database do
 
   def init(opts) do
     # TODO: need to fix the default login callback
+    login = case opts[:login] do
+      true  -> &Coherence.SessionController.login_callback/1
+      other -> other
+    end
     %{
-      login: Keyword.get(opts, :login, &Coherence.SessionController.login_callback/1),
+      login: login,
       error: Keyword.get(opts, :error, "HTTP Authentication Required"),
       db_model: Keyword.get(opts, :db_model),
       id_key: Keyword.get(opts, :id, :id),
