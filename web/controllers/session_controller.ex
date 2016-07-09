@@ -220,7 +220,7 @@ defmodule Coherence.SessionController do
     put_resp_cookie conn, key, gen_cookie(id, series, token), max_age: expire
   end
 
-  defp save_rememberable(conn, _user, nil), do: conn
+  defp save_rememberable(conn, _user, none) when none in [nil, false], do: conn
   defp save_rememberable(conn, user, _) do
     {changeset, series, token} = Rememberable.create_login(user)
     Config.repo.insert! changeset

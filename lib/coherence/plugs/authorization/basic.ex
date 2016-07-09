@@ -20,7 +20,7 @@ defmodule Coherence.Authentication.Basic do
   """
   def encode_credentials(user, password), do: Base.encode64("#{user}:#{password}")
 
-  def create_login(email, password, user_data, opts \\ []) do
+  def create_login(email, password, user_data, _opts \\ []) do
     creds = encode_credentials(email, password)
     store = get_credential_store
     store.put_credentials(creds, user_data)

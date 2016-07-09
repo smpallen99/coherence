@@ -150,8 +150,25 @@ defmodule Coherence.Schema do
         end
 
         def unlock!(user) do
-          Config.user_schema.changeset(user, %{locked_at: nil, unlock_token: nil})
-          |> Config.repo.update
+          changeset = Config.user_schema.changeset(user, %{locked_at: nil, unlock_token: nil, failed_attempts: 0})
+          if locked?(user) do
+            changeset
+            |> Config.repo.update
+          else
+            changeset = Ecto.Changeset.add_error changeset, :locked_at, "not locked"
+            {:error, changeset}
+          end
+        end
+
+        def lock!(user, locked_at \\ Ecto.DateTime.utc) do
+          changeset = Config.user_schema.changeset(user, %{locked_at: locked_at})
+          unless locked?(user) do
+            changeset
+            |> Config.repo.update
+          else
+            changeset = Ecto.Changeset.add_error changeset, :locked_at, "already locked"
+            {:error, changeset}
+          end
         end
       end
 
@@ -229,8 +246,11 @@ defmodule Coherence.Schema do
     lockable: [
       "# lockable",
       "add :failed_attempts, :integer, default: 0",
-      "add :unlock_token, :string",
       "add :locked_at, :datetime",
+    ],
+    unlockable_with_token: [
+      "# unlockable_with_token",
+      "add :unlock_token, :string",
     ],
     confirmable: [
       "# confirmable",
@@ -308,8 +328,10 @@ defmodule Coherence.Schema do
       end
       if Coherence.Config.has_option(:lockable) do
         field :failed_attempts, :integer, default: 0
-        field :unlock_token, :string
         field :locked_at, Ecto.DateTime
+      end
+      if Coherence.Config.has_option(:unlockable_with_token) do
+        field :unlock_token, :string
       end
       if Coherence.Config.has_option(:confirmable) do
         field :confirmation_token, :string
@@ -325,7 +347,8 @@ defmodule Coherence.Schema do
     recoverable: ~w(reset_password_token reset_password_sent_at),
     rememberable: ~w(remember_created_at),
     trackable: ~w(sign_in_count current_sign_in_at last_sign_in_at current_sign_in_ip last_sign_in_ip failed_attempts),
-    lockable: ~w(unlock_token locked_at),
+    lockable: ~w(locked_at failed_attempts),
+    unlockable_with_token: ~w(unlock_token),
     confirmable: ~w(confirmation_token confirmed_at confirmation_send_at)
   }
 
@@ -347,6 +370,7 @@ defmodule Coherence.Schema do
     |> options_fields(:rememberable)
     |> options_fields(:trackable)
     |> options_fields(:lockable)
+    |> options_fields(:unlockable_with_token)
     |> options_fields(:confirmable)
   end
 

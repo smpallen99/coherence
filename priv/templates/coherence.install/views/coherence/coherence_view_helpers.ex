@@ -1,6 +1,6 @@
 defmodule <%= base %>.Coherence.ViewHelpers do
   use Phoenix.HTML
-  import <%= base %>.Router.Helpers
+  alias <%= base %>.Router.Helpers
   alias Coherence.Config
 
   @seperator {:safe, "&nbsp; | &nbsp;"}
@@ -15,36 +15,35 @@ defmodule <%= base %>.Coherence.ViewHelpers do
     |> concat([])
   end
 
+  defp coherence_path(module, route_name, conn, action) do
+    apply(module, route_name, [conn, action])
+  end
+  defp coherence_path(module, route_name, conn, action, opts) do
+    apply(module, route_name, [conn, action, opts])
+  end
+
   defp concat([], acc), do: Enum.reverse(acc)
   defp concat([h|t], []), do: concat(t, [h])
   defp concat([h|t], acc), do: concat(t, [h, @seperator | acc])
 
   defp recovery_link(conn, user_schema) do
     if user_schema.recoverable? do
-      [link("Forgot Your Password?", to: password_path(conn, :new))]
+      [link("Forgot Your Password?", to: coherence_path(Helpers, :password_path, conn, :new))]
     else
       []
     end
   end
 
-  if Config.user_schema.invitable? do
-    def invitation_link(conn) do
-      link "Invite Someone", to: invitation_path(conn, :new)
-    end
-  else
-    def invitation_link(_conn), do: ""
+  def invitation_link(conn) do
+    link "Invite Someone", to: coherence_path(Helpers, :invitation_path, conn, :new)
   end
 
-  if Config.user_schema.unlockable_with_token? do
-    defp unlock_link(conn, _user_schema) do
-      if conn.assigns[:locked] do
-        [link("Send an unlock email", to: unlock_path(conn, :new))]
-      else
-        []
-      end
+  def unlock_link(conn, _user_schema) do
+    if conn.assigns[:locked] do
+      [link("Send an unlock email", to: coherence_path(Helpers, :unlock_path, conn, :new))]
+    else
+      []
     end
-  else
-    defp unlock_link(_conn, _user_schema), do: []
   end
 
   def required_label(f, name, opts \\ []) do
