@@ -123,6 +123,9 @@ defmodule Mix.Tasks.Coherence.Install do
 
   @switch_names Enum.map(@switches, &(elem(&1, 0)))
 
+  @new_user_migration_fields ["add :name, :string", "add :email, :string"]
+  @new_user_constraints      ["create unique_index(:users, [:email])"]
+
   def run(args) do
     {opts, _parsed, _} = OptionParser.parse(args, switches: @switches)
 
@@ -248,14 +251,58 @@ config :coherence, #{base}.Coherence.Mailer,
     |> hd
   end
 
+  defp create_or_alter_model(%{user_schema: user_schema} = config, name) do
+    table_name = config[:user_table_name]
+    user_schema = Module.concat user_schema, nil
+    if  Code.ensure_compiled?(user_schema) or model_exists?(user_schema) do
+      {:alter, "add_coherence_to_#{name}", [], []}
+    else
+      fields = Enum.map @new_user_migration_fields, &(String.replace(&1, ":users", ":#{table_name}"))
+      constraints = Enum.map @new_user_constraints, &(String.replace(&1, ":users", ":#{table_name}"))
+      {:create, "create_coherence_#{name}", fields, constraints}
+    end
+  end
+
+  defp model_exists?(model) when is_binary(model) do
+    model_exists? Module.concat(model, nil)
+  end
+  defp model_exists?(model) do
+    path = "web/models/"
+    case File.ls path do
+      {:ok, files} ->
+        Enum.any? files, fn fname ->
+          case File.read path <> fname do
+            {:ok, contents} ->
+              IO.puts String.slice(contents, 0, 120)
+              contents =~ ~r/defmodule\s*#{inspect model}/
+            {:error, _} -> false
+          end
+        end
+      {:error, _} -> false
+    end
+  end
+  # defp test_model(model) when is_binary(model) do
+  #   test_model Module.concat(model, nil)
+  # end
+  # defp test_model(model) do
+  #   IO.puts "test_model: #{inspect model}"
+  #   try do
+  #     model.__schema__
+  #     true
+  #   rescue
+  #     _ -> false
+  #   end
+  # end
+
   defp gen_migration(%{migrations: true, boilerplate: true} = config) do
     table_name = config[:user_table_name]
     name = config[:user_schema]
     |> module_to_string
     |> String.downcase
-    do_gen_migration config, "add_coherence_to_#{name}", fn repo, _path, file, name ->
+    {verb, migration_name, initial_fields, constraints} = create_or_alter_model(config, name)
+    do_gen_migration config, migration_name, fn repo, _path, file, name ->
       adds =
-        Enum.reduce(config[:opts], [], fn opt, acc ->
+        Enum.reduce(config[:opts], initial_fields, fn opt, acc ->
           case Coherence.Schema.schema_fields[opt] do
             nil -> acc
             list -> acc ++ list
@@ -264,10 +311,16 @@ config :coherence, #{base}.Coherence.Mailer,
         |> Enum.map(&("      " <> &1))
         |> Enum.join("\n")
 
+      constraints =
+        constraints
+        |> Enum.map(&("    " <> &1))
+        |> Enum.join("\n")
+
       change = """
-          alter table(:#{table_name}) do
+          #{verb} table(:#{table_name}) do
       #{adds}
           end
+      #{constraints}
       """
       assigns = [mod: Module.concat([repo, Migrations, camelize(name)]),
                        change: change]
@@ -570,11 +623,12 @@ config :coherence, #{base}.Coherence.Mailer,
     # IO.puts "binding: #{inspect binding}"
 
     base = opts[:module] || binding[:base]
+    opts = Keyword.put(opts, :base, base)
     repo = (opts[:repo] || "#{base}.Repo")
 
     binding = Keyword.put binding ,:base, base
 
-    {user_schema, user_table_name} = parse_model(opts[:model], base)
+    {user_schema, user_table_name} = parse_model(opts[:model], base, opts)
 
     bin_opts
     |> Enum.map(&({&1, true}))
@@ -596,10 +650,10 @@ config :coherence, #{base}.Coherence.Mailer,
     |> do_default_config(opts)
   end
 
-  defp parse_model(model, _base) when is_binary(model) do
+  defp parse_model(model, _base, opts) when is_binary(model) do
     case String.split(model, " ", trim: true) do
       [model, table] ->
-        {model, String.to_atom(table)}
+        {prefix_model(model, opts), String.to_atom(table)}
       [_] ->
         Mix.raise """
         The mix coherence.install --model option expects both singular and plural names. For example:
@@ -608,8 +662,17 @@ config :coherence, #{base}.Coherence.Mailer,
         """
     end
   end
-  defp parse_model(_, base) do
+  defp parse_model(_, base, _) do
     {"#{base}.User", :users}
+  end
+
+  defp prefix_model(model, opts) do
+    module = opts[:module] || opts[:base]
+    if String.starts_with? model, module do
+      model
+    else
+      module <> "." <>  model
+    end
   end
 
   defp parse_options(opts) do

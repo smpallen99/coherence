@@ -7,3 +7,4 @@ config :coherence, Coherence.Mailer,
   api_key: ""
 
 import_config "#{Mix.env}.exs"
+

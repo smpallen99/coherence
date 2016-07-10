@@ -140,7 +140,7 @@ defmodule Mix.Tasks.Coherence.InstallTest do
     test "for_default_model" do
       in_tmp "for_default_model", fn ->
         path = "migrations"
-        (~w(--repo=TestCoherence.Repo  --authenticatable --recoverable --log-only --no-views --no-templates --migration-path=#{path}))
+        (~w(--repo=TestCoherence.Repo  --authenticatable --recoverable --log-only --no-views --no-templates --module=TestCoherence --migration-path=#{path}))
         |> Mix.Tasks.Coherence.Install.run
 
         assert [migration] = Path.wildcard("migrations/*_add_coherence_to_user.exs")
@@ -154,10 +154,30 @@ defmodule Mix.Tasks.Coherence.InstallTest do
         end
       end
     end
+    test "for_new_model" do
+      in_tmp "for_new_model", fn ->
+        path = "migrations"
+        (~w(--repo=TestCoherence.Repo  --authenticatable --recoverable --log-only --no-views --no-templates --module=TestCoherence --migration-path=#{path}) ++ ["--model=Client clients"])
+        |> Mix.Tasks.Coherence.Install.run
+
+        assert [migration] = Path.wildcard("migrations/*create_coherence_client.exs")
+
+        assert_file migration, fn file ->
+          assert file =~ "defmodule TestCoherence.Repo.Migrations.CreateCoherenceClient do"
+          assert file =~ "create table(:clients) do"
+          assert file =~ "add :name, :string"
+          assert file =~ "add :email, :string"
+          assert file =~ "add :hashed_password, :string"
+          assert file =~ "add :reset_password_token, :string"
+          assert file =~ "add :reset_password_sent_at, :datetime"
+          assert file =~ "create unique_index(:clients, [:email])"
+        end
+      end
+    end
     test "for_custom_model" do
       in_tmp "for_custom_model", fn ->
         path = "migrations"
-        (~w(--repo=TestCoherence.Repo  --full --log-only --no-views --no-templates --migration-path=#{path}) ++ ["--model=Account accounts"])
+        (~w(--repo=TestCoherence.Repo  --full --log-only --no-views --no-templates --module=TestCoherence --migration-path=#{path}) ++ ["--model=Account accounts"])
         |> Mix.Tasks.Coherence.Install.run
 
         assert [migration] = Path.wildcard("migrations/*_add_coherence_to_account.exs")
