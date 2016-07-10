@@ -171,6 +171,7 @@ defmodule Mix.Tasks.Coherence.InstallTest do
           assert file =~ "add :reset_password_token, :string"
           assert file =~ "add :reset_password_sent_at, :datetime"
           assert file =~ "create unique_index(:clients, [:email])"
+          assert file =~ "timestamps()"
         end
       end
     end
@@ -262,6 +263,61 @@ defmodule Mix.Tasks.Coherence.InstallTest do
           assert file =~ "create index(:rememberables, [:series_hash])"
           assert file =~ "create index(:rememberables, [:token_hash])"
           assert file =~ "create unique_index(:rememberables, [:user_id, :series_hash, :token_hash])"
+        end
+      end
+    end
+  end
+  describe "model gen" do
+    test "does not generate for existing model" do
+      in_tmp "does_not_generate_for_existing_model", fn ->
+        (~w(--repo=TestCoherence.Repo  --authenticatable --log-only --no-views --no-templates --module=TestCoherence --no-migrations))
+        |> Mix.Tasks.Coherence.Install.run
+
+        refute_file "web/models/user.ex"
+      end
+    end
+
+    test "for default model" do
+      in_tmp "for_default_model", fn ->
+        (~w(--repo=TestCoherence.Repo  --authenticatable --log-only --no-views --no-templates --no-migrations))
+        |> Mix.Tasks.Coherence.Install.run
+
+        assert_file "web/models/coherence/user.ex", fn file ->
+          file =~ "defmodule Coherence.User do"
+          file =~ "use Coherence.Web, :model"
+          file =~ "use Coherence.Schema"
+          file =~ ~s(schema "users" do)
+          file =~ "field :name, :string"
+          file =~ "field :email, :string"
+          file =~ "coherence_schema"
+          file =~ "timestamps"
+          file =~ "cast(params, [:name, :email] ++ coherence_fields)"
+          file =~ "validate_required([:name, :email])"
+          file =~ "unique_constraint(:email)"
+          file =~ "validate_coherence(params)"
+        end
+      end
+
+    end
+
+    test "for custom model" do
+      in_tmp "for_custom_model", fn ->
+        (~w(--repo=TestCoherence.Repo  --authenticatable --log-only --no-views --no-templates --module=TestCoherence --no-migrations) ++ ["--model=Client clients"])
+        |> Mix.Tasks.Coherence.Install.run
+
+        assert_file "web/models/coherence/client.ex", fn file ->
+          file =~ "defmodule TestCoherence.Client do"
+          file =~ "use TestCoherence.Web, :model"
+          file =~ "use Coherence.Schema"
+          file =~ ~s(schema "clients" do)
+          file =~ "field :name, :string"
+          file =~ "field :email, :string"
+          file =~ "coherence_schema"
+          file =~ "timestamps"
+          file =~ "cast(params, [:name, :email] ++ coherence_fields)"
+          file =~ "validate_required([:name, :email])"
+          file =~ "unique_constraint(:email)"
+          file =~ "validate_coherence(params)"
         end
       end
     end

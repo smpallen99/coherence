@@ -18,6 +18,7 @@ defmodule Mix.Tasks.Coherence.Install do
   * Generate appropriate view files.
   * Generate appropriate template files.
   * Generate a `web/coherence_web.ex` file.
+  * Generate a `web/models/user.ex` file if one does not already exist.
 
   ## Examples
 
@@ -90,6 +91,7 @@ defmodule Mix.Tasks.Coherence.Install do
   * `--no-migrations` -- Don't create the migration files.
   * `--no-templates` -- Don't create the `web/templates/coherence` files.
   * `--no-boilerplate` -- Don't create any of the boilerplate files.
+  * `--no-models` -- Don't generate the model file.
 
   """
 
@@ -104,7 +106,7 @@ defmodule Mix.Tasks.Coherence.Install do
   @full_invitable    @all_options -- ~w(confirmable rememberable)
 
   # the options that default to true, and can be disabled with --no-option
-  @default_booleans  ~w(config web views migrations templates boilerplate)
+  @default_booleans  ~w(config web views migrations templates models emails boilerplate)
 
   # all boolean_options
   @boolean_options   @default_booleans ++ ~w(default full full_confirmable full_invitable) ++ @all_options
@@ -147,7 +149,8 @@ defmodule Mix.Tasks.Coherence.Install do
       rm_dir! "web/views/coherence"
       rm_dir! "web/controllers/coherence"
       rm_dir! "web/templates/coherence"
-      rm_dir! "web/emails"
+      rm_dir! "web/emails/coherence"
+      rm_dir! "web/models/coherence"
       rm! "web/coherence_web.ex"
       Mix.shell.info """
 
@@ -164,8 +167,10 @@ defmodule Mix.Tasks.Coherence.Install do
   defp do_run(%{clean: false} = config) do
     # IO.puts "config: #{inspect config}"
     config
+    |> check_for_model
     |> gen_coherence_config
     |> gen_migration
+    |> gen_model
     |> gen_invitable_migration
     |> gen_rememberable_migration
     |> gen_coherence_web
@@ -196,7 +201,7 @@ config :coherence,
     |> swoosh_config(config)
     |> add_end_marker
     |> write_config(config)
-    |> log_config(config)
+    |> log_config
   end
 
   defp swoosh_config(string, %{base: base, use_email?: true}) do
@@ -212,32 +217,43 @@ config :coherence, #{base}.Coherence.Mailer,
     string <> "# #{@config_marker_end}\n"
   end
 
-  defp log_config(string, config) do
+  defp write_config(string, %{config: true} = config) do
+    log_config? = if File.exists? @config_file do
+      source = File.read!(@config_file)
+      log_config? = if String.contains? source, @config_marker_start do
+        Mix.shell.yes? "Your config file already contains Coherence configuration. Are you sure you add another?"
+      else
+        true
+      end
+      |> if do
+        File.write!(@config_file, source <> "\n" <> string)
+        Mix.shell.info "Your config/config.exs file was updated."
+        false
+      else
+        Mix.shell.info "Configuration was not added!"
+        true
+      end
+    else
+      Mix.shell.error "Could not find #{@config_file}. Configuration was not added!"
+      true
+    end
+    Enum.into [config_string: string, log_config?: log_config?], config
+  end
+  defp write_config(string, config), do: Enum.into([log_config?: true, config_string: string], config)
+
+  defp log_config(%{log_config: false} = config) do
+    save_instructions config, ""
+  end
+  defp log_config(%{config_string: string} = config) do
+    verb = if config[:log_config] == :appended, do: "has been", else: "should be"
     instructions = """
 
-    The following has been added to your #{@config_file} file.
+    The following #{verb} added to your #{@config_file} file.
 
     """ <> string
 
     save_instructions config, instructions
   end
-
-  defp write_config(string, %{config: true}) do
-    if File.exists? @config_file do
-      source = File.read!(@config_file)
-      continue? = if String.contains? source, @config_marker_start do
-        Mix.shell.yes? "Your config file already contains Coherence configuration. Are you sure you add another?"
-      else
-        true
-      end
-      if continue?, do: File.write!(@config_file, source <> "\n" <> string),
-        else: Mix.shell.info "Configuration was not added!"
-    else
-      Mix.shell.error "Could not find #{@config_file}. Configuration was not added!"
-    end
-    string
-  end
-  defp write_config(string, _config), do: string
 
   defp module_to_string(module) when is_atom(module) do
     Module.split(module)
@@ -251,10 +267,34 @@ config :coherence, #{base}.Coherence.Mailer,
     |> hd
   end
 
-  defp create_or_alter_model(%{user_schema: user_schema} = config, name) do
-    table_name = config[:user_table_name]
+  ################
+  # Models
+
+  defp check_for_model(%{user_schema: user_schema} = config) do
     user_schema = Module.concat user_schema, nil
-    if  Code.ensure_compiled?(user_schema) or model_exists?(user_schema) do
+    Map.put(config, :model_found?, Code.ensure_compiled?(user_schema) or model_exists?(user_schema, "web/models"))
+  end
+  defp check_for_model(config), do: config
+
+  defp gen_model(%{user_schema: user_schema, boilerplate: true, models: true, model_found?: false} = config) do
+    name = module_to_string(user_schema)
+    |> String.downcase
+    binding = binding ++ [base: config[:base], user_table_name: config[:user_table_name]]
+    Mix.Phoenix.copy_from paths(),
+      "priv/templates/coherence.install/models/coherence", "", binding, [
+        {:eex, "user.ex", "web/models/coherence/#{name}.ex"}
+      ]
+    config
+  end
+  defp gen_model(config), do: config
+
+  ################
+  # Migrations
+
+  defp create_or_alter_model(config, name) do
+    table_name = config[:user_table_name]
+    # user_schema = Module.concat user_schema, nil
+    if  config[:model_found?] do
       {:alter, "add_coherence_to_#{name}", [], []}
     else
       fields = Enum.map @new_user_migration_fields, &(String.replace(&1, ":users", ":#{table_name}"))
@@ -263,11 +303,10 @@ config :coherence, #{base}.Coherence.Mailer,
     end
   end
 
-  defp model_exists?(model) when is_binary(model) do
-    model_exists? Module.concat(model, nil)
+  defp model_exists?(model, path) when is_binary(model) do
+    model_exists? Module.concat(model, nil), path
   end
-  defp model_exists?(model) do
-    path = "web/models/"
+  defp model_exists?(model, path) do
     case File.ls path do
       {:ok, files} ->
         Enum.any? files, fn fname ->
@@ -281,18 +320,9 @@ config :coherence, #{base}.Coherence.Mailer,
       {:error, _} -> false
     end
   end
-  # defp test_model(model) when is_binary(model) do
-  #   test_model Module.concat(model, nil)
-  # end
-  # defp test_model(model) do
-  #   IO.puts "test_model: #{inspect model}"
-  #   try do
-  #     model.__schema__
-  #     true
-  #   rescue
-  #     _ -> false
-  #   end
-  # end
+
+  defp add_timestamp(acc, %{model_found?: false}), do: acc ++ ["", "timestamps()"]
+  defp add_timestamp(acc, _), do: acc
 
   defp gen_migration(%{migrations: true, boilerplate: true} = config) do
     table_name = config[:user_table_name]
@@ -308,6 +338,7 @@ config :coherence, #{base}.Coherence.Mailer,
             list -> acc ++ list
           end
         end)
+        |> add_timestamp(config)
         |> Enum.map(&("      " <> &1))
         |> Enum.join("\n")
 
@@ -388,6 +419,9 @@ config :coherence, #{base}.Coherence.Mailer,
     Map.put(config, :timestamp, timestamp + 1)
   end
 
+  ################
+  # Web
+
   defp gen_coherence_web(%{web: true, boilerplate: true, binding: binding} = config) do
     Mix.Phoenix.copy_from paths(),
       "priv/templates/coherence.install", "", binding, [
@@ -396,6 +430,9 @@ config :coherence, #{base}.Coherence.Mailer,
     config
   end
   defp gen_coherence_web(config), do: config
+
+  ################
+  # Views
 
   @view_files [
     all: "coherence_view.ex",
@@ -435,6 +472,9 @@ config :coherence, #{base}.Coherence.Mailer,
     if opt in opts, do: true, else: false
   end
 
+  ################
+  # Templates
+
   def gen_coherence_templates(%{templates: true, boilerplate: true, binding: binding} = config) do
     for {name, {opt, files}} <- @template_files do
       if validate_option(config, opt), do: copy_templates(binding, name, files)
@@ -453,15 +493,21 @@ config :coherence, #{base}.Coherence.Mailer,
       "priv/templates/coherence.install/templates/coherence/#{name}", "", binding, files
   end
 
+  ################
+  # Mailer
+
   defp gen_coherence_mailer(%{binding: binding, use_email?: true, boilerplate: true} = config) do
     Mix.Phoenix.copy_from paths(),
-      "priv/templates/coherence.install/emails", "", binding, [
-        {:eex, "coherence_mailer.ex", "web/emails/coherence_mailer.ex"},
-        {:eex, "user_email.ex", "web/emails/user_email.ex"},
+      "priv/templates/coherence.install/emails/coherence", "", binding, [
+        {:eex, "coherence_mailer.ex", "web/emails/coherence/coherence_mailer.ex"},
+        {:eex, "user_email.ex", "web/emails/coherence/user_email.ex"},
       ]
     config
   end
   defp gen_coherence_mailer(config), do: config
+
+  ################
+  # Controllers
 
   @controller_files [
     confirmable: "confirmation_controller.ex",
@@ -481,7 +527,24 @@ config :coherence, #{base}.Coherence.Mailer,
   end
   defp gen_coherence_controllers(config), do: config
 
-  defp schema_instructions(%{base: base}), do: """
+  ################
+  # Instructions
+
+  defp seeds_instructions(%{base: base, repo: repo, user_schema: user_schema, authenticatable: true}) do
+    user_schema = to_string user_schema
+    repo = to_string repo
+    """
+    You might want to add the following to your priv/repo/seeds.exs file.
+
+    #{base}.#{repo}.delete_all #{user_schema}
+
+    #{user_schema}.changeset(%#{user_schema}{}, %{name: "Test User", email: "testuser@example.com", password: "secret", password_confirmation: "secret"})
+    |> #{base}.#{repo}.insert!
+    """
+  end
+  defp seeds_instructions(_config), do: ""
+
+  defp schema_instructions(%{base: base, found_model?: false}), do: """
     Add the following items to your User model (Phoenix v1.2).
 
     defmodule #{base}.User do
@@ -505,6 +568,8 @@ config :coherence, #{base}.Coherence.Mailer,
       end
     end
     """
+  defp schema_instructions(_), do: ""
+
   defp router_instructions(%{base: base, controllers: controllers}) do
     namespace = if controllers, do: ", #{base}", else: ""
     no_base = if controllers, do: "", else: "#{base}."
@@ -550,16 +615,19 @@ config :coherence, #{base}.Coherence.Mailer,
     """
   end
 
-  defp migrate_instructions(%{migrations: true, boilerplate: true}), do: """
-    Don't forget to run the new migrations with:
-        $ mix ecto.migrate
+  defp migrate_instructions(%{migrations: true, boilerplate: true}) do
     """
+    Don't forget to run the new migrations and seeds with:
+        $ mix ecto.setup
+    """
+  end
   defp migrate_instructions(_), do: ""
 
   defp print_instructions(%{instructions: instructions} = config) do
     Mix.shell.info instructions
     Mix.shell.info router_instructions(config)
     Mix.shell.info schema_instructions(config)
+    Mix.shell.info seeds_instructions(config)
     Mix.shell.info migrate_instructions(config)
 
     config
@@ -578,6 +646,9 @@ config :coherence, #{base}.Coherence.Mailer,
     end
   end
   """
+
+  ################
+  # Utilities
 
   defp pad(i) when i < 10, do: << ?0, ?0 + i >>
   defp pad(i), do: to_string(i)
@@ -610,6 +681,9 @@ config :coherence, #{base}.Coherence.Mailer,
       File.rm! file
     end
   end
+
+  ################
+  # Installer Configuration
 
   defp do_config(opts, []) do
     do_config(opts, list_to_atoms(@default_options))

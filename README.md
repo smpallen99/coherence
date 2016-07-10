@@ -54,7 +54,20 @@ Run the installer
 $ mix coherence.install --full-invitable
 ```
 
-This will add the coherence configuration to the end of your `config/config.exs` file. Please review this file as there are a couple items you will need to customize like email address and mail api_key.
+This will:
+
+* add the coherence configuration to the end of your `config/config.exs` file.
+* add a new User model if one does not already exist
+* add migration files
+  * timestamp_add_coherence_to_user.exs if the User model already exists
+  * timestamp_create_coherence_user.exs if the User model does not exist
+  * timestamp_create_coherence_invitable.exs
+* add view files web/view/coherence/
+* add template files to web/templates/coherence
+* add email files to web/emails/coherence
+* add web/coherence_web.ex file
+
+You should review your `config/config.exs` as there are a couple items you will need to customize like email address and mail api_key.
 
 See [Installer](#installer) for more install options.
 
@@ -88,17 +101,25 @@ defmodule MyProject.Router do
   scope "/" do
     pipe_through :public
     coherence_routes :public     # Add this
+
+    # add public resource below
+    get "/", MyProject.PageController, :index
   end
 
   scope "/" do
     pipe_through :browser
     coherence_routes :private    # Add this
+
+    # add protected resources below
+    resources "/privates", MyProject.PrivateController
   end
   # ...
 end
 ```
+**Important**: Note the name spacing above. Unless you generate coherence controllers, ensure that the scopes, `scope "/" do`, do not include your projects' scope here. If so, the coherence routes will not work!
 
-Update your user model like:
+
+If the installer created a user model (one did not already exist), there is nothing you need to do with that generated file. Otherwise, update your existing model like this:
 
 ```elixir
 # web/models/user.ex

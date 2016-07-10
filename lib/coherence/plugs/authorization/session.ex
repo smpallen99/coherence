@@ -116,6 +116,7 @@ defmodule Coherence.Authentication.Session do
       true  -> &Coherence.SessionController.login_callback/1
       other -> other
     end
+    rememberable? = if Config.has_option(:rememberable?), do: Config.user_schema.remeberable?, else: false
     %{
       login: login,
       error: Keyword.get(opts, :error, "HTTP Authentication Required"),
@@ -124,7 +125,7 @@ defmodule Coherence.Authentication.Session do
       store: Keyword.get(opts, :store, Coherence.CredentialStore.Session),
       assigns_key: Keyword.get(opts, :assigns_key, :current_user),
       login_key: Keyword.get(opts, :login_cookie, Config.login_cookie),
-      rememberable: Keyword.get(opts, :rememberable, Config.user_schema.rememberable?),
+      rememberable: Keyword.get(opts, :rememberable, rememberable?),
       cookie_expire: Keyword.get(opts, :login_cookie_expire_hours, Config.rememberable_cookie_expire_hours) * 60 * 60
     }
   end
