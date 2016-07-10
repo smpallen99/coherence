@@ -25,7 +25,9 @@ defmodule Coherence do
 
   The following columns are added the `<timestamp>_add_coherence_to_user.exs` migration:
 
-  * :encrypted_password, :string - the encrypted password
+  * :hashed_password, :string - the encrypted password
+  ** This name can be changed with the `hashed_password_field config item. Changing this
+  requires recompiling Coherence.
 
   ### Invitable
 

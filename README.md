@@ -135,7 +135,7 @@ the appropriate templates and view.
 
 The following columns are added the `<timestamp>_add_coherence_to_user.exs` migration:
 
-* :encrypted_password, :string - the encrypted password
+* :hashed_password, :string - the encrypted password
 
 ### Invitable
 

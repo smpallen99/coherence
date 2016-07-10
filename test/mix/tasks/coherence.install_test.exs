@@ -148,7 +148,7 @@ defmodule Mix.Tasks.Coherence.InstallTest do
         assert_file migration, fn file ->
           assert file =~ "defmodule TestCoherence.Repo.Migrations.AddCoherenceToUser do"
           assert file =~ "alter table(:users) do"
-          assert file =~ "add :encrypted_password, :string"
+          assert file =~ "add :hashed_password, :string"
           assert file =~ "add :reset_password_token, :string"
           assert file =~ "add :reset_password_sent_at, :datetime"
         end
@@ -165,7 +165,7 @@ defmodule Mix.Tasks.Coherence.InstallTest do
         assert_file migration, fn file ->
           assert file =~ "defmodule TestCoherence.Repo.Migrations.AddCoherenceToAccount do"
           assert file =~ "alter table(:accounts) do"
-          assert file =~ "add :encrypted_password, :string"
+          assert file =~ "add :hashed_password, :string"
           assert file =~ "add :reset_password_token, :string"
           assert file =~ "add :reset_password_sent_at, :datetime"
           assert file =~ "add :failed_attempts, :integer, default: 0"

@@ -2,7 +2,8 @@ defmodule Coherence.SessionController do
   use Coherence.Web, :controller
   use Timex
   require Logger
-  alias Coherence.{Config, Rememberable}
+  alias Coherence.{Rememberable}
+  use Coherence.Config
   import Ecto.Query
   import Rememberable, only: [hash: 1, gen_cookie: 3]
 
@@ -34,7 +35,7 @@ defmodule Coherence.SessionController do
     password = params["session"]["password"]
     user = Config.repo.one(from u in user_schema, where: u.email == ^email)
     lockable? = user_schema.lockable?
-    if user != nil and user_schema.checkpw(password, user.encrypted_password) do
+    if user != nil and user_schema.checkpw(password, Map.get(user, Config.hashed_password)) do
       if confirmed? user do
         url = case get_session(conn, "user_return_to") do
           nil -> "/"

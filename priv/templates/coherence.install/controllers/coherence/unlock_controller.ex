@@ -28,7 +28,7 @@ defmodule <%= base %>.Coherence.UnlockController do
     user = where(user_schema, [u], u.email == ^email)
     |> Config.repo.one
 
-    if user != nil and user_schema.checkpw(password, user.encrypted_password) do
+    if user != nil and user_schema.checkpw(password, Map.get(user, Config.hashed_password)) do
       user_schema.changeset(user, %{unlock_token: token})
       |> Config.repo.update
       |> case do

@@ -2,6 +2,7 @@ defmodule Coherence.UnlockController do
   use Coherence.Web, :controller
   require Logger
   use Timex
+  use Coherence.Config
 
   plug Coherence.ValidateOption, :unlockable_with_token
   plug :layout_view
@@ -28,7 +29,7 @@ defmodule Coherence.UnlockController do
     user = where(user_schema, [u], u.email == ^email)
     |> Config.repo.one
 
-    if user != nil and user_schema.checkpw(password, user.encrypted_password) do
+    if user != nil and user_schema.checkpw(password, Map.get(user, Config.hashed_password)) do
       user_schema.changeset(user, %{unlock_token: token})
       |> Config.repo.update
       |> case do
