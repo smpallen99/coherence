@@ -1,4 +1,4 @@
-defmodule <%= base %>.Coherence.ViewHelpers do
+defmodule Coherence.ViewHelpers do
   use Phoenix.HTML
   alias Coherence.Router.Helpers
   alias Coherence.Config

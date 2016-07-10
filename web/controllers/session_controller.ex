@@ -19,9 +19,6 @@ defmodule Coherence.SessionController do
   end
 
   def new(conn, _params) do
-    # if cookie = get_login_cookie(conn) do
-    #   Logger.debug "Found cookie #{Rememberable.log_cookie cookie}"
-    # end
     conn
     |> put_layout({Coherence.LayoutView, "app.html"})
     |> put_view(Coherence.SessionView)

@@ -41,6 +41,7 @@ defmodule Coherence.Mixfile do
       {:phoenix_swoosh, "~> 0.1.3"},
       {:phoenix_timex, "~> 1.0.0"},
       {:timex_ecto, "~> 1.1"},
+      {:floki, "~> 0.8", only: :test},
       {:ex_doc, "== 0.11.5", only: :dev},
       {:earmark, "== 0.2.1", only: :dev, override: true},
       {:postgrex, ">= 0.0.0", only: :test},
