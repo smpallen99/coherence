@@ -2,8 +2,8 @@
 
 [![Build Status](https://travis-ci.org/smpallen99/coherence.png?branch=master)](https://travis-ci.org/smpallen99/coherence) [![Hex Version][hex-img]][hex] [![License][license-img]][license]
 
-[hex-img]: https://img.shields.io/hexpm/v/ex_admin.svg
-[hex]: https://hex.pm/packages/ex_admin
+[hex-img]: https://img.shields.io/hexpm/v/coherence.svg
+[hex]: https://hex.pm/packages/coherence
 [license-img]: http://img.shields.io/badge/license-MIT-brightgreen.svg
 [license]: http://opensource.org/licenses/MIT
 
@@ -18,6 +18,7 @@ Coherence is a full featured, configurable authentication system for Phoenix, wi
 * [Database Authenticatable](#authenticatable): handles hashing and storing an encrypted password in the database.
 * [Invitable](#invitable): sends invites to new users with a sign-up link, allowing the user to create their account with their own password.
 * [Registerable](#registerable): allows anonymous users to register a users email address and password.
+* [Confirmable](#confirmable): new accounts require clicking a link in a confirmation email.
 * [Recoverable](#recoverable): provides a link to generate a password reset link with token expiry.
 * [Trackable](#trackable): saves login statics like login counts, timestamps, and IP address for each user.
 * [Lockable](#lockable): locks an account when a specified number of failed sign-in attempts has been exceeded.
@@ -98,22 +99,31 @@ defmodule MyProject.Router do
     plug Coherence.Authentication.Session
   end
 
+  # Add this block
   scope "/" do
     pipe_through :public
-    coherence_routes :public     # Add this
-
-    # add public resource below
-    get "/", MyProject.PageController, :index
+    coherence_routes :public
   end
 
+  # Add this block
   scope "/" do
     pipe_through :browser
-    coherence_routes :private    # Add this
+    coherence_routes :private
+  end
+
+  scope "/", MyProject do
+    pipe_through :public
+
+    get "/", PageController, :index
+    # add public resource below
+  end
+
+  scope "/", MyProject do
+    pipe_through :browser
 
     # add protected resources below
     resources "/privates", MyProject.PrivateController
   end
-  # ...
 end
 ```
 **Important**: Note the name spacing above. Unless you generate coherence controllers, ensure that the scopes, `scope "/" do`, do not include your projects' scope here. If so, the coherence routes will not work!
@@ -188,6 +198,14 @@ Adds a `Register New Account` to the log-in page.
 
 It is recommended that the :confirmable option is used with :registerable to
 ensure a valid email address is captured.
+
+### Confirmable
+
+Requires a new account be conformed. During registration, a conformation token is generated and sent to the registering email. This link must be clicked before the user can sign-in.
+
+Provides `edit` action for the `/confirmations` route.
+
+The confirmation token expiry default of 5 days can be changed with the `:confirmation_token_expire_days` config entry.
 
 ### Recoverable
 

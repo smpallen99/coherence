@@ -567,19 +567,27 @@ config :coherence, #{base}.Coherence.Mailer,
         plug Coherence.Authentication.Session               # Add this
       end
 
+      # Add this block
       scope "/"#{namespace} do
         pipe_through :public
-        coherence_routes :public          # Add this
-        get "/", #{no_base}PageController, :index
-        # Add your remaining unprotected routes here
+        coherence_routes :public
       end
 
+      # Add this block
       scope "/"#{namespace} do
         pipe_through :browser
-        coherence_routes :private         # Add this
+        coherence_routes :private
+      end
+
+      scope "/", #{base} do
+        pipe_through :public
+        get "/", PageController, :index
+      end
+
+      scope "/", #{base} do
+        pipe_through :browser
         # Add your protected routes here
       end
-      # ...
     end
     """
   end

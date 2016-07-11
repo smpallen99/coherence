@@ -56,7 +56,6 @@ defmodule Coherence.Router do
       scope "/" do
         pipe_through :public
         coherence_routes :public
-        get "/", Admin1.PageController, :index
       end
 
       # Routes that require authentication
