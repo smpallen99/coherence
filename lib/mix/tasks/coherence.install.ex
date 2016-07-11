@@ -285,9 +285,8 @@ config :coherence, #{base}.Coherence.Mailer,
     case File.ls path do
       {:ok, files} ->
         Enum.any? files, fn fname ->
-          case File.read path <> fname do
+          case File.read Path.join(path, fname) do
             {:ok, contents} ->
-              IO.puts String.slice(contents, 0, 120)
               contents =~ ~r/defmodule\s*#{inspect model}/
             {:error, _} -> false
           end
