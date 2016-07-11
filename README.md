@@ -363,6 +363,17 @@ If the controllers are generated, you will need to change your router to use the
 end
 ```
 
+## Contributing
+
+We appreciate any contribution to Coherence. Check our [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) and [CONTRIBUTING.md](CONTRIBUTING.md) guides for more information. We usually keep a list of features and bugs [in the issue tracker][1].
+
+## References
+
+* Detailed Example [Coherence Demo](https://github.com/smpallen99/coherence_demo)
+* [Docs](https://hexdocs.pm/coherence/)
+
+  [1]: https://github.com/smpallen99/coherence/issues
+
 ## License
 
 `coherence` is Copyright (c) 2016 E-MetroTel
