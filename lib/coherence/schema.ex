@@ -161,6 +161,15 @@ defmodule Coherence.Schema do
           end
         end
 
+        @doc """
+        Lock a use account.
+
+        Sets the `:locked_at` field on the user model to the current date and time unless
+        provided a value for the optional parameter.
+
+        You can provide a date in the future to override the configured lock expiry time. You
+        can set this data far in the future to do a pseudo permanent lock.
+        """
         def lock!(user, locked_at \\ Ecto.DateTime.utc) do
           changeset = Config.user_schema.changeset(user, %{locked_at: locked_at})
           unless locked?(user) do

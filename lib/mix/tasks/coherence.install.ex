@@ -541,7 +541,6 @@ config :coherence, #{base}.Coherence.Mailer,
 
   defp router_instructions(%{base: base, controllers: controllers}) do
     namespace = if controllers, do: ", #{base}", else: ""
-    no_base = if controllers, do: "", else: "#{base}."
     """
     Add the following to your router.ex file.
 

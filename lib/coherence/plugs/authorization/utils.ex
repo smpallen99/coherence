@@ -1,4 +1,5 @@
 defmodule Coherence.Authentication.Utils do
+  @moduledoc false
   import Plug.Conn
   alias Coherence.Config
 
