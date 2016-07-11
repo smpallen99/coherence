@@ -72,6 +72,8 @@ defmodule CoherenceTest.Plug.Session do
     :ok
   end
 
+  @user_params %{name: "test", email: "test@test.com", password: "secret", password_confirmation: "secret"}
+
   test "request without credentials" do
     conn = call(TestPlug, [])
     assert conn.halted
@@ -144,7 +146,7 @@ defmodule CoherenceTest.Plug.Session do
       Application.put_env :coherence, :user_schema, user_schema
     end
 
-    {:ok, user} = User.changeset(%User{}, %{name: "test", email: "test@test.com"})
+    {:ok, user} = User.changeset(%User{}, @user_params)
     |> TestCoherence.Repo.insert
     {changeset, series, token} = Rememberable.create_login(user)
     cookie = "#{user.id} #{series} #{token}"

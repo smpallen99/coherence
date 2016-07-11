@@ -195,9 +195,14 @@ defmodule Coherence.Schema do
         end
 
         def validate_password(changeset, params) do
-          changeset
-          |> validate_confirmation(:password)
-          |> set_password(params)
+          if is_nil(changeset.data.hashed_password) and is_nil(changeset.changes[:password]) do
+            changeset
+            |> add_error(:password, "can't be blank")
+          else
+            changeset
+            |> validate_confirmation(:password)
+            |> set_password(params)
+          end
         end
 
         defp set_password(changeset, _params) do

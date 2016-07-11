@@ -499,16 +499,16 @@ config :coherence, #{base}.Coherence.Mailer,
   ################
   # Instructions
 
-  defp seeds_instructions(%{base: base, repo: repo, user_schema: user_schema, authenticatable: true}) do
+  defp seeds_instructions(%{repo: repo, user_schema: user_schema, authenticatable: true}) do
     user_schema = to_string user_schema
     repo = to_string repo
     """
     You might want to add the following to your priv/repo/seeds.exs file.
 
-    #{base}.#{repo}.delete_all #{user_schema}
+    #{repo}.delete_all #{user_schema}
 
     #{user_schema}.changeset(%#{user_schema}{}, %{name: "Test User", email: "testuser@example.com", password: "secret", password_confirmation: "secret"})
-    |> #{base}.#{repo}.insert!
+    |> #{repo}.insert!
     """
   end
   defp seeds_instructions(_config), do: ""

@@ -2,7 +2,6 @@ defmodule CoherenceTest.ViewHelpers do
   use TestCoherence.ConnCase
   import Plug.Conn
   alias Coherence.ViewHelpers
-  import TestCoherence.TestHelpers
   alias TestCoherence.User
 
   setup do

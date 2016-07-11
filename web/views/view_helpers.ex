@@ -1,13 +1,12 @@
 defmodule Coherence.ViewHelpers do
   use Phoenix.HTML
-  alias Coherence.Router.Helpers
   alias Coherence.Config
 
   @seperator {:safe, "&nbsp; | &nbsp;"}
   @helpers Module.concat(Application.get_env(:coherence, :module), Router.Helpers)
 
   def coherence_links(conn, which, opts \\ [])
-  def coherence_links(conn, :new_session, opts) do
+  def coherence_links(conn, :new_session, _opts) do
     user_schema = Coherence.Config.user_schema
     [
       recovery_link(conn, user_schema),

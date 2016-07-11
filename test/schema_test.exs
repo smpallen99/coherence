@@ -7,6 +7,8 @@ defmodule CoherenceTest.Schema do
   end
 
   @email "schema@test.com"
+  @valid_params %{name: "test", email: @email, password: "12345", password_confirmation: "12345"}
+
   test "validates correct password" do
     cs = User.changeset(%User{}, %{name: "test", email: @email, password: "12345", password_confirmation: "12345"})
     assert cs.valid?
@@ -30,6 +32,15 @@ defmodule CoherenceTest.Schema do
     refute User.checkpw(nil, nil)
   end
 
+  test "enforces password" do
+    cs = User.changeset(%User{}, %{name: "test", email: @email})
+    refute cs.valid?
+  end
 
+  test "does not require password on update" do
+    user = struct %User{}, Map.put(@valid_params, :hashed_password, "123")
+    cs = User.changeset(user, %{name: "test123", email: @email})
+    assert cs.valid?
+  end
 
 end

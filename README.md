@@ -1,17 +1,17 @@
 # Coherence
 
-[![Build Status](https://travis-ci.org/smpallen99/coherence.png?branch=master)](https://travis-ci.org/smpallen99/coherence)  [![License][license-img]][license]
+[![Build Status](https://travis-ci.org/smpallen99/coherence.png?branch=master)](https://travis-ci.org/smpallen99/coherence) [![Hex Version][hex-img]][hex] [![License][license-img]][license]
 
+[hex-img]: https://img.shields.io/hexpm/v/ex_admin.svg
+[hex]: https://hex.pm/packages/ex_admin
 [license-img]: http://img.shields.io/badge/license-MIT-brightgreen.svg
 [license]: http://opensource.org/licenses/MIT
 
 > <div style="font-color: red">Alert: Project under active development!</div>
 >
-> This is really a 0.0.1 version. It has not been fully acceptance tested. For experimental use only!
->
-> When I think its ready, I release it on hex!
->
-> Thanks for your interest.
+> This is an early release. So expect changes and new features in the near future.
+
+Checkout the [Coherence Demo Project](https://github.com/smpallen99/coherence_demo) to see an example project using Coherence.
 
 Coherence is a full featured, configurable authentication system for Phoenix, with the following modules:
 
@@ -35,7 +35,7 @@ As well, a `web/coherence_web.ex` is added. Migrations are also generated to add
   1. Add coherence to your list of dependencies in `mix.exs`:
 
         def deps do
-          [{:coherence, github: "smpallen99/coherence"}]
+          [{:coherence, "~> 0.1"}]
         end
 
   2. Ensure coherence is started before your application:
