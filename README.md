@@ -268,7 +268,9 @@ create unique_index(:rememberables, [:user_id, :series_hash, :token_hash])
 
 The `--rememberable` install option is not provided in any of the installer group options. You must provide the `--rememberable` option to install the migration and its support.
 
-## Installer
+## Mix Tasks
+
+### Installer
 
 The following examples illustrate various configuration scenarios for the install mix task:
 
@@ -287,12 +289,27 @@ The following examples illustrate various configuration scenarios for the instal
 
     # Install the `full` options except `lockable` and `trackable`
     $ mix coherence.install --full --no-lockable --no-trackable
-
-    # Remove all the coherence generated boilerplate files
-    $ mix coherence.install --clean
 ```
 
 Run `$ mix help coherence.install` for more information.
+
+### Clean
+
+The following examples illustrate how to remove the files created by the installer:
+
+```bash
+  # Clean all the installed files
+  $ mix coherence.clean --all
+
+  # Clean only the installed view and template files
+  $ mix coherence.clean --views --templates
+
+  # Clean all but the models
+  $ mix coherence.clean --all --no-models
+
+  # Prompt once to confirm the removal
+  $ mix coherence.clean --all --confirm-once
+```
 
 ## Customization
 

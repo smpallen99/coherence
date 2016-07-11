@@ -2,6 +2,7 @@ defmodule <%= base %>.Coherence.UnlockController do
   use Coherence.Web, :controller
   require Logger
   use Timex
+  use Coherence.Config
 
   plug Coherence.ValidateOption, :unlockable_with_token
   plug :layout_view

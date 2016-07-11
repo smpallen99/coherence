@@ -2,7 +2,8 @@ defmodule <%= base %>.Coherence.SessionController do
   use Coherence.Web, :controller
   use Timex
   require Logger
-  alias Coherence.{Config, Rememberable}
+  alias Coherence.{Rememberable}
+  use Coherence.Config
   import Ecto.Query
   import Rememberable, only: [hash: 1, gen_cookie: 3]
 

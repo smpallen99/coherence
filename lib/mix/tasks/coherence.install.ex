@@ -4,6 +4,7 @@ defmodule Mix.Tasks.Coherence.Install do
   import Macro, only: [camelize: 1, underscore: 1]
   import Mix.Generator
   import Mix.Ecto
+  import Coherence.Mix.Utils
 
   @shortdoc "Configure the Coherence Package"
 
@@ -36,9 +37,6 @@ defmodule Mix.Tasks.Coherence.Install do
 
       # Install the `full` options except `lockable` and `trackable`
       mix coherence.install --full --no-lockable --no-trackable
-
-      # Remove all the coherence generated boilerplate files
-      # mix coherence.install --clean
 
   ## Option list
 
@@ -81,8 +79,6 @@ defmodule Mix.Tasks.Coherence.Install do
 
   A `--module` option to override the module
 
-  A `--clean` option will all the coherence boilerplate
-
   ## Disable Options
 
   * `--no-config` -- Don't append to your `config/config.exs` file.
@@ -120,7 +116,7 @@ defmodule Mix.Tasks.Coherence.Install do
   @config_marker_end   "%% End Coherence Configuration %%"
 
 
-  @switches [user: :string, repo: :string, clean: :boolean, migration_path: :string, model: :string, log_only: :boolean,
+  @switches [user: :string, repo: :string, migration_path: :string, model: :string, log_only: :boolean,
      controllers: :boolean, module: :string] ++ Enum.map(@boolean_options, &({String.to_atom(&1), :boolean}))
 
   @switch_names Enum.map(@switches, &(elem(&1, 0)))
@@ -129,43 +125,17 @@ defmodule Mix.Tasks.Coherence.Install do
   @new_user_constraints      ["create unique_index(:users, [:email])"]
 
   def run(args) do
-    {opts, _parsed, _} = OptionParser.parse(args, switches: @switches)
+    {opts, parsed, unknown} = OptionParser.parse(args, switches: @switches)
 
-    # IO.puts "args: #{inspect args}"
-    # IO.puts "opts: #{inspect opts}"
+    verify_args!(parsed, unknown)
 
     {bin_opts, opts} = parse_options(opts)
 
-    # IO.puts "bin_opts: #{inspect bin_opts}"
-    # IO.puts "opts: #{inspect opts}"
-
     do_config(opts, bin_opts)
-    |> do_clean
     |> do_run
   end
 
-  defp do_clean(%{clean: true} = config) do
-    if Mix.shell.yes? "Are you sure you want to delete coherence files?" do
-      rm_dir! "web/views/coherence"
-      rm_dir! "web/controllers/coherence"
-      rm_dir! "web/templates/coherence"
-      rm_dir! "web/emails/coherence"
-      rm_dir! "web/models/coherence"
-      rm! "web/coherence_web.ex"
-      Mix.shell.info """
-
-      You must manually remove the migration files and the
-      config/config.exs configuration
-      """
-    else
-      Mix.shell.info "Skipping the cleaning!"
-    end
-    config
-  end
-  defp do_clean(config), do: config
-
-  defp do_run(%{clean: false} = config) do
-    # IO.puts "config: #{inspect config}"
+  defp do_run(config) do
     config
     |> check_for_model
     |> gen_coherence_config
@@ -180,7 +150,6 @@ defmodule Mix.Tasks.Coherence.Install do
     |> gen_coherence_controllers
     |> print_instructions
   end
-  defp do_run(config), do: config
 
   defp gen_coherence_config(config) do
     from_email = if config[:use_email?] do
@@ -670,18 +639,6 @@ config :coherence, #{base}.Coherence.Mailer,
     update_in config, [:instructions], &(&1 <> instructions)
   end
 
-  defp rm_dir!(dir) do
-    if File.dir? dir do
-      File.rm_rf dir
-    end
-  end
-
-  defp rm!(file) do
-    if File.exists? file do
-      File.rm! file
-    end
-  end
-
   ################
   # Installer Configuration
 
@@ -707,7 +664,6 @@ config :coherence, #{base}.Coherence.Mailer,
     bin_opts
     |> Enum.map(&({&1, true}))
     |> Enum.into(%{})
-    |> Map.put(:clean, opts[:clean] || false)
     |> Map.put(:instructions, "")
     |> Map.put(:base, base)
     |> Map.put(:use_email?, Enum.any?(bin_opts, &(&1 in @email_options)))
@@ -772,15 +728,7 @@ config :coherence, #{base}.Coherence.Mailer,
           [] <- Enum.filter(opts_names, &(not &1 in @switch_names)) do
             {opts_bin, opts}
     else
-      list ->
-        list = Enum.map(list, fn option ->
-          "--" <> Atom.to_string(option) |> String.replace("_", "-")
-        end)
-        |> Enum.join(", ")
-        Mix.raise """
-        The following option(s) are not supported:
-            #{inspect list}
-        """
+      list -> raise_option_errors(list)
     end
   end
 
