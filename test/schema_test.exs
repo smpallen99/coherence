@@ -23,8 +23,8 @@ defmodule CoherenceTest.Schema do
   test "checkpw" do
     params = %{name: "test", email: "schema@test.com", password: "test", password_confirmation: "test"}
     user = Repo.insert! User.changeset(%User{}, params)
-    assert User.checkpw("test", user.hashed_password)
-    refute User.checkpw("t", user.hashed_password)
+    assert User.checkpw("test", user.password_hash)
+    refute User.checkpw("t", user.password_hash)
   end
 
   test "checkpw invalid passwords" do
@@ -38,7 +38,7 @@ defmodule CoherenceTest.Schema do
   end
 
   test "does not require password on update" do
-    user = struct %User{}, Map.put(@valid_params, :hashed_password, "123")
+    user = struct %User{}, Map.put(@valid_params, :password_hash, "123")
     cs = User.changeset(user, %{name: "test123", email: @email})
     assert cs.valid?
   end

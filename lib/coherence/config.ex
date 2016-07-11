@@ -28,7 +28,7 @@ defmodule Coherence.Config do
   * :unlock_token_expire_minutes (5)
   * :session_key ("session_auth")
   * :rememberable_cookie_expire_hours (2*24)
-  * :hashed_password_field (:hashed_password)         - The field used to save the hashed password
+  * :password_hash_field (:password_hash)         - The field used to save the hashed password
 
   ## Examples
 
@@ -54,7 +54,7 @@ defmodule Coherence.Config do
     :email_from,
     :email_reply_to,
     :site_name,
-    {:hashed_password_field, :hashed_password},
+    {:password_hash_field, :password_hash},
     {:login_cookie, "coherence_login"},
     {:auth_module, Coherence.Authentication.Session},
     {:create_login, :create_login},
@@ -94,8 +94,8 @@ defmodule Coherence.Config do
     if opts == :all or option in opts, do: true, else: false
   end
 
-  defmacro hashed_password do
-    field = Application.get_env :coherence, :hashed_password_field, :hashed_password
+  defmacro password_hash do
+    field = Application.get_env :coherence, :password_hash_field, :password_hash
     quote do: unquote(field)
   end
 

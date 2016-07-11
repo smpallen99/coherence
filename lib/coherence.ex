@@ -7,6 +7,7 @@ defmodule Coherence do
   * Database Authenticatable: handles hashing and storing an encrypted password in the database.
   * Invitable: sends invites to new users with a sign-up link, allowing the user to create their account with their own password.
   * Registerable: allows anonymous users to register a users email address and password.
+  * Confirmable: new accounts require clicking a link in a confirmation email.
   * Recoverable: provides a link to generate a password reset link with token expiry.
   * Trackable: saves login statics like login counts, timestamps, and IP address for each user.
   * Lockable: locks an account when a specified number of failed sign-in attempts has been exceeded.
@@ -25,9 +26,10 @@ defmodule Coherence do
 
   The following columns are added the `<timestamp>_add_coherence_to_user.exs` migration:
 
-  * :hashed_password, :string - the encrypted password
-  ** This name can be changed with the `hashed_password_field config item. Changing this
-  requires recompiling Coherence.
+  * :password_hash, :string - the encrypted password
+
+    * This name can be changed with the `password_hash_field` config item. Changing this requires recompiling Coherence.
+
 
   ### Invitable
 
@@ -41,13 +43,11 @@ defmodule Coherence do
 
   The following table is created by the generated `<timestamp>_create_coherence_invitable.exs` migration:
 
-  ```elixir
-  create table(:invitations) do
-    add :name, :string
-    add :email, :string
-    add :token, :string
-  end
-  ```
+      create table(:invitations) do
+        add :name, :string
+        add :email, :string
+        add :token, :string
+      end
 
   ### Registerable
 
@@ -59,6 +59,14 @@ defmodule Coherence do
 
   It is recommended that the :confirmable option is used with :registerable to
   ensure a valid email address is captured.
+
+  ### Confirmable
+
+  Requires a new account be conformed. During registration, a conformation token is generated and sent to the registering email. This link must be clicked before the user can sign-in.
+
+  Provides `edit` action for the `/confirmations` route.
+
+  The confirmation token expiry default of 5 days can be changed with the `:confirmation_token_expire_days` config entry.
 
   ### Recoverable
 
@@ -76,13 +84,11 @@ defmodule Coherence do
 
   Adds the following database field to your User model with the generated migration:
 
-  ```elixir
-  add :sign_in_count, :integer, default: 0  # how many times the user has logged in
-  add :current_sign_in_at, :datetime        # the current login timestamp
-  add :last_sign_in_at, :datetime           # the timestamp of the previous login
-  add :current_sign_in_ip, :string          # the current login IP adddress
-  add :last_sign_in_ip, :string             # the IP address of the previous login
-  ```
+      add :sign_in_count, :integer, default: 0  # how many times the user has logged in
+      add :current_sign_in_at, :datetime        # the current login timestamp
+      add :last_sign_in_at, :datetime           # the timestamp of the previous login
+      add :current_sign_in_ip, :string          # the current login IP adddress
+      add :last_sign_in_ip, :string             # the IP address of the previous login
 
   ### Lockable
 
@@ -95,11 +101,9 @@ defmodule Coherence do
 
   Adds the following database field to your User model with the generated migration:
 
-  ```elixir
-  add :failed_attempts, :integer, default: 0
-  add :unlock_token, :string
-  add :locked_at, :datetime
-  ```
+      add :failed_attempts, :integer, default: 0
+      add :unlock_token, :string
+      add :locked_at, :datetime
 
   ### Unlockable with Token
 
@@ -122,28 +126,27 @@ defmodule Coherence do
 
   The following table is created by the generated `<timestamp>_create_coherence_rememberable.exs` migration:
 
-  ```elixir
-  create table(:rememberables) do
-    add :series_hash, :string
-    add :token_hash, :string
-    add :token_created_at, :datetime
-    add :user_id, references(:users, on_delete: :delete_all)
+      create table(:rememberables) do
+        add :series_hash, :string
+        add :token_hash, :string
+        add :token_created_at, :datetime
+        add :user_id, references(:users, on_delete: :delete_all)
 
-    timestamps
-  end
-  create index(:rememberables, [:user_id])
-  create index(:rememberables, [:series_hash])
-  create index(:rememberables, [:token_hash])
-  create unique_index(:rememberables, [:user_id, :series_hash, :token_hash])
-  ```
+        timestamps
+      end
+      create index(:rememberables, [:user_id])
+      create index(:rememberables, [:series_hash])
+      create index(:rememberables, [:token_hash])
+      create unique_index(:rememberables, [:user_id, :series_hash, :token_hash])
 
   The `--rememberable` install option is not provided in any of the installer group options. You must provide the `--rememberable` option to install the migration and its support.
 
-  ## Installer
+  ## Mix Tasks
+
+  ### Installer
 
   The following examples illustrate various configuration scenarios for the install mix task:
 
-  ```bash
       # Install with only the `authenticatable` option
       $ mix coherence.install
 
@@ -159,9 +162,25 @@ defmodule Coherence do
       # Install the `full` options except `lockable` and `trackable`
       $ mix coherence.install --full --no-lockable --no-trackable
 
-      # Remove all the coherence generated boilerplate files
-      $ mix coherence.install --clean
-  ```
+
+  Run `$ mix help coherence.install` for more information.
+
+### Clean
+
+The following examples illustrate how to remove the files created by the installer:
+
+      # Clean all the installed files
+      $ mix coherence.clean --all
+
+      # Clean only the installed view and template files
+      $ mix coherence.clean --views --templates
+
+      # Clean all but the models
+      $ mix coherence.clean --all --no-models
+
+      # Prompt once to confirm the removal
+      $ mix coherence.clean --all --confirm-once
+
 
   Run `$ mix help coherence.install` for more information.
   """

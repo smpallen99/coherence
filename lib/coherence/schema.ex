@@ -204,7 +204,7 @@ defmodule Coherence.Schema do
         end
 
         def validate_password(changeset, params) do
-          if is_nil(changeset.data.hashed_password) and is_nil(changeset.changes[:password]) do
+          if is_nil(changeset.data.password_hash) and is_nil(changeset.changes[:password]) do
             changeset
             |> add_error(:password, "can't be blank")
           else
@@ -216,7 +216,7 @@ defmodule Coherence.Schema do
 
         defp set_password(changeset, _params) do
           if changeset.valid? and not is_nil(changeset.changes[:password]) do
-            put_change changeset, Config.hashed_password,
+            put_change changeset, Config.password_hash,
               encrypt_password(changeset.changes[:password])
           else
             changeset
@@ -239,7 +239,7 @@ defmodule Coherence.Schema do
   def schema_fields, do: [
     authenticatable: [
       "# authenticatable",
-      "add :#{Config.hashed_password}, :string",
+      "add :#{Config.password_hash}, :string",
     ],
     recoverable: [
       "# recoverable",
@@ -307,7 +307,7 @@ defmodule Coherence.Schema do
           field :email, :string
 
           # authenticatable
-          field :hashed_password, :string
+          field :password_hash, :string
           field :password, :string, virtual: true
           field :password_confirmation, :string, virtual: true
 
@@ -322,7 +322,7 @@ defmodule Coherence.Schema do
   defmacro coherence_schema do
     quote do
       if Coherence.Config.has_option(:authenticatable) do
-        field Config.hashed_password, :string
+        field Config.password_hash, :string
         field :password, :string, virtual: true
         field :password_confirmation, :string, virtual: true
       end
@@ -358,7 +358,7 @@ defmodule Coherence.Schema do
   end
 
   @optional_fields %{
-    authenticatable: ~w(#{Config.hashed_password} password password_confirmation),
+    authenticatable: ~w(#{Config.password_hash} password password_confirmation),
     recoverable: ~w(reset_password_token reset_password_sent_at),
     rememberable: ~w(remember_created_at),
     trackable: ~w(sign_in_count current_sign_in_at last_sign_in_at current_sign_in_ip last_sign_in_ip failed_attempts),
@@ -376,7 +376,7 @@ defmodule Coherence.Schema do
   For example, for `Coherence.Config.opts == [:authenticatable, :recoverable]`
   `coherence_fiels/0` will return:
 
-      ~w(hashed_password password password_confirmation reset_password_token reset_password_sent_at)
+      ~w(password_hash password password_confirmation reset_password_token reset_password_sent_at)
   """
   def coherence_fields do
     []

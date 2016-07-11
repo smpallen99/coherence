@@ -35,7 +35,7 @@ defmodule <%= base %>.Coherence.SessionController do
     password = params["session"]["password"]
     user = Config.repo.one(from u in user_schema, where: u.email == ^email)
     lockable? = user_schema.lockable?
-    if user != nil and user_schema.checkpw(password, Map.get(user, Config.hashed_password)) do
+    if user != nil and user_schema.checkpw(password, Map.get(user, Config.password_hash)) do
       if confirmed? user do
         url = case get_session(conn, "user_return_to") do
           nil -> "/"

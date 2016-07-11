@@ -6,7 +6,7 @@ defmodule TestCoherence.Migrations do
       add :email, :string
       add :name, :string
       # authenticatable
-      add :hashed_password, :string
+      add :password_hash, :string
       # recoverable
       add :reset_password_token, :string
       add :reset_password_sent_at, :datetime

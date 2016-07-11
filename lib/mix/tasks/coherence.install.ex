@@ -148,6 +148,7 @@ defmodule Mix.Tasks.Coherence.Install do
     |> gen_coherence_templates
     |> gen_coherence_mailer
     |> gen_coherence_controllers
+    |> touch_config                # work around for config file not getting recompiled
     |> print_instructions
   end
 
@@ -222,6 +223,11 @@ config :coherence, #{base}.Coherence.Mailer,
     """ <> string
 
     save_instructions config, instructions
+  end
+
+  defp touch_config(config) do
+    File.touch @config_file
+    config
   end
 
   defp module_to_string(module) when is_atom(module) do
