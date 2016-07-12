@@ -20,6 +20,7 @@ end
 TestCoherence.Repo.__adapter__.storage_down TestCoherence.Repo.config
 TestCoherence.Repo.__adapter__.storage_up TestCoherence.Repo.config
 
+{:ok, _pid } = TestCoherence.Endpoint.start_link
 {:ok, _pid} = TestCoherence.Repo.start_link
 _ = Ecto.Migrator.up(TestCoherence.Repo, 0, TestCoherence.Migrations, log: false)
 Process.flag(:trap_exit, true)

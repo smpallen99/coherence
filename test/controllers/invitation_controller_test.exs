@@ -4,11 +4,6 @@ defmodule CoherenceTest.InvitationController do
   alias TestCoherence.{User, Repo, Config}
   import TestCoherence.Router.Helpers
 
-  setup_all do
-    {:ok, _pid } = TestCoherence.Endpoint.start_link
-    :ok
-  end
-
   setup %{conn: conn} do
     user = insert_user
     conn = assign conn, :current_user, user

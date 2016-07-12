@@ -29,11 +29,6 @@ defmodule CoherenceTest.Rememberable do
     {:ok, conn: conn, user: user, rememberable: rememberable}
   end
 
-  setup_all do
-    {:ok, _pid } = TestCoherence.Endpoint.start_link
-    :ok
-  end
-
   describe "public" do
     test "get public page", %{conn: conn} do
       conn = get conn, dummy_path(conn, :index)
