@@ -44,11 +44,11 @@ defmodule Coherence.ConfirmationController do
           case Config.repo.update(changeset) do
             {:ok, _user} ->
               conn
-              |> put_flash(:info, "User confirmed successfully.")
+              |> put_flash(:info, "User account confirmed successfully.")
               |> redirect(to: logged_out_url(conn))
             {:error, _changeset} ->
               conn
-              |> put_flash(:error, "Problem confirming user. Please contact the system administrator.")
+              |> put_flash(:error, "Problem confirming user account. Please contact the system administrator.")
               |> redirect(to: logged_out_url(conn))
           end
         end

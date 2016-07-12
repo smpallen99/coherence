@@ -14,9 +14,6 @@ defmodule Coherence.Rememberable do
     timestamps
   end
 
-  @required_fields ~w(series_hash token_hash token_created_at user_id)
-  @optional_fields ~w()
-
   @doc """
   Creates a changeset based on the `model` and `params`.
 
@@ -25,7 +22,8 @@ defmodule Coherence.Rememberable do
   """
   def changeset(model, params \\ %{}) do
     model
-    |> cast(params, @required_fields, @optional_fields)
+    |> cast(params, ~w(series_hash token_hash token_created_at user_id))
+    |> validate_required(~w(series_hash token_hash token_created_at user_id)a)
   end
 
   def create_login(user) do

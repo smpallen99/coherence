@@ -28,6 +28,7 @@ defmodule TestCoherence.ConnCase do
       import TestCoherence.Router.Helpers
 
       import TestCoherence.TestHelpers
+      alias Coherence.Config
 
 
       # The default endpoint for testing

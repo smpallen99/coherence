@@ -1,16 +1,32 @@
 defmodule <%= base %>.Coherence.PasswordController do
+  @moduledoc """
+  Handle password recovery actions.
+
+  Controller that handles the recover password feature.
+
+  Actions:
+
+  * new - render the recover password form
+  * create - verify user's email address, generate a token, and send the email
+  * edit - render the reset password form
+  * update - verify password, password confirmation, and update the database
+  """
   use Coherence.Web, :controller
   require Logger
   use Timex
 
   plug :layout_view
 
+  @doc false
   def layout_view(conn, _) do
     conn
     |> put_layout({Coherence.LayoutView, "app.html"})
     |> put_view(Coherence.PasswordView)
   end
 
+  @doc """
+  Render the recover password form.
+  """
   def new(conn, _params) do
     user_schema = Config.user_schema
     cs = user_schema.changeset(user_schema.__struct__)
@@ -18,6 +34,9 @@ defmodule <%= base %>.Coherence.PasswordController do
     |> render(:new, [email: "", changeset: cs])
   end
 
+  @doc """
+  Create the recovery token and send the email
+  """
   def create(conn, %{"password" => password_params}) do
     user_schema = Config.user_schema
     email = password_params["email"]
@@ -47,6 +66,9 @@ defmodule <%= base %>.Coherence.PasswordController do
     end
   end
 
+  @doc """
+  Render the password and password confirmation form.
+  """
   def edit(conn, params) do
     user_schema = Config.user_schema
     token = params["id"]
@@ -73,6 +95,9 @@ defmodule <%= base %>.Coherence.PasswordController do
     end
   end
 
+  @doc """
+  Verify the passwords and update the database
+  """
   def update(conn, %{"password" => password_params}) do
     user_schema = Config.user_schema
     repo = Config.repo

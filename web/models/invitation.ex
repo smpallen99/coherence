@@ -9,9 +9,6 @@ defmodule Coherence.Invitation do
     timestamps
   end
 
-  @required_fields ~w(name email)
-  @optional_fields ~w(token)
-
   @doc """
   Creates a changeset based on the `model` and `params`.
 
@@ -20,7 +17,8 @@ defmodule Coherence.Invitation do
   """
   def changeset(model, params \\ %{}) do
     model
-    |> cast(params, @required_fields, @optional_fields)
+    |> cast(params, ~w(name email token))
+    |> validate_required([:name, :email])
     |> unique_constraint(:email)
     |> validate_format(:email, ~r/@/)
   end

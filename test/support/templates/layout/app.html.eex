@@ -7,7 +7,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Hello Admin1!</title>
+    <title>Hello Test Coherence</title>
     <link rel="stylesheet" href="<%%= static_path(@conn, "/css/app.css") %>">
   </head>
 

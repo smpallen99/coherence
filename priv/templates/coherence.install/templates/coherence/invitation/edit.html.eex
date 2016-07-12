@@ -16,6 +16,14 @@
     <%%= error_tag f, :name %>
   </div>
 
+  <%%= unless (login_field = Coherence.Config.login_field) == :email do %>
+    <div class="form-group">
+      <%%= required_label f, login_field, class: "control-label" %>
+      <%%= text_input f, login_field, class: "form-control", required: "" %>
+      <%%= error_tag f, login_field %>
+    </div>
+  <%% end %>
+
   <div class="form-group">
     <%%= required_label f, :email, class: "control-label" %>
     <%%= text_input f, :email, class: "form-control", required: "" %>

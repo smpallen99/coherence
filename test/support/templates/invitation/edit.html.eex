@@ -1,0 +1,41 @@
+<br \>
+<h2>Create Account</h2>
+<%= form_for @changeset, invitation_path(@conn, :create_user), fn f  -> %>
+
+  <%= if @changeset.action do %>
+    <div class="alert alert-danger">
+      <p>Oops, something went wrong! Please check the errors below.</p>
+    </div>
+  <% end %>
+
+  <input type="hidden" name="token" value="<%= @token %>">
+
+  <div class="form-group">
+    <%= required_label f, :name, class: "control-label" %>
+    <%= text_input f, :name, class: "form-control", required: "" %>
+    <%= error_tag f, :name %>
+  </div>
+
+  <div class="form-group">
+    <%= required_label f, :email, class: "control-label" %>
+    <%= text_input f, :email, class: "form-control", required: "" %>
+    <%= error_tag f, :email %>
+  </div>
+
+  <div class="form-group">
+    <%= required_label f, :password, class: "control-label" %>
+    <%= password_input f, :password, class: "form-control", required: "" %>
+    <%= error_tag f, :password %>
+  </div>
+
+  <div class="form-group">
+    <%= required_label f, :password_confirmation, class: "control-label" %>
+    <%= password_input f, :password_confirmation, class: "form-control", required: "" %>
+    <%= error_tag f, :password_confirmation %>
+  </div>
+
+  <div class="form-group">
+    <%= submit "Create", class: "btn btn-primary" %>
+    <%= link "Cancel", to: Coherence.Config.logged_out_url("/"), class: "btn" %>
+  </div>
+<% end %>

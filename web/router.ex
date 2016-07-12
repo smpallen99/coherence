@@ -93,6 +93,7 @@ defmodule Coherence.Router do
         if Coherence.Config.has_option(:invitable) do
           resources "/invitations", Coherence.InvitationController, only: [:new, :create, :edit]
           post "/invitations/create", Coherence.InvitationController, :create_user
+          get "/invitations/:id/resend", Coherence.InvitationController, :resend
         end
         if Coherence.Config.has_option(:authenticatable) do
           resources "/sessions", Coherence.SessionController, only: [:delete]

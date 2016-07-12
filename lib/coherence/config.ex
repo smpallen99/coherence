@@ -29,6 +29,7 @@ defmodule Coherence.Config do
   * :session_key ("session_auth")
   * :rememberable_cookie_expire_hours (2*24)
   * :password_hash_field (:password_hash)         - The field used to save the hashed password
+  * :login_field (:email)                         - The user model field used to login
 
   ## Examples
 
@@ -55,6 +56,7 @@ defmodule Coherence.Config do
     :email_reply_to,
     :site_name,
     {:password_hash_field, :password_hash},
+    {:login_field, :email},
     {:login_cookie, "coherence_login"},
     {:auth_module, Coherence.Authentication.Session},
     {:create_login, :create_login},

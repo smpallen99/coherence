@@ -1,4 +1,12 @@
 defmodule <%= base %>.Coherence.UnlockController do
+  @moduledoc """
+  Handle unlock_with_token actions.
+
+  This controller provides the ability generate an unlock token, send
+  the user an email and unlocking the account with a valid token.
+
+  Basic locking and unlocking does not use this controller.
+  """
   use Coherence.Web, :controller
   require Logger
   use Timex
@@ -7,18 +15,25 @@ defmodule <%= base %>.Coherence.UnlockController do
   plug Coherence.ValidateOption, :unlockable_with_token
   plug :layout_view
 
+  @doc false
   def layout_view(conn, _) do
     conn
     |> put_layout({Coherence.LayoutView, "app.html"})
     |> put_view(Coherence.UnlockView)
   end
 
+  @doc """
+  Render the send reset link form.
+  """
   def new(conn, _params) do
     user_schema = Config.user_schema
     changeset = user_schema.changeset(user_schema.__struct__)
     render conn, "new.html", changeset: changeset
   end
 
+  @doc """
+  Create and send the unlock token.
+  """
   def create(conn, %{"unlock" => unlock_params}) do
     user_schema = Config.user_schema
     token = random_string 48
@@ -35,9 +50,6 @@ defmodule <%= base %>.Coherence.UnlockController do
       |> case do
         {:ok, _} ->
           if user_schema.locked?(user) do
-            # email = Coherence.UserEmail.unlock(user, url)
-            # Logger.debug fn -> "unlock email: #{inspect email}" end
-            # email |> Coherence.Mailer.deliver
             send_user_email :unlock, user, url
             conn
             |> put_flash(:info, "Unlock Instructions sent.")
@@ -57,6 +69,9 @@ defmodule <%= base %>.Coherence.UnlockController do
     end
   end
 
+  @doc """
+  Handle the unlcock link click.
+  """
   def edit(conn, params) do
     user_schema = Config.user_schema
     token = params["id"]
@@ -84,6 +99,7 @@ defmodule <%= base %>.Coherence.UnlockController do
 
   @lockable_failure "Failed to update lockable attributes "
 
+  @doc false
   def clear_unlock_values(user, user_schema) do
     if user.unlock_token or user.locked_at do
       user_schema.changeset(user, %{unlock_token: nil, locked_at: nil})

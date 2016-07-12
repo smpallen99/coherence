@@ -4,6 +4,7 @@ defmodule Coherence.ControllerHelpers do
   """
   alias Coherence.Config
   require Logger
+  import Phoenix.Controller, only: [put_flash: 3]
 
   @lockable_failure "Failed to update lockable attributes "
 
@@ -76,4 +77,27 @@ defmodule Coherence.ControllerHelpers do
     apply(Module.concat(Config.module, Coherence.Mailer), :deliver, [email])
   end
 
+  @doc """
+  Send confirmation email with token.
+
+  If the user supports confirmable, generate a token and send the email.
+  """
+  def send_confirmation(conn, user, user_schema) do
+    if user_schema.confirmable? do
+      token = random_string 48
+      url = router_helpers.confirmation_url(conn, :edit, token)
+      Logger.debug "confirmation email url: #{inspect url}"
+      dt = Ecto.DateTime.utc
+      user_schema.changeset(user,
+        %{confirmation_token: token, confirmation_send_at: dt})
+      |> Config.repo.update!
+
+      send_user_email :confirmation, user, url
+      conn
+      |> put_flash(:info, "Confirmation email sent.")
+    else
+      conn
+      |> put_flash(:info, "Registration created successfully.")
+    end
+  end
 end

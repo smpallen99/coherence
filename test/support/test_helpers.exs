@@ -1,5 +1,7 @@
 defmodule TestCoherence.TestHelpers do
   alias Coherence.{Rememberable}
+  import Phoenix.HTML, only: [safe_to_string: 1]
+
   def insert_user(attrs \\ %{}) do
     changes = Dict.merge(%{
       name: "Test User",
@@ -26,6 +28,15 @@ defmodule TestCoherence.TestHelpers do
     |> Rememberable.changeset(changes)
     |> TestCoherence.Repo.insert!
     {r1, series, token}
+  end
+
+  def floki_link(safe) when is_tuple(safe) do
+    safe |> safe_to_string |> floki_link
+  end
+  def floki_link(string) do
+    result = Floki.find(string, "a[href]")
+    [href] = Floki.attribute(result, "href")
+    {href, Floki.text(result)}
   end
 
 end

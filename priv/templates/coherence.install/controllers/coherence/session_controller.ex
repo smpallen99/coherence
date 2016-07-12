@@ -1,4 +1,8 @@
 defmodule <%= base %>.Coherence.SessionController do
+  @moduledoc """
+  Handle the authentication actions.
+
+  """
   use Coherence.Web, :controller
   use Timex
   require Logger
@@ -8,8 +12,12 @@ defmodule <%= base %>.Coherence.SessionController do
   import Rememberable, only: [hash: 1, gen_cookie: 3]
 
 
+  @doc false
   def login_cookie, do: "coherence_login"
 
+  @doc """
+  Retrieve the login cookie.
+  """
   def get_login_cookie(conn) do
     conn.cookies[Config.login_cookie]
   end
@@ -18,22 +26,43 @@ defmodule <%= base %>.Coherence.SessionController do
     if Config.user_schema.rememberable?, do: true, else: false
   end
 
+  @doc """
+  Render the login form.
+  """
   def new(conn, _params) do
-    # if cookie = get_login_cookie(conn) do
-    #   Logger.debug "Found cookie #{Rememberable.log_cookie cookie}"
-    # end
+    login_field = Config.login_field
     conn
     |> put_layout({Coherence.LayoutView, "app.html"})
     |> put_view(Coherence.SessionView)
-    |> render(:new, [email: "", remember: rememberable_enabled?])
+    |> render(:new, [{login_field, ""}, remember: rememberable_enabled?])
   end
 
+  @doc """
+  Login the user.
+
+  Find the user based on the login_field. Hash the given password and verify it
+  matches the value stored in the database. Login proceeds only if the following
+  other conditions are satisfied:
+
+  * Confirmation is enabled and the user has been confirmed.
+  * Lockable is enabled and the user is not locked.
+
+  If the Trackable option is enabled, the trackable fields are update.
+
+  If the provided password is not correct, and the lockable option is enabled check
+  to see if the maximum login attempts threshold is exceeded. If so, lock the account.
+
+  If the rememberable option is enabled, create a new series and rememberable token,
+  create a new cookie and update the database.
+  """
   def create(conn, params) do
     remember = if Config.user_schema.rememberable?, do: params["remember"], else: false
     user_schema = Config.user_schema
-    email = params["session"]["email"]
+    login_field = Config.login_field
+    login_field_str = to_string login_field
+    login = params["session"][login_field_str]
     password = params["session"]["password"]
-    user = Config.repo.one(from u in user_schema, where: u.email == ^email)
+    user = Config.repo.one(from u in user_schema, where: field(u, ^login_field) == ^login)
     lockable? = user_schema.lockable?
     if user != nil and user_schema.checkpw(password, Map.get(user, Config.password_hash)) do
       if confirmed? user do
@@ -53,7 +82,7 @@ defmodule <%= base %>.Coherence.SessionController do
           conn
           |> put_flash(:error, "Too many failed login attempts. Account has been locked.")
           |> assign(:locked, true)
-          |> render("new.html", email: "", remember: rememberable_enabled?)
+          |> render("new.html", [{login_field, ""}, remember: rememberable_enabled?])
         end
       else
         conn
@@ -65,10 +94,15 @@ defmodule <%= base %>.Coherence.SessionController do
       |> failed_login(user, lockable?)
       |> put_layout({Coherence.LayoutView, "app.html"})
       |> put_view(Coherence.SessionView)
-      |> render(:new, email: email, remember: rememberable_enabled?)
+      |> render(:new, [{login_field, login}, remember: rememberable_enabled?])
     end
   end
 
+  @doc """
+  Logout the user.
+
+  Delete the user's session, track the logout and delete the rememberable cookie.
+  """
   def delete(conn, _params) do
     user = conn.assigns[Config.assigns_key]
     apply(Config.auth_module, Config.delete_login, [conn])
@@ -120,7 +154,7 @@ defmodule <%= base %>.Coherence.SessionController do
     conn
   end
 
-  @flash_invalid "Incorrect email or password."
+  @flash_invalid "Incorrect #{Config.login_field} or password."
   @flash_locked "Maximum Login attempts exceeded. Your account has been locked."
 
   defp log_lockable_update({:error, changeset}) do
@@ -165,11 +199,19 @@ defmodule <%= base %>.Coherence.SessionController do
     end
   end
 
+  @doc """
+  Call back for the authentication plug.
+
+  Render the login form.
+  """
   def login_callback(conn) do
     new(conn, %{})
     |> halt
   end
 
+  @doc """
+  Helper to check if a user has been confirmed.
+  """
   def confirmed?(user) do
     if Config.user_schema.confirmable? do
       Config.user_schema.confirmed?(user)
@@ -178,6 +220,13 @@ defmodule <%= base %>.Coherence.SessionController do
     end
   end
 
+  @doc """
+  Callback for the authenticate plug.
+
+  Validate the rememberable cookie. If valid, generate a new token,
+  keep the same series number. Update the rememberable database with
+  the new token. Save the new cookie.
+  """
   def remberable_callback(conn, id, series, token, opts) do
     repo = Config.repo
     cred_store = Coherence.Authentication.Utils.get_credential_store
@@ -217,28 +266,44 @@ defmodule <%= base %>.Coherence.SessionController do
     end
   end
 
+  @doc """
+  Save the login cookie.
+  """
   def save_login_cookie(conn, id, series, token, key \\ "coherence_login", expire \\ 2*24*60*60) do
     put_resp_cookie conn, key, gen_cookie(id, series, token), max_age: expire
   end
 
-  defp save_rememberable(conn, _user, nil), do: conn
+  defp save_rememberable(conn, _user, none) when none in [nil, false], do: conn
   defp save_rememberable(conn, user, _) do
     {changeset, series, token} = Rememberable.create_login(user)
     Config.repo.insert! changeset
     save_login_cookie conn, user.id, series, token, Config.login_cookie, Config.rememberable_cookie_expire_hours * 60 * 60
   end
 
+  @doc """
+  Fetch a rememberable database record.
+  """
   def get_rememberables(id) do
     where(Rememberable, [u], u.user_id == ^id)
     |> Config.repo.all
   end
 
+  @doc """
+  Validate the login cookie.
+
+  Check the following conditions:
+
+  * a record exists for the user, the series, but a different token
+    * assume a fraud case
+    * remove the rememberable cookie and delete the session
+  * a record exists for the user, the series, and the token
+    * a valid remembered user
+  * otherwise, this is an unknown user.
+  """
   def validate_login(user_id, series, token) do
     hash_series = hash series
     hash_token = hash token
     repo = Config.repo
-    # Logger.debug "user_id: #{user_id}, series: #{series}, token: #{token}"
-    # Logger.debug "           hash_series: #{hash_series}, hash_token: #{hash_token}"
 
     delete_expired_tokens!(repo)   # TODO: move the following to an task
 
@@ -266,4 +331,5 @@ defmodule <%= base %>.Coherence.SessionController do
   defp delete_expired_tokens!(repo) do
     repo.delete_all Rememberable.delete_expired_tokens
   end
+
 end

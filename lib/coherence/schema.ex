@@ -136,8 +136,13 @@ defmodule Coherence.Schema do
         end
 
         def confirm!(user) do
-          Config.user_schema.changeset(user, %{confirmed_at: Ecto.DateTime.utc, confirmation_token: nil})
-          |> Config.repo.update
+          changeset = Config.user_schema.changeset(user, %{confirmed_at: Ecto.DateTime.utc, confirmation_token: nil})
+          unless confirmed? user do
+            Config.repo.update changeset
+          else
+            changeset = Ecto.Changeset.add_error changeset, :confirmed_at, "already confirmed"
+            {:error, changeset}
+          end
         end
       end
 
@@ -204,7 +209,7 @@ defmodule Coherence.Schema do
         end
 
         def validate_password(changeset, params) do
-          if is_nil(changeset.data.password_hash) and is_nil(changeset.changes[:password]) do
+          if is_nil(Map.get(changeset.data, Config.password_hash)) and is_nil(changeset.changes[:password]) do
             changeset
             |> add_error(:password, "can't be blank")
           else
@@ -222,6 +227,8 @@ defmodule Coherence.Schema do
             changeset
           end
         end
+      else
+        def validate_coherence(changeset, _params), do: changeset
       end
     end
   end

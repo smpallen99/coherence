@@ -1,10 +1,21 @@
 defmodule Coherence.RegistrationController do
+  @moduledoc """
+  Handle account registration actions.
+
+  Actions:
+
+  * new - render the register form
+  * create - create a new user account
+  """
   use Coherence.Web, :controller
   require Logger
 
   plug Coherence.ValidateOption, :registerable
   plug :scrub_params, "registration" when action in [:create, :update]
 
+  @doc """
+  Render the new user form.
+  """
   def new(conn, _params) do
     user_schema = Config.user_schema
     cs = user_schema.changeset(user_schema.__struct__)
@@ -14,6 +25,12 @@ defmodule Coherence.RegistrationController do
     |> render(:new, email: "", changeset: cs)
   end
 
+  @doc """
+  Create the new user account.
+
+  Creates the new user account. Create and send a confirmation if
+  this option is enabled.
+  """
   def create(conn, %{"registration" => registration_params}) do
     user_schema = Config.user_schema
     cs = user_schema.changeset(user_schema.__struct__, registration_params)
@@ -28,35 +45,6 @@ defmodule Coherence.RegistrationController do
         |> put_view(Coherence.RegistrationView)
         |> render("new.html", changeset: changeset)
     end
-  end
-
-  # def delete(conn, _params) do
-  #   apply(Config.auth_module, Config.delete_login, [conn])
-  #   |> put_view(Admin1.LayoutView)
-  #   |> redirect(to: logged_out_url(conn))
-  # end
-
-  defp send_confirmation(conn, user, user_schema) do
-    if user_schema.confirmable? do
-      token = random_string 48
-      url = router_helpers.confirmation_url(conn, :edit, token)
-      Logger.debug "confirmation email url: #{inspect url}"
-      dt = Ecto.DateTime.utc
-      user_schema.changeset(user,
-        %{confirmation_token: token, confirmation_send_at: dt})
-      |> Config.repo.update!
-
-      # email = Coherence.UserEmail.confirmation(user, url)
-      # Logger.debug fn -> "confirmation email: #{inspect email}" end
-      # email |> Coherence.Mailer.deliver
-      send_user_email :confirmation, user, url
-      conn
-      |> put_flash(:info, "Confirmation email sent.")
-    else
-      conn
-      |> put_flash(:info, "Registration created successfully.")
-    end
-
   end
 
 end
