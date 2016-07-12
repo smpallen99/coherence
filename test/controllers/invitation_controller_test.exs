@@ -3,7 +3,6 @@ defmodule CoherenceTest.InvitationController do
   alias Coherence.{InvitationController, Config}
   alias TestCoherence.{User, Repo, Config}
   import TestCoherence.Router.Helpers
-  import Ecto.Query
 
   setup_all do
     {:ok, _pid } = TestCoherence.Endpoint.start_link
