@@ -116,7 +116,7 @@ defmodule Coherence.Authentication.Session do
       true  -> &Coherence.SessionController.login_callback/1
       other -> other
     end
-    rememberable? = if Config.has_option(:rememberable?), do: Config.user_schema.remeberable?, else: false
+    rememberable? = if Config.has_option(:rememberable), do: Config.user_schema.rememberable?, else: false
     %{
       login: login,
       error: Keyword.get(opts, :error, "HTTP Authentication Required"),
@@ -132,7 +132,6 @@ defmodule Coherence.Authentication.Session do
 
   @doc false
   def call(conn, opts) do
-    # IO.puts ".. opts: #{inspect opts}"
     unless get_authenticated_user(conn) do
       conn
       |> get_session_data

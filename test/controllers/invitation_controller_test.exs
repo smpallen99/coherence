@@ -25,11 +25,11 @@ defmodule CoherenceTest.InvitationController do
     Phoenix.Controller.accepts(conn, opts)
   end
 
-
   test "can't invite an existing user", %{conn: conn, user: user} do
     params = %{"invitation" => %{"name" => user.name, "email" => user.email}}
     conn = post conn, invitation_path(conn, :create), params
     assert html_response(conn, 200)
+    assert conn.private[:phoenix_template] == "new.html"
   end
 
   test "create an account for an existing user" do

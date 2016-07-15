@@ -132,6 +132,24 @@ defmodule CoherenceTest.Plug.Session do
       assert conn.resp_body == "Authorized"
       refute conn.assigns[:remembered]
     end
+    test "uses login token with lost session store", meta do
+      conn = conn(:get, "/", headers: [])
+      |> sign_conn
+      |> put_resp_cookie("coherence_login", meta[:cookie])
+      |> Session.create_login(meta[:user])
+      |> RememberablePlug.call([])
+      creds = get_session(conn, "session_auth")
+      assert creds
+      Coherence.CredentialStore.Session.delete_credentials creds
+
+      conn = conn(:get, "/", headers: [])
+      |> sign_conn
+      |> put_resp_cookie("coherence_login", meta[:cookie])
+      |> RememberablePlug.call([])
+      assert conn.status == 200
+      assert conn.resp_body == "Authorized"
+      assert conn.assigns[:remembered]
+    end
   end
 
   def valid_login_cookie(_) do
