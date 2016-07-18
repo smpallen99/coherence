@@ -363,6 +363,12 @@ If the controllers are generated, you will need to change your router to use the
 end
 ```
 
+## Authorization
+
+Coherence is a user management and authentication solution. Support for authorization (access control) can be achieved using another package like [Canary](https://github.com/cpjk/canary).
+
+For and example of using [Canary](https://github.com/cpjk/canary) with Coherence, please visit the [CoherenceDemo canary branch](https://github.com/smpallen99/coherence_demo/tree/canary).
+
 ## Contributing
 
 We appreciate any contribution to Coherence. Check our [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) and [CONTRIBUTING.md](CONTRIBUTING.md) guides for more information. We usually keep a list of features and bugs [in the issue tracker][1].
