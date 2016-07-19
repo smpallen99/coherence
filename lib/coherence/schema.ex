@@ -36,12 +36,13 @@ defmodule Coherence.Schema do
   The following functions are available when `confirmable?/0` returns true.
 
   * `confirmed?/1` - Has the given user been confirmed?
-  * `confirm!/1` - Confirm the given user
+  * `confirm/1` - Return a changeset to confirm the given user
 
   The following functions are available when `lockable?/0` returns true.
 
   * `locked?/1` - Is the given user locked?
-  * `unlock!/1` - Unlock the given user
+  * `lock/1` - Return a changeset to lock the given user
+  * `unlock/1` - Return a changeset to unlock the given user
 
   The `coherence_schema/1` macro is used to add the configured schema fields to the User models schema.
 
@@ -83,6 +84,7 @@ defmodule Coherence.Schema do
       import unquote(__MODULE__)
       import Ecto.Changeset
       use Coherence.Config
+      require Logger
 
       def authenticatable? do
         Coherence.Config.has_option(:authenticatable) and
@@ -131,11 +133,35 @@ defmodule Coherence.Schema do
 
       if  Coherence.Config.has_option(:confirmable) and
             Keyword.get(unquote(opts), :confirmable, true) do
+        @doc """
+        Checks if the user has been confirmed.
+
+        Returns true if confirmed, false otherwise
+        """
         def confirmed?(user) do
           !!user.confirmed_at
         end
 
+        @doc """
+        Confirm a user account.
+
+        Adds the `:confirmed_at` datetime field on the user model.
+
+        Returns a changeset ready for Repo.update
+        """
+        def confirm(user) do
+          Config.user_schema.changeset(user, %{confirmed_at: Ecto.DateTime.utc, confirmation_token: nil})
+        end
+
+        @doc """
+        Confirm a user account.
+
+        Adds the `:confirmed_at` datetime field on the user model.
+
+        deprecated! Please use Coherence.ControllerHelpers.unlock!/1.
+        """
         def confirm!(user) do
+          IO.warn "#{inspect Config.user_schema}.confirm!/1 has been deprecated. Please use Coherence.ControllerHelpers.confirm!/1 instead."
           changeset = Config.user_schema.changeset(user, %{confirmed_at: Ecto.DateTime.utc, confirmation_token: nil})
           unless confirmed? user do
             Config.repo.update changeset
@@ -149,14 +175,38 @@ defmodule Coherence.Schema do
       if  Coherence.Config.has_option(:lockable) and
             Keyword.get(unquote(opts), :lockable, true) do
 
+        @doc """
+        Checks if the user is locked.
+
+        Returns true if locked, false otherwise
+        """
         def locked?(user) do
           !!user.locked_at and
             !Coherence.ControllerHelpers.expired?(user.locked_at,
                 minutes: Config.unlock_timeout_minutes)
         end
 
+        @doc """
+        Unlock a user account.
+
+        Clears the `:locked_at` field on the user model.
+
+        Returns a changeset ready for Repo.update
+        """
+        def unlock(user) do
+          Config.user_schema.changeset(user, %{locked_at: nil, unlock_token: nil, failed_attempts: 0})
+        end
+
+        @doc """
+        Unlock a user account.
+
+        Clears the `:locked_at` field on the user model.
+
+        deprecated! Please use Coherence.ControllerHelpers.unlock!/1.
+        """
         def unlock!(user) do
-          changeset = Config.user_schema.changeset(user, %{locked_at: nil, unlock_token: nil, failed_attempts: 0})
+          IO.warn "#{inspect Config.user_schema}.unlock!/1 has been deprecated. Please use Coherence.ControllerHelpers.unlock!/1 instead."
+          changeset = unlock user
           if locked?(user) do
             changeset
             |> Config.repo.update
@@ -174,8 +224,27 @@ defmodule Coherence.Schema do
 
         You can provide a date in the future to override the configured lock expiry time. You
         can set this data far in the future to do a pseudo permanent lock.
+
+        Returns a changeset ready for Repo.update
         """
+        def lock(user, locked_at \\ Ecto.DateTime.utc) do
+          Config.user_schema.changeset(user, %{locked_at: locked_at})
+        end
+
+        @doc """
+        Lock a use account.
+
+        Sets the `:locked_at` field on the user model to the current date and time unless
+        provided a value for the optional parameter.
+
+        You can provide a date in the future to override the configured lock expiry time. You
+        can set this data far in the future to do a pseudo permanent lock.
+
+        deprecated! Please use Coherence.ControllerHelpers.lock!/1.
+        """
+
         def lock!(user, locked_at \\ Ecto.DateTime.utc) do
+          IO.warn "#{inspect Config.user_schema}.lock!/1 has been deprecated. Please use Coherence.ControllerHelpers.lock!/1 instead."
           changeset = Config.user_schema.changeset(user, %{locked_at: locked_at})
           unless locked?(user) do
             changeset

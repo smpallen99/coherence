@@ -1,6 +1,7 @@
 defmodule CoherenceTest.Schema do
   use TestCoherence.ModelCase
   alias TestCoherence.User
+  use Timex
 
   setup do
     :ok
@@ -41,6 +42,22 @@ defmodule CoherenceTest.Schema do
     user = struct %User{}, Map.put(@valid_params, :password_hash, "123")
     cs = User.changeset(user, %{name: "test123", email: @email})
     assert cs.valid?
+  end
+
+  test "confirmed?" do
+    refute User.confirmed?(%User{})
+    assert User.confirmed?(%User{confirmed_at: Ecto.DateTime.utc})
+  end
+
+  test "confirm" do
+    changeset = User.confirm(%User{confirmation_token: "1234"})
+    assert changeset.changes[:confirmed_at]
+    refute changeset.changes[:confimrmation_token]
+  end
+
+  test "locked?" do
+    refute User.locked?(%User{})
+    assert User.locked?(%User{locked_at: Ecto.DateTime.utc})
   end
 
 end

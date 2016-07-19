@@ -20,6 +20,10 @@ defmodule TestCoherence.Migrations do
       add :last_sign_in_at, :datetime
       add :current_sign_in_ip, :string
       add :last_sign_in_ip, :string
+      # confirmable
+      add :confirmation_token, :string
+      add :confirmed_at, :datetime
+      add :confirmation_send_at, :datetime
       timestamps
     end
     create unique_index(:users, [:email])

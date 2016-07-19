@@ -23,5 +23,5 @@ config :coherence,
   module: TestCoherence,
   logged_out_url: "/",
   email_from: {"Your Name", "yourname@example.com"},
-  opts: [:authenticatable, :recoverable, :lockable, :trackable, :unlockable_with_token, :invitable, :registerable]
+  opts: [:confirmable, :authenticatable, :recoverable, :lockable, :trackable, :unlockable_with_token, :invitable, :registerable]
 

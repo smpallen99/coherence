@@ -100,4 +100,62 @@ defmodule Coherence.ControllerHelpers do
       |> put_flash(:info, "Registration created successfully.")
     end
   end
+
+  #############
+  # User Schema
+
+  @doc """
+  Confirm a user account.
+
+  Adds the `:confirmed_at` datetime field on the user model and updates the database
+  """
+  def confirm!(user) do
+    user_schema = Config.user_schema
+    changeset = user_schema.confirm(user)
+    unless user_schema.confirmed? user do
+      Config.repo.update changeset
+    else
+      changeset = Ecto.Changeset.add_error changeset, :confirmed_at, "already confirmed"
+      {:error, changeset}
+    end
+  end
+
+  @doc """
+  Lock a use account.
+
+  Sets the `:locked_at` field on the user model to the current date and time unless
+  provided a value for the optional parameter.
+
+  You can provide a date in the future to override the configured lock expiry time. You
+  can set this data far in the future to do a pseudo permanent lock.
+  """
+
+  def lock!(user, locked_at \\ Ecto.DateTime.utc) do
+    user_schema = Config.user_schema
+    changeset = user_schema.lock user, locked_at
+    unless user_schema.locked?(user) do
+      changeset
+      |> Config.repo.update
+    else
+      changeset = Ecto.Changeset.add_error changeset, :locked_at, "already locked"
+      {:error, changeset}
+    end
+  end
+
+  @doc """
+  Unlock a user account.
+
+  Clears the `:locked_at` field on the user model and updates the database.
+  """
+  def unlock!(user) do
+    user_schema = Config.user_schema
+    changeset = user_schema.unlock user
+    if user_schema.locked?(user) do
+      changeset
+      |> Config.repo.update
+    else
+      changeset = Ecto.Changeset.add_error changeset, :locked_at, "not locked"
+      {:error, changeset}
+    end
+  end
 end
