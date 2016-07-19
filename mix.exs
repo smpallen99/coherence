@@ -1,7 +1,7 @@
 defmodule Coherence.Mixfile do
   use Mix.Project
 
-  @version "0.1.3-dev"
+  @version "0.1.3"
 
   def project do
     [ app: :coherence,

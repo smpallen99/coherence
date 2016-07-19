@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.1.3  (2016-7-18)
+
+* Bug Fixes
+  * Use rememberable token when session dies
+
+* Deprecations
+  * User.confirm!/1 - use Coherence.ControllerHelpers.confirm!/1
+  * User.lock!/1 - use Coherence.ControllerHelpers.lock!/1
+  * User.unlock!/1 - use Coherence.ControllerHelpers.unlock!/1
+
 ## 0.1.2  (2016-7-12)
 
 * Enhancements
