@@ -43,7 +43,7 @@ defmodule Mix.Tasks.Coherence.Install do
   A Coherence configuration will be appended to your `config/config.exs` file unless
   the `--no-config` option is given.
 
-  A `--model=SomeModule` option can be given to override the default User module.
+  A `--model="SomeModule tablename"` option can be given to override the default User module.
 
   A `--repo=CustomRepo` option can be given to override the default Repo module
 
