@@ -363,6 +363,54 @@ If the controllers are generated, you will need to change your router to use the
 end
 ```
 
+## Authentication
+
+Currently Coherence supports three modes of authentication including HTTP Basic, Session, and Token authentication.
+
+For HTTP Basic and Token authentication, you will need to add the credentials into the Credential Store. This is not required for Session Authentication.
+
+### Add HTTP Basic Credentials Example
+
+```elixir
+creds = Coherence.Authentication.Basic.encode_credentials("Admin", "SecretPass")
+Coherence.CredentialStore.Agent.put_credentials(creds, %{role: :admin})
+```
+
+### Add Token Credentials Example
+
+```elixir
+token = Coherence.Authentication.Token.generate_token
+Coherence.CredentialStore.Agent.put_credentials(token, %{role: :admin})
+```
+
+To add authentication, use on of the following three:
+
+### HTTP Basic Plug Example
+
+```elixir
+plug Coherence.Authentication.Basic, realm: "Secret"
+```
+
+The realm parameter is optional and can be omitted. By default "Restricted Area" will be used as realm name. You can also pass the error parameter, which should be a string or a function. If a string is passed, that string will be sent instead of the default message "HTTP Authentication Required" on authentication failure (with status code 401). If a function is passed, that function will be called with one argument, `conn`.
+
+### Token Plug Example
+
+```elixir
+plug Coherence.Authentication.Token, source: :params, param: "auth_token", error: ~s'{"error":"authentication required"}'
+```
+
+The error parameter is optional and is treated as in the example above. The source parameter defines how to retrieve the token from the connection. Currently, the three acceptable values are: `:params`, `:header` and `:session`. Their name is self-explainatory. The param parameter defines the name of the parameter/HTTP header/session key where the token is stored. This should cover most cases, but if retrieving the token is more complex than that, you can pass a tuple for the source parameter. The tuple must be in the form `{MyModule, :my_function, ["param1", 42]}`. The function must accept a connection as its first argument (which will be injected as the head of the given parameter list) and any other number of parameters, which must be given in the third element of the tuple. If no additional arguments are needed, an empty list must be given.
+
+### Session Plug Example
+
+```elixir
+plug Coherence.Authentication.Session, cookie_expire: 10*60*60, login: &MyController.login/1, assigns_key: :authenticated_user
+```
+
+The `:cookie_expire` value the expire time in seconds. The `:login` is a fun that will be passed `conn` if the user is not logged in. Use the `:assigns_key` to change the default `:current_user` value.
+
+Note that if you provide a login callback, that you must return `halt conn` a the end of the function.
+
 ## Authorization
 
 Coherence is a user management and authentication solution. Support for authorization (access control) can be achieved using another package like [Canary](https://github.com/cpjk/canary).
@@ -387,5 +435,7 @@ We appreciate any contribution to Coherence. Check our [CODE_OF_CONDUCT.md](CODE
 The source is released under the MIT License.
 
 Check [LICENSE](LICENSE) for more information.
+
+Much of the authentication code was taken from [PlugAuth](https://github.com/bitgamma/plug_auth), Copyright (c) 2014, Bitgamma OÜ <opensource@bitgamma.com>
 
 

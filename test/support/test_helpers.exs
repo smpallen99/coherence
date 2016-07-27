@@ -1,6 +1,7 @@
 defmodule TestCoherence.TestHelpers do
   alias Coherence.{Rememberable}
   import Phoenix.HTML, only: [safe_to_string: 1]
+  import Plug.Conn
 
   def insert_user(attrs \\ %{}) do
     changes = Dict.merge(%{
@@ -39,4 +40,10 @@ defmodule TestCoherence.TestHelpers do
     {href, Floki.text(result)}
   end
 
+
+  def handler(conn) do
+    conn
+    |> assign(:error_handler_called, true)
+    |> send_resp(418, "I'm a teapot")
+  end
 end
