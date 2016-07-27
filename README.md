@@ -20,14 +20,14 @@ Coherence is a full featured, configurable authentication system for Phoenix, wi
 * [Registerable](#registerable): allows anonymous users to register a users email address and password.
 * [Confirmable](#confirmable): new accounts require clicking a link in a confirmation email.
 * [Recoverable](#recoverable): provides a link to generate a password reset link with token expiry.
-* [Trackable](#trackable): saves login statics like login counts, timestamps, and IP address for each user.
+* [Trackable](#trackable): saves login statistics like login counts, timestamps, and IP address for each user.
 * [Lockable](#lockable): locks an account when a specified number of failed sign-in attempts has been exceeded.
 * [Unlockable With Token](#unlockable-with-token): provides a link to send yourself an unlock email.
 * [Rememberable](#remember-me): provides persistent login with 'Remember me?' check box on login page.
 
 Coherence provides flexibility by adding namespaced templates and views for only the options specified by the `mix coherence.install` command. This boiler plate code is added to your `web/templates/coherence` and `web/views/coherence` directories.
 
-Once the boilerplate has been generated, you free to customize the source as required.
+Once the boilerplate has been generated, you are free to customize the source as required.
 
 As well, a `web/coherence_web.ex` is added. Migrations are also generated to add the required database fields.
 
@@ -63,7 +63,7 @@ This will:
   * timestamp_add_coherence_to_user.exs if the User model already exists
   * timestamp_create_coherence_user.exs if the User model does not exist
   * timestamp_create_coherence_invitable.exs
-* add view files web/view/coherence/
+* add view files web/views/coherence/
 * add template files to web/templates/coherence
 * add email files to web/emails/coherence
 * add web/coherence_web.ex file
@@ -201,7 +201,7 @@ ensure a valid email address is captured.
 
 ### Confirmable
 
-Requires a new account be conformed. During registration, a conformation token is generated and sent to the registering email. This link must be clicked before the user can sign-in.
+Requires a new account be confirmed. During registration, a confirmation token is generated and sent to the registering email. This link must be clicked before the user can sign-in.
 
 Provides `edit` action for the `/confirmations` route.
 
@@ -219,7 +219,7 @@ The expiry timeout can be changed with the `:reset_token_expire_days` config ent
 
 ### Trackable
 
-Saves login statics like login counts, timestamps, and IP address for each user.
+Saves login statistics like login counts, timestamps, and IP address for each user.
 
 Adds the following database field to your User model with the generated migration:
 
