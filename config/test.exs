@@ -2,7 +2,7 @@ use Mix.Config
 
 # config :coherence, ecto_repos: [TestCoherence.Repo]
 
-config :logger, level: :warn
+config :logger, level: :error
 
 config :coherence, TestCoherence.Endpoint,
   http: [port: 4001],

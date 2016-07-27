@@ -367,7 +367,9 @@ end
 
 Currently Coherence supports three modes of authentication including HTTP Basic, Session, and Token authentication.
 
-For HTTP Basic and Token authentication, you will need to add the credentials into the Credential Store. This is not required for Session Authentication.
+For HTTP Basic and Token authentication, you will need to add the credentials into the Credential Store. This is not required for Session or IpAddress Authentication.
+
+IpAddress authentication is a good solution for server to server rest APIs.
 
 ### Add HTTP Basic Credentials Example
 
@@ -382,6 +384,15 @@ Coherence.CredentialStore.Agent.put_credentials(creds, %{role: :admin})
 token = Coherence.Authentication.Token.generate_token
 Coherence.CredentialStore.Agent.put_credentials(token, %{role: :admin})
 ```
+
+### Add IP Credentials Example
+
+```elixir
+Coherence.CredentialStore.Agent.put_credentials({127.0.0.1}, %{role: :admin})
+```
+
+IpAddress authentication does not require this step. Its optional. If the user_data
+is not found in the credential store, the conn.assigns will not be set.
 
 To add authentication, use on of the following three:
 
@@ -410,6 +421,17 @@ plug Coherence.Authentication.Session, cookie_expire: 10*60*60, login: &MyContro
 The `:cookie_expire` value the expire time in seconds. The `:login` is a fun that will be passed `conn` if the user is not logged in. Use the `:assigns_key` to change the default `:current_user` value.
 
 Note that if you provide a login callback, that you must return `halt conn` a the end of the function.
+
+### IP Address Plug Example
+
+```elixir
+plug Coherence.Authentication.IpAddress, allow: ~w(127.0.0.1 192.168.1.0/24)
+plug Coherence.Authentication.IpAddress, allow: ~w(0.0.0.0/0), deny: ~w(127.0.0.1)
+```
+
+The first example will allow local host and any ip address in the subnet 192.168.1.0/255.255.255.0
+
+The second example allows any ip except for localhost.
 
 ## Authorization
 

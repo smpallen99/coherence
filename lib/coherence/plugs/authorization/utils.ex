@@ -47,4 +47,6 @@ defmodule Coherence.Authentication.Utils do
   defp header_hd([]), do: nil
   defp header_hd([head | _]), do: head
 
+  def to_string({a,b,c,d}), do: "#{a}.#{b}.#{c}.#{d}"
+  def to_string(string) when is_binary(string), do: string
 end
