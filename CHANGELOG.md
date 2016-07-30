@@ -5,6 +5,7 @@
 * Enhancements
   * Support Token Authentication
   * Support IP Address Authentication
+  * Support ability to clean specific options from an install
 
 * Bug Fixes
   * Fix compile issue with trackable and not lockable
