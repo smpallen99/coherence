@@ -421,6 +421,8 @@ config :coherence, #{base}.Coherence.Mailer,
     unlockable_with_token: "unlock_view.ex"
   ]
 
+  def view_files, do: @view_files
+
   def gen_coherence_views(%{views: true, boilerplate: true, binding: binding} = config) do
     files = Enum.filter_map(@view_files, &(validate_option(config, elem(&1,0))), &(elem(&1, 1)))
     |> Enum.map(&({:eex, &1, "web/views/coherence/#{&1}"}))
@@ -439,6 +441,7 @@ config :coherence, #{base}.Coherence.Mailer,
     session: {:authenticatable, ~w(new)},
     unlock: {:unlockable_with_token, ~w(new)}
   ]
+  def template_files, do: @template_files
 
   defp validate_option(_, :all), do: true
   defp validate_option(%{use_email?: true}, :use_email?), do: true
@@ -491,6 +494,7 @@ config :coherence, #{base}.Coherence.Mailer,
     authenticatable: "session_controller.ex",
     unlockable_with_token: "unlock_controller.ex"
   ]
+  def controller_files, do: @controller_files
 
   defp gen_coherence_controllers(%{controllers: true, boilerplate: true, binding: binding} = config) do
     files = Enum.filter_map(@controller_files, &(validate_option(config, elem(&1,0))), &(elem(&1, 1)))
@@ -743,6 +747,8 @@ config :coherence, #{base}.Coherence.Mailer,
       list -> raise_option_errors(list)
     end
   end
+
+  def all_options, do: @all_options_atoms
 
   # TODO: Remove this later if we never use it
   #

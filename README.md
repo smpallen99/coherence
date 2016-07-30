@@ -329,6 +329,19 @@ The following examples illustrate how to remove the files created by the install
   $ mix coherence.clean --all --confirm-once
 ```
 
+After installation, if you later want to remove one more options, here are a couple examples:
+
+```bash
+  # Clean one option
+  $ mix coherence.clean --options=recoverable
+
+  # Clean several options without confirmation
+  $ mix coherence.clicked --no-confirm --options="recoverable unlockable-with-token"
+
+  # Test the uninstaller without removing files
+  $ mix coherence.clicked --dry-run --options="recoverable unlockable-with-token"
+```
+
 ## Customization
 
 The `coherence.install` mix task generates a bunch of boiler plate code so you can easily customize the views, templates, and mailer.
