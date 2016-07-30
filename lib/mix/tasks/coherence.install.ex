@@ -211,7 +211,7 @@ config :coherence, #{base}.Coherence.Mailer,
   end
   defp write_config(string, config), do: Enum.into([log_config?: true, config_string: string], config)
 
-  defp log_config(%{log_config: false} = config) do
+  defp log_config(%{log_config?: false} = config) do
     save_instructions config, ""
   end
   defp log_config(%{config_string: string} = config) do

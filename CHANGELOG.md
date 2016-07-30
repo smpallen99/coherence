@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.2.0  (2016-7-30)
+
+* Enhancements
+  * Support Token Authentication
+  * Support IP Address Authentication
+
+* Bug Fixes
+  * Fix compile issue with trackable and not lockable
+  * Fix incorrect config installer instructions
+  * Fix types in README file
+
+* Deprecations
+  * None
+
 ## 0.1.3  (2016-7-18)
 
 * Bug Fixes
