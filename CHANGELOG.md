@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.0.1  ()
+
+* Bug Fixes
+  * rename database column `confirmation_send_at` `to confirmation_sent_at`
+
 ## 0.2.0  (2016-7-30)
 
 * Enhancements
@@ -14,6 +19,9 @@
 
 * Deprecations
   * None
+
+* Backward incompatible changes
+  * the schema change `confirmation_sent_at` will require updating the  user model database. You should create a migration to alter the table.
 
 ## 0.1.3  (2016-7-18)
 
