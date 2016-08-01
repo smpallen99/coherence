@@ -14,7 +14,7 @@ defmodule <%= base %>.Coherence.ConfirmationController do
   @doc """
   Handle the user's click on the confirm link in the confirmation email.
 
-  Validate that the confirmation token has not expired and sets `confirmation_send_at`
+  Validate that the confirmation token has not expired and sets `confirmation_sent_at`
   field to nil, marking the user as confirmed.
 
   TODO: Need to support a resend confirmation email.
@@ -32,7 +32,7 @@ defmodule <%= base %>.Coherence.ConfirmationController do
         |> put_flash(:error, "Invalid confirmation token.")
         |> redirect(to: logged_out_url(conn))
       user ->
-        if expired? user.confirmation_send_at, days: Config.confirmation_token_expire_days do
+        if expired? user.confirmation_sent_at, days: Config.confirmation_token_expire_days do
           conn
           |> put_flash(:error, "Confirmation token expired.")
           |> redirect(to: logged_out_url(conn))
