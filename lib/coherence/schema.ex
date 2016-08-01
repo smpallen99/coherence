@@ -347,7 +347,7 @@ defmodule Coherence.Schema do
       "# confirmable",
       "add :confirmation_token, :string",
       "add :confirmed_at, :datetime",
-      "add :confirmation_send_at, :datetime"
+      "add :confirmation_sent_at, :datetime"
     ]
   ]
 
@@ -427,7 +427,7 @@ defmodule Coherence.Schema do
       if Coherence.Config.has_option(:confirmable) do
         field :confirmation_token, :string
         field :confirmed_at, Ecto.DateTime
-        field :confirmation_send_at, Ecto.DateTime
+        field :confirmation_sent_at, Ecto.DateTime
         # field :unconfirmed_email, :string
       end
     end
@@ -440,7 +440,7 @@ defmodule Coherence.Schema do
     trackable: ~w(sign_in_count current_sign_in_at last_sign_in_at current_sign_in_ip last_sign_in_ip),
     lockable: ~w(locked_at failed_attempts),
     unlockable_with_token: ~w(unlock_token),
-    confirmable: ~w(confirmation_token confirmed_at confirmation_send_at)
+    confirmable: ~w(confirmation_token confirmed_at confirmation_sent_at)
   }
 
   @doc """

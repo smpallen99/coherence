@@ -89,7 +89,7 @@ defmodule Coherence.ControllerHelpers do
       Logger.debug "confirmation email url: #{inspect url}"
       dt = Ecto.DateTime.utc
       user_schema.changeset(user,
-        %{confirmation_token: token, confirmation_send_at: dt})
+        %{confirmation_token: token, confirmation_sent_at: dt})
       |> Config.repo.update!
 
       send_user_email :confirmation, user, url
