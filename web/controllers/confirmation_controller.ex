@@ -12,13 +12,54 @@ defmodule Coherence.ConfirmationController do
   plug Coherence.ValidateOption, :confirmable
 
   @doc """
+  Handle resending a confirmation email.
+
+  Request the user's email, reset the confirmation token and resend the email.
+  """
+  def new(conn, _params) do
+    user_schema = Config.user_schema
+    cs = user_schema.changeset(user_schema.__struct__)
+    conn
+    |> put_layout({Coherence.LayoutView, "app.html"})
+    |> put_view(Coherence.ConfirmationView)
+    |> render(:new, [email: "", changeset: cs])
+  end
+
+  @doc """
+  Create a new confirmation token and resend the email.
+  """
+  def create(conn, %{"confirmation" => password_params}) do
+    user_schema = Config.user_schema
+    email = password_params["email"]
+    user = where(user_schema, [u], u.email == ^email)
+    |> Config.repo.one
+
+    changeset = user_schema.changeset(user_schema.__struct__)
+    case user do
+      nil ->
+        conn
+        |> put_flash(:error, "Could not find that email address")
+        |> render("new.html", changeset: changeset)
+      user ->
+        if user_schema.confirmed?(user) do
+          conn
+          |> put_flash(:error, "Account already confirmed.")
+          |> put_layout({Coherence.LayoutView, "app.html"})
+          |> put_view(Coherence.ConfirmationView)
+          |> render(:new, [email: "", changeset: changeset])
+        else
+          conn
+          |> send_confirmation(user, user_schema)
+          |> redirect(to: logged_out_url(conn))
+        end
+    end
+  end
+
+  @doc """
   Handle the user's click on the confirm link in the confirmation email.
 
   Validate that the confirmation token has not expired and sets `confirmation_sent_at`
   field to nil, marking the user as confirmed.
-
-  TODO: Need to support a resend confirmation email.
-
   """
   def edit(conn, params) do
     user_schema = Config.user_schema

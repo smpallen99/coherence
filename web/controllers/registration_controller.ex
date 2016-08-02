@@ -46,5 +46,4 @@ defmodule Coherence.RegistrationController do
         |> render("new.html", changeset: changeset)
     end
   end
-
 end

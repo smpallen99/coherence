@@ -77,15 +77,15 @@ defmodule Mix.Tasks.Coherence.InstallTest do
     end
   end
 
-  test "generates files for authenticatable recoverable registerable" do
-    in_tmp "generates_files_for_authenticatable_recoverable_registerable", fn ->
-      ~w(--repo=TestCoherence.Repo  --authenticatable --recoverable --registerable --log-only --no-migrations)
+  test "generates files for authenticatable recoverable registerable confirmable" do
+    in_tmp "generates_files_for_authenticatable_recoverable_registerable_confirmable", fn ->
+      ~w(--repo=TestCoherence.Repo  --authenticatable --recoverable --registerable --confirmable --log-only --no-migrations)
       |> Mix.Tasks.Coherence.Install.run
 
-      ~w(session_view.ex coherence_view.ex layout_view.ex password_view.ex registration_view.ex email_view.ex coherence_view_helpers.ex)
+      ~w(session_view.ex coherence_view.ex layout_view.ex password_view.ex registration_view.ex email_view.ex confirmation_view.ex coherence_view_helpers.ex)
       |> assert_file_list(@all_views, "web/views/coherence/")
 
-      ~w(layout session password registration email)
+      ~w(layout session password registration email confirmation)
       |> assert_dirs(@all_template_dirs, "web/templates/coherence/")
 
     end

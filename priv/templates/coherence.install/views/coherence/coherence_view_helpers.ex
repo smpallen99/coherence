@@ -12,6 +12,7 @@ defmodule <%= base %>.Coherence.ViewHelpers do
   @unlock_link   "Send an unlock email"
   @register_link "Need An Account?"
   @invite_link   "Invite Someone"
+  @confirm_link  "Resend confirmation email"
   @signin_link   "Sign In"
   @signout_link  "Sign Out"
 
@@ -23,7 +24,7 @@ defmodule <%= base %>.Coherence.ViewHelpers do
   ## Examples
 
       coherence_links(conn, :new_session)
-      Generates: #{@recover_link}  #{@unlock_link} #{@register_link}
+      Generates: #{@recover_link}  #{@unlock_link} #{@register_link} #{@confirm_link}
 
       coherence_links(conn, :new_session, recover: "Password reset", register: false
       Generates: Password reset  #{@unlock_link}
@@ -37,15 +38,17 @@ defmodule <%= base %>.Coherence.ViewHelpers do
   """
   def coherence_links(conn, which, opts \\ [])
   def coherence_links(conn, :new_session, opts) do
-    recover?  = Keyword.get opts, :recover, @recover_link
-    unlock?   = Keyword.get opts, :unlock, @unlock_link
-    register? = Keyword.get opts, :register, @register_link
+    recover_link  = Keyword.get opts, :recover, @recover_link
+    unlock_link   = Keyword.get opts, :unlock, @unlock_link
+    register_link = Keyword.get opts, :register, @register_link
+    confirm_link  = Keyword.get opts, :confirm, @confirm_link
 
     user_schema = Coherence.Config.user_schema
     [
-      recover_link(conn, user_schema, recover?),
-      unlock_link(conn, user_schema, unlock?),
-      register_link(conn, user_schema, register?)
+      recover_link(conn, user_schema, recover_link),
+      unlock_link(conn, user_schema, unlock_link),
+      register_link(conn, user_schema, register_link),
+      confirmation_link(conn, user_schema, confirm_link)
     ]
     |> List.flatten
     |> concat([])
@@ -112,6 +115,14 @@ defmodule <%= base %>.Coherence.ViewHelpers do
 
   def invitation_link(conn, text \\ @invite_link) do
     link text, to: coherence_path(@helpers, :invitation_path, conn, :new)
+  end
+
+  def confirmation_link(_conn, _user_schema, false), do: []
+  def confirmation_link(conn, user_schema, text) do
+    if user_schema.confirmable?, do: [confirmation_link(conn, text)], else: []
+  end
+  def confirmation_link(conn, text \\ @confirm_link) do
+    link(text, to: coherence_path(@helpers, :confirmation_path, conn, :new))
   end
 
   def required_label(f, name, opts \\ []) do

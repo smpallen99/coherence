@@ -83,7 +83,7 @@ defmodule Coherence.Router do
           resources "/passwords", Coherence.PasswordController, only: [:new, :create, :edit, :update, :delete]
         end
         if Coherence.Config.has_option(:confirmable) do
-          resources "/confirmations", Coherence.ConfirmationController, only: [:edit]
+          resources "/confirmations", Coherence.ConfirmationController, only: [:edit, :new, :create]
         end
         if Coherence.Config.has_option(:unlockable_with_token) do
           resources "/unlocks", Coherence.UnlockController, only: [:new, :create, :edit]

@@ -439,7 +439,8 @@ config :coherence, #{base}.Coherence.Mailer,
     password: {:recoverable, ~w(edit new)},
     registration: {:registerable, ~w(new)},
     session: {:authenticatable, ~w(new)},
-    unlock: {:unlockable_with_token, ~w(new)}
+    unlock: {:unlockable_with_token, ~w(new)},
+    confirmation: {:confirmable, ~w(new)}
   ]
   def template_files, do: @template_files
 

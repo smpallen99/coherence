@@ -48,10 +48,10 @@ defmodule Mix.Tasks.Coherence.Clean do
   alias Mix.Tasks.Coherence.Install
 
   @config_file "config/config.exs"
-  @remove_opts ~w(views templates models controllers emails web migrations config dry_run)a
+  @remove_opts ~w(views templates models controllers emails web migrations config)a
   @default_opts ~w(confirm)a
   @clean_opts [{:options, :string}]
-  @switches Enum.map([:all, :confirm_once | @remove_opts] ++ @default_opts, &({&1, :boolean})) ++ @clean_opts
+  @switches Enum.map([:all, :confirm_once | @remove_opts] ++ @default_opts, &({&1, :boolean})) ++ @clean_opts ++ [dry_run: :boolean]
 
   def run(args) do
     OptionParser.parse(args, switches: @switches)
