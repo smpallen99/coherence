@@ -11,6 +11,14 @@ defmodule <%= base %>.Coherence.SessionController do
   import Ecto.Query
   import Rememberable, only: [hash: 1, gen_cookie: 3]
 
+  plug :layout_view
+
+  @doc false
+  def layout_view(conn, _) do
+    conn
+    |> put_layout({Coherence.LayoutView, "app.html"})
+    |> put_view(Coherence.SessionView)
+  end
 
   @doc false
   def login_cookie, do: "coherence_login"

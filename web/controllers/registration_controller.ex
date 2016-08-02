@@ -13,6 +13,15 @@ defmodule Coherence.RegistrationController do
   plug Coherence.ValidateOption, :registerable
   plug :scrub_params, "registration" when action in [:create, :update]
 
+  plug :layout_view
+
+  @doc false
+  def layout_view(conn, _) do
+    conn
+    |> put_layout({Coherence.LayoutView, "app.html"})
+    |> put_view(Coherence.RegistrationView)
+  end
+
   @doc """
   Render the new user form.
   """
@@ -20,8 +29,6 @@ defmodule Coherence.RegistrationController do
     user_schema = Config.user_schema
     cs = user_schema.changeset(user_schema.__struct__)
     conn
-    |> put_layout({Coherence.LayoutView, "app.html"})
-    |> put_view(Coherence.RegistrationView)
     |> render(:new, email: "", changeset: cs)
   end
 
@@ -41,8 +48,6 @@ defmodule Coherence.RegistrationController do
         |> redirect(to: logged_out_url(conn))
       {:error, changeset} ->
         conn
-        |> put_layout({Coherence.LayoutView, "app.html"})
-        |> put_view(Coherence.RegistrationView)
         |> render("new.html", changeset: changeset)
     end
   end

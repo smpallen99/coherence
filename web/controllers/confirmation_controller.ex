@@ -11,6 +11,15 @@ defmodule Coherence.ConfirmationController do
 
   plug Coherence.ValidateOption, :confirmable
 
+  plug :layout_view
+
+  @doc false
+  def layout_view(conn, _) do
+    conn
+    |> put_layout({Coherence.LayoutView, "app.html"})
+    |> put_view(Coherence.ConfirmationView)
+  end
+
   @doc """
   Handle resending a confirmation email.
 
@@ -20,8 +29,6 @@ defmodule Coherence.ConfirmationController do
     user_schema = Config.user_schema
     cs = user_schema.changeset(user_schema.__struct__)
     conn
-    |> put_layout({Coherence.LayoutView, "app.html"})
-    |> put_view(Coherence.ConfirmationView)
     |> render(:new, [email: "", changeset: cs])
   end
 
@@ -44,8 +51,6 @@ defmodule Coherence.ConfirmationController do
         if user_schema.confirmed?(user) do
           conn
           |> put_flash(:error, "Account already confirmed.")
-          |> put_layout({Coherence.LayoutView, "app.html"})
-          |> put_view(Coherence.ConfirmationView)
           |> render(:new, [email: "", changeset: changeset])
         else
           conn
