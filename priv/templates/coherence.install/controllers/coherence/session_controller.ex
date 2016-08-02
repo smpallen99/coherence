@@ -87,7 +87,7 @@ defmodule <%= base %>.Coherence.SessionController do
       else
         conn
         |> put_flash(:error, "You must confirm your account before you can login.")
-        |> redirect(to: logged_out_url(conn))
+        |> render("new.html", [{login_field, login}, remember: rememberable_enabled?])
       end
     else
       conn
