@@ -38,7 +38,7 @@ defmodule <%= base %>.Coherence.PasswordController do
   @doc """
   Create the recovery token and send the email
   """
-  def create(conn, %{"password" => password_params}) do
+  def create(conn, %{"password" => password_params} = params) do
     user_schema = Config.user_schema
     email = password_params["email"]
     user = where(user_schema, [u], u.email == ^email)
@@ -63,7 +63,7 @@ defmodule <%= base %>.Coherence.PasswordController do
 
         conn
         |> put_flash(:info, "Reset email sent. Check your email for a reset link.")
-        |> redirect(to: logged_out_url(conn))
+        |> redirect_to(:password_create, params)
     end
   end
 
@@ -99,7 +99,7 @@ defmodule <%= base %>.Coherence.PasswordController do
   @doc """
   Verify the passwords and update the database
   """
-  def update(conn, %{"password" => password_params}) do
+  def update(conn, %{"password" => password_params} = params) do
     user_schema = Config.user_schema
     repo = Config.repo
     token = password_params["reset_password_token"]
@@ -119,7 +119,7 @@ defmodule <%= base %>.Coherence.PasswordController do
 
             conn
             |> put_flash(:info, "Password updated successfully.")
-            |> redirect(to: logged_out_url(conn))
+            |> redirect_to(:password_update, params)
           {:error, changeset} ->
             conn
             |> render("edit.html", changeset: changeset)

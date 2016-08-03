@@ -75,18 +75,13 @@ defmodule <%= base %>.Coherence.SessionController do
     lockable? = user_schema.lockable?
     if user != nil and user_schema.checkpw(password, Map.get(user, Config.password_hash)) do
       if confirmed? user do
-        url = case get_session(conn, "user_return_to") do
-          nil -> "/"
-          value -> value
-        end
         unless lockable? and user_schema.locked?(user) do
           apply(Config.auth_module, Config.create_login, [conn, user, [id_key: Config.schema_key]])
           |> reset_failed_attempts(user, lockable?)
           |> track_login(user, user_schema.trackable?)
-          |> put_flash(:notice, "Signed in successfully.")
-          |> put_session("user_return_to", nil)
           |> save_rememberable(user, remember)
-          |> redirect(to: url)
+          |> put_flash(:notice, "Signed in successfully.")
+          |> redirect_to(:session_create, params)
         else
           conn
           |> put_flash(:error, "Too many failed login attempts. Account has been locked.")
@@ -112,12 +107,12 @@ defmodule <%= base %>.Coherence.SessionController do
 
   Delete the user's session, track the logout and delete the rememberable cookie.
   """
-  def delete(conn, _params) do
+  def delete(conn, params) do
     user = conn.assigns[Config.assigns_key]
     apply(Config.auth_module, Config.delete_login, [conn])
     |> track_logout(user, user.__struct__.trackable?)
     |> delete_rememberable(user)
-    |> redirect(to: logged_out_url(conn))
+    |> redirect_to(:session_delete, params)
   end
 
   defp track_login(conn, _, false), do: conn

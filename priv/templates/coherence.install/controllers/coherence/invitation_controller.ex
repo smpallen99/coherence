@@ -41,7 +41,7 @@ defmodule <%= base %>.Coherence.InvitationController do
   Creates a new invitation token, save it to the database and send
   the invitation email.
   """
-  def create(conn, %{"invitation" =>  invitation_params}) do
+  def create(conn, %{"invitation" =>  invitation_params} = params) do
     repo = Config.repo
     user_schema = Config.user_schema
     email = invitation_params["email"]
@@ -56,7 +56,7 @@ defmodule <%= base %>.Coherence.InvitationController do
             send_user_email :invitation, invitation, url
             conn
             |> put_flash(:info, "Invitation sent.")
-            |> redirect(to: logged_out_url(conn))
+            |> redirect_to(:invitation_create, params)
           {:error, changeset} ->
             {conn, changeset} = case repo.one from i in Invitation, where: i.email == ^email do
               nil -> {conn, changeset}
@@ -134,7 +134,7 @@ defmodule <%= base %>.Coherence.InvitationController do
 
   Resent the invitation based on the invitation's id.
   """
-  def resend(conn, %{id: id}) do
+  def resend(conn, %{"id" => id}) do
     case Config.repo.get(Invitation, id) do
       nil ->
         conn

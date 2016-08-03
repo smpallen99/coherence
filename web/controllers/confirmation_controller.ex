@@ -36,7 +36,7 @@ defmodule Coherence.ConfirmationController do
   @doc """
   Create a new confirmation token and resend the email.
   """
-  def create(conn, %{"confirmation" => password_params}) do
+  def create(conn, %{"confirmation" => password_params} = params) do
     user_schema = Config.user_schema
     email = password_params["email"]
     user = where(user_schema, [u], u.email == ^email)
@@ -56,7 +56,7 @@ defmodule Coherence.ConfirmationController do
         else
           conn
           |> send_confirmation(user, user_schema)
-          |> redirect(to: logged_out_url(conn))
+          |> redirect_to(:confirmation_create, params)
         end
     end
   end
@@ -77,12 +77,12 @@ defmodule Coherence.ConfirmationController do
         changeset = user_schema.changeset(user_schema.__struct__)
         conn
         |> put_flash(:error, "Invalid confirmation token.")
-        |> redirect(to: logged_out_url(conn))
+        |> redirect_to(:confirmation_edit_invalid, params)
       user ->
         if expired? user.confirmation_sent_at, days: Config.confirmation_token_expire_days do
           conn
           |> put_flash(:error, "Confirmation token expired.")
-          |> redirect(to: logged_out_url(conn))
+          |> redirect_to(:confirmation_edit_expired, params)
         else
           changeset = user_schema.changeset(user, %{
             confirmation_token: nil,
@@ -92,14 +92,13 @@ defmodule Coherence.ConfirmationController do
             {:ok, _user} ->
               conn
               |> put_flash(:info, "User account confirmed successfully.")
-              |> redirect(to: logged_out_url(conn))
+              |> redirect_to(:confirmation_edit, params)
             {:error, _changeset} ->
               conn
               |> put_flash(:error, "Problem confirming user account. Please contact the system administrator.")
-              |> redirect(to: logged_out_url(conn))
+              |> redirect_to(:confirmation_edit_error, params)
           end
         end
     end
   end
-
 end

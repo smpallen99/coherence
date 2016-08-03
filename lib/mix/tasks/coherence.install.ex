@@ -147,6 +147,7 @@ defmodule Mix.Tasks.Coherence.Install do
     |> gen_coherence_views
     |> gen_coherence_templates
     |> gen_coherence_mailer
+    |> gen_redirects
     |> gen_coherence_controllers
     |> touch_config                # work around for config file not getting recompiled
     |> print_instructions
@@ -404,6 +405,15 @@ config :coherence, #{base}.Coherence.Mailer,
     config
   end
   defp gen_coherence_web(config), do: config
+
+  defp gen_redirects(%{boilerplate: true, binding: binding} = config) do
+    Mix.Phoenix.copy_from paths(),
+      "priv/templates/coherence.install/controllers/coherence", "", binding, [
+        {:eex, "redirects.ex", "web/controllers/coherence/redirects.ex"},
+      ]
+    config
+  end
+  defp gen_redirects(config), do: config
 
   ################
   # Views

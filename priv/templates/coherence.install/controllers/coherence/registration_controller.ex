@@ -39,14 +39,14 @@ defmodule <%= base %>.Coherence.RegistrationController do
   Creates the new user account. Create and send a confirmation if
   this option is enabled.
   """
-  def create(conn, %{"registration" => registration_params}) do
+  def create(conn, %{"registration" => registration_params} = params) do
     user_schema = Config.user_schema
     cs = user_schema.changeset(user_schema.__struct__, registration_params)
     case Config.repo.insert(cs) do
       {:ok, user} ->
         conn
         |> send_confirmation(user, user_schema)
-        |> redirect(to: logged_out_url(conn))
+        |> redirect_to(:registration_create, params)
       {:error, changeset} ->
         conn
         |> render("new.html", changeset: changeset)

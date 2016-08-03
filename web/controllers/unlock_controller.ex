@@ -35,7 +35,7 @@ defmodule Coherence.UnlockController do
   @doc """
   Create and send the unlock token.
   """
-  def create(conn, %{"unlock" => unlock_params}) do
+  def create(conn, %{"unlock" => unlock_params} = params) do
     user_schema = Config.user_schema
     token = random_string 48
     url = router_helpers.unlock_url(conn, :edit, token)
@@ -54,11 +54,11 @@ defmodule Coherence.UnlockController do
             send_user_email :unlock, user, url
             conn
             |> put_flash(:info, "Unlock Instructions sent.")
-            |> redirect(to: logged_out_url(conn))
+            |> redirect_to(:unlock_create, params)
           else
             conn
             |> put_flash(:error, "Your account is not locked.")
-            |> redirect(to: logged_out_url(conn))
+            |> redirect_to(:unlock_create_not_locked, params)
           end
         {:error, changeset} ->
           render conn, "new.html", changeset: changeset
@@ -66,7 +66,7 @@ defmodule Coherence.UnlockController do
     else
       conn
       |> put_flash(:error, "Invalid email or password.")
-      |> redirect(to: logged_out_url(conn))
+      |> redirect_to(:unlock_create_invalid, params)
     end
   end
 
@@ -82,18 +82,18 @@ defmodule Coherence.UnlockController do
       nil ->
         conn
         |> put_flash(:error, "Invalid unlock token.")
-        |> redirect(to: logged_out_url(conn))
+        |> redirect_to(:unlock_edit_invalid, params)
       user ->
         if user_schema.locked? user do
           user_schema.unlock! user
           conn
           |> put_flash(:info, "Your account has been unlocked")
-          |> redirect(to: logged_out_url(conn))
+          |> redirect_to(:unlock_edit, params)
         else
           clear_unlock_values(user, user_schema)
           conn
           |> put_flash(:error, "Account is not locked.")
-          |> redirect(to: logged_out_url(conn))
+          |> redirect_to(:unlock_edit_not_locked, params)
         end
     end
   end

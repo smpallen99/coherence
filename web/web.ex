@@ -19,6 +19,7 @@ defmodule Coherence.Web do
       import Ecto.Query
 
       alias Coherence.Config
+      require Redirects
     end
   end
 
