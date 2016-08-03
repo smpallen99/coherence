@@ -4,7 +4,8 @@ defmodule Coherence.ControllerHelpers do
   """
   alias Coherence.Config
   require Logger
-  import Phoenix.Controller, only: [put_flash: 3]
+  import Phoenix.Controller, only: [put_flash: 3, redirect: 2]
+  import Plug.Conn, only: [halt: 1]
 
   @lockable_failure "Failed to update lockable attributes "
 
@@ -158,4 +159,20 @@ defmodule Coherence.ControllerHelpers do
       {:error, changeset}
     end
   end
+
+
+  @doc """
+  Plug to redirect already logged in users.
+  """
+  def redirect_logged_in(conn, _params) do
+    if Coherence.logged_in?(conn) do
+      conn
+      |> put_flash(:info, "Already logged in." )
+      |> redirect(to: logged_out_url(conn))
+      |> halt
+    else
+      conn
+    end
+  end
+
 end

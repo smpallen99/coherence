@@ -14,6 +14,7 @@ defmodule <%= base %>.Coherence.UnlockController do
 
   plug Coherence.ValidateOption, :unlockable_with_token
   plug :layout_view
+  plug :redirect_logged_in when action in [:new, :create, :edit]
 
   @doc false
   def layout_view(conn, _) do

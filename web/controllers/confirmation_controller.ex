@@ -12,6 +12,7 @@ defmodule Coherence.ConfirmationController do
   plug Coherence.ValidateOption, :confirmable
 
   plug :layout_view
+  plug :redirect_logged_in when action in [:new]
 
   @doc false
   def layout_view(conn, _) do

@@ -16,6 +16,7 @@ defmodule <%= base %>.Coherence.PasswordController do
   use Timex
 
   plug :layout_view
+  plug :redirect_logged_in when action in [:new, :create, :edit, :update]
 
   @doc false
   def layout_view(conn, _) do
@@ -61,7 +62,7 @@ defmodule <%= base %>.Coherence.PasswordController do
         send_user_email :password, user, url
 
         conn
-        |> put_flash(:info, "Reset email send. Check your email for a reset link.")
+        |> put_flash(:info, "Reset email sent. Check your email for a reset link.")
         |> redirect(to: logged_out_url(conn))
     end
   end

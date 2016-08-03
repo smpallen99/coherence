@@ -12,6 +12,7 @@ defmodule Coherence.SessionController do
   import Rememberable, only: [hash: 1, gen_cookie: 3]
 
   plug :layout_view
+  plug :redirect_logged_in when action in [:new, :create]
 
   @doc false
   def layout_view(conn, _) do

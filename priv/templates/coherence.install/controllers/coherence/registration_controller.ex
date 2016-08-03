@@ -14,6 +14,7 @@ defmodule <%= base %>.Coherence.RegistrationController do
   plug :scrub_params, "registration" when action in [:create, :update]
 
   plug :layout_view
+  plug :redirect_logged_in when action in [:new, :create]
 
   @doc false
   def layout_view(conn, _) do
