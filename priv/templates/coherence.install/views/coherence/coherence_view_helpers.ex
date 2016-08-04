@@ -66,7 +66,7 @@ defmodule <%= base %>.Coherence.ViewHelpers do
       [
         content_tag(list_tag, current_user.name),
         content_tag(list_tag,
-          link(signout, to: coherence_path(@helpers, :session_path, conn, :delete, current_user), method: :delete, class: signout_class))
+          link(signout, to: coherence_path(@helpers, :session_path, conn, :delete), method: :delete, class: signout_class))
       ]
     else
       signin_link = content_tag(list_tag, link(signin, to: coherence_path(@helpers, :session_path, conn, :new)))

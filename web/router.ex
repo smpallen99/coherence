@@ -102,7 +102,7 @@ defmodule Coherence.Router do
           get "/invitations/:id/resend", Coherence.InvitationController, :resend
         end
         if Coherence.Config.has_option(:authenticatable) do
-          resources "/sessions", Coherence.SessionController, only: [:delete]
+          delete "/sessions", Coherence.SessionController, :delete
         end
       end
     end
