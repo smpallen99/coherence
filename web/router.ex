@@ -13,30 +13,30 @@ defmodule Coherence.Router do
         pipeline :browser do
           plug :accepts, ["html"]
           # ...
-          plug Coherence.Authentication.Session, login: true
+          plug Coherence.Authentication.Session           # Add this
         end
 
-        pipeline :public do
+        pipeline :protected do
           plug :accepts, ["html"]
           # ...
-          plug Coherence.Authentication.Session
-        end
-
-        scope "/" do
-          pipe_through :public
-          coherence_routes :public
+          plug Coherence.Authentication.Session, protected: true
         end
 
         scope "/" do
           pipe_through :browser
-          coherence_routes :private
+          coherence_routes
+        end
+
+        scope "/" do
+          pipe_through :protected
+          coherence_routes :protected
         end
         # ...
       end
 
   Alternatively, you may want to use the login plug in individual controllers. In
-  this case, you can have one pipeline, one scope and call `coherence_routes` without
-  any parameters. In this case, it will add both the public and private routes.
+  this case, you can have one pipeline, one scope and call `coherence_routes :all`.
+  In this case, it will add both the public and protected routes.
   """
 
   defmacro __using__(_opts \\ []) do
@@ -54,20 +54,23 @@ defmodule Coherence.Router do
 
       # Routes that don't require authentication
       scope "/" do
-        pipe_through :public
-        coherence_routes :public
+        pipe_through :browser
+        coherence_routes
       end
 
       # Routes that require authentication
       scope "/" do
-        pipe_through :browser
-        coherence_routes :private
+        pipe_through :protected
+        coherence_routes :protected
       end
   """
   defmacro coherence_routes(mode \\ [], opts \\ []) do
     {mode, _opts} = case mode do
+      :private ->
+        IO.warn "coherence_routes :private has been deprecated. Please use :protected instead."
+        {:protected, opts}
       mode when is_atom(mode) -> {mode, opts}
-      []                      -> {:all, []}
+      []                      -> {:public, []}
       opts when is_list(opts) -> {:all, opts}
     end
     quote do
@@ -93,7 +96,7 @@ defmodule Coherence.Router do
           post "/invitations/create", Coherence.InvitationController, :create_user
         end
       end
-      if mode == :all or mode == :private do
+      if mode == :all or mode == :protected do
         if Coherence.Config.has_option(:invitable) do
           resources "/invitations", Coherence.InvitationController, only: [:new, :create]
           get "/invitations/:id/resend", Coherence.InvitationController, :resend

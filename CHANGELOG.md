@@ -1,9 +1,25 @@
 # Changelog
 
-## 2.0.1  ()
+## 0.3.0  (2016-8-xx)
+
+See these `0.2.0` to `0.3.0` [upgrade instructions](https://gist.github.com/smpallen99/ae80753a5cdea5d20a1c03639b9a801e) to bring your existing app up to speed.
+
+* Enhancements
+  * All controller redirects are now customizable
+  * Logged in users trying to view pages meant for unauthenticated users now get redirected to logged_out_url (session new, register new, etc.)
+  * Support resend confirmation instructions
 
 * Bug Fixes
   * rename database column `confirmation_send_at` `to confirmation_sent_at`
+  * fix an coherence.clean --all doing a dry-run
+
+* Deprecations
+  * `coherence_routes :public` is replaced with `coherence_routes`
+  * `coherence_routes :private` is replaced with `coherence_routes :protected`
+
+* Backward incompatible changes
+  * `coherence_routes` has changed from default `:all` to public routes
+  * the rename of database column `confirmation_send_at` `to confirmation_sent_at` requires that you generate a new migration to alter the table.
 
 ## 0.2.0  (2016-7-30)
 

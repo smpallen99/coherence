@@ -109,14 +109,31 @@ defmodule Coherence.Authentication.Session do
     |> delete_token_session
   end
 
+  defp default_login_callback do
+    module = Application.get_env(:coherence, :module)
+    |> Module.concat(Coherence.SessionController)
+
+    if :erlang.function_exported(module, :login_callback, 1) do
+      &module.login_callback/1
+    else
+      &Coherence.SessionController.login_callback/1
+    end
+  end
+
   @doc false
   def init(opts) do
-    # TODO: need to fix the default login callback
     login = case opts[:login] do
-      true  -> &Coherence.SessionController.login_callback/1
-      other -> other
+      true  -> default_login_callback
+      fun when is_function(fun) -> fun
+      other ->
+        case opts[:protected] do
+          nil -> other
+          true -> default_login_callback
+          other -> other
+        end
     end
     rememberable? = if Config.has_option(:rememberable), do: Config.user_schema.rememberable?, else: false
+    IO.puts "..... login: #{inspect login}, rememberable?: #{inspect rememberable?}"
     %{
       login: login,
       error: Keyword.get(opts, :error, "HTTP Authentication Required"),

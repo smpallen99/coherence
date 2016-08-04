@@ -87,49 +87,73 @@ defmodule MyProject.Router do
     plug :fetch_flash
     plug :protect_from_forgery
     plug :put_secure_browser_headers
-    plug Coherence.Authentication.Session, login: true
+    plug Coherence.Authentication.Session  # Add this
   end
 
-  pipeline :public do
+  pipeline :protected do
     plug :accepts, ["html"]
     plug :fetch_session
     plug :fetch_flash
     plug :protect_from_forgery
     plug :put_secure_browser_headers
-    plug Coherence.Authentication.Session
-  end
-
-  # Add this block
-  scope "/" do
-    pipe_through :public
-    coherence_routes :public
+    plug Coherence.Authentication.Session, protected: true
   end
 
   # Add this block
   scope "/" do
     pipe_through :browser
-    coherence_routes :private
+    coherence_routes
+  end
+
+  # Add this block
+  scope "/" do
+    pipe_through :protected
+    coherence_routes :protected
   end
 
   scope "/", MyProject do
-    pipe_through :public
+    pipe_through :browser
 
     get "/", PageController, :index
-    # add public resource below
+    # add public resources below
   end
 
   scope "/", MyProject do
-    pipe_through :browser
+    pipe_through :protected
 
     # add protected resources below
     resources "/privates", MyProject.PrivateController
   end
 end
 ```
-**Important**: Note the name spacing above. Unless you generate coherence controllers, ensure that the scopes, `scope "/" do`, do not include your projects' scope here. If so, the coherence routes will not work!
-
+**Important**: Note the name-spacing above. Unless you generate coherence controllers, ensure that the scopes, `scope "/" do`, do not include your projects' scope here. If so, the coherence routes will not work!
 
 If the installer created a user model (one did not already exist), there is nothing you need to do with that generated file. Otherwise, update your existing model like this:
+
+An alternative approach is add the authorization plugs to individual controllers that require authentication. You will want to use this approach if you require authorization for a subset of actions in a controller.
+
+For example, lets say you want to show a list of products for everyone visiting the site, but only want authenticated users to be able to create, update, and delete products. You could do the following:
+
+Ensure the following is in your `web/router.ex` file:
+
+```elixir
+  scope "/", MyProject do
+    pipe_through :browser
+    resources "/products", ProductController
+  end
+```
+
+In your product controller add the following:
+
+```elixir
+defmodule MyProject.ProductController do
+  use MyProject.Web, :controller
+  alias MyProject.Product
+
+  Coherence.Authentication.Session, protected: true when action != :index
+
+  # ...
+```
 
 ```elixir
 # web/models/user.ex
