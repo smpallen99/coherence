@@ -13,29 +13,29 @@ defmodule TestCoherence.Router do
     plug :fetch_flash
     # plug :protect_from_forgery
     plug :put_secure_browser_headers
-    plug Coherence.Authentication.Session, db_model: TestCoherence.User, rememberable: true, login: &__MODULE__.login_callback/1
+    plug Coherence.Authentication.Session, db_model: TestCoherence.User
   end
 
-  pipeline :public do
+  pipeline :protected do
     plug :accepts, ["html", "text"]
     plug :fetch_session
     plug :fetch_flash
     # plug :protect_from_forgery
     plug :put_secure_browser_headers
-    plug Coherence.Authentication.Session, db_model: TestCoherence.User, login: false
+    plug Coherence.Authentication.Session, db_model: TestCoherence.User, rememberable: true, login: &__MODULE__.login_callback/1
   end
 
   scope "/" do
     pipe_through :browser
-    coherence_routes :private
-
-    get "/dummies/new", TestCoherence.DummyController, :new
-  end
-  scope "/" do
-    pipe_through :public
-    coherence_routes :public
+    coherence_routes
 
     get "/dummies", TestCoherence.DummyController, :index
+  end
+  scope "/" do
+    pipe_through :protected
+    coherence_routes :protected
+
+    get "/dummies/new", TestCoherence.DummyController, :new
   end
 end
 
