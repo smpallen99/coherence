@@ -133,7 +133,6 @@ defmodule Coherence.Authentication.Session do
         end
     end
     rememberable? = if Config.has_option(:rememberable), do: Config.user_schema.rememberable?, else: false
-    IO.puts "..... login: #{inspect login}, rememberable?: #{inspect rememberable?}"
     %{
       login: login,
       error: Keyword.get(opts, :error, "HTTP Authentication Required"),
