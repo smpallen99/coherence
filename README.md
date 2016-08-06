@@ -130,6 +130,30 @@ end
 
 If the installer created a user model (one did not already exist), there is nothing you need to do with that generated file. Otherwise, update your existing model like this:
 
+```elixir
+# web/models/user.ex
+
+defmodule MyProject.User do
+  use MyProject.Web, :model
+  use Coherence.Schema                                    # Add this
+
+  schema "users" do
+    field :name, :string
+    field :email, :string
+    coherence_schema                                      # Add this
+
+    timestamps
+  end
+
+  def changeset(model, params \\ %{}) do
+    model
+    |> cast(params, [:name, :email] ++ coherence_fields)  # Add this
+    |> validate_required([:name, :email])
+    |> validate_coherence(params)                         # Add this
+  end
+end
+```
+
 An alternative approach is add the authorization plugs to individual controllers that require authentication. You will want to use this approach if you require authorization for a subset of actions in a controller.
 
 For example, lets say you want to show a list of products for everyone visiting the site, but only want authenticated users to be able to create, update, and delete products. You could do the following:
@@ -153,30 +177,6 @@ defmodule MyProject.ProductController do
   Coherence.Authentication.Session, protected: true when action != :index
 
   # ...
-```
-
-```elixir
-# web/models/user.ex
-
-defmodule MyProject.User do
-  use MyProject.Web, :model
-  use Coherence.Schema                                    # Add this
-
-  schema "users" do
-    field :name, :string
-    field :email, :string
-    coherence_schema                                      # Add this
-
-    timestamps
-  end
-
-  def changeset(model, params \\ %{}) do
-    model
-    |> cast(params, [:name, :email] ++ coherence_fields)  # Add this
-    |> validate_required([:name, :email])
-    |> validate_coherence(params)                         # Add this
-  end
-end
 ```
 
 ## Option Overview
