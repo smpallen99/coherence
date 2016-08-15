@@ -32,6 +32,10 @@ defmodule Mix.Tasks.Coherence.InstallTest do
       assert_file "web/controllers/coherence/session_controller.ex", fn file ->
         assert file =~ "defmodule TestCoherence.Coherence.SessionController do"
       end
+
+      assert_file "web/controllers/coherence/redirects.ex", fn file ->
+        assert file =~ "import TestCoherence.Router.Helpers"
+      end
     end
   end
 
