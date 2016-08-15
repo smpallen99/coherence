@@ -577,7 +577,7 @@ config :coherence, #{base}.Coherence.Mailer,
         plug Coherence.Authentication.Session  # Add this
       end
 
-      pipeline :public do
+      pipeline :protected do
         plug :accepts, ["html"]
         plug :fetch_session
         plug :fetch_flash
