@@ -574,7 +574,7 @@ config :coherence, #{base}.Coherence.Mailer,
         plug :fetch_flash
         plug :protect_from_forgery
         plug :put_secure_browser_headers
-        plug Coherence.Authentication.Session, login: true  # Add this
+        plug Coherence.Authentication.Session  # Add this
       end
 
       pipeline :public do
@@ -583,29 +583,30 @@ config :coherence, #{base}.Coherence.Mailer,
         plug :fetch_flash
         plug :protect_from_forgery
         plug :put_secure_browser_headers
-        plug Coherence.Authentication.Session               # Add this
-      end
-
-      # Add this block
-      scope "/"#{namespace} do
-        pipe_through :public
-        coherence_routes :public
+        plug Coherence.Authentication.Session, protected: true  # Add this
       end
 
       # Add this block
       scope "/"#{namespace} do
         pipe_through :browser
-        coherence_routes :private
+        coherence_routes
+      end
+
+      # Add this block
+      scope "/"#{namespace} do
+        pipe_through :protected
+        coherence_routes :protected
       end
 
       scope "/", #{base} do
-        pipe_through :public
+        pipe_through :browser
         get "/", PageController, :index
+        # Add public routes below
       end
 
       scope "/", #{base} do
-        pipe_through :browser
-        # Add your protected routes here
+        pipe_through :protected
+        # Add protected routes below
       end
     end
     """
