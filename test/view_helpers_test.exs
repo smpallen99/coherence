@@ -8,6 +8,7 @@ defmodule CoherenceTest.ViewHelpers do
   @recover_link  "Forgot your password?"
   @unlock_link   "Send an unlock email"
   @register_link "Need An Account?"
+  @confirmation_link "Resend confirmation email"
   @invite_link   "Invite Someone"
   @signin_link   "Sign In"
   @signout_link  "Sign Out"
@@ -43,33 +44,36 @@ defmodule CoherenceTest.ViewHelpers do
   test "coherence_links :new_session defaults", %{conn: conn} do
     conn = Plug.Conn.assign conn, :locked, true
 
-    [result1, "&nbsp; | &nbsp;", result2, "&nbsp; | &nbsp;",  result3] =
+    [result1, "&nbsp; | &nbsp;", result2, "&nbsp; | &nbsp;",  result3, "&nbsp; | &nbsp;", result4] =
       ViewHelpers.coherence_links(conn, :new_session)
       |> Enum.map(&Phoenix.HTML.safe_to_string/1)
 
     assert floki_link(result1) == {"/passwords/new", @recover_link}
     assert floki_link(result2) == {"/unlocks/new", @unlock_link}
     assert floki_link(result3) == {"/registrations/new", @register_link}
+    assert floki_link(result4) == {"/confirmations/new", @confirmation_link}
   end
 
   test "coherence_links :new_session no register", %{conn: conn} do
     conn = Plug.Conn.assign conn, :locked, true
+
+    [result1, "&nbsp; | &nbsp;", result2, "&nbsp; | &nbsp;", result3] =
+      ViewHelpers.coherence_links(conn, :new_session, register: false)
+      |> Enum.map(&Phoenix.HTML.safe_to_string/1)
+
+    assert floki_link(result1) == {"/passwords/new", @recover_link}
+    assert floki_link(result2) == {"/unlocks/new", @unlock_link}
+    assert floki_link(result3) == {"/confirmations/new", @confirmation_link}
+  end
+
+  test "coherence_links :new_session not locked no register", %{conn: conn} do
 
     [result1, "&nbsp; | &nbsp;", result2] =
       ViewHelpers.coherence_links(conn, :new_session, register: false)
       |> Enum.map(&Phoenix.HTML.safe_to_string/1)
 
     assert floki_link(result1) == {"/passwords/new", @recover_link}
-    assert floki_link(result2) == {"/unlocks/new", @unlock_link}
-  end
-
-  test "coherence_links :new_session not locked no register", %{conn: conn} do
-
-    [result1] =
-      ViewHelpers.coherence_links(conn, :new_session, register: false)
-      |> Enum.map(&Phoenix.HTML.safe_to_string/1)
-
-    assert floki_link(result1) == {"/passwords/new", @recover_link}
+    assert floki_link(result2) == {"/confirmations/new", @confirmation_link}
   end
 
   test "coherence_links :layout signed in", %{conn: conn} do
