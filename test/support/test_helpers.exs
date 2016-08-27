@@ -6,7 +6,7 @@ defmodule TestCoherence.TestHelpers do
   def insert_user(attrs \\ %{}) do
     changes = Dict.merge(%{
       name: "Test User",
-      email: "user#{Base.encode16(:crypto.rand_bytes(8))}@example.com",
+      email: "user#{Base.encode16(:crypto.strong_rand_bytes(8))}@example.com",
       password: "supersecret",
       password_confirmation: "supersecret"
       }, attrs)

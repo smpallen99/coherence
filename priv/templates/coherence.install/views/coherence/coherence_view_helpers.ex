@@ -64,7 +64,7 @@ defmodule <%= base %>.Coherence.ViewHelpers do
     if Coherence.logged_in?(conn) do
       current_user = Coherence.current_user(conn)
       [
-        content_tag(list_tag, current_user.name),
+        content_tag(list_tag, profile_link(current_user, conn)),
         content_tag(list_tag,
           link(signout, to: coherence_path(@helpers, :session_path, conn, :delete), method: :delete, class: signout_class))
       ]
@@ -134,4 +134,11 @@ defmodule <%= base %>.Coherence.ViewHelpers do
     end
   end
 
+  defp profile_link(current_user, conn) do
+    if Config.user_schema.registerable? do
+      link current_user.name, to: coherence_path(@helpers, :registration_path, conn, :show, current_user.id)
+    else
+      current_user.name
+    end
+  end
 end

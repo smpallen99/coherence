@@ -73,17 +73,18 @@ defmodule Coherence.Router do
       []                      -> {:public, []}
       opts when is_list(opts) -> {:all, opts}
     end
-    quote do
+    quote location: :keep do
       mode = unquote(mode)
       if mode == :all or mode == :public do
         if Coherence.Config.has_option(:authenticatable) do
           resources "/sessions", Coherence.SessionController, only: [:new, :create]
         end
         if Coherence.Config.has_option(:registerable) do
-          resources "/registrations", Coherence.RegistrationController, only: [:new, :create, :edit, :update, :delete]
+          get "/registrations/new", Coherence.RegistrationController, :new
+          post "/registrations", Coherence.RegistrationController, :create
         end
         if Coherence.Config.has_option(:recoverable) do
-          resources "/passwords", Coherence.PasswordController, only: [:new, :create, :edit, :update, :delete]
+          resources "/passwords", Coherence.PasswordController, only: [:new, :create, :edit, :update]
         end
         if Coherence.Config.has_option(:confirmable) do
           resources "/confirmations", Coherence.ConfirmationController, only: [:edit, :new, :create]
@@ -103,6 +104,13 @@ defmodule Coherence.Router do
         end
         if Coherence.Config.has_option(:authenticatable) do
           delete "/sessions", Coherence.SessionController, :delete
+        end
+        if Coherence.Config.has_option(:registerable) do
+          get "/registrations/:id", Coherence.RegistrationController, :show
+          put "/registrations/:id", Coherence.RegistrationController, :update
+          patch "/registrations/:id", Coherence.RegistrationController, :update
+          get "/registrations/:id/edit", Coherence.RegistrationController, :edit
+          delete "/registrations", Coherence.RegistrationController, :delete
         end
       end
     end

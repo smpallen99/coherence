@@ -79,6 +79,8 @@ defmodule Mix.Tasks.Coherence.Install do
 
   A `--module` option to override the module
 
+  A `--installed-options` option to list the previous install options
+
   ## Disable Options
 
   * `--no-config` -- Don't append to your `config/config.exs` file.
@@ -91,7 +93,6 @@ defmodule Mix.Tasks.Coherence.Install do
 
   """
 
-  # :rememberable not supported yet
   @all_options       ~w(authenticatable recoverable lockable trackable rememberable) ++
                        ~w(unlockable_with_token confirmable invitable registerable)
   @all_options_atoms Enum.map(@all_options, &(String.to_atom(&1)))
@@ -117,7 +118,7 @@ defmodule Mix.Tasks.Coherence.Install do
 
 
   @switches [user: :string, repo: :string, migration_path: :string, model: :string, log_only: :boolean,
-     controllers: :boolean, module: :string] ++ Enum.map(@boolean_options, &({String.to_atom(&1), :boolean}))
+     controllers: :boolean, module: :string, installed_options: :boolean] ++ Enum.map(@boolean_options, &({String.to_atom(&1), :boolean}))
 
   @switch_names Enum.map(@switches, &(elem(&1, 0)))
 
@@ -135,6 +136,10 @@ defmodule Mix.Tasks.Coherence.Install do
     |> do_run
   end
 
+  defp do_run(%{installed_options: true} = config) do
+
+    print_installed_options config
+  end
   defp do_run(config) do
     config
     |> check_for_model
@@ -447,7 +452,7 @@ config :coherence, #{base}.Coherence.Mailer,
     invitation: {:invitable, ~w(edit new)},
     layout: {:all, ~w(app email)},
     password: {:recoverable, ~w(edit new)},
-    registration: {:registerable, ~w(new)},
+    registration: {:registerable, ~w(new edit form show)},
     session: {:authenticatable, ~w(new)},
     unlock: {:unlockable_with_token, ~w(new)},
     confirmation: {:confirmable, ~w(new)}
@@ -705,6 +710,7 @@ config :coherence, #{base}.Coherence.Mailer,
     |> Map.put(:migration_path, opts[:migration_path])
     |> Map.put(:module, opts[:module])
     |> Map.put(:timestamp, timestamp() |> String.to_integer)
+    |> Map.put(:installed_options, opts[:installed_options])
     |> do_default_config(opts)
   end
 
@@ -761,6 +767,26 @@ config :coherence, #{base}.Coherence.Mailer,
   end
 
   def all_options, do: @all_options_atoms
+
+  def print_installed_options(config) do
+    output = ["mix coherence.install"]
+    |> list_config_options(Application.get_env(:coherence, :opts, []))
+    |> Enum.reverse
+    |> Enum.join(" ")
+    |> Mix.shell.info
+  end
+
+  def list_config_options(acc, opts) do
+    opts
+    |> Enum.reduce(acc, &config_option/2)
+  end
+
+  defp config_option(opt, acc) do
+    str = Atom.to_string(opt)
+    |> String.replace("_", "-")
+    ["--" <> str | acc]
+  end
+
 
   # TODO: Remove this later if we never use it
   #

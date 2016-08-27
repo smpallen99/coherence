@@ -108,11 +108,18 @@ defmodule <%= base %>.Coherence.SessionController do
   Delete the user's session, track the logout and delete the rememberable cookie.
   """
   def delete(conn, params) do
+    delete(conn)
+    |> redirect_to(:session_delete, params)
+  end
+
+  @doc """
+  Delete the user session.
+  """
+  def delete(conn) do
     user = conn.assigns[Config.assigns_key]
     apply(Config.auth_module, Config.delete_login, [conn])
     |> track_logout(user, user.__struct__.trackable?)
     |> delete_rememberable(user)
-    |> redirect_to(:session_delete, params)
   end
 
   defp track_login(conn, _, false), do: conn

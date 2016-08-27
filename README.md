@@ -216,9 +216,14 @@ end
 
 Allows anonymous users to register a users email address and password.
 
-Provides `/registrations/new` and `/registrations/create` routes for creating a new registration.
+Provides `/registrations/new`, `create`, `edit`, `update`, `show`, and `delete` routes for managing registrations.
 
-Adds a `Register New Account` to the log-in page.
+Adds the following:
+
+* `Register New Account` to the log-in page.
+* `Link to account page on layout helpers`
+* Show page with `edit` and `delete` links
+* `edit` page
 
 It is recommended that the :confirmable option is used with :registerable to
 ensure a valid email address is captured.
@@ -514,5 +519,3 @@ The source is released under the MIT License.
 Check [LICENSE](LICENSE) for more information.
 
 Much of the authentication code was taken from [PlugAuth](https://github.com/bitgamma/plug_auth), Copyright (c) 2014, Bitgamma OÜ <opensource@bitgamma.com>
-
-

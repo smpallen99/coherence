@@ -178,4 +178,7 @@ defmodule Coherence.ControllerHelpers do
   def redirect_to(conn, path, params) do
     apply(Coherence.Redirects, path, [conn, params])
   end
+  def redirect_to(conn, path, params, user) do
+    apply(Coherence.Redirects, path, [conn, params, user])
+  end
 end

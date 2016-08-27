@@ -92,6 +92,9 @@ defmodule Mix.Tasks.Coherence.InstallTest do
       ~w(layout session password registration email confirmation)
       |> assert_dirs(@all_template_dirs, "web/templates/coherence/")
 
+      for file <- ~w(new edit form show) do
+        assert_file "web/templates/coherence/registration/#{file}.html.eex"
+      end
     end
   end
 
@@ -324,6 +327,35 @@ defmodule Mix.Tasks.Coherence.InstallTest do
           file =~ "validate_coherence(params)"
         end
       end
+    end
+
+  end
+
+  describe "installed options" do
+    test "install options default" do
+      Application.put_env :coherence, :opts, [:authenticatable]
+      ~w(--installed-options --repo=TestCoherence.Repo)
+      |>  Mix.Tasks.Coherence.Install.run
+
+      assert_received {:mix_shell, :info, [output]}
+      assert output == "mix coherence.install --authenticatable"
+    end
+
+    test "install options authenticatable recoverable" do
+      Application.put_env :coherence, :opts, [:authenticatable, :recoverable]
+      ~w(--installed-options --repo=TestCoherence.Repo)
+      |>  Mix.Tasks.Coherence.Install.run
+
+      assert_received {:mix_shell, :info, [output]}
+      assert output == "mix coherence.install --authenticatable --recoverable"
+    end
+    test "install options many" do
+      Application.put_env :coherence, :opts, [:confirmable, :rememberable, :registerable, :invitable, :authenticatable, :recoverable, :lockable, :trackable, :unlockable_with_token]
+      ~w(--installed-options --repo=TestCoherence.Repo)
+      |>  Mix.Tasks.Coherence.Install.run
+
+      assert_received {:mix_shell, :info, [output]}
+      assert output == "mix coherence.install --confirmable --rememberable --registerable --invitable --authenticatable --recoverable --lockable --trackable --unlockable-with-token"
     end
   end
 
