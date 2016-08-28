@@ -11,10 +11,11 @@ defmodule <%= base %>.Coherence.InvitationController do
   * resend - resend an invitation token email
   """
   use Coherence.Web, :controller
-  alias Coherence.{Config, Invitation}
-  require Logger
   use Timex
+  alias Coherence.{Config, Invitation}
+  alias Coherence.ControllerHelpers, as: Helpers
   import Ecto.Changeset
+  require Logger
 
   plug Coherence.ValidateOption, :invitable
   plug :scrub_params, "user" when action in [:create_user]
@@ -91,7 +92,7 @@ defmodule <%= base %>.Coherence.InvitationController do
         |> redirect(to: logged_out_url(conn))
       invite ->
         user_schema = Config.user_schema
-        cs = user_schema.changeset(user_schema.__struct__,
+        cs = Helpers.changeset(:invitation, user_schema, user_schema.__struct__,
           %{email: invite.email, name: invite.name})
         conn
         |> render(:edit, changeset: cs, token: invite.token)
@@ -116,7 +117,7 @@ defmodule <%= base %>.Coherence.InvitationController do
         |> put_flash(:error, "Invalid Invitation. Please contact the site administrator.")
         |> redirect(to: logged_out_url(conn))
       invite ->
-        changeset = user_schema.changeset(user_schema.__struct__, params["user"])
+        changeset = Helpers.changeset(:invitation, user_schema, user_schema.__struct__, params["user"])
         case repo.insert changeset do
           {:ok, user} ->
             repo.delete invite

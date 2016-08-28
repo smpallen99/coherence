@@ -423,6 +423,62 @@ end
 
 See the documentation for further details.
 
+## Customizing User Changeset
+
+The User model changeset used by Coherence can be customized for each Coherence controller. To customize the changeset, set the `changeset` config option.
+
+For example, the following defines a changeset/3 function in your user model:
+
+```elixir
+  # config/config.exs
+  config :coherence,
+    # ...
+    changeset: {MyProject.User, :changeset}
+```
+
+Now add a new `changeset/3` function to the user model. The following example defines a custom changeset for the registration controller:
+
+```elixir
+  # web/models/coherence/user.ex
+  defmodule CoherenceDemo.User do
+    use CoherenceDemo.Web, :model
+    use Coherence.Schema
+
+    # ...
+
+    def changeset(model, params \\ %{}) do
+      model
+      |> cast(params, [:name, :email] ++ coherence_fields)
+      |> validate_required([:name, :email])
+      |> unique_constraint(:email)
+      |> validate_coherence(params)
+    end
+    def changeset(model, params, :registration) do
+      # custom changeset  for registration controller
+      model
+      |> cast(params, [:name, :email] ++ coherence_fields)
+      |> validate_required([:name, :email])
+      |> unique_constraint(:email)
+      |> validate_coherence(params)
+    end
+    def changeset(model, params, _which) do
+      # use the default changeset for all other coherence controllers
+      changeset model, params
+    end
+  end
+```
+
+When a custom changeset is configured, the changeset function is called with an atom indicating the controller calling the changeset, allowing you to match on specific controllers.
+
+The list of controller actions are:
+
+* :confirmation
+* :invitation
+* :password
+* :registration
+* :session
+* :unlock
+
 ## Authentication
 
 Currently Coherence supports three modes of authentication including HTTP Basic, Session, and Token authentication.

@@ -12,6 +12,7 @@ defmodule Coherence.RegistrationController do
   """
   use Coherence.Web, :controller
   require Logger
+  alias Coherence.ControllerHelpers, as: Helpers
 
   plug Coherence.ValidateOption, :registerable
   plug :scrub_params, "registration" when action in [:create, :update]
@@ -31,7 +32,7 @@ defmodule Coherence.RegistrationController do
   """
   def new(conn, _params) do
     user_schema = Config.user_schema
-    cs = user_schema.changeset(user_schema.__struct__)
+    cs = Helpers.changeset(:registration, user_schema, user_schema.__struct__)
     conn
     |> render(:new, email: "", changeset: cs)
   end
@@ -44,7 +45,7 @@ defmodule Coherence.RegistrationController do
   """
   def create(conn, %{"registration" => registration_params} = params) do
     user_schema = Config.user_schema
-    cs = user_schema.changeset(user_schema.__struct__, registration_params)
+    cs = Helpers.changeset(:registration, user_schema, user_schema.__struct__, registration_params)
     case Config.repo.insert(cs) do
       {:ok, user} ->
         conn
@@ -69,7 +70,7 @@ defmodule Coherence.RegistrationController do
   """
   def edit(conn, _) do
     user = Coherence.current_user(conn)
-    changeset = Config.user_schema.changeset(user)
+    changeset = Helpers.changeset(:registration, user.__struct__, user)
     render(conn, "edit.html", user: user, changeset: changeset)
   end
 
@@ -79,7 +80,7 @@ defmodule Coherence.RegistrationController do
   def update(conn, %{"id" => _id, "registration" => user_params} = params) do
     user_schema = Config.user_schema
     user = Coherence.current_user(conn)
-    changeset = user_schema.changeset(user, user_params)
+    changeset = Helpers.changeset(:registration, user_schema, user, user_params)
 
     case Config.repo.update(changeset) do
       {:ok, user} ->

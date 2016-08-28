@@ -11,6 +11,7 @@ defmodule Coherence.UnlockController do
   require Logger
   use Timex
   use Coherence.Config
+  alias Coherence.ControllerHelpers, as: Helpers
 
   plug Coherence.ValidateOption, :unlockable_with_token
   plug :layout_view
@@ -28,7 +29,7 @@ defmodule Coherence.UnlockController do
   """
   def new(conn, _params) do
     user_schema = Config.user_schema
-    changeset = user_schema.changeset(user_schema.__struct__)
+    changeset = Helpers.changeset(:unlock, user_schema, user_schema.__struct__)
     render conn, "new.html", changeset: changeset
   end
 
@@ -46,7 +47,7 @@ defmodule Coherence.UnlockController do
     |> Config.repo.one
 
     if user != nil and user_schema.checkpw(password, Map.get(user, Config.password_hash)) do
-      user_schema.changeset(user, %{unlock_token: token})
+      Helpers.changeset(:unlock, user.__struct__, user, %{unlock_token: token})
       |> Config.repo.update
       |> case do
         {:ok, _} ->
@@ -104,6 +105,7 @@ defmodule Coherence.UnlockController do
   def clear_unlock_values(user, user_schema) do
     if user.unlock_token or user.locked_at do
       user_schema.changeset(user, %{unlock_token: nil, locked_at: nil})
+      Helpers.changeset(:unlock, user.__struct__, user, %{unlock_token: nil, locked_at: nil})
       |> Config.repo.update
       |> case do
         {:error, changeset} ->

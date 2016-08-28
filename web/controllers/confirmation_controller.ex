@@ -8,6 +8,7 @@ defmodule Coherence.ConfirmationController do
   use Coherence.Web, :controller
   require Logger
   use Timex
+  alias Coherence.ControllerHelpers, as: Helpers
 
   plug Coherence.ValidateOption, :confirmable
 
@@ -28,7 +29,7 @@ defmodule Coherence.ConfirmationController do
   """
   def new(conn, _params) do
     user_schema = Config.user_schema
-    cs = user_schema.changeset(user_schema.__struct__)
+    cs = Helpers.changeset :confirmation, user_schema, user_schema.__struct__
     conn
     |> render(:new, [email: "", changeset: cs])
   end
@@ -42,7 +43,7 @@ defmodule Coherence.ConfirmationController do
     user = where(user_schema, [u], u.email == ^email)
     |> Config.repo.one
 
-    changeset = user_schema.changeset(user_schema.__struct__)
+    changeset = Helpers.changeset :confirmation, user_schema, user_schema.__struct__
     case user do
       nil ->
         conn
@@ -74,7 +75,7 @@ defmodule Coherence.ConfirmationController do
     |> Config.repo.one
     case user do
       nil ->
-        changeset = user_schema.changeset(user_schema.__struct__)
+        changeset = Helpers.changeset :confirmation, user_schema, user_schema.__struct__
         conn
         |> put_flash(:error, "Invalid confirmation token.")
         |> redirect_to(:confirmation_edit_invalid, params)
@@ -84,7 +85,7 @@ defmodule Coherence.ConfirmationController do
           |> put_flash(:error, "Confirmation token expired.")
           |> redirect_to(:confirmation_edit_expired, params)
         else
-          changeset = user_schema.changeset(user, %{
+          changeset = Helpers.changeset(:confirmation, user_schema, user, %{
             confirmation_token: nil,
             confirmed_at: Ecto.DateTime.utc,
             })

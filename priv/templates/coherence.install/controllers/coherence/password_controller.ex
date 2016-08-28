@@ -14,6 +14,7 @@ defmodule <%= base %>.Coherence.PasswordController do
   use Coherence.Web, :controller
   require Logger
   use Timex
+  alias Coherence.ControllerHelpers, as: Helpers
 
   plug :layout_view
   plug :redirect_logged_in when action in [:new, :create, :edit, :update]
@@ -30,7 +31,7 @@ defmodule <%= base %>.Coherence.PasswordController do
   """
   def new(conn, _params) do
     user_schema = Config.user_schema
-    cs = user_schema.changeset(user_schema.__struct__)
+    cs = Helpers.changeset :password, user_schema, user_schema.__struct__
     conn
     |> render(:new, [email: "", changeset: cs])
   end
@@ -46,7 +47,7 @@ defmodule <%= base %>.Coherence.PasswordController do
 
     case user do
       nil ->
-        changeset = user_schema.changeset(user_schema.__struct__)
+        changeset = Helpers.changeset :password, user_schema, user_schema.__struct__
         conn
         |> put_flash(:error, "Could not find that email address")
         |> render("new.html", changeset: changeset)
@@ -55,7 +56,7 @@ defmodule <%= base %>.Coherence.PasswordController do
         url = router_helpers.password_url(conn, :edit, token)
         Logger.debug "reset email url: #{inspect url}"
         dt = Ecto.DateTime.utc
-        cs = user_schema.changeset(user,
+        cs = Helpers.changeset(:password, user_schema, user,
           %{reset_password_token: token, reset_password_sent_at: dt})
         Config.repo.update! cs
 
@@ -89,7 +90,7 @@ defmodule <%= base %>.Coherence.PasswordController do
           |> put_flash(:error, "Password reset token expired.")
           |> redirect(to: logged_out_url(conn))
         else
-          changeset = user_schema.changeset(user)
+          changeset = Helpers.changeset(:password, user_schema, user)
           conn
           |> render("edit.html", changeset: changeset)
         end
@@ -111,7 +112,7 @@ defmodule <%= base %>.Coherence.PasswordController do
         |> put_flash(:error, "Invalid reset token")
         |> redirect(to: logged_out_url(conn))
       user ->
-        cs = user_schema.changeset(user, password_params)
+        cs = Helpers.changeset(:password, user_schema, user, password_params)
         case repo.update(cs) do
           {:ok, user} ->
             clear_password_params(user, user_schema, %{})
@@ -130,7 +131,7 @@ defmodule <%= base %>.Coherence.PasswordController do
   defp clear_password_params(user, user_schema, params) do
     params = Map.put(params, "reset_password_token", nil)
     |> Map.put("reset_password_sent_at", nil)
-    user_schema.changeset(user, params)
+    Helpers.changeset(:password, user_schema, user, params)
   end
 
 end

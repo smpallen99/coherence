@@ -30,6 +30,7 @@ defmodule Coherence.Config do
   * :rememberable_cookie_expire_hours (2*24)
   * :password_hash_field (:password_hash)         - The field used to save the hashed password
   * :login_field (:email)                         - The user model field used to login
+  * :changeset                                    - Custom user changeset
 
   ## Examples
 
@@ -55,6 +56,7 @@ defmodule Coherence.Config do
     :email_from,
     :email_reply_to,
     :site_name,
+    :changeset,
     {:password_hash_field, :password_hash},
     {:login_field, :email},
     {:login_cookie, "coherence_login"},

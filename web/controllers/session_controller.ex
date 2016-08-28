@@ -10,6 +10,7 @@ defmodule Coherence.SessionController do
   use Coherence.Config
   import Ecto.Query
   import Rememberable, only: [hash: 1, gen_cookie: 3]
+  alias Coherence.ControllerHelpers, as: Helpers
 
   plug :layout_view
   plug :redirect_logged_in when action in [:new, :create]
@@ -135,7 +136,7 @@ defmodule Coherence.SessionController do
         {user.last_sign_in_at, user.last_sign_in_ip}
     end
 
-    user.__struct__.changeset(user,
+    Helpers.changeset(:session, user.__struct__, user,
       %{
         sign_in_count: user.sign_in_count + 1,
         current_sign_in_at: Ecto.DateTime.utc,
@@ -154,7 +155,7 @@ defmodule Coherence.SessionController do
 
   defp track_logout(conn, _, false), do: conn
   defp track_logout(conn, user, true) do
-    user.__struct__.changeset(user,
+    Helpers.changeset(:session, user.__struct__, user,
       %{
         last_sign_in_at: user.current_sign_in_at,
         last_sign_in_ip: user.current_sign_in_ip,
@@ -174,7 +175,7 @@ defmodule Coherence.SessionController do
   defp log_lockable_update(_), do: :ok
 
   def reset_failed_attempts(conn, %{failed_attempts: attempts} = user, true) when attempts > 0 do
-    user.__struct__.changeset(user, %{failed_attempts: 0})
+    Helpers.changeset(:session, user.__struct__, user, %{failed_attempts: 0})
     |> Config.repo.update
     |> log_lockable_update
     conn
@@ -191,7 +192,7 @@ defmodule Coherence.SessionController do
         {conn, @flash_invalid, %{}}
       end
 
-    user.__struct__.changeset(user, Map.put(params, :failed_attempts, attempts))
+    Helpers.changeset(:session, user.__struct__, user, Map.put(params, :failed_attempts, attempts))
     |> Config.repo.update
     |> log_lockable_update
 
