@@ -36,7 +36,7 @@ As well, a `web/coherence_web.ex` is added. Migrations are also generated to add
   1. Add coherence to your list of dependencies in `mix.exs`:
 
         def deps do
-          [{:coherence, "~> 0.2"}]
+          [{:coherence, "~> 0.3"}]
         end
 
   2. Ensure coherence is started before your application:

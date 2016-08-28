@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.3.0  (2016-8-xx)
+## 0.3.0  (2016-08-28)
 
 See these `0.2.0` to `0.3.0` [upgrade instructions](https://gist.github.com/smpallen99/ae80753a5cdea5d20a1c03639b9a801e) to bring your existing app up to speed.
 
@@ -8,10 +8,15 @@ See these `0.2.0` to `0.3.0` [upgrade instructions](https://gist.github.com/smpa
   * All controller redirects are now customizable
   * Logged in users trying to view pages meant for unauthenticated users now get redirected to logged_out_url (session new, register new, etc.)
   * Support resend confirmation instructions
+  * Support custom changesets
+  * Make routes more intuitive
+  * `--install-options` mix task option
 
 * Bug Fixes
   * rename database column `confirmation_send_at` `to confirmation_sent_at`
   * fix an coherence.clean --all doing a dry-run
+  * fix router install instructions
+  * install instructions include confirm! for seeds file
 
 * Deprecations
   * `coherence_routes :public` is replaced with `coherence_routes`
