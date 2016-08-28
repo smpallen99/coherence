@@ -524,7 +524,7 @@ config :coherence, #{base}.Coherence.Mailer,
   ################
   # Instructions
 
-  defp seeds_instructions(%{repo: repo, user_schema: user_schema, authenticatable: true}) do
+  defp seeds_instructions(%{repo: repo, user_schema: user_schema, authenticatable: true} = config) do
     user_schema = to_string user_schema
     repo = to_string repo
     """
@@ -534,7 +534,8 @@ config :coherence, #{base}.Coherence.Mailer,
 
     #{user_schema}.changeset(%#{user_schema}{}, %{name: "Test User", email: "testuser@example.com", password: "secret", password_confirmation: "secret"})
     |> #{repo}.insert!
-    """
+    """ <>
+      if config[:confirmable], do: "|> Coherence.ControllerHelpers.confirm!\n", else: ""
   end
   defp seeds_instructions(_config), do: ""
 
@@ -768,8 +769,8 @@ config :coherence, #{base}.Coherence.Mailer,
 
   def all_options, do: @all_options_atoms
 
-  def print_installed_options(config) do
-    output = ["mix coherence.install"]
+  def print_installed_options(_config) do
+    ["mix coherence.install"]
     |> list_config_options(Application.get_env(:coherence, :opts, []))
     |> Enum.reverse
     |> Enum.join(" ")
