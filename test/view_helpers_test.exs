@@ -14,6 +14,8 @@ defmodule CoherenceTest.ViewHelpers do
   @signout_link  "Sign Out"
 
   setup do
+    Application.put_env :coherence, :opts, [:confirmable, :authenticatable, :recoverable,
+      :lockable, :trackable, :unlockable_with_token, :invitable, :registerable]
     user = %User{name: "test", email: "test@example.com", id: 1}
     conn = %Plug.Conn{}
     |> assign(:current_user, user)
@@ -21,6 +23,7 @@ defmodule CoherenceTest.ViewHelpers do
   end
 
   @helpers Module.concat(Application.get_env(:coherence, :module), Router.Helpers)
+
   test "coherence_path", %{conn: conn} do
     assert ViewHelpers.coherence_path(@helpers, :unlock_path, conn, :new) == "/unlocks/new"
     assert ViewHelpers.coherence_path(@helpers, :registration_path, conn, :new) == "/registrations/new"
@@ -96,6 +99,7 @@ defmodule CoherenceTest.ViewHelpers do
     assert Floki.find(result1, "li") |> Floki.text == "New Account"
     assert Floki.find(result2, "li a") |> Floki.text == "Login"
   end
+
   test "coherence_links :layout not signed no register" do
     conn = %Plug.Conn{}
     assert ViewHelpers.coherence_links(conn, :layout, register: false)

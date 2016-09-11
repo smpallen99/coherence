@@ -1,7 +1,5 @@
 defmodule CoherenceTest.InvitationController do
   use TestCoherence.ConnCase
-  alias Coherence.{InvitationController, Config}
-  alias TestCoherence.{User, Repo, Config}
   import TestCoherence.Router.Helpers
 
   setup %{conn: conn} do
@@ -11,6 +9,8 @@ defmodule CoherenceTest.InvitationController do
   end
 
   def with_session(conn) do
+    Application.put_env :coherence, :opts, [:confirmable, :authenticatable, :recoverable,
+      :lockable, :trackable, :unlockable_with_token, :invitable, :registerable]
     session_opts = Plug.Session.init(store: :cookie, key: "_binaryid_key",
                                      signing_salt: "JFbk5iZ6")
     conn

@@ -2,7 +2,6 @@ Code.require_file "../../mix_helpers.exs", __DIR__
 
 defmodule Mix.Tasks.Coherence.InstallTest do
   use ExUnit.Case
-  alias Coherence.Config
   import MixHelper
 
   setup do

@@ -1,7 +1,6 @@
 defmodule CoherenceTest.ControllerHelpers do
   use TestCoherence.ConnCase
-  alias Coherence.{InvitationController, Config}
-  alias TestCoherence.{User, Repo, Config}
+  alias TestCoherence.User
   alias Coherence.ControllerHelpers, as: Helpers
   import TestCoherence.TestHelpers
 
