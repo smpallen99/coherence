@@ -42,12 +42,13 @@ defmodule Coherence.Redirects do
 
   """
   use Redirects
-  import <%= base %>.Router.Helpers
+  # Uncomment the import below if adding overrides
+  # import <%= base %>.Router.Helpers
 
   # Add function overrides below
 
   # Example usage
-  # uncomment the following line to return the user to the login form after logging out
+  # Uncomment the following line to return the user to the login form after logging out
   # def session_delete(conn, _), do: redirect(conn, session_path(conn, :new))
 
 end
