@@ -65,8 +65,7 @@ defmodule <%= base %>.Coherence.ViewHelpers do
       current_user = Coherence.current_user(conn)
       [
         content_tag(list_tag, profile_link(current_user, conn)),
-        content_tag(list_tag,
-          link(signout, to: coherence_path(@helpers, :session_path, conn, :delete), method: :delete, class: signout_class))
+        content_tag(list_tag, signout_link(conn, signout, signout_class))
       ]
     else
       signin_link = content_tag(list_tag, link(signin, to: coherence_path(@helpers, :session_path, conn, :new)))
@@ -115,6 +114,10 @@ defmodule <%= base %>.Coherence.ViewHelpers do
 
   def invitation_link(conn, text \\ @invite_link) do
     link text, to: coherence_path(@helpers, :invitation_path, conn, :new)
+  end
+
+  def signout_link(conn, text \\ @signout_link, signout_class \\ "") do
+    link(text, to: coherence_path(@helpers, :session_path, conn, :delete), method: :delete, class: signout_class)
   end
 
   def confirmation_link(_conn, _user_schema, false), do: []
