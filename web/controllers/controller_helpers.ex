@@ -182,6 +182,39 @@ defmodule Coherence.ControllerHelpers do
     apply(Coherence.Redirects, path, [conn, params, user])
   end
 
+  @doc """
+  Record time and ip adress when user login
+  """
+  def track_login(conn, _, false), do: conn
+  def track_login(conn, user, true) do
+    ip = conn.peer |> elem(0) |> inspect
+    now = Ecto.DateTime.utc
+    {last_at, last_ip} = cond do
+      is_nil(user.last_sign_in_at) and is_nil(user.current_sign_in_at) ->
+        {now, ip}
+      !!user.current_sign_in_at ->
+        {user.current_sign_in_at, user.current_sign_in_ip}
+      true ->
+        {user.last_sign_in_at, user.last_sign_in_ip}
+    end
+
+    changeset(:session, user.__struct__, user,
+      %{
+        sign_in_count: user.sign_in_count + 1,
+        current_sign_in_at: Ecto.DateTime.utc,
+        current_sign_in_ip: ip,
+        last_sign_in_at: last_at,
+        last_sign_in_ip: last_ip
+      })
+    |> Config.repo.update
+    |> case do
+      {:ok, _} -> nil
+      {:error, _changeset} ->
+        Logger.error ("Failed to update tracking!")
+    end
+    conn
+  end
+
   def changeset(which, module, model, params \\ %{}) do
     {mod, fun, args} = case Application.get_env :coherence, :changeset do
       nil -> {module, :changeset, [model, params]}
