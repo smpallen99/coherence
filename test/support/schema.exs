@@ -21,6 +21,29 @@ defmodule TestCoherence.User do
     |> validate_coherence(params)
   end
 end
+
+defmodule TestCoherence.Invitation do
+  use Ecto.Schema
+  use Coherence.Schema
+  import Ecto.Changeset
+
+  schema "invitations" do
+    field :email, :string
+    field :name, :string
+    field :token, :string
+
+    timestamps
+  end
+
+  def changeset(model, params \\ %{}) do
+    model
+    |> cast(params, ~w(name email token))
+    |> validate_required([:name, :email])
+    |> unique_constraint(:email)
+    |> validate_format(:email, ~r/@/)
+  end
+end
+
 defmodule TestCoherence.Account do
   use Ecto.Schema
   use Coherence.Schema
