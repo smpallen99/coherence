@@ -17,4 +17,9 @@ defmodule CoherenceTest.InvitationController do
     assert conn.private[:phoenix_template] == "new.html"
   end
 
+  test "can invite new user", %{conn: conn} do
+    params = %{"invitation" => %{"name" => "John Doe", "email" => "john@example.com"}}
+    conn = post conn, invitation_path(conn, :create), params
+    assert html_response(conn, 302)
+  end
 end
