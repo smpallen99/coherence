@@ -154,7 +154,7 @@ defmodule MyProject.User do
 end
 ```
 
-An alternative approach is add the authorization plugs to individual controllers that require authentication. You will want to use this approach if you require authorization for a subset of actions in a controller.
+An alternative approach is add the authentication plugs to individual controllers that require authentication. You will want to use this approach if you require authentication for a subset of actions in a controller.
 
 For example, lets say you want to show a list of products for everyone visiting the site, but only want authenticated users to be able to create, update, and delete products. You could do the following:
 
