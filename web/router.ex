@@ -76,40 +76,63 @@ defmodule Coherence.Router do
     quote location: :keep do
       mode = unquote(mode)
       if mode == :all or mode == :public do
-        if Coherence.Config.has_option(:authenticatable) do
-          resources "/sessions", Coherence.SessionController, only: [:new, :create]
-        end
-        if Coherence.Config.has_option(:registerable) do
+        Enum.each([:new, :create], fn(action) ->
+          if Coherence.Config.has_action?(:authenticatable, action) do
+            resources "/sessions", Coherence.SessionController, only: [action]
+          end
+        end)
+        if Coherence.Config.has_action?(:registerable, :new) do
           get "/registrations/new", Coherence.RegistrationController, :new
+        end
+        if Coherence.Config.has_action?(:registerable, :create) do
           post "/registrations", Coherence.RegistrationController, :create
         end
-        if Coherence.Config.has_option(:recoverable) do
-          resources "/passwords", Coherence.PasswordController, only: [:new, :create, :edit, :update]
-        end
-        if Coherence.Config.has_option(:confirmable) do
-          resources "/confirmations", Coherence.ConfirmationController, only: [:edit, :new, :create]
-        end
-        if Coherence.Config.has_option(:unlockable_with_token) do
-          resources "/unlocks", Coherence.UnlockController, only: [:new, :create, :edit]
-        end
-        if Coherence.Config.has_option(:invitable) do
+        Enum.each([:new, :create, :edit, :update], fn(action) ->
+          if Coherence.Config.has_action?(:recoverable, action) do
+            resources "/passwords", Coherence.PasswordController, only: [action]
+          end
+        end)
+        Enum.each([:edit, :new, :create], fn(action) ->
+          if Coherence.Config.has_action?(:confirmable, action) do
+            resources "/confirmations", Coherence.ConfirmationController, only: [action]
+          end
+        end)
+        Enum.each([:new, :create, :edit], fn(action) ->
+          if Coherence.Config.has_action?(:unlockable_with_token, action) do
+            resources "/unlocks", Coherence.UnlockController, only: [action]
+          end
+        end)
+        if Coherence.Config.has_action?(:invitable, :edit) do
           resources "/invitations", Coherence.InvitationController, only: [:edit]
+        end
+        if Coherence.Config.has_action?(:invitable, :create_user) do
           post "/invitations/create", Coherence.InvitationController, :create_user
         end
       end
       if mode == :all or mode == :protected do
-        if Coherence.Config.has_option(:invitable) do
-          resources "/invitations", Coherence.InvitationController, only: [:new, :create]
+        if Coherence.Config.has_action?(:invitable, :new) do
+          resources "/invitations", Coherence.InvitationController, only: [:new]
+        end
+        if Coherence.Config.has_action?(:invitable, :create) do
+          resources "/invitations", Coherence.InvitationController, only: [:create]
+        end
+        if Coherence.Config.has_action?(:invitable, :resend) do
           get "/invitations/:id/resend", Coherence.InvitationController, :resend
         end
-        if Coherence.Config.has_option(:authenticatable) do
+        if Coherence.Config.has_action?(:authenticatable, :delete) do
           delete "/sessions", Coherence.SessionController, :delete
         end
-        if Coherence.Config.has_option(:registerable) do
+        if Coherence.Config.has_action?(:registerable, :show) do
           get "/registrations/:id", Coherence.RegistrationController, :show
+        end
+        if Coherence.Config.has_action?(:registerable, :update) do
           put "/registrations/:id", Coherence.RegistrationController, :update
           patch "/registrations/:id", Coherence.RegistrationController, :update
+        end
+        if Coherence.Config.has_action?(:registerable, :edit) do
           get "/registrations/:id/edit", Coherence.RegistrationController, :edit
+        end
+        if Coherence.Config.has_action?(:registerable, :delete) do
           delete "/registrations", Coherence.RegistrationController, :delete
         end
       end

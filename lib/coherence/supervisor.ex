@@ -1,6 +1,5 @@
 defmodule Coherence.Supervisor do
   @doc false
-  alias Coherence.Config
   import Coherence.Authentication.Utils, only: [get_credential_store: 0]
   def start_link() do
     Supervisor.start_link(__MODULE__, :ok, name: __MODULE__)
