@@ -87,11 +87,13 @@ defmodule <%= base %>.Coherence.SessionController do
           conn
           |> put_flash(:error, "Too many failed login attempts. Account has been locked.")
           |> assign(:locked, true)
+          |> put_status(423)
           |> render("new.html", [{login_field, ""}, remember: rememberable_enabled?])
         end
       else
         conn
         |> put_flash(:error, "You must confirm your account before you can login.")
+        |> put_status(406)
         |> render("new.html", [{login_field, login}, remember: rememberable_enabled?])
       end
     else
@@ -99,6 +101,7 @@ defmodule <%= base %>.Coherence.SessionController do
       |> failed_login(user, lockable?)
       |> put_layout({Coherence.LayoutView, "app.html"})
       |> put_view(Coherence.SessionView)
+      |> put_status(401)
       |> render(:new, [{login_field, login}, remember: rememberable_enabled?])
     end
   end
