@@ -113,7 +113,7 @@ defmodule Coherence.Authentication.Session do
     module = Application.get_env(:coherence, :module)
     |> Module.concat(Coherence.SessionController)
 
-    if :erlang.function_exported(module, :login_callback, 1) do
+    if function_exported?(module, :login_callback, 1) do
       &module.login_callback/1
     else
       &Coherence.SessionController.login_callback/1
