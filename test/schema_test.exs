@@ -10,6 +10,20 @@ defmodule CoherenceTest.Schema do
   @email "schema@test.com"
   @valid_params %{name: "test", email: @email, password: "12345", password_confirmation: "12345"}
 
+  test "invalid email" do
+    cs1 = User.changeset(%User{}, %{name: "test", email: "john-example.com", password: "12345", password_confirmation: "12345"})
+    cs2 = User.changeset(%User{}, %{name: "test", email: "john.doe-example.com", password: "12345", password_confirmation: "12345"})
+    refute cs1.valid?
+    refute cs2.valid?
+  end
+
+  test "valid email" do
+    cs1 = User.changeset(%User{}, %{name: "test", email: "john@example.com", password: "12345", password_confirmation: "12345"})
+    cs2 = User.changeset(%User{}, %{name: "test", email: "john.doe@example.com", password: "12345", password_confirmation: "12345"})
+    assert cs1.valid?
+    assert cs2.valid?
+  end
+
   test "validates correct password" do
     cs = User.changeset(%User{}, %{name: "test", email: @email, password: "12345", password_confirmation: "12345"})
     assert cs.valid?
