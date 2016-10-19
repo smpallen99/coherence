@@ -95,8 +95,28 @@ defmodule Coherence.Config do
   Test if an options is configured.
   """
   def has_option(option) do
-    if opts == :all or option in opts, do: true, else: false
+    has_any_option?(fn({name, _actions}) -> name == option end)
   end
+
+  @doc """
+  Test if an option is configured and accepts a specific action
+  """
+  def has_action?(option, action) do
+    has_any_option?(fn({name, actions}) ->
+      name == option and (actions == :all or action in actions)
+    end)
+  end
+
+  defp has_any_option?(fun) do
+    if opts == :all do
+      true
+    else
+      Enum.any?(opts, &(fun.(standardize_option(&1))))
+    end
+  end
+
+  defp standardize_option(option) when is_atom(option), do: {option, :all}
+  defp standardize_option(option), do: option
 
   defmacro password_hash do
     field = Application.get_env :coherence, :password_hash_field, :password_hash
