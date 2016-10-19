@@ -149,6 +149,7 @@ defmodule MyProject.User do
     model
     |> cast(params, [:name, :email] ++ coherence_fields)  # Add this
     |> validate_required([:name, :email])
+    |> validate_format(:email, ~r/@/)
     |> validate_coherence(params)                         # Add this
   end
 end
@@ -463,6 +464,7 @@ Now add a new `changeset/3` function to the user model. The following example de
       model
       |> cast(params, [:name, :email] ++ coherence_fields)
       |> validate_required([:name, :email])
+      |> validate_format(:email, ~r/@/)
       |> unique_constraint(:email)
       |> validate_coherence(params)
     end
@@ -471,6 +473,7 @@ Now add a new `changeset/3` function to the user model. The following example de
       model
       |> cast(params, [:name, :email] ++ coherence_fields)
       |> validate_required([:name, :email])
+      |> validate_format(:email, ~r/@/)
       |> unique_constraint(:email)
       |> validate_coherence(params)
     end
