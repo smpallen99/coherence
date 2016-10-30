@@ -68,7 +68,7 @@ This will:
 * add email files to web/emails/coherence
 * add web/coherence_web.ex file
 
-You should review your `config/config.exs` as there are a couple items you will need to customize like email address and mail api_key.
+You should review your `config/config.exs` as there are a couple items you will need to customize like email address and mail api_key. If you don't edit the email_from value to something different than it's default emails may not be sent.
 
 See [Installer](#installer) for more install options.
 
