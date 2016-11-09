@@ -365,10 +365,10 @@ After installation, if you later want to remove one more options, here are a cou
   $ mix coherence.clean --options=recoverable
 
   # Clean several options without confirmation
-  $ mix coherence.clicked --no-confirm --options="recoverable unlockable-with-token"
+  $ mix coherence.clean --no-confirm --options="recoverable unlockable-with-token"
 
   # Test the uninstaller without removing files
-  $ mix coherence.clicked --dry-run --options="recoverable unlockable-with-token"
+  $ mix coherence.clean --dry-run --options="recoverable unlockable-with-token"
 ```
 
 ## Customization
