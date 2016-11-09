@@ -10,6 +10,20 @@ defmodule CoherenceTest.Schema do
   @email "schema@test.com"
   @valid_params %{name: "test", email: @email, password: "12345", password_confirmation: "12345"}
 
+  test "invalid email" do
+    cs1 = User.changeset(%User{}, %{name: "test", email: "john-example.com", password: "12345", password_confirmation: "12345"})
+    cs2 = User.changeset(%User{}, %{name: "test", email: "john.doe-example.com", password: "12345", password_confirmation: "12345"})
+    refute cs1.valid?
+    refute cs2.valid?
+  end
+
+  test "valid email" do
+    cs1 = User.changeset(%User{}, %{name: "test", email: "john@example.com", password: "12345", password_confirmation: "12345"})
+    cs2 = User.changeset(%User{}, %{name: "test", email: "john.doe@example.com", password: "12345", password_confirmation: "12345"})
+    assert cs1.valid?
+    assert cs2.valid?
+  end
+
   test "validates correct password" do
     cs = User.changeset(%User{}, %{name: "test", email: @email, password: "12345", password_confirmation: "12345"})
     assert cs.valid?
@@ -21,8 +35,9 @@ defmodule CoherenceTest.Schema do
     cs = User.changeset(%User{}, %{name: "test", email: @email, password: "12345", password_confirmation: "99"})
     refute cs.valid?
   end
+
   test "checkpw" do
-    params = %{name: "test", email: "schema@test.com", password: "test", password_confirmation: "test"}
+    params = %{name: "test", email: @email, password: "test", password_confirmation: "test"}
     user = Repo.insert! User.changeset(%User{}, params)
     assert User.checkpw("test", user.password_hash)
     refute User.checkpw("t", user.password_hash)
@@ -59,5 +74,4 @@ defmodule CoherenceTest.Schema do
     refute User.locked?(%User{})
     assert User.locked?(%User{locked_at: Ecto.DateTime.utc})
   end
-
 end

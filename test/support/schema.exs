@@ -17,6 +17,8 @@ defmodule TestCoherence.User do
   def changeset(model, params \\ %{}) do
     model
     |> cast(params, @required_fields, @optional_fields)
+    |> validate_required([:name, :email])
+    |> validate_format(:email, ~r/@/)
     |> unique_constraint(:email)
     |> validate_coherence(params)
   end
