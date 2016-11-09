@@ -174,7 +174,7 @@ defmodule MyProject.ProductController do
   use MyProject.Web, :controller
   alias MyProject.Product
 
-  Coherence.Authentication.Session, protected: true when action != :index
+  Coherence.Authentication.Session, [protected: true] when action != :index
 
   # ...
 ```
