@@ -68,7 +68,7 @@ defmodule Coherence.ViewHelpers do
         content_tag(list_tag, signout_link(conn, signout, signout_class))
       ]
     else
-      signin_link = content_tag(list_tag, link(signin, to: coherence_path(@helpers, :session_path, conn, :new)))
+      signin_link = content_tag(list_tag, signin_link(conn, signin))
       if Config.has_option(:registerable) && register do
         [content_tag(list_tag, link(register, to: coherence_path(@helpers, :registration_path, conn, :new))), signin_link]
       else
@@ -114,6 +114,10 @@ defmodule Coherence.ViewHelpers do
 
   def invitation_link(conn, text \\ @invite_link) do
     link text, to: coherence_path(@helpers, :invitation_path, conn, :new)
+  end
+
+  def signin_link(conn, text \\ @signin_link) do
+    link(text, to: coherence_path(@helpers, :session_path, conn, :new))
   end
 
   def signout_link(conn, text \\ @signout_link, signout_class \\ "") do
