@@ -47,7 +47,7 @@ As well, a `web/coherence_web.ex` is added. Migrations are also generated to add
 
 ## Getting Started
 
-First, decide with modules you would like to use for your project. For the following example were are going to use a full install except for the registerable option.
+First, decide with modules you would like to use for your project. For the following example were are going to use a full install except for the confirmable option.
 
 Run the installer
 
