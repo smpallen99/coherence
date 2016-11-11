@@ -19,6 +19,7 @@ defmodule Coherence.Config do
   * :login_cookie ("coherence_login")                 - The name of the login cookie
   * :auth_module (Coherence.Authentication.Session)
   * :create_login (:create_login)
+  * :uppdate_login (:update_login)
   * :delete_login (:delete_login})
   * :opts ([])
   * :reset_token_expire_days (2)
@@ -62,6 +63,7 @@ defmodule Coherence.Config do
     {:login_cookie, "coherence_login"},
     {:auth_module, Coherence.Authentication.Session},
     {:create_login, :create_login},
+    {:update_login, :update_login},
     {:delete_login, :delete_login},
     {:opts, []},
     {:assigns_key, :current_user},

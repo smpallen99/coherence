@@ -24,6 +24,14 @@ defmodule Coherence.Authentication.Basic do
     store.put_credentials(creds, user_data)
   end
 
+  @doc """
+    Update login store for a user. `user_data` can be any term but must not be `nil`.
+  """
+  def update_login(email, password, user_data, opts  \\ []) do
+    create_login(email, password, user_data, opts)
+  end
+
+
   def init(opts) do
     %{
       realm: Keyword.get(opts, :realm, "Restricted Area"),

@@ -81,10 +81,9 @@ defmodule Coherence.RegistrationController do
     user_schema = Config.user_schema
     user = Coherence.current_user(conn)
     changeset = Helpers.changeset(:registration, user_schema, user, user_params)
-
     case Config.repo.update(changeset) do
       {:ok, user} ->
-        conn
+        apply(Config.auth_module, Config.update_login, [conn, user, [id_key: Config.schema_key]])
         |> put_flash(:info, "Account updated successfully.")
         |> redirect_to(:registration_update, params, user)
       {:error, changeset} ->

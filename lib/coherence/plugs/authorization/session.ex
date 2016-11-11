@@ -94,6 +94,18 @@ defmodule Coherence.Authentication.Session do
   end
 
   @doc """
+    Update login store for a user. `user_data` can be any term but must not be `nil`.
+  """
+  def update_login(conn, user_data, opts  \\ []) do
+    id_key = Keyword.get(opts, :id_key, :id)
+    store = Keyword.get(opts, :store, Coherence.CredentialStore.Session)
+    id = get_session(conn, @session_key)
+
+    store.put_credentials({id, user_data, id_key})
+    conn
+  end
+
+  @doc """
     Delete a login.
   """
   def delete_login(conn, opts \\ []) do

@@ -495,6 +495,19 @@ The list of controller actions are:
 * :session
 * :unlock
 
+## Updating the User Model
+
+During login, a current version of the user model is cashed in the credential store. During each authentication request, the user model is fetched from the credential store and placed in conn.assigns[:current_user] to avoid a database fetch on each request.
+
+If the user model is changed after login, a call to `update_login` must be done to update the credential store. For example, in your controller update function, call:
+
+```elixir
+apply(Config.auth_module, Config.update_login, [conn, user, [id_key: Config.schema_key]])
+```
+to update the credential store.
+
+This is not needed for registration update page.
+
 ## Authentication
 
 Currently Coherence supports three modes of authentication including HTTP Basic, Session, and Token authentication.
