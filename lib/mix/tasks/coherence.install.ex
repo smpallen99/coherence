@@ -565,6 +565,15 @@ config :coherence, #{base}.Coherence.Mailer,
     """
   defp schema_instructions(_), do: ""
 
+  defp mix_instructions(%{base: base}), do: """
+  Add :coherence to your applications list in mix.exs.
+
+    def application do
+      [mod: {#{base}, []},
+       applications: [..., :coherence]]
+    end
+  """
+
   defp router_instructions(%{base: base, controllers: controllers}) do
     namespace = if controllers, do: ", #{base}", else: ""
     """
@@ -628,6 +637,7 @@ config :coherence, #{base}.Coherence.Mailer,
 
   defp print_instructions(%{instructions: instructions} = config) do
     Mix.shell.info instructions
+    Mix.shell.info mix_instructions(config)
     Mix.shell.info router_instructions(config)
     Mix.shell.info schema_instructions(config)
     Mix.shell.info seeds_instructions(config)
