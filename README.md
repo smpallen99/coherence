@@ -47,7 +47,7 @@ As well, a `web/coherence_web.ex` is added. Migrations are also generated to add
 
 ## Getting Started
 
-First, decide with modules you would like to use for your project. For the following example were are going to use a full install except for the registerable option.
+First, decide with modules you would like to use for your project. For the following example were are going to use a full install except for the confirmable option.
 
 Run the installer
 
@@ -68,7 +68,7 @@ This will:
 * add email files to web/emails/coherence
 * add web/coherence_web.ex file
 
-You should review your `config/config.exs` as there are a couple items you will need to customize like email address and mail api_key.
+You should review your `config/config.exs` as there are a couple items you will need to customize like email address and mail api_key. If you don't edit the email_from value to something different than it's default emails may not be sent.
 
 See [Installer](#installer) for more install options.
 
@@ -149,12 +149,13 @@ defmodule MyProject.User do
     model
     |> cast(params, [:name, :email] ++ coherence_fields)  # Add this
     |> validate_required([:name, :email])
+    |> validate_format(:email, ~r/@/)
     |> validate_coherence(params)                         # Add this
   end
 end
 ```
 
-An alternative approach is add the authorization plugs to individual controllers that require authentication. You will want to use this approach if you require authorization for a subset of actions in a controller.
+An alternative approach is add the authentication plugs to individual controllers that require authentication. You will want to use this approach if you require authentication for a subset of actions in a controller.
 
 For example, lets say you want to show a list of products for everyone visiting the site, but only want authenticated users to be able to create, update, and delete products. You could do the following:
 
@@ -174,7 +175,7 @@ defmodule MyProject.ProductController do
   use MyProject.Web, :controller
   alias MyProject.Product
 
-  Coherence.Authentication.Session, protected: true when action != :index
+  Coherence.Authentication.Session, [protected: true] when action != :index
 
   # ...
 ```
@@ -365,10 +366,10 @@ After installation, if you later want to remove one more options, here are a cou
   $ mix coherence.clean --options=recoverable
 
   # Clean several options without confirmation
-  $ mix coherence.clicked --no-confirm --options="recoverable unlockable-with-token"
+  $ mix coherence.clean --no-confirm --options="recoverable unlockable-with-token"
 
   # Test the uninstaller without removing files
-  $ mix coherence.clicked --dry-run --options="recoverable unlockable-with-token"
+  $ mix coherence.clean --dry-run --options="recoverable unlockable-with-token"
 ```
 
 ## Customization
@@ -403,6 +404,19 @@ If the controllers are generated, you will need to change your router to use the
   end
   # ...
 end
+```
+
+### Customizing Routes
+
+By default, Coherence assumes you want all available routes for the `opts` you've configured. However, you can specify which routes should be available by modifying your configuration.
+
+For example, if you want all of the routes for `authenticatable`, but only the `new` and `create` actions from `registerable`:
+
+```elixir
+# config/config.exs
+config :coherence,
+  # ...
+  opts: [:authenticatable, registerable: [:new, :create]]
 ```
 
 ### Customizing Redirections
@@ -450,6 +464,7 @@ Now add a new `changeset/3` function to the user model. The following example de
       model
       |> cast(params, [:name, :email] ++ coherence_fields)
       |> validate_required([:name, :email])
+      |> validate_format(:email, ~r/@/)
       |> unique_constraint(:email)
       |> validate_coherence(params)
     end
@@ -458,6 +473,7 @@ Now add a new `changeset/3` function to the user model. The following example de
       model
       |> cast(params, [:name, :email] ++ coherence_fields)
       |> validate_required([:name, :email])
+      |> validate_format(:email, ~r/@/)
       |> unique_constraint(:email)
       |> validate_coherence(params)
     end

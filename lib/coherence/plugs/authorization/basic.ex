@@ -12,8 +12,6 @@ defmodule Coherence.Authentication.Basic do
   @behaviour Plug
   import Plug.Conn
   import Coherence.Authentication.Utils
-  alias Coherence.Config
-  import Coherence.Authentication.Utils
 
   @doc """
     Returns the encoded form for the given `user` and `password` combination.

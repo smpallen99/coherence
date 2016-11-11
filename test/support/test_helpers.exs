@@ -1,6 +1,7 @@
 defmodule TestCoherence.TestHelpers do
   alias Coherence.{Rememberable}
   import Phoenix.HTML, only: [safe_to_string: 1]
+  import Coherence.ControllerHelpers, only: [random_string: 1]
   import Plug.Conn
 
   def insert_user(attrs \\ %{}) do
@@ -13,6 +14,19 @@ defmodule TestCoherence.TestHelpers do
 
     %TestCoherence.User{}
     |> TestCoherence.User.changeset(changes)
+    |> TestCoherence.Repo.insert!
+  end
+
+  def insert_invitation(attrs \\ %{}) do
+    token = random_string 48
+    changes = Dict.merge(%{
+      name: "Test User",
+      email: "user#{Base.encode16(:crypto.strong_rand_bytes(8))}@example.com",
+      token: token
+      }, attrs)
+
+    %TestCoherence.Invitation{}
+    |> TestCoherence.Invitation.changeset(changes)
     |> TestCoherence.Repo.insert!
   end
 
