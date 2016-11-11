@@ -141,6 +141,14 @@ defmodule Coherence.ViewHelpers do
     end
   end
 
+  def current_user(conn) do
+    Coherence.current_user(conn)
+  end
+
+  def logged_in?(conn) do
+    Coherence.logged_in?(conn)
+  end
+
   defp profile_link(current_user, conn) do
     if Config.user_schema.registerable? do
       link current_user.name, to: coherence_path(@helpers, :registration_path, conn, :show, current_user.id)
