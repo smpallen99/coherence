@@ -26,6 +26,13 @@ defmodule Coherence.ControllerHelpers do
   end
 
   @doc """
+  Get the configured logged_in_url.
+  """
+  def logged_in_url(_conn) do
+    Config.logged_in_url || "/"
+  end
+
+  @doc """
   Get a random string of given length.
 
   Returns a random url safe encoded64 string of the given length.
@@ -168,7 +175,7 @@ defmodule Coherence.ControllerHelpers do
     if Coherence.logged_in?(conn) do
       conn
       |> put_flash(:info, "Already logged in." )
-      |> redirect(to: logged_out_url(conn))
+      |> redirect(to: logged_in_url(conn))
       |> halt
     else
       conn

@@ -13,6 +13,7 @@ defmodule Coherence.Config do
   * :user_schema
   * :schema_key
   * :logged_out_url
+  * :logged_in_url
   * :email_from
   * :email_reply_to
   * :site_name                                        - The site name used for email
@@ -54,6 +55,7 @@ defmodule Coherence.Config do
     :user_schema,
     :schema_key,
     :logged_out_url,
+    :logged_in_url,
     :email_from,
     :email_reply_to,
     :site_name,
