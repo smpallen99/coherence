@@ -75,6 +75,14 @@ defmodule Coherence.Router do
     end
     quote location: :keep do
       mode = unquote(mode)
+
+      if mode == :public && Module.get_attribute(__MODULE__, :__COHERENCE_PROTECTED__) do
+        raise "Protected routes must follow public routes. Please move 'coherence_routes :protected' below 'coherence_routes'."
+      end
+      if mode == :protected do
+        Module.put_attribute __MODULE__, :__COHERENCE_PROTECTED__, true
+      end
+
       if mode == :all or mode == :public do
         Enum.each([:new, :create], fn(action) ->
           if Coherence.Config.has_action?(:authenticatable, action) do
