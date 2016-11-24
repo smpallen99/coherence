@@ -50,11 +50,18 @@ defmodule Coherence.RegistrationController do
       {:ok, user} ->
         conn
         |> send_confirmation(user, user_schema)
-        |> redirect_to(:registration_create, params)
+        |> redirect_or_login(user, params, Config.allow_unconfirmed_access_for)
       {:error, changeset} ->
         conn
         |> render("new.html", changeset: changeset)
     end
+  end
+
+  defp redirect_or_login(conn, _user, params, 0) do
+    redirect_to(conn, :registration_create, params)
+  end
+  defp redirect_or_login(conn, user, params, _) do
+    Helpers.login_user(conn, user, params)
   end
 
   @doc """
