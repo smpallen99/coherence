@@ -173,9 +173,8 @@ In your product controller add the following:
 ```elixir
 defmodule MyProject.ProductController do
   use MyProject.Web, :controller
-  alias MyProject.Product
 
-  Coherence.Authentication.Session, [protected: true] when action != :index
+  plug Coherence.Authentication.Session, [protected: true] when action != :index
 
   # ...
 ```
@@ -449,7 +448,7 @@ If you want to customize coherence controllers layout, you can follow different 
 
 * Edit `web/views/coherence/layout_view.ex`:
 
-  replace 
+  replace
 ```elixir
   use ContactDemo.Coherence.Web, :view
 ```
@@ -496,7 +495,7 @@ defmodule ExBlog.Coherence.Web do
   When used, dispatch to the appropriate controller/view/etc.
   """
 
-  # 
+  #
   defmacro __using__(which) when is_atom(which) do
     apply(__MODULE__, which, args)
   end
