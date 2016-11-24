@@ -62,7 +62,7 @@ defmodule Coherence do
 
   ### Confirmable
 
-  Requires a new account be conformed. During registration, a conformation token is generated and sent to the registering email. This link must be clicked before the user can sign-in.
+  Requires a new account be conformed. During registration, a confirmation token is generated and sent to the registering email. This link must be clicked before the user can sign-in.
 
   Provides `edit` action for the `/confirmations` route.
 
