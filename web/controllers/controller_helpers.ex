@@ -6,7 +6,7 @@ defmodule Coherence.ControllerHelpers do
   require Logger
   import Phoenix.Controller, only: [put_flash: 3, redirect: 2]
   import Plug.Conn, only: [halt: 1]
-
+  alias Coherence.Schema.{Confirmable}
   @lockable_failure "Failed to update lockable attributes "
 
   @doc """
@@ -118,9 +118,8 @@ defmodule Coherence.ControllerHelpers do
   Adds the `:confirmed_at` datetime field on the user model and updates the database
   """
   def confirm!(user) do
-    user_schema = Config.user_schema
-    changeset = user_schema.confirm(user)
-    unless user_schema.confirmed? user do
+    changeset = Confirmable.confirm(user)
+    unless Confirmable.confirmed? user do
       Config.repo.update changeset
     else
       changeset = Ecto.Changeset.add_error changeset, :confirmed_at, "already confirmed"

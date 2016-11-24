@@ -25,6 +25,7 @@ defmodule Coherence.Config do
   * :opts ([])
   * :reset_token_expire_days (2)
   * :confirmation_token_expire_days (5)
+  * :allow_unconfirmed_access_for (0)             - default 0 days
   * :max_failed_login_attempts (5)
   * :unlock_timeout_minutes (20)
   * :unlock_token_expire_minutes (5)
@@ -71,6 +72,7 @@ defmodule Coherence.Config do
     {:assigns_key, :current_user},
     {:reset_token_expire_days, 2},
     {:confirmation_token_expire_days, 5},
+    {:allow_unconfirmed_access_for, 0},
     {:max_failed_login_attempts, 5},
     {:unlock_timeout_minutes, 20},
     {:unlock_token_expire_minutes, 5},

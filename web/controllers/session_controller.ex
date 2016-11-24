@@ -11,6 +11,7 @@ defmodule Coherence.SessionController do
   import Ecto.Query
   import Rememberable, only: [hash: 1, gen_cookie: 3]
   alias Coherence.ControllerHelpers, as: Helpers
+  alias Coherence.Schema.{Confirmable}
 
   plug :layout_view
   plug :redirect_logged_in when action in [:new, :create]
@@ -75,7 +76,7 @@ defmodule Coherence.SessionController do
     user = Config.repo.one(from u in user_schema, where: field(u, ^login_field) == ^login)
     lockable? = user_schema.lockable?
     if user != nil and user_schema.checkpw(password, Map.get(user, Config.password_hash)) do
-      if confirmed? user do
+      if Confirmable.confirmed?(user) || Confirmable.unconfirmed_access?(user) do
         unless lockable? and user_schema.locked?(user) do
           apply(Config.auth_module, Config.create_login, [conn, user, [id_key: Config.schema_key]])
           |> reset_failed_attempts(user, lockable?)
@@ -225,17 +226,6 @@ defmodule Coherence.SessionController do
   end
 
   @doc """
-  Helper to check if a user has been confirmed.
-  """
-  def confirmed?(user) do
-    if Config.user_schema.confirmable? do
-      Config.user_schema.confirmed?(user)
-    else
-      true
-    end
-  end
-
-  @doc """
   Callback for the authenticate plug.
 
   Validate the rememberable cookie. If valid, generate a new token,
@@ -249,7 +239,7 @@ defmodule Coherence.SessionController do
     |> case do
       {:ok, rememberable} ->
         # Logger.debug "Valid login :ok"
-        user = case repo.get(Config.user_schema, id) do
+        case repo.get(Config.user_schema, id) do
           nil -> {:error, :not_found}
           user ->
             gen_cookie(id, series, token)

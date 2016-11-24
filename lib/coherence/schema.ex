@@ -85,6 +85,9 @@ defmodule Coherence.Schema do
       import Ecto.Changeset
       use Coherence.Config
       require Logger
+      alias Coherence.Schema.{Confirmable}
+
+      use Confirmable, unquote(opts)
 
       def authenticatable? do
         Coherence.Config.has_option(:authenticatable) and
@@ -94,11 +97,6 @@ defmodule Coherence.Schema do
       def registerable? do
         Coherence.Config.has_option(:registerable) and
           Keyword.get(unquote(opts), :registerable, true)
-      end
-
-      def confirmable? do
-        Coherence.Config.has_option(:confirmable) and
-          Keyword.get(unquote(opts), :confirmable, true)
       end
 
       def trackable? do
@@ -129,47 +127,6 @@ defmodule Coherence.Schema do
       def rememberable? do
         Coherence.Config.has_option(:rememberable) and
           Keyword.get(unquote(opts), :rememberable, true)
-      end
-
-      if  Coherence.Config.has_option(:confirmable) and
-            Keyword.get(unquote(opts), :confirmable, true) do
-        @doc """
-        Checks if the user has been confirmed.
-
-        Returns true if confirmed, false otherwise
-        """
-        def confirmed?(user) do
-          !!user.confirmed_at
-        end
-
-        @doc """
-        Confirm a user account.
-
-        Adds the `:confirmed_at` datetime field on the user model.
-
-        Returns a changeset ready for Repo.update
-        """
-        def confirm(user) do
-          Config.user_schema.changeset(user, %{confirmed_at: Ecto.DateTime.utc, confirmation_token: nil})
-        end
-
-        @doc """
-        Confirm a user account.
-
-        Adds the `:confirmed_at` datetime field on the user model.
-
-        deprecated! Please use Coherence.ControllerHelpers.unlock!/1.
-        """
-        def confirm!(user) do
-          IO.warn "#{inspect Config.user_schema}.confirm!/1 has been deprecated. Please use Coherence.ControllerHelpers.confirm!/1 instead."
-          changeset = Config.user_schema.changeset(user, %{confirmed_at: Ecto.DateTime.utc, confirmation_token: nil})
-          unless confirmed? user do
-            Config.repo.update changeset
-          else
-            changeset = Ecto.Changeset.add_error changeset, :confirmed_at, "already confirmed"
-            {:error, changeset}
-          end
-        end
       end
 
       if  Coherence.Config.has_option(:lockable) and
