@@ -48,9 +48,10 @@ defmodule Coherence.RegistrationController do
     cs = Helpers.changeset(:registration, user_schema, user_schema.__struct__, registration_params)
     case Config.repo.insert(cs) do
       {:ok, user} ->
-        conn
+        apply(Config.auth_module, Config.create_login, [conn, user, [id_key: Config.schema_key]])
+        |> Helpers.track_login(user, user_schema.trackable?)
         |> send_confirmation(user, user_schema)
-        |> redirect_to(:registration_create, params)
+        |> redirect_to(:session_create, params)
       {:error, changeset} ->
         conn
         |> render("new.html", changeset: changeset)
