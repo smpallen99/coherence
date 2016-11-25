@@ -131,14 +131,14 @@ defmodule Coherence.Router do
           delete "/sessions", Coherence.SessionController, :delete
         end
         if Coherence.Config.has_action?(:registerable, :show) do
-          get "/registrations/:id", Coherence.RegistrationController, :show
+          get "/registrations", Coherence.RegistrationController, :show
         end
         if Coherence.Config.has_action?(:registerable, :update) do
-          put "/registrations/:id", Coherence.RegistrationController, :update
-          patch "/registrations/:id", Coherence.RegistrationController, :update
+          put "/registrations", Coherence.RegistrationController, :update
+          patch "/registrations", Coherence.RegistrationController, :update
         end
         if Coherence.Config.has_action?(:registerable, :edit) do
-          get "/registrations/:id/edit", Coherence.RegistrationController, :edit
+          get "/registrations/edit", Coherence.RegistrationController, :edit
         end
         if Coherence.Config.has_action?(:registerable, :delete) do
           delete "/registrations", Coherence.RegistrationController, :delete
