@@ -55,6 +55,7 @@ defmodule Coherence.ControllerHelpers do
       expired?(user.expire_at, days: 5)
       expired?(user.expire_at, minutes: 10)
   """
+  def expired?(nil, _), do: true
   def expired?(datetime, opts) do
     expire_on? = datetime
     |> Ecto.DateTime.to_erl
