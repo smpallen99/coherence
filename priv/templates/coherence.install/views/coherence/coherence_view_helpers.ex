@@ -19,7 +19,39 @@ defmodule <%= base %>.Coherence.ViewHelpers do
   @doc """
   Create coherence template links.
 
-  Generates links if the appropriate option is installed.
+  Generates links if the appropriate option is installed. This function
+  can be used to:
+
+  * create links for the new session page `:new_session`
+  * create links for your layout template `:layout`
+
+
+  Defaults are provided based on the options configured for Coherence.
+  However, the defaults can be overridden by passing the following options.
+
+  ## Customize the links
+
+  ### :new_session Options
+
+  * :recover - customize the recover link (#{@recover_link})
+  * :unlock - customize the unlock link (#{@unlock_link})
+  * :register - customize the register link (#{@register_link})
+  * :confirm - customize the confirm link (#{@confirm_link})
+
+  ### :layout Options
+
+  * :list_tag - customize the list tag (:li)
+  * :signout_class - customize the class on the signout link ("navbar-form")
+  * :signin - customize the signin link text (#{@signin_link})
+  * :signout - customize the signout link text (#{@signout_link})
+  * :register - customize the register link text (#{@register_link})
+
+  ### Disable links
+
+  If you set an option to false, the link will not be shown. For example, to
+  disable the register link on the layout, use the following in your layout template:
+
+      coherence_links(conn, :layout, register: false)
 
   ## Examples
 
