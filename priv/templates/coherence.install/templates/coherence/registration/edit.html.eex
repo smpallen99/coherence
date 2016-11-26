@@ -2,4 +2,4 @@
 
 <%%= render "form.html", changeset: @changeset,
                         label: "Update", required: [],
-                        action: registration_path(@conn, :update, @user) %>
+                        action: registration_path(@conn, :update) %>
