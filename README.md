@@ -31,6 +31,8 @@ Once the boilerplate has been generated, you are free to customize the source as
 
 As well, a `web/coherence_web.ex` is added. Migrations are also generated to add the required database fields.
 
+See the [Docs](https://hexdocs.pm/coherence/Coherence.html) and [Wiki](https://github.com/smpallen99/coherence/wiki) for more information.
+
 ## Installation
 
   1. Add coherence to your list of dependencies in `mix.exs`:
