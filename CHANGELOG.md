@@ -1,5 +1,35 @@
 # Changelog
 
+## 0.3.1  (2016-xx-xx)
+
+* Enhancements
+  * Remove unused params from registration path
+  * Update docs for coherence_links
+  * Add unit tests for registration controller
+  * Support unconfirmed access
+  * Support auto login if unconfirmed access is enabled
+  * Start refactoring into schema modules (web/models/confirmable.ex)
+  * Raise compiler error when protected routes are defined before public routes
+  * Add current_user and logged_in? view helpers
+  * Add templates customization section
+  * Add Config.logged_in_url to be used for redirect from redirect_logged_in plug
+  * Add :coherence to apps in installer instructions
+  * Add sign in link helper
+  * Validate email format with some minor improvements
+  * Document customizable actions
+  * Allow configuring specific routes
+  * Add signout_link function to view helpers
+
+* Bug Fixes
+  * Remove web/controllers/redirects since it breaks releases
+  * Fix readme getting started section
+  * Ensure local module is loaded on login callback
+  * Give correct HTTP status code when login fail
+
+* Deprecations
+
+* Backward incompatible changes
+
 ## 0.3.0  (2016-08-28)
 
 See these `0.2.0` to `0.3.0` [upgrade instructions](https://gist.github.com/smpallen99/ae80753a5cdea5d20a1c03639b9a801e) to bring your existing app up to speed.
