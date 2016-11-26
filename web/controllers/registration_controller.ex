@@ -84,7 +84,7 @@ defmodule Coherence.RegistrationController do
   @doc """
   Update the registration.
   """
-  def update(conn, %{"id" => _id, "registration" => user_params} = params) do
+  def update(conn, %{"registration" => user_params} = params) do
     user_schema = Config.user_schema
     user = Coherence.current_user(conn)
     changeset = Helpers.changeset(:registration, user_schema, user, user_params)

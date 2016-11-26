@@ -47,7 +47,7 @@ defmodule CoherenceTest.RegistrationController do
 
   describe "update" do
     test "can update registration", %{conn: conn} do
-      params = %{"registration" => %{}, "id" => nil}
+      params = %{"registration" => %{}}
       conn = put conn, registration_path(conn, :update), params
       assert conn.private[:phoenix_flash] == %{"info" => "Account updated successfully."}
       assert html_response(conn, 302)
