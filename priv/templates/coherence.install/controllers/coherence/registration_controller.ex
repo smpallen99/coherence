@@ -50,11 +50,18 @@ defmodule <%= base %>.Coherence.RegistrationController do
       {:ok, user} ->
         conn
         |> send_confirmation(user, user_schema)
-        |> redirect_to(:registration_create, params)
+        |> redirect_or_login(user, params, Config.allow_unconfirmed_access_for)
       {:error, changeset} ->
         conn
         |> render("new.html", changeset: changeset)
     end
+  end
+
+  defp redirect_or_login(conn, _user, params, 0) do
+    redirect_to(conn, :registration_create, params)
+  end
+  defp redirect_or_login(conn, user, params, _) do
+    Helpers.login_user(conn, user, params)
   end
 
   @doc """
@@ -77,11 +84,10 @@ defmodule <%= base %>.Coherence.RegistrationController do
   @doc """
   Update the registration.
   """
-  def update(conn, %{"id" => _id, "registration" => user_params} = params) do
+  def update(conn, %{"registration" => user_params} = params) do
     user_schema = Config.user_schema
     user = Coherence.current_user(conn)
     changeset = Helpers.changeset(:registration, user_schema, user, user_params)
-
     case Config.repo.update(changeset) do
       {:ok, user} ->
         apply(Config.auth_module, Config.update_login, [conn, user, [id_key: Config.schema_key]])

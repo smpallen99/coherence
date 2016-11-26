@@ -11,6 +11,7 @@ defmodule <%= base %>.Coherence.SessionController do
   import Ecto.Query
   import Rememberable, only: [hash: 1, gen_cookie: 3]
   alias Coherence.ControllerHelpers, as: Helpers
+  alias Coherence.Schema.{Confirmable}
 
   plug :layout_view
   plug :redirect_logged_in when action in [:new, :create]
@@ -75,7 +76,7 @@ defmodule <%= base %>.Coherence.SessionController do
     user = Config.repo.one(from u in user_schema, where: field(u, ^login_field) == ^login)
     lockable? = user_schema.lockable?
     if user != nil and user_schema.checkpw(password, Map.get(user, Config.password_hash)) do
-      if confirmed? user do
+      if Confirmable.confirmed?(user) || Confirmable.unconfirmed_access?(user) do
         unless lockable? and user_schema.locked?(user) do
           apply(Config.auth_module, Config.create_login, [conn, user, [id_key: Config.schema_key]])
           |> reset_failed_attempts(user, lockable?)
@@ -124,36 +125,6 @@ defmodule <%= base %>.Coherence.SessionController do
     apply(Config.auth_module, Config.delete_login, [conn])
     |> track_logout(user, user.__struct__.trackable?)
     |> delete_rememberable(user)
-  end
-
-  defp track_login(conn, _, false), do: conn
-  defp track_login(conn, user, true) do
-    ip = conn.peer |> elem(0) |> inspect
-    now = Ecto.DateTime.utc
-    {last_at, last_ip} = cond do
-      is_nil(user.last_sign_in_at) and is_nil(user.current_sign_in_at) ->
-        {now, ip}
-      !!user.current_sign_in_at ->
-        {user.current_sign_in_at, user.current_sign_in_ip}
-      true ->
-        {user.last_sign_in_at, user.last_sign_in_ip}
-    end
-
-    Helpers.changeset(:session, user.__struct__, user,
-      %{
-        sign_in_count: user.sign_in_count + 1,
-        current_sign_in_at: Ecto.DateTime.utc,
-        current_sign_in_ip: ip,
-        last_sign_in_at: last_at,
-        last_sign_in_ip: last_ip
-      })
-    |> Config.repo.update
-    |> case do
-      {:ok, _} -> nil
-      {:error, _changeset} ->
-        Logger.error ("Failed to update tracking!")
-    end
-    conn
   end
 
   defp track_logout(conn, _, false), do: conn
@@ -225,17 +196,6 @@ defmodule <%= base %>.Coherence.SessionController do
   end
 
   @doc """
-  Helper to check if a user has been confirmed.
-  """
-  def confirmed?(user) do
-    if Config.user_schema.confirmable? do
-      Config.user_schema.confirmed?(user)
-    else
-      true
-    end
-  end
-
-  @doc """
   Callback for the authenticate plug.
 
   Validate the rememberable cookie. If valid, generate a new token,
@@ -249,7 +209,7 @@ defmodule <%= base %>.Coherence.SessionController do
     |> case do
       {:ok, rememberable} ->
         # Logger.debug "Valid login :ok"
-        user = case repo.get(Config.user_schema, id) do
+        case repo.get(Config.user_schema, id) do
           nil -> {:error, :not_found}
           user ->
             gen_cookie(id, series, token)
