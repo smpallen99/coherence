@@ -19,6 +19,7 @@
   * Document customizable actions
   * Allow configuring specific routes
   * Add signout_link function to view helpers
+  * Support {:system, env_var} in config
 
 * Bug Fixes
   * Remove web/controllers/redirects since it breaks releases
@@ -27,6 +28,8 @@
   * Give correct HTTP status code when login fail
 
 * Deprecations
+  * email_from config - use  email_from_name and email_from_email
+  * email_reply_to config - use email_reply_to_name and email_reply_to_email
 
 * Backward incompatible changes
 

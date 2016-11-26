@@ -77,9 +77,15 @@ defmodule TestCoherence.Coherence.UserEmail do
   defp from_email do
     case Coherence.Config.email_from do
       nil ->
-        Logger.error ~s|Need to configure :coherence, :email_from, {"Name", "me@example.com"}|
-        ""
-      email -> email
+        Logger.error ~s|Need to configure :coherence, :email_from_name, "Name", and :email_from_email, "me@example.com"|
+        nil
+      {name, email} = email_tuple ->
+        if is_nil(name) or is_nil(email) do
+          Logger.error ~s|Need to configure :coherence, :email_from_name, "Name", and :email_from_email, "me@example.com"|
+          nil
+        else
+          email_tuple
+        end
     end
   end
 end

@@ -160,7 +160,8 @@ defmodule Mix.Tasks.Coherence.Install do
 
   defp gen_coherence_config(config) do
     from_email = if config[:use_email?] do
-      ~s|  email_from: {"Your Name", "yourname@example.com"},\n|
+      ~s|  email_from_name: "Your Name",\n| <>
+      ~s|  email_from_email: "yourname@example.com",\n|
     else
       ""
     end

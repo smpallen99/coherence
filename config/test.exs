@@ -22,6 +22,7 @@ config :coherence,
   repo: TestCoherence.Repo,
   module: TestCoherence,
   logged_out_url: "/",
-  email_from: {"Your Name", "yourname@example.com"},
+  email_from_name: "Your Name",
+  email_from_email: "yourname@example.com",
   opts: [:confirmable, :authenticatable, :recoverable, :lockable, :trackable, :unlockable_with_token, :invitable, :registerable]
 

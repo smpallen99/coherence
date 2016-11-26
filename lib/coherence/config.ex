@@ -14,8 +14,12 @@ defmodule Coherence.Config do
   * :schema_key
   * :logged_out_url
   * :logged_in_url
-  * :email_from
-  * :email_reply_to
+  * :email_from                                       - Deprecated. Use `email_from_name` and `email_from_email` instead
+  * :email_from_name
+  * :email_from_email
+  * :email_reply_to                                   - Set to true to add email_from_name and email_from_email
+  * :email_reply_to_name
+  * :email_reply_to_email
   * :site_name                                        - The site name used for email
   * :login_cookie ("coherence_login")                 - The name of the login cookie
   * :auth_module (Coherence.Authentication.Session)
@@ -49,6 +53,8 @@ defmodule Coherence.Config do
     end
   end
 
+  require Logger
+
   # opts: :all || [:trackable, :lockable, :rememberable, :confirmable]
   [
     :module,
@@ -57,8 +63,10 @@ defmodule Coherence.Config do
     :schema_key,
     :logged_out_url,
     :logged_in_url,
-    :email_from,
-    :email_reply_to,
+    :email_from_name,
+    :email_from_email,
+    :email_reply_to_name,
+    :email_reply_to_email,
     :site_name,
     :changeset,
     {:password_hash_field, :password_hash},
@@ -82,19 +90,43 @@ defmodule Coherence.Config do
   |> Enum.each(fn
         {key, default} ->
           def unquote(key)(opts \\ unquote(default)) do
-            Application.get_env :coherence, unquote(key), opts
+            get_application_env unquote(key), opts
           end
         key ->
           def unquote(key)(opts \\ nil) do
-            Application.get_env :coherence, unquote(key), opts
+            get_application_env unquote(key), opts
           end
      end)
+
+  def email_from do
+    case get_application_env :email_from do
+      nil ->
+        {get_application_env(:email_from_name), get_application_env(:email_from_email)}
+      email ->
+        Logger.info "email_from config is deprecated. Use email_from_name and email_from_email instead"
+        email
+    end
+  end
+
+  def email_reply_to do
+    case get_application_env :email_reply_to do
+      nil ->
+        case {get_application_env(:email_reply_to_name), get_application_env(:email_reply_to_email)} do
+          {nil, nil} -> nil
+          email -> email
+        end
+      true -> true
+      email ->
+        Logger.info "email_reply_to {name, email} config is deprecated. Use email_reply_to_name and email_reply_to_email instead"
+        email
+    end
+  end
 
   @doc """
   Get a configuration item.
   """
   def get(key, default \\ nil) do
-    Application.get_env :coherence, key, default
+    get_application_env key, default
   end
 
   @doc """
@@ -127,6 +159,13 @@ defmodule Coherence.Config do
   defmacro password_hash do
     field = Application.get_env :coherence, :password_hash_field, :password_hash
     quote do: unquote(field)
+  end
+
+  defp get_application_env(key, default \\ nil) do
+    case Application.get_env :coherence, key, default do
+      {:system, env_var} -> System.get_env env_var
+      value -> value
+    end
   end
 
 end

@@ -584,6 +584,31 @@ to update the credential store.
 
 This is not needed for registration update page.
 
+## Configuring the Swoosh Email Adapter
+
+The following configuration must be setup to send emails:
+
+```elixir
+config :coherence,
+  email_from_name: "Some Name",
+  email_from_email: "myname@domain.com"
+
+config :coherence, CoherenceDemo.Coherence.Mailer,
+  adapter: Swoosh.Adapters.Sendgrid,
+  api_key: "Add api key here"
+```
+
+You may want to configure the email system to use system environment variables.
+
+```elixir
+config :coherence,
+  email_from_name: {:system, "NAME"},
+  email_from_email: {:system, "EMAIL"}
+
+config :coherence, CoherenceDemo.Coherence.Mailer,
+  api_key: {:system, "API_KEY"}
+```
+
 ## Authentication
 
 Currently Coherence supports three modes of authentication including HTTP Basic, Session, and Token authentication.
