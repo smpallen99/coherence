@@ -330,10 +330,10 @@ The following examples illustrate various configuration scenarios for the instal
     # Install all the options except `confirmable` and `invitable`
     $ mix coherence.install --full
 
-    # Install all the options except `invitable`
+    # Install all the options except `confirmable`
     $ mix coherence.install --full-confirmable
 
-    # Install all the options except `confirmable`
+    # Install all the options except `invitable`
     $ mix coherence.install --full-invitable
 
     # Install the `full` options except `lockable` and `trackable`
