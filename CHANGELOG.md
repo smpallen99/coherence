@@ -1,6 +1,8 @@
 # Changelog
 
-## 0.3.1  (2016-xx-xx)
+## 0.3.1  (2016-11-26)
+
+See these `0.3.0` to `0.3.1` [upgrade instructions](https://gist.github.com/smpallen99/2241d3365aedf0ca3eb884f16def0bb1) to bring your existing app up to speed.
 
 * Enhancements
   * Remove unused params from registration path
@@ -20,6 +22,8 @@
   * Allow configuring specific routes
   * Add signout_link function to view helpers
   * Support {:system, env_var} in config
+  * Add new `mix coherence.install --reinstall` option
+  * Add `--silent`, `--confirm-once`, and `--no-confirm` option to `mix coherence.install`
 
 * Bug Fixes
   * Remove web/controllers/redirects since it breaks releases

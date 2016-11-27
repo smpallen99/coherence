@@ -21,7 +21,7 @@ defmodule Mix.Tasks.Coherence.Install do
   * Generate a `web/coherence_web.ex` file.
   * Generate a `web/models/user.ex` file if one does not already exist.
 
-  ## Examples
+  ## Install Examples
 
       # Install with only the `authenticatable` option
       mix coherence.install
@@ -37,6 +37,14 @@ defmodule Mix.Tasks.Coherence.Install do
 
       # Install the `full` options except `lockable` and `trackable`
       mix coherence.install --full --no-lockable --no-trackable
+
+  ## Reinstall Examples
+
+      # Reinstall with defaults (--silent --no-migrations --no-config --confirm-once)
+      mix coherence.install --reinstall
+
+      # Confirm to overwrite files, show instructions, and generate migrations
+      mix coherence.install --reinstall --no-confirm-once --with-migrations
 
   ## Option list
 
@@ -81,6 +89,14 @@ defmodule Mix.Tasks.Coherence.Install do
 
   A `--installed-options` option to list the previous install options
 
+  A `--reinstall` option to reinstall the coherence boilerplate based on your existing configuration options
+
+  A `--silent` option to disable printing instructions
+
+  A `--confirm-once` option to only confirm overwriting existing files once
+
+  A `--with-migrations` option to reinstall migrations. only valid for --reinstall option
+
   ## Disable Options
 
   * `--no-config` -- Don't append to your `config/config.exs` file.
@@ -90,6 +106,7 @@ defmodule Mix.Tasks.Coherence.Install do
   * `--no-templates` -- Don't create the `web/templates/coherence` files.
   * `--no-boilerplate` -- Don't create any of the boilerplate files.
   * `--no-models` -- Don't generate the model file.
+  * `--no-confirm` -- Don't confirm overwriting files.
 
   """
 
@@ -103,7 +120,7 @@ defmodule Mix.Tasks.Coherence.Install do
   @full_invitable    @all_options -- ~w(confirmable rememberable)
 
   # the options that default to true, and can be disabled with --no-option
-  @default_booleans  ~w(config web views migrations templates models emails boilerplate)
+  @default_booleans  ~w(config web views migrations templates models emails boilerplate confirm)
 
   # all boolean_options
   @boolean_options   @default_booleans ++ ~w(default full full_confirmable full_invitable) ++ @all_options
@@ -117,8 +134,12 @@ defmodule Mix.Tasks.Coherence.Install do
   @config_marker_end   "%% End Coherence Configuration %%"
 
 
-  @switches [user: :string, repo: :string, migration_path: :string, model: :string, log_only: :boolean,
-     controllers: :boolean, module: :string, installed_options: :boolean] ++ Enum.map(@boolean_options, &({String.to_atom(&1), :boolean}))
+  @switches [
+    user: :string, repo: :string, migration_path: :string, model: :string,
+    log_only: :boolean, confirm_once: :boolean, controllers: :boolean,
+    module: :string, installed_options: :boolean, reinstall: :boolean,
+    silent: :boolean, with_migrations: :boolean
+  ] ++ Enum.map(@boolean_options, &({String.to_atom(&1), :boolean}))
 
   @switch_names Enum.map(@switches, &(elem(&1, 0)))
 
@@ -136,10 +157,26 @@ defmodule Mix.Tasks.Coherence.Install do
     |> do_run
   end
 
+  defp do_run(%{reinstall: true} = config) do
+    ["--no-config"]
+    |> check_confirm_once(config)
+    |> check_silent(config)
+    |> check_migrations(config)
+    |> get_config_options()
+    |> run
+  end
   defp do_run(%{installed_options: true} = config) do
-
     print_installed_options config
   end
+  defp do_run(%{confirm_once: true} = config) do
+    if Mix.shell.yes? "Are you sure you want overwrite any existing files?" do
+      config
+      |> Map.put(:confirm, false)
+      |> Map.delete(:confirm_once)
+      |> do_run
+    end
+  end
+  defp do_run(%{with_migrations: true}), do: Mix.raise("--with-migrations only valid with --reinstall")
   defp do_run(config) do
     config
     |> check_for_model
@@ -157,6 +194,15 @@ defmodule Mix.Tasks.Coherence.Install do
     |> touch_config                # work around for config file not getting recompiled
     |> print_instructions
   end
+
+  defp check_confirm(options, %{confirm: true}), do: options
+  defp check_confirm(options, _), do: ["--no-confirm" | options]
+  defp check_confirm_once(options, %{confirm_once: false} = config), do: check_confirm(options, config)
+  defp check_confirm_once(options, _), do: ["--confirm-once" | options]
+  defp check_silent(options, %{silent: false}), do: options
+  defp check_silent(options, _), do: ["--silent" | options]
+  defp check_migrations(options, %{with_migrations: true}), do: options
+  defp check_migrations(options, _), do: ["--no-migrations" | options]
 
   defp gen_coherence_config(config) do
     from_email = if config[:use_email?] do
@@ -194,30 +240,35 @@ config :coherence, #{base}.Coherence.Mailer,
     string <> "# #{@config_marker_end}\n"
   end
 
-  defp write_config(string, %{config: true} = config) do
+  defp write_config(string, %{config: true, confirm: confirm?} = config) do
     log_config? = if File.exists? @config_file do
       source = File.read!(@config_file)
       if String.contains? source, @config_marker_start do
-        Mix.shell.yes? "Your config file already contains Coherence configuration. Are you sure you add another?"
+        confirm? && Mix.shell.yes?("Your config file already contains Coherence configuration. Are you sure you add another?")
       else
         true
       end
       |> if do
         File.write!(@config_file, source <> "\n" <> string)
-        Mix.shell.info "Your config/config.exs file was updated."
+        shell_info config, "Your config/config.exs file was updated."
         false
       else
-        Mix.shell.info "Configuration was not added!"
+        shell_info config, "Configuration was not added!"
         true
       end
     else
-      Mix.shell.error "Could not find #{@config_file}. Configuration was not added!"
+      shell_info config, "Could not find #{@config_file}. Configuration was not added!"
       true
     end
     Enum.into [config_string: string, log_config?: log_config?], config
   end
   defp write_config(string, config), do: Enum.into([log_config?: true, config_string: string], config)
 
+  defp shell_info(%{silent: true} = config, _message), do: config
+  defp shell_info(config, message) do
+    Mix.shell.info message
+    config
+  end
   defp log_config(%{log_config?: false} = config) do
     save_instructions config, ""
   end
@@ -262,10 +313,10 @@ config :coherence, #{base}.Coherence.Mailer,
     name = module_to_string(user_schema)
     |> String.downcase
     binding = binding ++ [base: config[:base], user_table_name: config[:user_table_name]]
-    Mix.Phoenix.copy_from paths(),
+    copy_from paths(),
       "priv/templates/coherence.install/models/coherence", "", binding, [
         {:eex, "user.ex", "web/models/coherence/#{name}.ex"}
-      ]
+      ], config
     config
   end
   defp gen_model(config), do: config
@@ -404,19 +455,19 @@ config :coherence, #{base}.Coherence.Mailer,
   # Web
 
   defp gen_coherence_web(%{web: true, boilerplate: true, binding: binding} = config) do
-    Mix.Phoenix.copy_from paths(),
+    copy_from paths(),
       "priv/templates/coherence.install", "", binding, [
         {:eex, "coherence_web.ex", "web/coherence_web.ex"},
-      ]
+      ], config
     config
   end
   defp gen_coherence_web(config), do: config
 
   defp gen_redirects(%{boilerplate: true, binding: binding} = config) do
-    Mix.Phoenix.copy_from paths(),
+    copy_from paths(),
       "priv/templates/coherence.install/controllers/coherence", "", binding, [
         {:eex, "redirects.ex", "web/controllers/coherence/redirects.ex"},
-      ]
+      ], config
     config
   end
   defp gen_redirects(config), do: config
@@ -443,7 +494,7 @@ config :coherence, #{base}.Coherence.Mailer,
     files = Enum.filter_map(@view_files, &(validate_option(config, elem(&1,0))), &(elem(&1, 1)))
     |> Enum.map(&({:eex, &1, "web/views/coherence/#{&1}"}))
 
-    Mix.Phoenix.copy_from paths(), "priv/templates/coherence.install/views/coherence", "", binding, files
+    copy_from paths(), "priv/templates/coherence.install/views/coherence", "", binding, files, config
     config
   end
   def gen_coherence_views(config), do: config
@@ -471,31 +522,31 @@ config :coherence, #{base}.Coherence.Mailer,
 
   def gen_coherence_templates(%{templates: true, boilerplate: true, binding: binding} = config) do
     for {name, {opt, files}} <- @template_files do
-      if validate_option(config, opt), do: copy_templates(binding, name, files)
+      if validate_option(config, opt), do: copy_templates(binding, name, files, config)
     end
     config
   end
   def gen_coherence_templates(config), do: config
 
-  defp copy_templates(binding, name, file_list) do
+  defp copy_templates(binding, name, file_list, config) do
     files = for fname <- file_list do
       fname = "#{fname}.html.eex"
       {:eex, fname, "web/templates/coherence/#{name}/#{fname}"}
     end
 
-    Mix.Phoenix.copy_from paths(),
-      "priv/templates/coherence.install/templates/coherence/#{name}", "", binding, files
+    copy_from paths(),
+      "priv/templates/coherence.install/templates/coherence/#{name}", "", binding, files, config
   end
 
   ################
   # Mailer
 
   defp gen_coherence_mailer(%{binding: binding, use_email?: true, boilerplate: true} = config) do
-    Mix.Phoenix.copy_from paths(),
+    copy_from paths(),
       "priv/templates/coherence.install/emails/coherence", "", binding, [
         {:eex, "coherence_mailer.ex", "web/emails/coherence/coherence_mailer.ex"},
         {:eex, "user_email.ex", "web/emails/coherence/user_email.ex"},
-      ]
+      ], config
     config
   end
   defp gen_coherence_mailer(config), do: config
@@ -517,7 +568,7 @@ config :coherence, #{base}.Coherence.Mailer,
     files = Enum.filter_map(@controller_files, &(validate_option(config, elem(&1,0))), &(elem(&1, 1)))
     |> Enum.map(&({:eex, &1, "web/controllers/coherence/#{&1}"}))
 
-    Mix.Phoenix.copy_from paths(), "priv/templates/coherence.install/controllers/coherence", "", binding, files
+    copy_from paths(), "priv/templates/coherence.install/controllers/coherence", "", binding, files, config
     config
   end
   defp gen_coherence_controllers(config), do: config
@@ -636,6 +687,7 @@ config :coherence, #{base}.Coherence.Mailer,
   end
   defp migrate_instructions(_), do: ""
 
+  defp print_instructions(%{silent: true} = config), do: config
   defp print_instructions(%{instructions: instructions} = config) do
     Mix.shell.info instructions
     Mix.shell.info mix_instructions(config)
@@ -723,6 +775,11 @@ config :coherence, #{base}.Coherence.Mailer,
     |> Map.put(:module, opts[:module])
     |> Map.put(:timestamp, timestamp() |> String.to_integer)
     |> Map.put(:installed_options, opts[:installed_options])
+    |> Map.put(:confirm, opts[:confirm])
+    |> Map.put(:confirm_once, opts[:confirm_once])
+    |> Map.put(:reinstall, opts[:reinstall])
+    |> Map.put(:silent, opts[:silent])
+    |> Map.put(:with_migrations, opts[:with_migrations])
     |> do_default_config(opts)
   end
 
@@ -793,24 +850,64 @@ config :coherence, #{base}.Coherence.Mailer,
     |> Enum.reduce(acc, &config_option/2)
   end
 
+  def get_config_options([]) do
+    Mix.raise """
+    Could not find coherence configuration.
+    """
+  end
+
+  def get_config_options(opts) do
+    Application.get_env(:coherence, :opts, [])
+    |> get_config_options(opts)
+  end
+
+  def get_config_options([], _opts) do
+    Mix.raise """
+    Could not find coherence configuration for re-installation. Please remove the --reinstall option to do a fresh install.
+    """
+  end
+  def get_config_options(config_opts, opts) do
+    config_opts
+    |> Enum.reduce(opts, &config_option/2)
+  end
+
   defp config_option(opt, acc) do
     str = Atom.to_string(opt)
     |> String.replace("_", "-")
     ["--" <> str | acc]
   end
 
+  @doc """
+  Copies files from source dir to target dir
+  according to the given map.
+  Files are evaluated against EEx according to
+  the given binding.
+  """
+  def copy_from(apps, source_dir, target_dir, binding, mapping, config) when is_list(mapping) do
+    roots = Enum.map(apps, &to_app_source(&1, source_dir))
+    create_opts = if config[:confirm], do: [], else: [force: true]
 
-  # TODO: Remove this later if we never use it
-  #
-  # defp prompt_yes(default, yes_prompt, prompt) do
-  #   unless Mix.shell.yes? yes_prompt do
-  #     Mix.shell.prompt prompt
-  #   else
-  #     default
-  #   end
-  # end
-  # defp schema_exists?(module) do
-  #   :erlang.function_exported(module, :__schema__, 1)
-  # end
+    for {format, source_file_path, target_file_path} <- mapping do
+      source =
+        Enum.find_value(roots, fn root ->
+          source = Path.join(root, source_file_path)
+          if File.exists?(source), do: source
+        end) || raise "could not find #{source_file_path} in any of the sources"
 
+      target = Path.join(target_dir, target_file_path)
+
+      contents =
+        case format do
+          :text -> File.read!(source)
+          :eex  -> EEx.eval_file(source, binding)
+        end
+
+      Mix.Generator.create_file(target, contents, create_opts)
+    end
+  end
+
+  defp to_app_source(path, source_dir) when is_binary(path),
+    do: Path.join(path, source_dir)
+  defp to_app_source(app, source_dir) when is_atom(app),
+    do: Application.app_dir(app, source_dir)
 end
