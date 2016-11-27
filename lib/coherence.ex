@@ -28,7 +28,10 @@ defmodule Coherence do
 
   * :password_hash, :string - the encrypted password
 
-    * This name can be changed with the `password_hash_field` config item. Changing this requires recompiling Coherence.
+  The following options can be customized (default shown):
+
+      config :coherence,
+        password_hash_field: :password_hash    # you must recompile Coherence after changing this
 
 
   ### Invitable
@@ -37,7 +40,7 @@ defmodule Coherence do
 
   Provides `/invitations/new` and `invitations/edit` routes for creating a new invitation and creating a new account from the invite email.
 
-  These routes can be configured to require login by using the `coherence_routes :private` macro in your router.exs file.
+  These routes can be configured to require login by using the `coherence_routes :protected` macro in your router.exs file.
 
   Invitation token timeout will be added in the future.
 
@@ -66,7 +69,11 @@ defmodule Coherence do
 
   Provides `edit` action for the `/confirmations` route.
 
-  The confirmation token expiry default of 5 days can be changed with the `:confirmation_token_expire_days` config entry.
+  The following options can be customized (default shown):
+
+      config :coherence,
+        confirmation_token_expire_days: 5,
+        allow_unconfirmed_access_for: 0       # number of days. 0 to disable
 
   ### Recoverable
 
@@ -76,7 +83,10 @@ defmodule Coherence do
 
   Adds a "Forgot your password?" link to the log-in form. When clicked, the user provides their email address and if found, sends a reset password instructions email with a reset link.
 
-  The expiry timeout can be changed with the `:reset_token_expire_days` config entry.
+  The following options can be customized (default shown):
+
+      config :coherence,
+        reset_token_expire_days: 2
 
   ### Trackable
 
@@ -96,8 +106,11 @@ defmodule Coherence do
 
   The following defaults can be changed with the following config entries:
 
-  * `:unlock_timeout_minutes`
-  * `:max_failed_login_attempts`
+  The following options can be customized (default shown):
+
+      config :coherence,
+        unlock_timeout_minutes: 5,
+        max_failed_login_attempts: 5
 
   Adds the following database field to your User model with the generated migration:
 
@@ -109,7 +122,10 @@ defmodule Coherence do
 
   Provides a link to send yourself an unlock email. When the user clicks the link, the user is presented a form to enter their email address and password. If the token has not expired and the email and password are valid, a unlock email is sent to the user's email address with an expiring token.
 
-  The default expiry time can be changed with the `:unlock_token_expire_minutes` config entry.
+  The following options can be customized (default shown):
+
+      config :coherence,
+        unlock_token_expire_minutes: 5
 
   ### Remember Me
 
@@ -119,10 +135,11 @@ defmodule Coherence do
 
   For security, both a token and series number stored in the cookie on initial login. Each new creates a new token, but preserves the series number, providing protection against fraud. As well, both the token and series numbers are hashed before saving them to the database, providing protection if the database is compromised.
 
-  The following defaults can be changed with the following config entries:
+  The following options can be customized (default shown):
 
-  * :rememberable_cookie_expire_hours (2*24)
-  * :login_cookie                     ("coherence_login")
+      config :coherence,
+        rememberable_cookie_expire_hours: 2*24,
+        login_cookie: "coherence_login"
 
   The following table is created by the generated `<timestamp>_create_coherence_rememberable.exs` migration:
 
@@ -162,6 +179,13 @@ defmodule Coherence do
       # Install the `full` options except `lockable` and `trackable`
       $ mix coherence.install --full --no-lockable --no-trackable
 
+  And some reinstall examples:
+
+      # Reinstall with defaults (--silent --no-migrations --no-config --confirm-once)
+      $ mix coherence.install --reinstall
+
+      # Confirm to overwrite files, show instructions, and generate migrations
+      $ mix coherence.install --reinstall --no-confirm-once --with-migrations
 
   Run `$ mix help coherence.install` for more information.
 
@@ -180,7 +204,6 @@ The following examples illustrate how to remove the files created by the install
 
       # Prompt once to confirm the removal
       $ mix coherence.clean --all --confirm-once
-
 
 After installation, if you later want to remove one more options, here are a couple examples:
 
