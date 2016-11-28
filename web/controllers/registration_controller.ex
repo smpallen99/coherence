@@ -63,6 +63,7 @@ defmodule Coherence.RegistrationController do
   end
   defp redirect_or_login(conn, user, params, _) do
     Helpers.login_user(conn, user, params)
+    |> redirect_to(:session_create, params)
   end
 
   @doc """
@@ -104,7 +105,7 @@ defmodule Coherence.RegistrationController do
   """
   def delete(conn, params) do
     user = Coherence.current_user(conn)
-    conn = Coherence.SessionController.delete(conn)
+    conn = Helpers.logout_user(conn)
     Config.repo.delete! user
     redirect_to(conn, :registration_delete, params)
   end

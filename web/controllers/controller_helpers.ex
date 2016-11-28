@@ -6,7 +6,8 @@ defmodule Coherence.ControllerHelpers do
   require Logger
   import Phoenix.Controller, only: [put_flash: 3, redirect: 2]
   import Plug.Conn, only: [halt: 1]
-  alias Coherence.Schema.{Confirmable}
+  alias Coherence.{ConfirmableService, RememberableService}
+  alias Coherence.ControllerHelpers, as: Helpers
   @lockable_failure "Failed to update lockable attributes "
 
   @doc """
@@ -119,8 +120,8 @@ defmodule Coherence.ControllerHelpers do
   Adds the `:confirmed_at` datetime field on the user model and updates the database
   """
   def confirm!(user) do
-    changeset = Confirmable.confirm(user)
-    unless Confirmable.confirmed? user do
+    changeset = ConfirmableService.confirm(user)
+    unless ConfirmableService.confirmed? user do
       Config.repo.update changeset
     else
       changeset = Ecto.Changeset.add_error changeset, :confirmed_at, "already confirmed"
@@ -202,10 +203,21 @@ defmodule Coherence.ControllerHelpers do
 
   Logs in a user and redirects them to the session_create page.
   """
-  def login_user(conn, user, params) do
+  def login_user(conn, user, _params \\ %{}) do
      apply(Config.auth_module, Config.create_login, [conn, user, [id_key: Config.schema_key]])
      |> track_login(user, Config.user_schema.trackable?)
-     |> redirect_to(:session_create, params)
+  end
+
+  @doc """
+  Logout a user.
+
+  Logs out a user and redirects them to the session_delete page.
+  """
+  def logout_user(conn) do
+    user = Coherence.current_user conn
+    apply(Config.auth_module, Config.delete_login, [conn, [id_key: Config.schema_key]])
+    |> track_logout(user, user.__struct__.trackable?)
+    |> RememberableService.delete_rememberable(user)
   end
 
   @doc """
@@ -240,6 +252,19 @@ defmodule Coherence.ControllerHelpers do
       {:error, _changeset} ->
         Logger.error ("Failed to update tracking!")
     end
+    conn
+  end
+
+  def track_logout(conn, _, false), do: conn
+  def track_logout(conn, user, true) do
+    Helpers.changeset(:session, user.__struct__, user,
+      %{
+        last_sign_in_at: user.current_sign_in_at,
+        last_sign_in_ip: user.current_sign_in_ip,
+        current_sign_in_at: nil,
+        current_sign_in_ip: nil
+      })
+    |> Config.repo.update
     conn
   end
 

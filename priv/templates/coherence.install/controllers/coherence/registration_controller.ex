@@ -63,6 +63,7 @@ defmodule <%= base %>.Coherence.RegistrationController do
   end
   defp redirect_or_login(conn, user, params, _) do
     Helpers.login_user(conn, user, params)
+    |> redirect_to(:session_create, params)
   end
 
   @doc """
