@@ -2,21 +2,21 @@
 <ul>
   <li>
     <strong>Name:</strong>
-    <%%= @user.name %>
+    <%= @user.name %>
   </li>
-  <%%= unless (login_field = Coherence.Config.login_field) == :email do %>
+  <%= unless (login_field = Coherence.Config.login_field) == :email do %>
     <li>
-      <strong><%%= humanize login_field %></strong>
-      <%%= Map.get(@user, login_field) %>
+      <strong><%= humanize login_field %></strong>
+      <%= Map.get(@user, login_field) %>
     </li>
   <%% end %>
 
   <li>
     <strong>Email:</strong>
-    <%%= @user.email %>
+    <%= @user.email %>
   </li>
 
 </ul>
 
-<%%= link "Edit", to: registration_path(@conn, :edit) %> |
-<%%= link "Delete", to: registration_path(@conn, :delete), method: :delete, data: [confirm: "Are you sure?"] %>
+<%= link "Edit", to: registration_path(@conn, :edit) %> |
+<%= link "Delete", to: registration_path(@conn, :delete), method: :delete, data: [confirm: "Are you sure?"] %>
