@@ -10,6 +10,7 @@ defmodule Coherence.RegistrationController do
   * update - update the user account
   * delete - delete the user account
   """
+  use Coherence.Config
   use Coherence.Web, :controller
   require Logger
   alias Coherence.ControllerHelpers, as: Helpers
@@ -88,7 +89,7 @@ defmodule Coherence.RegistrationController do
   def update(conn, %{"registration" => user_params} = params) do
     user_schema = Config.user_schema
     user = Coherence.current_user(conn)
-    changeset = Helpers.changeset(:registration, user_schema, user, user_params)
+    changeset = Helpers.changeset(:registration, user_schema, user, user_params) |> update_with_password(user_params)
     case Config.repo.update(changeset) do
       {:ok, user} ->
         apply(Config.auth_module, Config.update_login, [conn, user, [id_key: Config.schema_key]])
@@ -107,5 +108,21 @@ defmodule Coherence.RegistrationController do
     conn = Coherence.SessionController.delete(conn)
     Config.repo.delete! user
     redirect_to(conn, :registration_delete, params)
+  end
+
+  defp update_with_password(changeset, user_params) do
+    if Config.require_current_password do
+      if is_nil(user_params["current_password"]) do
+        changeset
+        |> Ecto.Changeset.add_error(:current_password, "can't be blank")
+      else
+        if not Helpers.checkpw(user_params["current_password"], Map.get(changeset.data, Config.password_hash)) do
+          changeset
+          |> Ecto.Changeset.add_error(:current_password, "invalid current password")
+        else
+          changeset
+        end
+      end
+    end
   end
 end

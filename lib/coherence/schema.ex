@@ -231,7 +231,13 @@ defmodule Coherence.Schema do
         def validate_coherence(changeset, params) do
           changeset
           |> validate_length(:password, min: 4)
+          |> validate_current_password(params)
           |> validate_password(params)
+        end
+
+        def validate_current_password(changeset, params) do
+          IO.inspect params
+          changeset
         end
 
         def validate_password(changeset, params) do
@@ -356,6 +362,7 @@ defmodule Coherence.Schema do
     quote do
       if Coherence.Config.has_option(:authenticatable) do
         field Config.password_hash, :string
+        field :current_password, :string, virtual: true
         field :password, :string, virtual: true
         field :password_confirmation, :string, virtual: true
       end

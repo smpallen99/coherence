@@ -108,4 +108,20 @@ defmodule <%= base %>.Coherence.RegistrationController do
     Config.repo.delete! user
     redirect_to(conn, :registration_delete, params)
   end
+
+  defp update_with_password(changeset, user_params) do
+    if Config.require_current_password do
+      if is_nil(user_params["current_password"]) do
+        changeset
+        |> Ecto.Changeset.add_error(:current_password, "can't be blank")
+      else
+        if not Helpers.checkpw(user_params["current_password"], Map.get(changeset.data, Config.password_hash)) do
+          changeset
+          |> Ecto.Changeset.add_error(:current_password, "invalid current password")
+        else
+          changeset
+        end
+      end
+    end
+  end
 end

@@ -78,6 +78,7 @@ defmodule Coherence.Config do
     {:delete_login, :delete_login},
     {:opts, []},
     {:assigns_key, :current_user},
+    {:require_current_password, true},
     {:reset_token_expire_days, 2},
     {:confirmation_token_expire_days, 5},
     {:allow_unconfirmed_access_for, 0},

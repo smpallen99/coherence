@@ -243,5 +243,13 @@ defmodule Coherence.ControllerHelpers do
     conn
   end
 
+  def checkpw(password, encrypted) do
+    try do
+      Comeonin.Bcrypt.checkpw(password, encrypted)
+    rescue
+      _ -> false
+    end
+  end
+
 
 end
