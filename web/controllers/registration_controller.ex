@@ -10,7 +10,6 @@ defmodule Coherence.RegistrationController do
   * update - update the user account
   * delete - delete the user account
   """
-  use Coherence.Config
   use Coherence.Web, :controller
   require Logger
   alias Coherence.ControllerHelpers, as: Helpers
