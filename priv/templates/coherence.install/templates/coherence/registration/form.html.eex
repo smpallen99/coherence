@@ -26,6 +26,14 @@
     <%%= error_tag f, :email %>
   </div>
 
+  <%%= if not is_nil(@changset.data.id) do %>
+    <div class="form-group">
+      <%%= required_label f, :current_password, class: "control-label" %>
+      <%%= password_input f, :current_password, [class: "form-control"] ++ @required %>
+      <%%= error_tag f, :current_password %>
+    </div>
+  <%% end %>
+
   <div class="form-group">
     <%%= required_label f, :password, class: "control-label" %>
     <%%= password_input f, :password, [class: "form-control"] ++ @required %>
