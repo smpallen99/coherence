@@ -151,7 +151,7 @@ defmodule Coherence.Schema do
         Returns a changeset ready for Repo.update
         """
         def unlock(user) do
-          Config.user_schema.changeset(user, %{locked_at: nil, unlock_token: nil, failed_attempts: 0})
+          Config.user_schema.changeset(user, %{locked_at: nil, unlock_token: nil, failed_attempts: 0, current_password: user.password})
         end
 
         @doc """
@@ -185,7 +185,7 @@ defmodule Coherence.Schema do
         Returns a changeset ready for Repo.update
         """
         def lock(user, locked_at \\ Ecto.DateTime.utc) do
-          Config.user_schema.changeset(user, %{locked_at: locked_at})
+          Config.user_schema.changeset(user, %{locked_at: locked_at, current_password: user.password})
         end
 
         @doc """
@@ -202,7 +202,7 @@ defmodule Coherence.Schema do
 
         def lock!(user, locked_at \\ Ecto.DateTime.utc) do
           IO.warn "#{inspect Config.user_schema}.lock!/1 has been deprecated. Please use Coherence.ControllerHelpers.lock!/1 instead."
-          changeset = Config.user_schema.changeset(user, %{locked_at: locked_at})
+          changeset = Config.user_schema.changeset(user, %{locked_at: locked_at, current_password: user.password})
           unless locked?(user) do
             changeset
             |> Config.repo.update
@@ -237,7 +237,7 @@ defmodule Coherence.Schema do
 
         def validate_current_password(changeset, params) do
           current_password = params[:current_password] || params["current_password"]
-          if Config.require_current_password and (not is_nil(changeset.data.id)) do
+          if Config.require_current_password and (not is_nil(changeset.data.id)) and is_nil(params[:reset_password_token]) do
             if is_nil(current_password) do
               changeset
               |> add_error(:current_password, "can't be blank")

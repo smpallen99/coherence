@@ -57,7 +57,7 @@ defmodule Coherence.Schema.Confirmable do
         Returns a changeset ready for Repo.update
         """
         def confirm(user) do
-          Config.user_schema.changeset(user, %{confirmed_at: Ecto.DateTime.utc, confirmation_token: nil})
+          Config.user_schema.changeset(user, %{confirmed_at: Ecto.DateTime.utc, confirmation_token: nil, current_password: user.password})
         end
 
         @doc """
@@ -69,7 +69,7 @@ defmodule Coherence.Schema.Confirmable do
         """
         def confirm!(user) do
           IO.warn "#{inspect Config.user_schema}.confirm!/1 has been deprecated. Please use Coherence.ControllerHelpers.confirm!/1 instead."
-          changeset = Config.user_schema.changeset(user, %{confirmed_at: Ecto.DateTime.utc, confirmation_token: nil})
+          changeset = Config.user_schema.changeset(user, %{confirmed_at: Ecto.DateTime.utc, confirmation_token: nil, current_password: user.password})
           unless confirmed? user do
             Config.repo.update changeset
           else
@@ -90,7 +90,7 @@ defmodule Coherence.Schema.Confirmable do
   deprecated! Please use Coherence.ControllerHelpers.unlock!/1.
   """
   def confirm(user) do
-    Config.user_schema.changeset(user, %{confirmed_at: Ecto.DateTime.utc, confirmation_token: nil})
+    Config.user_schema.changeset(user, %{confirmed_at: Ecto.DateTime.utc, confirmation_token: nil, current_password: user.password})
   end
 
   @doc """
@@ -101,7 +101,7 @@ defmodule Coherence.Schema.Confirmable do
   deprecated! Please use Coherence.ControllerHelpers.unlock!/1.
   """
   def confirm!(user) do
-    changeset = Config.user_schema.changeset(user, %{confirmed_at: Ecto.DateTime.utc, confirmation_token: nil})
+    changeset = Config.user_schema.changeset(user, %{confirmed_at: Ecto.DateTime.utc, confirmation_token: nil, current_password: user.password})
     unless confirmed? user do
       Config.repo.update changeset
     else

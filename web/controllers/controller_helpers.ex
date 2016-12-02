@@ -1,3 +1,4 @@
+require(IEx)
 defmodule Coherence.ControllerHelpers do
   @moduledoc """
   Common helper functions for Coherence Controllers.
