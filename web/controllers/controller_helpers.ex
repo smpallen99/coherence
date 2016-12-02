@@ -98,7 +98,7 @@ defmodule Coherence.ControllerHelpers do
       Logger.debug "confirmation email url: #{inspect url}"
       dt = Ecto.DateTime.utc
       user_schema.changeset(user,
-        %{confirmation_token: token, confirmation_sent_at: dt})
+        %{confirmation_token: token, confirmation_sent_at: dt, current_password: user.password})
       |> Config.repo.update!
 
       send_user_email :confirmation, user, url
@@ -242,14 +242,5 @@ defmodule Coherence.ControllerHelpers do
     end
     conn
   end
-
-  def checkpw(password, encrypted) do
-    try do
-      Comeonin.Bcrypt.checkpw(password, encrypted)
-    rescue
-      _ -> false
-    end
-  end
-
 
 end

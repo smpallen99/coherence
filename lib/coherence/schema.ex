@@ -236,8 +236,22 @@ defmodule Coherence.Schema do
         end
 
         def validate_current_password(changeset, params) do
-          IO.inspect params
-          changeset
+          current_password = params[:current_password] || params["current_password"]
+          if Config.require_current_password and (not is_nil(changeset.data.id)) do
+            if is_nil(current_password) do
+              changeset
+              |> add_error(:current_password, "can't be blank")
+            else
+              if not checkpw(current_password, Map.get(changeset.data, Config.password_hash)) do
+                changeset
+                |> add_error(:current_password, "invalid current password")
+              else
+                changeset
+              end
+            end
+          else
+            changeset
+          end
         end
 
         def validate_password(changeset, params) do
