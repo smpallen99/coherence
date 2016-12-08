@@ -1,8 +1,8 @@
 <html>
   <head>
-    <title><%%= @email.subject %></title>
+    <title><%= @email.subject %></title>
   </head>
   <body>
-    <%%= render @view_module, @view_template, assigns %>
+    <%= render @view_module, @view_template, assigns %>
   </body>
 </html>
