@@ -90,8 +90,6 @@ defmodule Coherence.RegistrationController do
     user = Coherence.current_user(conn)
     changeset = Helpers.changeset(:registration, user_schema, user, user_params)
 
-    # IO.inspect changeset
-
     case Config.repo.update(changeset) do
       {:ok, user} ->
         apply(Config.auth_module, Config.update_login, [conn, user, [id_key: Config.schema_key]])
