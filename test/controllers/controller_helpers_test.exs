@@ -31,7 +31,7 @@ defmodule CoherenceTest.ControllerHelpers do
     assert User.locked?(user)
     {:ok, user} = Helpers.unlock!(user)
     refute User.locked?(user)
-    
+
     {:error, changeset} = Helpers.unlock!(user)
     refute changeset.valid?
     assert changeset.errors == [locked_at: {"not locked", []}]
