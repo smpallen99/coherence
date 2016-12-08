@@ -55,7 +55,7 @@ defmodule Coherence.Rememberable do
   end
 
   def delete_expired_tokens do
-    expire_datetime = Timex.shift(DateTime.now, hours: -Config.rememberable_cookie_expire_hours)
+    expire_datetime = Timex.shift(Timex.now, hours: -Config.rememberable_cookie_expire_hours)
     from p in Rememberable, where: p.token_created_at < ^expire_datetime
   end
 
@@ -71,7 +71,7 @@ defmodule Coherence.Rememberable do
     cookie <> " : #{hash series}  #{hash token}"
   end
 
-  defp created_at, do: DateTime.now
+  defp created_at, do: Timex.now
 
   defp gen_token do
     Coherence.ControllerHelpers.random_string 24

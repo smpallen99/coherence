@@ -25,7 +25,7 @@ defmodule Coherence.Mixfile do
   def application do
     [mod: {Coherence, []},
      applications: [:logger, :comeonin, :ecto, :uuid, :phoenix_swoosh,
-                    :phoenix_timex, :timex_ecto, :tzdata]]
+                    :timex_ecto, :tzdata]]
   end
 
   defp elixirc_paths(:test), do: ["lib", "web", "test/support"]
@@ -40,8 +40,8 @@ defmodule Coherence.Mixfile do
       {:gettext, "~> 0.11"},
       {:uuid, "~> 1.0"},
       {:phoenix_swoosh, "~> 0.1.3"},
-      {:phoenix_timex, "~> 1.0.0"},
-      {:timex_ecto, "~> 1.1"},
+      {:timex, "~> 3.0"},
+      {:timex_ecto, "~> 3.0"},
       {:floki, "~> 0.8", only: :test},
       {:ex_doc, "== 0.11.5", only: :dev},
       {:earmark, "== 0.2.1", only: :dev, override: true},

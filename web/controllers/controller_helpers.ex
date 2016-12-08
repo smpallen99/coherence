@@ -59,9 +59,9 @@ defmodule Coherence.ControllerHelpers do
   def expired?(datetime, opts) do
     expire_on? = datetime
     |> Ecto.DateTime.to_erl
-    |> Timex.DateTime.from_erl
+    |> Timex.to_datetime
     |> Timex.shift(opts)
-    not Timex.before?(Timex.DateTime.now, expire_on?)
+    not Timex.before?(Timex.now, expire_on?)
   end
 
   @doc """
