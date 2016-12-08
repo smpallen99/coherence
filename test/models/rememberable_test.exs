@@ -14,7 +14,8 @@ defmodule Coherence.RememberableTest do
     {:ok, user: user}
   end
 
-  @valid_attrs %{user_id: 1, series_hash: "1234", token_hash: "abcd", token_created_at: "2010-04-17 14:00:00"}
+  @test_date Timex.parse!("2010-04-17 14:00:00", "%Y-%m-%d %H:%M:%S", :strftime) |> Timex.to_datetime
+  @valid_attrs %{user_id: 1, series_hash: "1234", token_hash: "abcd", token_created_at: @test_date}
   @invalid_attrs %{}
 
   test "changeset with valid attributes" do
@@ -48,13 +49,13 @@ defmodule Coherence.RememberableTest do
     refute new_changes[:token_hash] == changes[:token_hash]
   end
 
-  def now, do: DateTime.now
+  def now, do: Timex.now
 
   def rememberables, do: [
     %Rememberable{user_id: 10, series_hash: "123", token_hash: "abc", token_created_at: now},
     %Rememberable{user_id:  1, series_hash: "123", token_hash: "abc", token_created_at: now },
   ]
-  @dt Timex.shift DateTime.now, months: -2
+  @dt Timex.shift Timex.now, months: -2
   @expired_list [
     %Rememberable{user_id: 10, series_hash: "124", token_hash: "abca", token_created_at: @dt},
     %Rememberable{user_id:  1, series_hash: "12345", token_hash: "abcd", token_created_at: @dt },
