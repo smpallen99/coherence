@@ -63,6 +63,7 @@ defmodule CoherenceTest.Plug.Session do
 
   defp call(plug, headers) do
     conn(:get, "/", headers: headers)
+    |> Phoenix.Controller.put_view(TestCoherence.Coherence.SessionView)
     |> sign_conn
     |> plug.call([])
   end
@@ -83,6 +84,7 @@ defmodule CoherenceTest.Plug.Session do
     conn(:get, "/", headers: headers)
     |> sign_conn
     |> put_resp_cookie("coherence_login", cookie)
+    |> Phoenix.Controller.put_view(TestCoherence.Coherence.SessionView)
     |> plug.call([])
   end
   def save_login_cookie(conn, id, series, token, key, expire) do

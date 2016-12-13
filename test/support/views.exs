@@ -46,6 +46,10 @@ defmodule TestCoherence.Coherence.InvitationView do
     "new data: #{inspect params}"
   end
 end
+defmodule TestCoherence.Coherence.SessionView do
+  use TestCoherence.Coherence.Web, :view
+  def render("new.html", _params), do: "new session"
+end
 
 defmodule TestCoherence.ErrorView do
   # def render("500.html", changeset), do: "500.html: #{inspect changeset}"
