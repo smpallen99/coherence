@@ -156,8 +156,7 @@ defmodule Coherence.SessionController do
   Render the login form.
   """
   def login_callback(conn) do
-    conn
-    |> new(%{})
+    new(conn, %{})
     |> halt
   end
 
