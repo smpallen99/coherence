@@ -1,4 +1,5 @@
 defmodule <%= user_schema %> do
+  @moduledoc false
   use <%= base %>.Web, :model
   use Coherence.Schema
 
