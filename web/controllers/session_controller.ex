@@ -11,7 +11,7 @@ defmodule Coherence.SessionController do
   import Ecto.Query
   import Rememberable, only: [hash: 1, gen_cookie: 3]
   alias Coherence.ControllerHelpers, as: Helpers
-  alias Coherence.Schema.{Confirmable}
+  alias Coherence.{ConfirmableService}
 
   plug :layout_view
   plug :redirect_logged_in when action in [:new, :create]
@@ -76,7 +76,7 @@ defmodule Coherence.SessionController do
     user = Config.repo.one(from u in user_schema, where: field(u, ^login_field) == ^login)
     lockable? = user_schema.lockable?
     if user != nil and user_schema.checkpw(password, Map.get(user, Config.password_hash)) do
-      if Confirmable.confirmed?(user) || Confirmable.unconfirmed_access?(user) do
+      if ConfirmableService.confirmed?(user) || ConfirmableService.unconfirmed_access?(user) do
         unless lockable? and user_schema.locked?(user) do
           apply(Config.auth_module, Config.create_login, [conn, user, [id_key: Config.schema_key]])
           |> reset_failed_attempts(user, lockable?)
@@ -113,32 +113,19 @@ defmodule Coherence.SessionController do
   Delete the user's session, track the logout and delete the rememberable cookie.
   """
   def delete(conn, params) do
-    delete(conn)
+    logout_user(conn)
     |> redirect_to(:session_delete, params)
   end
 
-  @doc """
-  Delete the user session.
-  """
-  def delete(conn) do
-    user = conn.assigns[Config.assigns_key]
-    apply(Config.auth_module, Config.delete_login, [conn])
-    |> track_logout(user, user.__struct__.trackable?)
-    |> delete_rememberable(user)
-  end
-
-  defp track_logout(conn, _, false), do: conn
-  defp track_logout(conn, user, true) do
-    Helpers.changeset(:session, user.__struct__, user,
-      %{
-        last_sign_in_at: user.current_sign_in_at,
-        last_sign_in_ip: user.current_sign_in_ip,
-        current_sign_in_at: nil,
-        current_sign_in_ip: nil
-      })
-    |> Config.repo.update
-    conn
-  end
+  # @doc """
+  # Delete the user session.
+  # """
+  # def delete(conn) do
+  #   user = conn.assigns[Config.assigns_key]
+  #   apply(Config.auth_module, Config.delete_login, [conn])
+  #   |> track_logout(user, user.__struct__.trackable?)
+  #   |> delete_rememberable(user)
+  # end
 
   @flash_invalid "Incorrect #{Config.login_field} or password."
   @flash_locked "Maximum Login attempts exceeded. Your account has been locked."
@@ -173,17 +160,6 @@ defmodule Coherence.SessionController do
     put_flash(conn, :error, flash)
   end
   defp failed_login(conn, _user, _), do: put_flash(conn, :error, @flash_invalid)
-
-  def delete_rememberable(conn, %{id: id}) do
-    if Config.has_option :rememberable do
-      where(Rememberable, [u], u.user_id == ^id)
-      |> Config.repo.delete_all
-      conn
-      |> delete_resp_cookie(Config.login_cookie)
-    else
-      conn
-    end
-  end
 
   @doc """
   Call back for the authentication plug.

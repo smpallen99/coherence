@@ -1,4 +1,4 @@
-defmodule Coherence.Schema.Confirmable do
+defmodule Coherence.ConfirmableService do
   @moduledoc """
   Confirmable allows users to confirm a new account.
 

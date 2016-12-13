@@ -85,9 +85,9 @@ defmodule Coherence.Schema do
       import Ecto.Changeset
       use Coherence.Config
       require Logger
-      alias Coherence.Schema.{Confirmable}
+      alias Coherence.{ConfirmableService}
 
-      use Confirmable, unquote(opts)
+      use ConfirmableService, unquote(opts)
 
       def authenticatable? do
         Coherence.Config.has_option(:authenticatable) and
