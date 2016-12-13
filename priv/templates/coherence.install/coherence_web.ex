@@ -1,4 +1,5 @@
 defmodule <%= base %>.Coherence.Web do
+  @moduledoc false
 
   def view do
     quote do
