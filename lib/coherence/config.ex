@@ -39,6 +39,7 @@ defmodule Coherence.Config do
   * :login_field (:email)                         - The user model field used to login
   * :changeset                                    - Custom user changeset
   * :title                                        - Layout page title
+  * :layout                                       - Customize the layout template e.g. {MyApp.LayoutView, "app.html"}
 
   ## Examples
 
@@ -70,6 +71,7 @@ defmodule Coherence.Config do
     :email_reply_to_email,
     :site_name,
     :changeset,
+    :layout,
     {:password_hash_field, :password_hash},
     {:login_field, :email},
     {:login_cookie, "coherence_login"},

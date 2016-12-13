@@ -484,78 +484,28 @@ end
 See the documentation for further details.
 
 ### Customizing layout
-By default coherence uses own layout from package, that can be installed to `web/templates/coherence/layout/app.html.eex`.
+
+By default coherence uses its own layout, that is installed to `web/templates/coherence/layout/app.html.eex`.
 
 If you want to customize coherence controllers layout, you can follow different approaches:
 
-* Edit layout at `web/templates/coherence/layout/app.html.eex`. In this case, unless authentication layout differs - you will get code duplication.
-
+* Edit the generated layout at `web/templates/coherence/layout/app.html.eex`.
+* Set `:layout` in your config file. e.g. `config :coherence, :layout, {MyProject.LayoutView, :app}`
 * Install coherence controllers to application and edit them, to use layout module different from `Coherence.LayoutView`
+* And the last solution is to use `plug :put_layout` in your `web/router.ex` file. For example:
 
-* Edit `web/views/coherence/layout_view.ex`:
-
-  replace
 ```elixir
-  use ContactDemo.Coherence.Web, :view
-```
-with
-```elixir
-  use Phoenix.View, root: "web/templates"
-  # Import convenience functions from controllers
-  import Phoenix.Controller, only: [get_csrf_token: 0, get_flash: 2, view_module: 1]
-
-  # Use all HTML functionality (forms, tags, etc)
-  use Phoenix.HTML
-
-  import ContactDemo.Router.Helpers
-  import ContactDemo.ErrorHelpers
-  import ContactDemo.Gettext
-  import ContactDemo.Coherence.ViewHelpers
-```
-This approach will require to move also all other coherence templates to top level templates directory `web/templates`
-
-* And the last solution is to edit `web/coherence_web.ex` to allow it to setup which templates directory specific view should use:
-```elixir
-defmodule ExBlog.Coherence.Web do
-  # add default coherence templates path
-  @template_path "web/templates/coherence"
-
-  # using default path unless user provides one explicitly
-  def view(template_path \\ @template_path) do
-    quote do
-      use Phoenix.View, root: unquote(template_path)
-      # Import convenience functions from controllers
-      import Phoenix.Controller, only: [get_csrf_token: 0, get_flash: 2, view_module: 1]
-
-      # Use all HTML functionality (forms, tags, etc)
-      use Phoenix.HTML
-
-      import ExBlog.Router.Helpers
-      import ExBlog.ErrorHelpers
-      import ExBlog.Gettext
-      import ExBlog.Coherence.ViewHelpers
-    end
+defmodule MyApp.Router do
+  # ...
+  pipeline :coherence do
+    plug :put_layout, {MyProject.LayoutView, :app}
   end
-
-  @doc """
-  When used, dispatch to the appropriate controller/view/etc.
-  """
-
-  #
-  defmacro __using__(which) when is_atom(which) do
-    apply(__MODULE__, which, args)
+  # ...
+  scope "/" do
+    pipe_through [:protected, :coherence]
+    coherence_routes :protected
   end
-  defmacro __using__([which | args]) do
-    apply(__MODULE__, which, args)
-  end
-end
-```
-After that you can override templates directory for desired view module:
-
-```elixir
-defmodule Coherence.LayoutView do
-  use ExBlog.Coherence.Web, [:view, "web/templates"]
-  import ExBlog.LayoutView, only: [blog_header: 2, page_title: 1]
+  #...
 end
 ```
 

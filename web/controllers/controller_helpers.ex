@@ -4,11 +4,34 @@ defmodule Coherence.ControllerHelpers do
   """
   alias Coherence.Config
   require Logger
-  import Phoenix.Controller, only: [put_flash: 3, redirect: 2]
+  import Phoenix.Controller, only: [put_flash: 3, redirect: 2, put_layout: 2, put_view: 2]
   import Plug.Conn, only: [halt: 1]
   alias Coherence.{ConfirmableService, RememberableService}
   alias Coherence.ControllerHelpers, as: Helpers
   @lockable_failure "Failed to update lockable attributes "
+
+  @doc """
+  Put LayoutView
+
+  Adds Config.layout if set.
+  """
+  def layout_view(conn, opts) do
+    case Config.layout do
+      nil -> conn
+      layout -> put_layout conn, layout
+    end
+    |> set_view(opts)
+  end
+
+  @doc """
+  Set view plug
+  """
+  def set_view(conn, opts) do
+    case opts[:view] do
+      nil -> conn
+      view -> put_view conn, view
+    end
+  end
 
   @doc """
   Get the MyProject.Router.Helpers module.

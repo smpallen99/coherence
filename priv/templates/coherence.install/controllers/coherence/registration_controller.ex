@@ -21,13 +21,6 @@ defmodule <%= base %>.Coherence.RegistrationController do
   plug :layout_view
   plug :redirect_logged_in when action in [:new, :create]
 
-  @doc false
-  def layout_view(conn, _) do
-    conn
-    |> put_layout({Coherence.LayoutView, "app.html"})
-    |> put_view(Coherence.RegistrationView)
-  end
-
   @doc """
   Render the new user form.
   """
@@ -90,6 +83,7 @@ defmodule <%= base %>.Coherence.RegistrationController do
     user_schema = Config.user_schema
     user = Coherence.current_user(conn)
     changeset = Helpers.changeset(:registration, user_schema, user, user_params)
+
     case Config.repo.update(changeset) do
       {:ok, user} ->
         apply(Config.auth_module, Config.update_login, [conn, user, [id_key: Config.schema_key]])
@@ -105,9 +99,8 @@ defmodule <%= base %>.Coherence.RegistrationController do
   """
   def delete(conn, params) do
     user = Coherence.current_user(conn)
-    conn = Coherence.SessionController.delete(conn)
+    conn = Helpers.logout_user(conn)
     Config.repo.delete! user
     redirect_to(conn, :registration_delete, params)
   end
-
 end

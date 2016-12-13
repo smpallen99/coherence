@@ -17,13 +17,6 @@ defmodule Coherence.UnlockController do
   plug :layout_view
   plug :redirect_logged_in when action in [:new, :create, :edit]
 
-  @doc false
-  def layout_view(conn, _) do
-    conn
-    |> put_layout({Coherence.LayoutView, "app.html"})
-    |> put_view(Coherence.UnlockView)
-  end
-
   @doc """
   Render the send reset link form.
   """

@@ -19,13 +19,6 @@ defmodule <%= base %>.Coherence.PasswordController do
   plug :layout_view
   plug :redirect_logged_in when action in [:new, :create, :edit, :update]
 
-  @doc false
-  def layout_view(conn, _) do
-    conn
-    |> put_layout({Coherence.LayoutView, "app.html"})
-    |> put_view(Coherence.PasswordView)
-  end
-
   @doc """
   Render the recover password form.
   """

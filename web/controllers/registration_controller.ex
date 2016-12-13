@@ -21,13 +21,6 @@ defmodule Coherence.RegistrationController do
   plug :layout_view
   plug :redirect_logged_in when action in [:new, :create]
 
-  @doc false
-  def layout_view(conn, _) do
-    conn
-    |> put_layout({Coherence.LayoutView, "app.html"})
-    |> put_view(Coherence.RegistrationView)
-  end
-
   @doc """
   Render the new user form.
   """

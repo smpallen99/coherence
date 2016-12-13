@@ -13,15 +13,8 @@ defmodule <%= base %>.Coherence.SessionController do
   alias Coherence.ControllerHelpers, as: Helpers
   alias Coherence.{ConfirmableService}
 
-  plug :layout_view
+  plug :layout_view, view: Coherence.SessionView
   plug :redirect_logged_in when action in [:new, :create]
-
-  @doc false
-  def layout_view(conn, _) do
-    conn
-    |> put_layout({Coherence.LayoutView, "app.html"})
-    |> put_view(Coherence.SessionView)
-  end
 
   @doc false
   def login_cookie, do: "coherence_login"
@@ -43,8 +36,6 @@ defmodule <%= base %>.Coherence.SessionController do
   def new(conn, _params) do
     login_field = Config.login_field
     conn
-    |> put_layout({Coherence.LayoutView, "app.html"})
-    |> put_view(Coherence.SessionView)
     |> render(:new, [{login_field, ""}, remember: rememberable_enabled?])
   end
 
@@ -100,8 +91,6 @@ defmodule <%= base %>.Coherence.SessionController do
     else
       conn
       |> failed_login(user, lockable?)
-      |> put_layout({Coherence.LayoutView, "app.html"})
-      |> put_view(Coherence.SessionView)
       |> put_status(401)
       |> render(:new, [{login_field, login}, remember: rememberable_enabled?])
     end

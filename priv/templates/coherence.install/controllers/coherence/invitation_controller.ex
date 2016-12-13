@@ -21,13 +21,6 @@ defmodule <%= base %>.Coherence.InvitationController do
   plug :scrub_params, "user" when action in [:create_user]
   plug :layout_view
 
-  @doc false
-  def layout_view(conn, _) do
-    conn
-    |> put_layout({Coherence.LayoutView, "app.html"})
-    |> put_view(Coherence.InvitationView)
-  end
-
   @doc """
   Render the new invitation form.
   """

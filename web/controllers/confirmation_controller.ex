@@ -16,13 +16,6 @@ defmodule Coherence.ConfirmationController do
   plug :layout_view
   plug :redirect_logged_in when action in [:new]
 
-  @doc false
-  def layout_view(conn, _) do
-    conn
-    |> put_layout({Coherence.LayoutView, "app.html"})
-    |> put_view(Coherence.ConfirmationView)
-  end
-
   @doc """
   Handle resending a confirmation email.
 
