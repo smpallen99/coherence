@@ -38,6 +38,7 @@ defmodule Coherence.Config do
   * :password_hash_field (:password_hash)         - The field used to save the hashed password
   * :login_field (:email)                         - The user model field used to login
   * :changeset                                    - Custom user changeset
+  * :title                                        - Layout page title
 
   ## Examples
 
@@ -122,6 +123,11 @@ defmodule Coherence.Config do
         email
     end
   end
+
+  @doc """
+  Get title
+  """
+  def title, do: get_application_env(:title, get(:module))
 
   @doc """
   Get a configuration item.
