@@ -22,7 +22,9 @@ defmodule TestCoherence.Router do
     plug :fetch_flash
     # plug :protect_from_forgery
     plug :put_secure_browser_headers
-    plug Coherence.Authentication.Session, db_model: TestCoherence.User, rememberable: true, login: &__MODULE__.login_callback/1
+    plug Coherence.Authentication.Session, db_model: TestCoherence.User, rememberable: true,
+                                           login: &__MODULE__.login_callback/1,
+                                           rememberable_callback: &Coherence.SessionController._rememberable_callback/5
   end
 
   scope "/" do

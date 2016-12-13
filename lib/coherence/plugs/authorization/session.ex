@@ -156,7 +156,8 @@ defmodule Coherence.Authentication.Session do
       assigns_key: Keyword.get(opts, :assigns_key, :current_user),
       login_key: Keyword.get(opts, :login_cookie, Config.login_cookie),
       rememberable: Keyword.get(opts, :rememberable, rememberable?),
-      cookie_expire: Keyword.get(opts, :login_cookie_expire_hours, Config.rememberable_cookie_expire_hours) * 60 * 60
+      cookie_expire: Keyword.get(opts, :login_cookie_expire_hours, Config.rememberable_cookie_expire_hours) * 60 * 60,
+      rememberable_callback: Keyword.get(opts, :rememberable_callback)
     }
   end
 
@@ -186,7 +187,7 @@ defmodule Coherence.Authentication.Session do
           [id, series, token] ->
             case opts[:rememberable_callback] do
               nil ->
-                Coherence.SessionController.remberable_callback(conn, id, series, token, opts)
+                Coherence.SessionController.rememberable_callback(conn, id, series, token, opts)
               fun ->
                 fun.(conn, id, series, token, opts)
             end

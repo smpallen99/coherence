@@ -178,7 +178,14 @@ defmodule Coherence.SessionController do
   keep the same series number. Update the rememberable database with
   the new token. Save the new cookie.
   """
-  def remberable_callback(conn, id, series, token, opts) do
+  def rememberable_callback(conn, id, series, token, opts) do
+    Coherence.RememberableServer.callback fn ->
+      _rememberable_callback(conn, id, series, token, opts)
+    end
+  end
+
+  @doc false
+  def _rememberable_callback(conn, id, series, token, opts) do
     repo = Config.repo
     cred_store = Coherence.Authentication.Utils.get_credential_store
     validate_login(id, series, token)

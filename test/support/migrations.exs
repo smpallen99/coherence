@@ -24,6 +24,8 @@ defmodule TestCoherence.Migrations do
       add :confirmation_token, :string
       add :confirmed_at, :datetime
       add :confirmation_sent_at, :datetime
+      # rememberable
+      add :remember_created_at, :datetime
       timestamps
     end
     create unique_index(:users, [:email])

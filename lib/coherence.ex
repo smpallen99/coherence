@@ -235,4 +235,5 @@ Run `$ mix help coherence.install` or `$ mix help coherence.install` for more in
   Check if user is logged in.
   """
   def logged_in?(conn), do: !!current_user(conn)
+
 end
