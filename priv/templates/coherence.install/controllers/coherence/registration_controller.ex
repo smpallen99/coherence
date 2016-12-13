@@ -108,4 +108,5 @@ defmodule <%= base %>.Coherence.RegistrationController do
     Config.repo.delete! user
     redirect_to(conn, :registration_delete, params)
   end
+
 end

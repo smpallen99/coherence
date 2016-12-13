@@ -195,6 +195,27 @@ defmodule MyProject.ProductController do
   # ...
 ```
 
+## Default Configuration
+
+```elixir
+{:require_current_password, true}, # Current password is required when updating new password.
+{:reset_token_expire_days, 2},
+{:confirmation_token_expire_days, 5},
+{:allow_unconfirmed_access_for, 0},
+{:max_failed_login_attempts, 5},
+{:unlock_timeout_minutes, 20},
+{:unlock_token_expire_minutes, 5},
+{:rememberable_cookie_expire_hours, 2*24}
+```
+
+You can override this default configs. For example: you can add the following codes inside `config/config.exs`
+
+```elixir
+config :coherence,
+  require_current_password: false,
+  max_failed_login_attempts: 3
+```
+
 ## Option Overview
 
 ### Authenticatable
