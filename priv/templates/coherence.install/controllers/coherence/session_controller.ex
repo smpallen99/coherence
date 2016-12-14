@@ -184,16 +184,22 @@ defmodule <%= base %>.Coherence.SessionController do
         case repo.get(Config.user_schema, id) do
           nil -> {:error, :not_found}
           user ->
-            gen_cookie(id, series, token)
-            |> cred_store.delete_credentials
-            {changeset, new_token} = Rememberable.update_login(rememberable)
+            if Enum.any?(conn.req_headers, fn {k,v} -> k == "x-requested-with" and v == "XMLHttpRequest" end) do
+              # for ajax requests, we don't update the sequence number, ensuring that
+              # multiple concurrent ajax requests don't fail on the seq_no
+              {assign(conn, :remembered, true), user}
+            else
+              gen_cookie(id, series, token)
+              |> cred_store.delete_credentials
+              {changeset, new_token} = Rememberable.update_login(rememberable)
 
-            cred_store.put_credentials({gen_cookie(id, series, new_token), Config.user_schema, Config.schema_key})
+              cred_store.put_credentials({gen_cookie(id, series, new_token), Config.user_schema, Config.schema_key})
 
-            Config.repo.update! changeset
-            conn = save_login_cookie(conn, id, series, new_token, opts[:login_key], opts[:cookie_expire])
-            |> assign(:remembered, true)
-            {conn, user}
+              Config.repo.update! changeset
+              conn = save_login_cookie(conn, id, series, new_token, opts[:login_key], opts[:cookie_expire])
+              |> assign(:remembered, true)
+              {conn, user}
+            end
         end
       {:error, :not_found} ->
         Logger.debug "No valid login found"
