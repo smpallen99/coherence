@@ -51,13 +51,6 @@ defmodule CoherenceTest.Rememberable do
       assert conn.assigns[:remembered]
       assert conn.assigns[:current_user].id == meta[:user].id
     end
-    # test "logout deletes the login cookie", %{conn: conn} = meta  do
-    #   conn = conn
-    #   |> Coherence.Authentication.Session.create_login(meta[:user])
-    #   |> delete(session_path(conn, :delete, meta[:user].id))
-    #   refute conn.cookies["coherence_login"]
-    #   refute Plug.Conn.fetch_session conn
-    # end
 
     test "expired", %{conn: conn} = meta do
       {rememberable, _, _} = meta[:rememberable]

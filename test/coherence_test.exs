@@ -8,6 +8,4 @@ defmodule CoherenceTest do
     user = Repo.insert! changeset
     assert user.email == "test@example.com"
   end
-
-
 end
