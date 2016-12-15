@@ -1,4 +1,3 @@
-
 defmodule TestCoherence.Coherence.Email do
   defstruct [:from, :to, :subject, :reply_to, :template, :params]
 end

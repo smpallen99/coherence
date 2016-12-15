@@ -26,12 +26,6 @@ defmodule CoherenceTest.Plug.Session do
     |> fetch_session
   end
 
-  # defp encrypt_conn(conn) do
-  #   put_in(conn.secret_key_base, @secret)
-  #   |> Plug.Session.call(@encrypted_opts)
-  #   |> fetch_session
-  # end
-
   defmodule TestPlug do
     use Plug.Builder
     import Plug.Conn
@@ -174,12 +168,4 @@ defmodule CoherenceTest.Plug.Session do
     {:ok, r1: r1, user: user, series: series, token: token, cookie: cookie}
   end
 
-  # test "create_login" do
-  #   user = %{id: 1, email: "test@example.com"}
-  #   conn = call(TestPlug, [])
-  #   # |> sign_conn
-  #   |> Session.create_login(user)
-
-  #   assert conn.assigns[:current_user] ==  user
-  # end
 end

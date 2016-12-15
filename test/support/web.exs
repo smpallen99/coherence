@@ -10,8 +10,6 @@ defmodule TestCoherence.Coherence.Web do
       use Phoenix.HTML
 
       import TestCoherence.Router.Helpers
-      # import ContactDemo.ErrorHelpers
-      # import ContactDemo.Gettext
       import Coherence.ViewHelpers
 
     end

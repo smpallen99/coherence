@@ -52,8 +52,6 @@ defmodule TestCoherence.Coherence.SessionView do
 end
 
 defmodule TestCoherence.ErrorView do
-  # def render("500.html", changeset), do: "500.html: #{inspect changeset}"
-  # def render("400.html", changeset), do: "400.html: #{inspect changeset}"
   def render("500.html", _changeset), do: "500.html"
   def render("400.html", _changeset), do: "400.html"
 end
