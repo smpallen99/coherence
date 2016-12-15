@@ -45,9 +45,13 @@ defmodule Coherence.Authentication.IpAddress do
   alias Coherence.Authentication.Utils
   use Bitwise
 
+  @type t :: Ecto.Schema.t | Map.t
+  @type conn :: Plug.Conn.t
+
   @doc """
     Add the credentials for a `token`. `user_data` can be any term but must not be `nil`.
   """
+  @spec add_credentials(String.t, t, module) :: t
   def add_credentials(ip, user_data, store \\ Coherence.CredentialStore.Agent) do
     store.put_credentials(ip, user_data)
   end
@@ -55,10 +59,12 @@ defmodule Coherence.Authentication.IpAddress do
   @doc """
     Remove the credentials for a `token`.
   """
+  @spec remove_credentials(String.t, module) :: t
   def remove_credentials(ip, store \\ Coherence.CredentialStore.Agent) do
     store.delete_credentials(ip)
   end
 
+  @spec init(Keyword.t) :: Map.t
   def init(opts) do
     %{
       allow: Keyword.get(opts, :allow, []),
@@ -69,6 +75,7 @@ defmodule Coherence.Authentication.IpAddress do
     }
   end
 
+  @spec call(conn, Keyword.t) :: conn
   def call(conn, opts) do
     ip = conn.peer |> elem(0)
     conn

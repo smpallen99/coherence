@@ -5,10 +5,12 @@ defmodule Coherence.ValidateOption do
 
   import Phoenix.Controller, only: [put_flash: 3, redirect: 2]
 
+  @spec init(Keyword.t) :: Map.t
   def init(options) do
     %{option: options}
   end
 
+  @spec call(Plug.Conn.t, Keyword.t) :: Plug.Conn.t
   def call(conn, opts) do
     if Coherence.Config.has_option(opts[:option]) do
       conn

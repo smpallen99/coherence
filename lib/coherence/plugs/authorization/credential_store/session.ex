@@ -3,10 +3,14 @@ defmodule Coherence.CredentialStore.Session do
   Starts a new credentials store.
   """
   @behaviour Coherence.CredentialStore
+
+  @type t :: Ecto.Schema.t | Map.t
+
   require Logger
   alias Coherence.DbStore
   alias Coherence.CredentialStore.Agent
 
+  @spec start_link() :: {:ok, pid} | {:error, atom}
   def start_link do
     Agent.start_link
   end
@@ -14,6 +18,7 @@ defmodule Coherence.CredentialStore.Session do
   @doc """
   Gets the user data for the given credentials
   """
+  @spec get_user_data({String.t, nil | struct, integer | nil}) :: t | nil
   def get_user_data({credentials, nil, _}) do
     get_data credentials
   end
@@ -36,6 +41,7 @@ defmodule Coherence.CredentialStore.Session do
   @doc """
   Puts the `user_data` for the given `credentials`.
   """
+  @spec put_credentials({String.t, t, integer}) :: any
   def put_credentials({credentials, user_data, id_key}) do
     Agent.put_credentials(credentials, user_data)
     DbStore.put_credentials(user_data, credentials, id_key)
@@ -46,6 +52,7 @@ defmodule Coherence.CredentialStore.Session do
 
   Returns the current value of `credentials`, if `credentials` exists.
   """
+  @spec delete_credentials(String.t) :: any
   def delete_credentials(credentials) do
     case get_data credentials do
       nil -> nil

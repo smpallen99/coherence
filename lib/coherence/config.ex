@@ -102,6 +102,7 @@ defmodule Coherence.Config do
           end
      end)
 
+  @spec email_from() :: {nil, nil} | {String.t, String.t} | String.t
   def email_from do
     case get_application_env :email_from do
       nil ->
@@ -112,6 +113,7 @@ defmodule Coherence.Config do
     end
   end
 
+  @spec email_reply_to() :: {nil, nil} | true | {String.t, String.t} | String.t
   def email_reply_to do
     case get_application_env :email_reply_to do
       nil ->
@@ -129,11 +131,13 @@ defmodule Coherence.Config do
   @doc """
   Get title
   """
+  @spec title() :: String.t | nil
   def title, do: get_application_env(:title, get(:module))
 
   @doc """
   Get a configuration item.
   """
+  @spec get(atom, any) :: any
   def get(key, default \\ nil) do
     get_application_env key, default
   end
@@ -141,6 +145,7 @@ defmodule Coherence.Config do
   @doc """
   Test if an options is configured.
   """
+  @spec has_option(atom) :: boolean
   def has_option(option) do
     has_any_option?(fn({name, _actions}) -> name == option end)
   end
@@ -148,6 +153,7 @@ defmodule Coherence.Config do
   @doc """
   Test if an option is configured and accepts a specific action
   """
+  @spec has_action?(atom, atom) :: boolean
   def has_action?(option, action) do
     has_any_option?(fn({name, actions}) ->
       name == option and (actions == :all or action in actions)

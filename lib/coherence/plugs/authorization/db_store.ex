@@ -7,19 +7,24 @@ defprotocol Coherence.DbStore do
   """
   @fallback_to_any true
 
+  @type t :: Ecto.Schema.t | Map.t
+
   @doc """
   Get authenticated user data.
   """
+  @spec get_user_data(t, String.t, atom) :: t
   def get_user_data(resource, credentials, id_key)
 
   @doc """
   Save authenticated user data in the database.
   """
+  @spec put_credentials(t, String.t, atom) :: t
   def put_credentials(resource, credentials, id_key)
 
   @doc """
   Delete current user credentials.
   """
+  @spec delete_credentials(t, String.t) :: t
   def delete_credentials(resource, credentials)
 end
 

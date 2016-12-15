@@ -25,7 +25,7 @@ defmodule Coherence.Mixfile do
   def application do
     [mod: {Coherence, []},
      applications: [:logger, :comeonin, :ecto, :uuid, :phoenix_swoosh,
-                    :timex_ecto, :tzdata]]
+                    :timex_ecto, :tzdata, :plug, :phoenix, :phoenix_html]]
   end
 
   defp elixirc_paths(:test), do: ["lib", "web", "test/support"]
@@ -46,6 +46,7 @@ defmodule Coherence.Mixfile do
       {:ex_doc, "== 0.11.5", only: :dev},
       {:earmark, "== 0.2.1", only: :dev, override: true},
       {:postgrex, ">= 0.0.0", only: :test},
+      {:dialyxir, "~> 0.4", only: [:dev], runtime: false},
     ]
   end
 

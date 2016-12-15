@@ -81,9 +81,13 @@ defmodule Coherence.Authentication.Session do
   alias Coherence.{Config}
   require Logger
 
+  @type t :: Ecto.Schema.t | Map.t
+  @type conn :: Plug.Conn.t
+
   @doc """
     Create a login for a user. `user_data` can be any term but must not be `nil`.
   """
+  @spec create_login(conn, t, Keyword.t) :: conn
   def create_login(conn, user_data, opts  \\ []) do
     id_key = Keyword.get(opts, :id_key, :id)
     store = Keyword.get(opts, :store, Coherence.CredentialStore.Session)
@@ -96,6 +100,7 @@ defmodule Coherence.Authentication.Session do
   @doc """
     Update login store for a user. `user_data` can be any term but must not be `nil`.
   """
+  @spec update_login(conn, t, Keyword.t) :: conn
   def update_login(conn, user_data, opts  \\ []) do
     id_key = Keyword.get(opts, :id_key, :id)
     store = Keyword.get(opts, :store, Coherence.CredentialStore.Session)
@@ -108,6 +113,7 @@ defmodule Coherence.Authentication.Session do
   @doc """
     Delete a login.
   """
+  @spec delete_login(conn, Keyword.t) :: conn
   def delete_login(conn, opts \\ []) do
     store = Keyword.get(opts, :store, Coherence.CredentialStore.Session)
     case get_session(conn, @session_key) do
@@ -135,6 +141,7 @@ defmodule Coherence.Authentication.Session do
   end
 
   @doc false
+  @spec init(Keyword.t) :: Map.t
   def init(opts) do
     login = case opts[:login] do
       true  -> default_login_callback
@@ -162,6 +169,7 @@ defmodule Coherence.Authentication.Session do
   end
 
   @doc false
+  @spec call(conn, Keyword.t) :: conn
   def call(conn, opts) do
     unless get_authenticated_user(conn) do
       conn

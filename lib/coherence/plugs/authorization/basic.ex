@@ -9,6 +9,9 @@ defmodule Coherence.Authentication.Basic do
     This module is derived from https://github.com/bitgamma/plug_auth which is derived from https://github.com/lexmag/blaguth
   """
 
+  @type t :: Ecto.Schema.t | Map.t
+  @type conn :: Plug.Conn.t
+
   @behaviour Plug
   import Plug.Conn
   import Coherence.Authentication.Utils
@@ -16,8 +19,10 @@ defmodule Coherence.Authentication.Basic do
   @doc """
     Returns the encoded form for the given `user` and `password` combination.
   """
+  @spec encode_credentials(atom | String.t, String.t | nil) :: String.t
   def encode_credentials(user, password), do: Base.encode64("#{user}:#{password}")
 
+  @spec create_login(String.t, String.t, t, Keyword.t) :: t
   def create_login(email, password, user_data, _opts \\ []) do
     creds = encode_credentials(email, password)
     store = get_credential_store
@@ -27,11 +32,12 @@ defmodule Coherence.Authentication.Basic do
   @doc """
     Update login store for a user. `user_data` can be any term but must not be `nil`.
   """
+  @spec update_login(String.t, String.t, t, Keyword.t) :: t
   def update_login(email, password, user_data, opts  \\ []) do
     create_login(email, password, user_data, opts)
   end
 
-
+  # @spec init(Keyword.t) :: map
   def init(opts) do
     %{
       realm: Keyword.get(opts, :realm, "Restricted Area"),
@@ -41,6 +47,7 @@ defmodule Coherence.Authentication.Basic do
     }
   end
 
+  # @spec call(conn, Keyword.t) :: none
   def call(conn, opts) do
     conn
     |> get_auth_header

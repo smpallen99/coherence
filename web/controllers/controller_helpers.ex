@@ -10,11 +10,18 @@ defmodule Coherence.ControllerHelpers do
   alias Coherence.ControllerHelpers, as: Helpers
   @lockable_failure "Failed to update lockable attributes "
 
+  @type schema :: Ecto.Schema.t
+  @type changeset :: Ecto.Changeset.t
+  @type schema_or_error :: schema | {:error, changeset}
+  @type conn :: Plug.Conn.t
+  @type params :: Map.t
+
   @doc """
   Put LayoutView
 
   Adds Config.layout if set.
   """
+  @spec layout_view(Plug.Conn.t, Keyword.t) :: Plug.Conn.t
   def layout_view(conn, opts) do
     case Config.layout do
       nil -> conn
@@ -26,6 +33,7 @@ defmodule Coherence.ControllerHelpers do
   @doc """
   Set view plug
   """
+  @spec set_view(Plug.Conn.t, Keyword.t) :: Plug.Conn.t
   def set_view(conn, opts) do
     case opts[:view] do
       nil -> conn
@@ -38,6 +46,7 @@ defmodule Coherence.ControllerHelpers do
 
   Returns the projects Router.Helpers module.
   """
+  @spec router_helpers() :: module
   def router_helpers do
     Module.concat(Config.module, Router.Helpers)
   end
@@ -45,6 +54,7 @@ defmodule Coherence.ControllerHelpers do
   @doc """
   Get the configured logged_out_url.
   """
+  @spec logged_out_url(Plug.Conn.t) :: String.t
   def logged_out_url(conn) do
     Config.logged_out_url || Module.concat(Config.module, Router.Helpers).session_path(conn, :new)
   end
@@ -52,6 +62,7 @@ defmodule Coherence.ControllerHelpers do
   @doc """
   Get the configured logged_in_url.
   """
+  @spec logged_in_url(Plug.Conn.t) :: String.t
   def logged_in_url(_conn) do
     Config.logged_in_url || "/"
   end
@@ -62,6 +73,7 @@ defmodule Coherence.ControllerHelpers do
   Returns a random url safe encoded64 string of the given length.
   Used to generate tokens for the various modules that require unique tokens.
   """
+  @spec random_string(integer) :: binary
   def random_string(length) do
     :crypto.strong_rand_bytes(length)
     |> Base.url_encode64
@@ -79,6 +91,7 @@ defmodule Coherence.ControllerHelpers do
       expired?(user.expire_at, days: 5)
       expired?(user.expire_at, minutes: 10)
   """
+  @spec expired?(nil | struct, Keyword.t) :: boolean
   def expired?(nil, _), do: true
   def expired?(datetime, opts) do
     expire_on? = datetime
@@ -91,6 +104,7 @@ defmodule Coherence.ControllerHelpers do
   @doc """
   Log an error message when lockable update fails.
   """
+  @spec lockable_failure(Ecto.Changeset.t) :: :ok
   def lockable_failure(changeset) do
     Logger.error @lockable_failure <> inspect(changeset.errors)
   end
@@ -104,6 +118,7 @@ defmodule Coherence.ControllerHelpers do
   Note: This function uses an apply to avoid compile warnings if the
   mailer is not selected as an option.
   """
+  @spec send_user_email(function, Ecto.Schema.t, String.t) :: any
   def send_user_email(fun, model, url) do
     email = apply(Module.concat(Config.module, Coherence.UserEmail), fun, [model, url])
     Logger.debug fn -> "#{fun} email: #{inspect email}" end
@@ -115,6 +130,7 @@ defmodule Coherence.ControllerHelpers do
 
   If the user supports confirmable, generate a token and send the email.
   """
+  @spec send_confirmation(Plug.Conn.t, Ecto.Schema.t, module) :: Plug.Conn.t
   def send_confirmation(conn, user, user_schema) do
     if user_schema.confirmable? do
       token = random_string 48
@@ -142,6 +158,7 @@ defmodule Coherence.ControllerHelpers do
 
   Adds the `:confirmed_at` datetime field on the user model and updates the database
   """
+  @spec confirm!(Ecto.Schema.t) :: schema_or_error
   def confirm!(user) do
     changeset = ConfirmableService.confirm(user)
     unless ConfirmableService.confirmed? user do
@@ -161,7 +178,7 @@ defmodule Coherence.ControllerHelpers do
   You can provide a date in the future to override the configured lock expiry time. You
   can set this data far in the future to do a pseudo permanent lock.
   """
-
+  @spec lock!(Ecto.Schema.t, struct) :: schema_or_error
   def lock!(user, locked_at \\ Ecto.DateTime.utc) do
     user_schema = Config.user_schema
     changeset = user_schema.lock user, locked_at
@@ -179,6 +196,7 @@ defmodule Coherence.ControllerHelpers do
 
   Clears the `:locked_at` field on the user model and updates the database.
   """
+  @spec unlock!(Ecto.Schema.t) :: schema_or_error
   def unlock!(user) do
     user_schema = Config.user_schema
     changeset = user_schema.unlock user
@@ -195,6 +213,7 @@ defmodule Coherence.ControllerHelpers do
   @doc """
   Plug to redirect already logged in users.
   """
+  @spec redirect_logged_in(conn, params) :: conn
   def redirect_logged_in(conn, _params) do
     if Coherence.logged_in?(conn) do
       conn
@@ -206,13 +225,17 @@ defmodule Coherence.ControllerHelpers do
     end
   end
 
+  @spec redirect_to(conn, String.t, params) :: conn
   def redirect_to(conn, path, params) do
     apply(Coherence.Redirects, path, [conn, params])
   end
+
+  @spec redirect_to(conn, String.t, params, schema) :: conn
   def redirect_to(conn, path, params, user) do
     apply(Coherence.Redirects, path, [conn, params, user])
   end
 
+  @spec changeset(atom, module, schema, params) :: changeset
   def changeset(which, module, model, params \\ %{}) do
     {mod, fun, args} = case Application.get_env :coherence, :changeset do
       nil -> {module, :changeset, [model, params]}
@@ -226,6 +249,7 @@ defmodule Coherence.ControllerHelpers do
 
   Logs in a user and redirects them to the session_create page.
   """
+  @spec login_user(conn, schema, params) :: conn
   def login_user(conn, user, _params \\ %{}) do
      apply(Config.auth_module, Config.create_login, [conn, user, [id_key: Config.schema_key]])
      |> track_login(user, Config.user_schema.trackable?)
@@ -236,6 +260,7 @@ defmodule Coherence.ControllerHelpers do
 
   Logs out a user and redirects them to the session_delete page.
   """
+  @spec logout_user(conn) :: conn
   def logout_user(conn) do
     user = Coherence.current_user conn
     apply(Config.auth_module, Config.delete_login, [conn, [id_key: Config.schema_key]])
@@ -248,6 +273,7 @@ defmodule Coherence.ControllerHelpers do
 
   Saves the ip address and timestamp when the user logs in.
   """
+  @spec track_login(conn, schema, boolean) :: conn
   def track_login(conn, _, false), do: conn
   def track_login(conn, user, true) do
     ip = conn.peer |> elem(0) |> inspect
@@ -278,6 +304,7 @@ defmodule Coherence.ControllerHelpers do
     conn
   end
 
+  @spec track_logout(conn, schema, boolean) :: conn
   def track_logout(conn, _, false), do: conn
   def track_logout(conn, user, true) do
     Helpers.changeset(:session, user.__struct__, user,
