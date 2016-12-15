@@ -36,6 +36,7 @@ defmodule Coherence.SessionController do
   def new(conn, _params) do
     login_field = Config.login_field
     conn
+    |> put_view(Coherence.SessionView)
     |> render(:new, [{login_field, ""}, remember: rememberable_enabled?])
   end
 
@@ -156,7 +157,12 @@ defmodule Coherence.SessionController do
   Render the login form.
   """
   def login_callback(conn) do
-    new(conn, %{})
+    if Map.get conn.private, "phoenix_layout" do
+      conn
+    else
+      put_layout conn, Config.layout({Coherence.LayoutView, :app})
+    end
+    |> new(%{})
     |> halt
   end
 
