@@ -26,7 +26,7 @@
     <%%= error_tag f, :email %>
   </div>
 
-  <%%= if Coherence.Config.require_current_password and not is_nil(@changset.data.id) do %>
+  <%%= if Coherence.Config.require_current_password and not is_nil(@changeset.data.id) do %>
     <div class="form-group">
       <%%= required_label f, :current_password, class: "control-label" %>
       <%%= password_input f, :current_password, [class: "form-control"] ++ @required %>
