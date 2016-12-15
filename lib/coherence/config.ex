@@ -35,11 +35,12 @@ defmodule Coherence.Config do
   * :unlock_token_expire_minutes (5)
   * :session_key ("session_auth")
   * :rememberable_cookie_expire_hours (2*24)
-  * :password_hash_field (:password_hash)         - The field used to save the hashed password
-  * :login_field (:email)                         - The user model field used to login
-  * :changeset                                    - Custom user changeset
-  * :title                                        - Layout page title
-  * :layout                                       - Customize the layout template e.g. {MyApp.LayoutView, "app.html"}
+  * :password_hash_field (:password_hash) - The field used to save the hashed password
+  * :login_field (:email) - The user model field used to login
+  * :changeset - Custom user changeset
+  * :title  - Layout page title
+  * :layout - Customize the layout template e.g. {MyApp.LayoutView, "app.html"}
+  * :async_rememberable? (false) - Don't update rememberable seq_no for ajax requests
 
   ## Examples
 
@@ -89,7 +90,8 @@ defmodule Coherence.Config do
     {:unlock_timeout_minutes, 20},
     {:unlock_token_expire_minutes, 5},
     {:session_key, "session_auth"},
-    {:rememberable_cookie_expire_hours, 2*24 }
+    {:rememberable_cookie_expire_hours, 2*24},
+    {:async_rememberable?, false}
   ]
   |> Enum.each(fn
         {key, default} ->

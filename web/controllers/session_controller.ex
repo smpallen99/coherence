@@ -184,7 +184,7 @@ defmodule Coherence.SessionController do
         case repo.get(Config.user_schema, id) do
           nil -> {:error, :not_found}
           user ->
-            if Enum.any?(conn.req_headers, fn {k,v} -> k == "x-requested-with" and v == "XMLHttpRequest" end) do
+            if Config.async_rememberable? and Enum.any?(conn.req_headers, fn {k,v} -> k == "x-requested-with" and v == "XMLHttpRequest" end) do
               # for ajax requests, we don't update the sequence number, ensuring that
               # multiple concurrent ajax requests don't fail on the seq_no
               {assign(conn, :remembered, true), user}
