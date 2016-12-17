@@ -14,6 +14,10 @@ defmodule Coherence.RegistrationController do
   require Logger
   alias Coherence.ControllerHelpers, as: Helpers
 
+  @dialyzer [
+    {:nowarn_function, update: 2},
+  ]
+
   plug Coherence.RequireLogin when action in ~w(show edit update delete)a
   plug Coherence.ValidateOption, :registerable
   plug :scrub_params, "registration" when action in [:create, :update]

@@ -118,7 +118,7 @@ defmodule Coherence.ControllerHelpers do
   Note: This function uses an apply to avoid compile warnings if the
   mailer is not selected as an option.
   """
-  @spec send_user_email(function, Ecto.Schema.t, String.t) :: any
+  @spec send_user_email(atom, Ecto.Schema.t, String.t) :: any
   def send_user_email(fun, model, url) do
     email = apply(Module.concat(Config.module, Coherence.UserEmail), fun, [model, url])
     Logger.debug fn -> "#{fun} email: #{inspect email}" end
@@ -225,12 +225,12 @@ defmodule Coherence.ControllerHelpers do
     end
   end
 
-  @spec redirect_to(conn, String.t, params) :: conn
+  @spec redirect_to(conn, atom, params) :: conn
   def redirect_to(conn, path, params) do
     apply(Coherence.Redirects, path, [conn, params])
   end
 
-  @spec redirect_to(conn, String.t, params, schema) :: conn
+  @spec redirect_to(conn, atom, params, schema) :: conn
   def redirect_to(conn, path, params, user) do
     apply(Coherence.Redirects, path, [conn, params, user])
   end
