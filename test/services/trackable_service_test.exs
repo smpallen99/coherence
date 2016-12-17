@@ -1,6 +1,6 @@
-defmodule CoherenceTest.Rememberable do
+defmodule CoherenceTest.TrackableService do
   use TestCoherence.ConnCase
-  alias Coherence.ControllerHelpers, as: Service
+  alias Coherence.TrackableService, as: Service
   alias TestCoherence.{Repo, User}
 
   defp current_user(conn), do: conn.assigns[:current_user]
@@ -44,7 +44,7 @@ defmodule CoherenceTest.Rememberable do
     end
     test "track_logout", %{conn: conn, user: user} do
       conn = Service.track_login(conn, user, true)
-      conn1 = Service.track_logout(conn, current_user(conn), true)
+      Service.track_logout(conn, current_user(conn), true)
       user1 = Repo.get(User, user.id)
       assert user1.sign_in_count == 1
       refute user1.current_sign_in_at

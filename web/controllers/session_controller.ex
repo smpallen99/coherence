@@ -12,6 +12,7 @@ defmodule Coherence.SessionController do
   import Rememberable, only: [hash: 1, gen_cookie: 3]
   alias Coherence.ControllerHelpers, as: Helpers
   alias Coherence.{ConfirmableService}
+  import Coherence.TrackableService
 
   plug :layout_view, view: Coherence.SessionView
   plug :redirect_logged_in when action in [:new, :create]
