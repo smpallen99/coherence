@@ -14,6 +14,7 @@ defmodule Coherence.Mixfile do
       docs: [extras: ["README.md"], main: "Coherence"],
       deps: deps,
       package: package,
+      dialyzer: [plt_add_apps: [:mix]],
       name: "Coherence",
       description: """
       A full featured, configurable authentication and user management system for Phoenix.

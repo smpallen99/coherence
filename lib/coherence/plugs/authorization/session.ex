@@ -81,6 +81,15 @@ defmodule Coherence.Authentication.Session do
   alias Coherence.{Config}
   require Logger
 
+  @dialyzer [
+    {:nowarn_function, call: 2},
+    {:nowarn_function, get_session_data: 1},
+    {:nowarn_function, verify_rememberable: 2},
+    {:nowarn_function, verify_auth_key: 3},
+    {:nowarn_function, assert_login: 3},
+    {:nowarn_function, init: 1},
+  ]
+
   @type t :: Ecto.Schema.t | Map.t
   @type conn :: Plug.Conn.t
 
@@ -141,7 +150,7 @@ defmodule Coherence.Authentication.Session do
   end
 
   @doc false
-  @spec init(Keyword.t) :: Map.t
+  @spec init(Keyword.t) :: [tuple]
   def init(opts) do
     login = case opts[:login] do
       true  -> default_login_callback

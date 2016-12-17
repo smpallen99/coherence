@@ -18,7 +18,7 @@ defmodule Coherence.CredentialStore.Session do
   @doc """
   Gets the user data for the given credentials
   """
-  @spec get_user_data({String.t, nil | struct, integer | nil}) :: t | nil
+  @spec get_user_data({HashDict.t, nil | struct, integer | nil}) :: any
   def get_user_data({credentials, nil, _}) do
     get_data credentials
   end
@@ -41,7 +41,7 @@ defmodule Coherence.CredentialStore.Session do
   @doc """
   Puts the `user_data` for the given `credentials`.
   """
-  @spec put_credentials({String.t, t, integer}) :: any
+  @spec put_credentials({HashDict.t, any, atom}) :: any
   def put_credentials({credentials, user_data, id_key}) do
     Agent.put_credentials(credentials, user_data)
     DbStore.put_credentials(user_data, credentials, id_key)
@@ -52,7 +52,7 @@ defmodule Coherence.CredentialStore.Session do
 
   Returns the current value of `credentials`, if `credentials` exists.
   """
-  @spec delete_credentials(String.t) :: any
+  @spec delete_credentials(HashDict.t) :: any
   def delete_credentials(credentials) do
     case get_data credentials do
       nil -> nil

@@ -336,9 +336,6 @@ config :coherence, #{base}.Coherence.Mailer,
     end
   end
 
-  defp model_exists?(model, path) when is_binary(model) do
-    model_exists? Module.concat(model, nil), path
-  end
   defp model_exists?(model, path) do
     case File.ls path do
       {:ok, files} ->

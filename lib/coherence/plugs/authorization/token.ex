@@ -35,6 +35,15 @@ defmodule Coherence.Authentication.Token do
   import Coherence.Authentication.Utils
   require Logger
 
+  @dialyzer [
+    {:nowarn_function, call: 2},
+    {:nowarn_function, get_token_from_header: 2},
+    {:nowarn_function, verify_creds: 2},
+    {:nowarn_function, assert_creds: 2},
+    # {:nowarn_function, assert_login: 3},
+    {:nowarn_function, init: 1},
+  ]
+
   @type t :: Ecto.Schema.t | Map.t
   @type conn :: Plug.Conn.t
 
@@ -62,7 +71,7 @@ defmodule Coherence.Authentication.Token do
     :crypto.strong_rand_bytes(16) |> Base.url_encode64
   end
 
-  @spec init(Keyword.t) :: Map.t
+  @spec init(Keyword.t) :: [tuple]
   def init(opts) do
     param = Keyword.get(opts, :param)
     %{
@@ -88,7 +97,7 @@ defmodule Coherence.Authentication.Token do
   @spec get_token_from_session(conn, Map.t) :: {conn, String.t}
   def get_token_from_session(conn, param), do: {conn, get_session(conn, param)}
 
-  @spec get_token_from_params_session(conn, Map.t) :: conn
+  @spec get_token_from_params_session(conn, Map.t) :: {conn, nil | String.t}
   def get_token_from_params_session(conn, param) do
     get_token_from_params(conn, param)
     |> check_token_from_session(param)

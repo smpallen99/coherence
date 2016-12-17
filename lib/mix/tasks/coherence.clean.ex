@@ -1,9 +1,4 @@
 defmodule Mix.Tasks.Coherence.Clean do
-  use Mix.Task
-
-  import Coherence.Mix.Utils
-  import Mix.Ecto
-
   @shortdoc "Clean files created by the coherence installer."
 
   @moduledoc """
@@ -45,6 +40,15 @@ defmodule Mix.Tasks.Coherence.Clean do
 
   * `--no-confirm` - don't confirm before removing files
   """
+  use Mix.Task
+
+  @dialyzer [
+    {:nowarn_function, raise_options_error!: 2},
+  ]
+
+  import Coherence.Mix.Utils
+  import Mix.Ecto
+
   alias Mix.Tasks.Coherence.Install
 
   @config_file "config/config.exs"
@@ -53,6 +57,7 @@ defmodule Mix.Tasks.Coherence.Clean do
   @clean_opts [{:options, :string}]
   @switches Enum.map([:all, :confirm_once | @remove_opts] ++ @default_opts, &({&1, :boolean})) ++ @clean_opts ++ [dry_run: :boolean]
 
+  @spec run([String.t] | []) :: any
   def run(args) do
     OptionParser.parse(args, switches: @switches)
     |> do_config

@@ -45,6 +45,15 @@ defmodule Coherence.Authentication.IpAddress do
   alias Coherence.Authentication.Utils
   use Bitwise
 
+  @dialyzer [
+    {:nowarn_function, call: 2},
+    # {:nowarn_function, get_auth_header: 1},
+    # {:nowarn_function, verify_creds: 2},
+    # {:nowarn_function, assert_creds: 4},
+    {:nowarn_function, init: 1},
+    # {:nowarn_function, halt_with_login: 3},
+  ]
+
   @type t :: Ecto.Schema.t | Map.t
   @type conn :: Plug.Conn.t
 
@@ -64,7 +73,7 @@ defmodule Coherence.Authentication.IpAddress do
     store.delete_credentials(ip)
   end
 
-  @spec init(Keyword.t) :: Map.t
+  @spec init(Keyword.t) :: [tuple]
   def init(opts) do
     %{
       allow: Keyword.get(opts, :allow, []),

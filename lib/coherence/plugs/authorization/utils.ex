@@ -34,7 +34,7 @@ defmodule Coherence.Authentication.Utils do
     |> halt
   end
 
-  @spec get_first_req_header(conn, List.t) :: conn
+  @spec get_first_req_header(conn, List.t) :: nil | String.t
   def get_first_req_header(conn, header), do: get_req_header(conn, header) |> header_hd
 
   @spec delete_token_session(conn) :: conn

@@ -14,7 +14,7 @@ defmodule Coherence.CredentialStore.Agent do
   @doc """
   Gets the user data for the given credentials
   """
-  @spec get_user_data(String.t) :: String.t
+  @spec get_user_data(HashDict.t) :: String.t | nil
   def get_user_data(credentials) do
     Agent.get(__MODULE__, &HashDict.get(&1, credentials))
   end
@@ -22,7 +22,7 @@ defmodule Coherence.CredentialStore.Agent do
   @doc """
   Puts the `user_data` for the given `credentials`.
   """
-  @spec put_credentials(String.t, t) :: t
+  @spec put_credentials(HashDict.t, t) :: t
   def put_credentials(credentials, user_data) do
     Agent.update(__MODULE__, &HashDict.put(&1, credentials, user_data))
   end
@@ -32,7 +32,7 @@ defmodule Coherence.CredentialStore.Agent do
 
   Returns the current value of `credentials`, if `credentials` exists.
   """
-  @spec delete_credentials(String.t) :: t
+  @spec delete_credentials(HashDict.t) :: t
   def delete_credentials(credentials) do
     Agent.get_and_update(__MODULE__, &HashDict.pop(&1, credentials))
   end

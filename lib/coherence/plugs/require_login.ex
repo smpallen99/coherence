@@ -5,7 +5,12 @@ defmodule Coherence.RequireLogin do
 
   import Phoenix.Controller, only: [put_flash: 3, redirect: 2]
 
-  @spec init(Keyword.t) :: Map.t
+  @dialyzer [
+    {:nowarn_function, call: 2},
+    {:nowarn_function, init: 1},
+  ]
+
+  @spec init(Keyword.t) :: [tuple]
   def init(options) do
     %{option: options}
   end
