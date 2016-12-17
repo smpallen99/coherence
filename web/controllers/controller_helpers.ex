@@ -5,7 +5,7 @@ defmodule Coherence.ControllerHelpers do
   alias Coherence.Config
   require Logger
   import Phoenix.Controller, only: [put_flash: 3, redirect: 2, put_layout: 2, put_view: 2]
-  import Plug.Conn, only: [halt: 1]
+  import Plug.Conn, only: [halt: 1, assign: 3]
   alias Coherence.{ConfirmableService, RememberableService}
   alias Coherence.ControllerHelpers, as: Helpers
   @lockable_failure "Failed to update lockable attributes "
@@ -297,11 +297,11 @@ defmodule Coherence.ControllerHelpers do
       })
     |> Config.repo.update
     |> case do
-      {:ok, _} -> nil
+      {:ok, user} -> assign conn, Config.assigns_key, user
       {:error, _changeset} ->
         Logger.error ("Failed to update tracking!")
+        conn
     end
-    conn
   end
 
   @spec track_logout(conn, schema, boolean) :: conn
