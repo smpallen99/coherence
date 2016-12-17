@@ -1,17 +1,24 @@
 defmodule Coherence.Mix.Utils do
 
+  @dialyzer [
+    {:nowarn_function, raise_option_errors: 1},
+  ]
+
+  @spec rm_dir!(String.t) :: any
   def rm_dir!(dir) do
     if File.dir? dir do
       File.rm_rf dir
     end
   end
 
+  @spec rm!(String.t) :: any
   def rm!(file) do
     if File.exists? file do
       File.rm! file
     end
   end
 
+  @spec raise_option_errors([:atom]) :: String.t
   def raise_option_errors(list) do
     list = Enum.map(list, fn option ->
       "--" <> Atom.to_string(option) |> String.replace("_", "-")
@@ -23,6 +30,7 @@ defmodule Coherence.Mix.Utils do
     """
   end
 
+  @spec verify_args!([String.t] | [], [String.t] | []) :: String.t | nil
   def verify_args!(parsed, unknown) do
     unless parsed == [] do
       opts = Enum.join parsed, ", "

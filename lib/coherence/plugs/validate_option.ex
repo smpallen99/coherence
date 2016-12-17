@@ -5,10 +5,17 @@ defmodule Coherence.ValidateOption do
 
   import Phoenix.Controller, only: [put_flash: 3, redirect: 2]
 
+  @dialyzer [
+    {:nowarn_function, call: 2},
+    {:nowarn_function, init: 1},
+  ]
+
+  @spec init(Keyword.t | atom) :: [tuple]
   def init(options) do
     %{option: options}
   end
 
+  @spec call(Plug.Conn.t, Map.t) :: Plug.Conn.t
   def call(conn, opts) do
     if Coherence.Config.has_option(opts[:option]) do
       conn

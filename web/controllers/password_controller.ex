@@ -19,9 +19,14 @@ defmodule Coherence.PasswordController do
   plug :layout_view
   plug :redirect_logged_in when action in [:new, :create, :edit, :update]
 
+  @type schema :: Ecto.Schema.t
+  @type conn :: Plug.Conn.t
+  @type params :: Map.t
+
   @doc """
   Render the recover password form.
   """
+  @spec new(conn, params) :: conn
   def new(conn, _params) do
     user_schema = Config.user_schema
     cs = Helpers.changeset :password, user_schema, user_schema.__struct__
@@ -32,6 +37,7 @@ defmodule Coherence.PasswordController do
   @doc """
   Create the recovery token and send the email
   """
+  @spec create(conn, params) :: conn
   def create(conn, %{"password" => password_params} = params) do
     user_schema = Config.user_schema
     email = password_params["email"]
@@ -64,6 +70,7 @@ defmodule Coherence.PasswordController do
   @doc """
   Render the password and password confirmation form.
   """
+  @spec edit(conn, params) :: conn
   def edit(conn, params) do
     user_schema = Config.user_schema
     token = params["id"]
@@ -93,6 +100,7 @@ defmodule Coherence.PasswordController do
   @doc """
   Verify the passwords and update the database
   """
+  @spec update(conn, params) :: conn
   def update(conn, %{"password" => password_params} = params) do
     user_schema = Config.user_schema
     repo = Config.repo

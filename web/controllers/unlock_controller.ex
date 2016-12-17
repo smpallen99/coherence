@@ -17,9 +17,14 @@ defmodule Coherence.UnlockController do
   plug :layout_view
   plug :redirect_logged_in when action in [:new, :create, :edit]
 
+  @type schema :: Ecto.Schema.t
+  @type conn :: Plug.Conn.t
+  @type params :: Map.t
+
   @doc """
   Render the send reset link form.
   """
+  @spec new(conn, params) :: conn
   def new(conn, _params) do
     user_schema = Config.user_schema
     changeset = Helpers.changeset(:unlock, user_schema, user_schema.__struct__)
@@ -29,6 +34,7 @@ defmodule Coherence.UnlockController do
   @doc """
   Create and send the unlock token.
   """
+  @spec create(conn, params) :: conn
   def create(conn, %{"unlock" => unlock_params} = params) do
     user_schema = Config.user_schema
     token = random_string 48
@@ -67,6 +73,7 @@ defmodule Coherence.UnlockController do
   @doc """
   Handle the unlcock link click.
   """
+  @spec edit(conn, params) :: conn
   def edit(conn, params) do
     user_schema = Config.user_schema
     token = params["id"]
@@ -95,6 +102,7 @@ defmodule Coherence.UnlockController do
   @lockable_failure "Failed to update lockable attributes "
 
   @doc false
+  @spec clear_unlock_values(schema, module) :: nil | :ok | String.t
   def clear_unlock_values(user, user_schema) do
     if user.unlock_token or user.locked_at do
       user_schema.changeset(user, %{unlock_token: nil, locked_at: nil})

@@ -16,12 +16,18 @@ defmodule Coherence.SessionController do
   plug :layout_view, view: Coherence.SessionView
   plug :redirect_logged_in when action in [:new, :create]
 
+  @type schema :: Ecto.Schema.t
+  @type conn :: Plug.Conn.t
+  @type params :: Map.t
+
   @doc false
+  @spec login_cookie() :: String.t
   def login_cookie, do: "coherence_login"
 
   @doc """
   Retrieve the login cookie.
   """
+  @spec get_login_cookie(conn) :: String.t
   def get_login_cookie(conn) do
     conn.cookies[Config.login_cookie]
   end
@@ -33,6 +39,7 @@ defmodule Coherence.SessionController do
   @doc """
   Render the login form.
   """
+  @spec new(conn, params) :: conn
   def new(conn, _params) do
     login_field = Config.login_field
     conn
@@ -58,6 +65,7 @@ defmodule Coherence.SessionController do
   If the rememberable option is enabled, create a new series and rememberable token,
   create a new cookie and update the database.
   """
+  @spec create(conn, params) :: conn
   def create(conn, params) do
     remember = if Config.user_schema.rememberable?, do: params["remember"], else: false
     user_schema = Config.user_schema
@@ -102,6 +110,7 @@ defmodule Coherence.SessionController do
 
   Delete the user's session, track the logout and delete the rememberable cookie.
   """
+  @spec delete(conn, params) :: conn
   def delete(conn, params) do
     logout_user(conn)
     |> redirect_to(:session_delete, params)
@@ -125,6 +134,7 @@ defmodule Coherence.SessionController do
   end
   defp log_lockable_update(_), do: :ok
 
+  @spec reset_failed_attempts(conn, Ecto.Schema.t, boolean) :: conn
   def reset_failed_attempts(conn, %{failed_attempts: attempts} = user, true) when attempts > 0 do
     Helpers.changeset(:session, user.__struct__, user, %{failed_attempts: 0})
     |> Config.repo.update
@@ -156,6 +166,7 @@ defmodule Coherence.SessionController do
 
   Render the login form.
   """
+  @spec login_callback(conn) :: conn
   def login_callback(conn) do
     if Map.get conn.private, "phoenix_layout" do
       conn
@@ -173,6 +184,7 @@ defmodule Coherence.SessionController do
   keep the same series number. Update the rememberable database with
   the new token. Save the new cookie.
   """
+  @spec rememberable_callback(conn, integer, String.t, String.t, Keyword.t) :: conn
   def rememberable_callback(conn, id, series, token, opts) do
     Coherence.RememberableServer.callback fn ->
       _rememberable_callback(conn, id, series, token, opts)
@@ -180,6 +192,7 @@ defmodule Coherence.SessionController do
   end
 
   @doc false
+  @spec _rememberable_callback(conn, integer, String.t, String.t, Keyword.t) :: conn | {:errror, atom} | {conn, schema | nil}
   def _rememberable_callback(conn, id, series, token, opts) do
     repo = Config.repo
     cred_store = Coherence.Authentication.Utils.get_credential_store
@@ -228,6 +241,7 @@ defmodule Coherence.SessionController do
   @doc """
   Save the login cookie.
   """
+  @spec save_login_cookie(conn, integer, String.t, String.t, String.t, integer) :: conn
   def save_login_cookie(conn, id, series, token, key \\ "coherence_login", expire \\ 2*24*60*60) do
     put_resp_cookie conn, key, gen_cookie(id, series, token), max_age: expire
   end
@@ -242,6 +256,7 @@ defmodule Coherence.SessionController do
   @doc """
   Fetch a rememberable database record.
   """
+  @spec get_rememberables(integer) :: [schema]
   def get_rememberables(id) do
     where(Rememberable, [u], u.user_id == ^id)
     |> Config.repo.all
@@ -259,6 +274,7 @@ defmodule Coherence.SessionController do
     * a valid remembered user
   * otherwise, this is an unknown user.
   """
+  @spec validate_login(integer, String.t, String.t) :: {:ok, schema} | {:error, atom}
   def validate_login(user_id, series, token) do
     hash_series = hash series
     hash_token = hash token

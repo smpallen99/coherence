@@ -21,9 +21,14 @@ defmodule Coherence.InvitationController do
   plug :scrub_params, "user" when action in [:create_user]
   plug :layout_view
 
+  @type schema :: Ecto.Schema.t
+  @type conn :: Plug.Conn.t
+  @type params :: Map.t
+
   @doc """
   Render the new invitation form.
   """
+  @spec new(conn, params) :: conn
   def new(conn, _params) do
     changeset = Invitation.changeset(%Invitation{})
     render(conn, "new.html", changeset: changeset)
@@ -35,6 +40,7 @@ defmodule Coherence.InvitationController do
   Creates a new invitation token, save it to the database and send
   the invitation email.
   """
+  @spec create(conn, params) :: conn
   def create(conn, %{"invitation" =>  invitation_params} = params) do
     repo = Config.repo
     user_schema = Config.user_schema
@@ -74,6 +80,7 @@ defmodule Coherence.InvitationController do
   Sets the name and email address in the form based on what was entered
   when the invitation was sent.
   """
+  @spec edit(conn, params) :: conn
   def edit(conn, params) do
     token = params["id"]
     where(Invitation, [u], u.token == ^token)
@@ -97,6 +104,7 @@ defmodule Coherence.InvitationController do
 
   Create a new user based from an invite token.
   """
+  @spec create_user(conn, params) :: conn
   def create_user(conn, params) do
     token = params["token"]
     repo = Config.repo
@@ -128,6 +136,7 @@ defmodule Coherence.InvitationController do
 
   Resent the invitation based on the invitation's id.
   """
+  @spec resend(conn, params) :: conn
   def resend(conn, %{"id" => id}) do
     case Config.repo.get(Invitation, id) do
       nil ->

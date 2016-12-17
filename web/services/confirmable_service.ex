@@ -89,6 +89,7 @@ defmodule Coherence.ConfirmableService do
 
   deprecated! Please use Coherence.ControllerHelpers.unlock!/1.
   """
+  @spec confirm(Ecto.Schema.t) :: Ecto.Changeset.t
   def confirm(user) do
     Config.user_schema.changeset(user, %{confirmed_at: Ecto.DateTime.utc, confirmation_token: nil})
   end
@@ -100,6 +101,7 @@ defmodule Coherence.ConfirmableService do
 
   deprecated! Please use Coherence.ControllerHelpers.unlock!/1.
   """
+  @spec confirm!(Ecto.Schema.t) :: Ecto.Changeset.t | {:error, Ecto.Changeset.t}
   def confirm!(user) do
     changeset = Config.user_schema.changeset(user, %{confirmed_at: Ecto.DateTime.utc, confirmation_token: nil})
     unless confirmed? user do
@@ -116,6 +118,7 @@ defmodule Coherence.ConfirmableService do
 
   Returns true if confirmed, false otherwise
   """
+  @spec confirmed?(Ecto.Schema.t) :: boolean
   def confirmed?(user) do
     for_option true, fn ->
       !!user.confirmed_at
@@ -127,6 +130,7 @@ defmodule Coherence.ConfirmableService do
 
   Returns true when the confirmation has expired.
   """
+  @spec expired?(Ecto.Schema.t) :: boolean
   def expired?(user) do
     for_option fn ->
       expired?(user.confirmation_sent_at, days: Config.confirmation_token_expire_days)
@@ -138,6 +142,7 @@ defmodule Coherence.ConfirmableService do
 
   Returns true if the unconfirmed access has not expired.
   """
+  @spec unconfirmed_access?(Ecto.Schema.t) :: boolean
   def unconfirmed_access?(user) do
     for_option fn ->
       case Config.allow_unconfirmed_access_for do
