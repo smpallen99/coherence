@@ -21,6 +21,7 @@ defmodule Coherence.Schema do
   * `registerable?/0` - Returns true if the option is configured.
   * `confirmable?/0` - Returns true if the option is configured.
   * `trackable?/0` - Returns true if the option is configured.
+  * `trackable_table?/0` - Returns true if the option is configured.
   * `recoverable?/0` - Returns true if the option is configured.
   * `lockable?/0` - Returns true if the option is configured.
   * `invitable?/0` - Returns true if the option is configured.
@@ -102,6 +103,11 @@ defmodule Coherence.Schema do
       def trackable? do
         Coherence.Config.has_option(:trackable) and
           Keyword.get(unquote(opts), :trackable, true)
+      end
+
+      def trackable_table? do
+        Coherence.Config.has_option(:trackable_table) and
+          Keyword.get(unquote(opts), :trackable_table, true)
       end
 
       def recoverable? do
@@ -395,6 +401,9 @@ defmodule Coherence.Schema do
         field :last_sign_in_at, Ecto.DateTime
         field :current_sign_in_ip, :string
         field :last_sign_in_ip, :string
+      end
+      if Coherence.Config.has_option(:trackable_table) do
+        has_many :trackables, Coherence.Trackable
       end
       if Coherence.Config.has_option(:lockable) do
         field :failed_attempts, :integer, default: 0

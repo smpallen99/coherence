@@ -89,15 +89,40 @@ defmodule Coherence.ControllerHelpers do
 
       expired?(user.expire_at, days: 5)
       expired?(user.expire_at, minutes: 10)
+
+      iex> Ecto.DateTime.utc
+      ...> |> Coherence.ControllerHelpers.expired?(days: 1)
+      false
+
+      iex> Ecto.DateTime.utc
+      ...> |> Coherence.ControllerHelpers.shift(days: -2)
+      ...> |> Ecto.DateTime.cast!
+      ...> |> Coherence.ControllerHelpers.expired?(days: 1)
+      true
   """
   @spec expired?(nil | struct, Keyword.t) :: boolean
   def expired?(nil, _), do: true
   def expired?(datetime, opts) do
-    expire_on? = datetime
+    not Timex.before?(Timex.now, shift(datetime, opts))
+  end
+
+  @doc """
+  Shift a Ecto.DateTime.
+
+  ## Examples
+
+      iex> Ecto.DateTime.cast!("2016-10-10 10:10:10")
+      ...> |> Coherence.ControllerHelpers.shift(days: -2)
+      ...> |> Ecto.DateTime.cast!
+      ...> |> to_string
+      "2016-10-08 10:10:10"
+  """
+  @spec shift(struct, Keyword.t) :: struct
+  def shift(datetime, opts) do
+    datetime
     |> Ecto.DateTime.to_erl
     |> Timex.to_datetime
     |> Timex.shift(opts)
-    not Timex.before?(Timex.now, expire_on?)
   end
 
   @doc """
@@ -251,7 +276,7 @@ defmodule Coherence.ControllerHelpers do
   @spec login_user(conn, schema, params) :: conn
   def login_user(conn, user, _params \\ %{}) do
      apply(Config.auth_module, Config.create_login, [conn, user, [id_key: Config.schema_key]])
-     |> TrackableService.track_login(user, Config.user_schema.trackable?)
+     |> TrackableService.track_login(user, Config.user_schema.trackable?, Config.user_schema.trackable_table?)
   end
 
   @doc """
@@ -263,7 +288,7 @@ defmodule Coherence.ControllerHelpers do
   def logout_user(conn) do
     user = Coherence.current_user conn
     apply(Config.auth_module, Config.delete_login, [conn, [id_key: Config.schema_key]])
-    |> TrackableService.track_logout(user, user.__struct__.trackable?)
+    |> TrackableService.track_logout(user, user.__struct__.trackable?, user.__struct__.trackable_table?)
     |> RememberableService.delete_rememberable(user)
   end
 

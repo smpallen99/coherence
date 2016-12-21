@@ -1,4 +1,7 @@
 defmodule Coherence.Invitation do
+  @moduledoc """
+  Schema to support inviting a someone to create an account.
+  """
   use Coherence.Web, :model
 
   schema "invitations" do

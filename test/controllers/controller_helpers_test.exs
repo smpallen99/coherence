@@ -3,6 +3,12 @@ defmodule CoherenceTest.ControllerHelpers do
   alias TestCoherence.User
   alias Coherence.ControllerHelpers, as: Helpers
   import TestCoherence.TestHelpers
+  doctest Coherence.ControllerHelpers
+
+  setup do
+    Application.put_env :coherence, :opts, [:authenticatable, :recoverable,
+      :confirmable, :invitable, :registerable]
+  end
 
   test "confirm!" do
     user = insert_user

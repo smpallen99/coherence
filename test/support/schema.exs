@@ -90,3 +90,28 @@ defmodule TestCoherence.Rememberable do
     |> cast(params, @required_fields, @optional_fields)
   end
 end
+
+# defmodule TestCoherence.Trackable do
+#   use Coherence.Web, :model
+#   alias Coherence.Config
+
+#   schema "trackables" do
+#     field :action, :string, null: false
+#     field :sign_in_count, :integer, default: 0
+#     field :current_sign_in_at, Ecto.DateTime
+#     field :last_sign_in_at, Ecto.DateTime
+#     field :current_sign_in_ip, :string
+#     field :last_sign_in_ip, :string
+#     belongs_to :user, Module.concat(Config.module, Config.user_schema)
+
+#     timestamps
+#   end
+
+#   @fields ~w(action sign_i_count current_sign_in_ip current_sign_in_at last_sign_in_ip last_sign_in_at user_id)a
+
+#   def changeset(model, params \\ %{}) do
+#     model
+#     |> cast(params, @fields)
+#     |> validate_required([:action, :user_id])
+#   end
+# end

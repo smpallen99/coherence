@@ -249,6 +249,29 @@ defmodule Mix.Tasks.Coherence.InstallTest do
         end
       end
     end
+    test "for_trackable_table" do
+      in_tmp "for_trackable_table", fn ->
+        (~w(--repo=TestCoherence.Repo  --authenticatable --trackable-table --log-only --no-views --no-templates --migration-path=migrations))
+        |> Mix.Tasks.Coherence.Install.run
+
+        assert [migration] = Path.wildcard("migrations/*_create_coherence_trackable.exs")
+
+        assert_file migration, fn file ->
+          assert file =~ "defmodule TestCoherence.Repo.Migrations.CreateCoherenceTrackable do"
+          assert file =~ "create table(:trackables) do"
+          assert file =~ "add :action, :string"
+          assert file =~ "add :sign_in_count, :integer, default: 0"
+          assert file =~ "add :current_sign_in_at, :datetime"
+          assert file =~ "add :last_sign_in_at, :datetime"
+          assert file =~ "add :current_sign_in_ip, :string"
+          assert file =~ "add :last_sign_in_ip, :string"
+          assert file =~ "add :user_id, references(:users, on_delete: :delete_all)"
+          assert file =~ "timestamps"
+          assert file =~ "create index(:trackables, [:user_id])"
+          assert file =~ "create index(:trackables, [:action])"
+        end
+      end
+    end
     test "for_rememberable_with_accounts_schema" do
       in_tmp "for_rememberable", fn ->
         (~w(--repo=TestCoherence.Repo  --authenticatable --rememberable --log-only --no-views --no-templates --migration-path=migrations)++ ["--model=Account accounts"])

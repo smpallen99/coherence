@@ -2,10 +2,20 @@ defmodule CoherenceTest.PasswordController do
   use TestCoherence.ConnCase
   import TestCoherence.Router.Helpers
   import Coherence.ControllerHelpers, only: [random_string: 1]
+  alias TestCoherence.Repo
+  alias Coherence.Trackable
+  alias Coherence.PasswordService
 
   setup %{conn: conn} do
     Application.put_env :coherence, :opts, [:confirmable, :authenticatable, :recoverable,
       :lockable, :trackable, :unlockable_with_token, :invitable, :registerable]
+    user = insert_user
+    {:ok, conn: conn, user: user}
+  end
+
+  def setup_trackable_table(%{conn: conn}) do
+    Application.put_env :coherence, :opts, [:confirmable, :authenticatable, :recoverable,
+      :lockable, :trackable_table, :unlockable_with_token, :invitable, :registerable]
     user = insert_user
     {:ok, conn: conn, user: user}
   end
@@ -52,5 +62,21 @@ defmodule CoherenceTest.PasswordController do
       assert conn.private[:phoenix_template] == "edit.html"
       assert html_response(conn, 200)
     end
+  end
+
+  describe "trackable table" do
+    setup [:setup_trackable_table]
+
+    test "reset password creates rememberable", %{conn: conn, user: user} do
+      {:ok, user} = PasswordService.reset_password_token(user)
+      params = %{"password" => %{"reset_password_token" => user.reset_password_token, "password" => "secret2", "password_confirmation" => "secret2", "current_password" => "supersecret"}}
+      conn = put conn, password_path(conn, :update, user), params
+      assert conn.private[:phoenix_flash] == %{"info" => "Password updated successfully."}
+      assert html_response(conn, 302)
+      [t1] = Repo.all(Trackable)
+      assert t1.action == "password_reset"
+      assert t1.user_id == user.id
+    end
+
   end
 end
