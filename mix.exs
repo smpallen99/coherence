@@ -12,8 +12,8 @@ defmodule Coherence.Mixfile do
       build_embedded: Mix.env == :prod,
       start_permanent: Mix.env == :prod,
       docs: [extras: ["README.md"], main: "Coherence"],
-      deps: deps,
-      package: package,
+      deps: deps(),
+      package: package(),
       dialyzer: [plt_add_apps: [:mix]],
       name: "Coherence",
       description: """

@@ -39,7 +39,7 @@ defmodule Coherence.Authentication.Utils do
 
   @spec delete_token_session(conn) :: conn
   def delete_token_session(conn) do
-    case get_session(conn, param_key) do
+    case get_session(conn, param_key()) do
       nil -> conn
       param -> put_session(conn, param, nil)
     end

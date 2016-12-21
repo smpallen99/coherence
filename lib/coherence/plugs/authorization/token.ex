@@ -111,7 +111,7 @@ defmodule Coherence.Authentication.Token do
   @spec save_token_in_session({conn, nil | String.t}, Map.t) :: {conn, nil | String.t}
   def save_token_in_session({conn, nil}, _), do: {conn, nil}
   def save_token_in_session({conn, creds}, param) do
-    {put_session(conn, param, creds) |> put_session(param_key, param), creds}
+    {put_session(conn, param, creds) |> put_session(param_key(), param), creds}
   end
 
   @spec call(conn, Keyword.t) :: conn

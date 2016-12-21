@@ -11,7 +11,7 @@ defmodule Coherence.Rememberable do
     field :token_created_at, Timex.Ecto.DateTime
     belongs_to :user, Module.concat(Config.module, Config.user_schema)
 
-    timestamps
+    timestamps()
   end
 
   @doc """
@@ -29,16 +29,16 @@ defmodule Coherence.Rememberable do
 
   @spec create_login(Ecto.Schema.t) :: {Ecto.Changeset.t, String.t, String.t}
   def create_login(user) do
-    series = gen_series
-    token = gen_token
-    changeset = changeset(%__MODULE__{}, %{token_created_at: created_at, user_id: user.id,
+    series = gen_series()
+    token = gen_token()
+    changeset = changeset(%__MODULE__{}, %{token_created_at: created_at(), user_id: user.id,
       series_hash: hash(series), token_hash: hash(token)})
     {changeset, series, token}
   end
 
   @spec update_login(Ecto.Changeset.t) :: {Ecto.Changeset.t, String.t}
   def update_login(rememberable) do
-    token = gen_token
+    token = gen_token()
     {changeset(rememberable, %{token_hash: hash(token)}), token}
   end
 

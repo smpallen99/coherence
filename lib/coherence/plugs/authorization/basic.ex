@@ -33,7 +33,7 @@ defmodule Coherence.Authentication.Basic do
   @spec create_login(String.t, String.t, t, Keyword.t) :: t
   def create_login(email, password, user_data, _opts \\ []) do
     creds = encode_credentials(email, password)
-    store = get_credential_store
+    store = get_credential_store()
     store.put_credentials(creds, user_data)
   end
 

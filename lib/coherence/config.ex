@@ -163,10 +163,10 @@ defmodule Coherence.Config do
   end
 
   defp has_any_option?(fun) do
-    if opts == :all do
+    if opts() == :all do
       true
     else
-      Enum.any?(opts, &(fun.(standardize_option(&1))))
+      Enum.any?(opts(), &(fun.(standardize_option(&1))))
     end
   end
 

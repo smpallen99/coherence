@@ -153,12 +153,12 @@ defmodule Coherence.Authentication.Session do
   @spec init(Keyword.t) :: [tuple]
   def init(opts) do
     login = case opts[:login] do
-      true  -> default_login_callback
+      true  -> default_login_callback()
       fun when is_function(fun) -> fun
       other ->
         case opts[:protected] do
           nil -> other
-          true -> default_login_callback
+          true -> default_login_callback()
           other -> other
         end
     end

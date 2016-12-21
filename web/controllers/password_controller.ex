@@ -52,7 +52,7 @@ defmodule Coherence.PasswordController do
         |> render("new.html", changeset: changeset)
       user ->
         token = random_string 48
-        url = router_helpers.password_url(conn, :edit, token)
+        url = router_helpers().password_url(conn, :edit, token)
         Logger.debug "reset email url: #{inspect url}"
         dt = Ecto.DateTime.utc
         cs = Helpers.changeset(:password, user_schema, user,
