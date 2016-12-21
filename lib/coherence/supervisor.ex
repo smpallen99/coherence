@@ -11,7 +11,7 @@ defmodule Coherence.Supervisor do
     use Coherence.Config
 
     children = [
-      worker(get_credential_store, [])
+      worker(get_credential_store(), [])
     ]
     |> build_children(Config.has_option(:rememberable))
 

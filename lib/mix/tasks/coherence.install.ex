@@ -312,7 +312,7 @@ config :coherence, #{base}.Coherence.Mailer,
   defp gen_model(%{user_schema: user_schema, boilerplate: true, models: true, model_found?: false} = config) do
     name = module_to_string(user_schema)
     |> String.downcase
-    binding = binding ++ [base: config[:base], user_table_name: config[:user_table_name]]
+    binding = Kernel.binding() ++ [base: config[:base], user_table_name: config[:user_table_name]]
     copy_from paths(),
       "priv/templates/coherence.install/models/coherence", "", binding, [
         {:eex, "user.ex", "web/models/coherence/#{name}.ex"}

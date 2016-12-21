@@ -6,7 +6,7 @@ defmodule Coherence.Invitation do
     field :email, :string
     field :token, :string
 
-    timestamps
+    timestamps()
   end
 
   @doc """

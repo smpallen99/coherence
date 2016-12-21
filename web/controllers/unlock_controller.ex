@@ -38,7 +38,7 @@ defmodule Coherence.UnlockController do
   def create(conn, %{"unlock" => unlock_params} = params) do
     user_schema = Config.user_schema
     token = random_string 48
-    url = router_helpers.unlock_url(conn, :edit, token)
+    url = router_helpers().unlock_url(conn, :edit, token)
     email = unlock_params["email"]
     password = unlock_params["password"]
 
