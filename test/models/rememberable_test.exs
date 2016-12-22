@@ -52,14 +52,8 @@ defmodule Coherence.RememberableTest do
   def now, do: Timex.now
 
   def rememberables, do: [
-    %Rememberable{user_id: 10, series_hash: "123", token_hash: "abc", token_created_at: now},
-    %Rememberable{user_id:  1, series_hash: "123", token_hash: "abc", token_created_at: now },
-  ]
-  @dt Timex.shift Timex.now, months: -2
-  @expired_list [
-    %Rememberable{user_id: 10, series_hash: "124", token_hash: "abca", token_created_at: @dt},
-    %Rememberable{user_id:  1, series_hash: "12345", token_hash: "abcd", token_created_at: @dt },
-    %Rememberable{user_id:  1, series_hash: "12", token_hash: "ab", token_created_at: @dt },
+    %Rememberable{user_id: 10, series_hash: "123", token_hash: "abc", token_created_at: now()},
+    %Rememberable{user_id:  1, series_hash: "123", token_hash: "abc", token_created_at: now()},
   ]
 
   def build_rememberable(changes) do

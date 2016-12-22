@@ -1,6 +1,5 @@
 defmodule Coherence.CredentialStore do
   @moduledoc false
-  use Behaviour
 
-  @callback get_user_data(HashDict.t | {HashDict.t, any, any}) :: any
+  @callback get_user_data(String.t | {String.t, any, any}) :: any
 end

@@ -11,7 +11,7 @@ defmodule CoherenceTest.ControllerHelpers do
   end
 
   test "confirm!" do
-    user = insert_user
+    user = insert_user()
     refute User.confirmed?(user)
     {:ok, user} = Helpers.confirm!(user)
     assert User.confirmed?(user)
@@ -22,7 +22,7 @@ defmodule CoherenceTest.ControllerHelpers do
   end
 
   test "lock!" do
-    user = insert_user
+    user = insert_user()
     refute User.locked?(user)
     {:ok, user} = Helpers.lock!(user)
     assert User.locked?(user)

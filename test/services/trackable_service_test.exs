@@ -8,7 +8,7 @@ defmodule CoherenceTest.TrackableService do
   defp current_user(conn), do: conn.assigns[:current_user]
 
   setup %{conn: conn} do
-    user = insert_user
+    user = insert_user()
     conn = assign(conn, :current_user, user)
     |> struct(peer: {{127,0,0,1}, 80})
     {:ok, conn: conn, user: user}

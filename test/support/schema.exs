@@ -6,13 +6,13 @@ defmodule TestCoherence.User do
   schema "users" do
     field :email, :string
     field :name, :string
-    coherence_schema
+    coherence_schema()
 
-    timestamps
+    timestamps()
   end
 
   @required_fields ~w(email name)
-  @optional_fields ~w() ++ coherence_fields
+  @optional_fields ~w() ++ coherence_fields()
 
   def changeset(model, params \\ %{}) do
     model
@@ -34,7 +34,7 @@ defmodule TestCoherence.Invitation do
     field :name, :string
     field :token, :string
 
-    timestamps
+    timestamps()
   end
 
   def changeset(model, params \\ %{}) do
@@ -54,13 +54,13 @@ defmodule TestCoherence.Account do
   schema "accounts" do
     field :email, :string
     field :name, :string
-    coherence_schema
+    coherence_schema()
 
-    timestamps
+    timestamps()
   end
 
   @required_fields ~w(email name)
-  @optional_fields ~w() ++ coherence_fields
+  @optional_fields ~w() ++ coherence_fields()
 
   def changeset(model, params \\ %{}) do
     model
@@ -79,7 +79,7 @@ defmodule TestCoherence.Rememberable do
     field :token_hash, :string
     field :token_created_at, Timex.Ecto.DateTime
     belongs_to :user, Module.concat(Config.module, Config.user_schema)
-    timestamps
+    timestamps()
   end
 
   @required_fields ~w(series_hash token_hash token_created_at user_id)
@@ -104,7 +104,7 @@ end
 #     field :last_sign_in_ip, :string
 #     belongs_to :user, Module.concat(Config.module, Config.user_schema)
 
-#     timestamps
+#     timestamps()
 #   end
 
 #   @fields ~w(action sign_i_count current_sign_in_ip current_sign_in_at last_sign_in_ip last_sign_in_at user_id)a

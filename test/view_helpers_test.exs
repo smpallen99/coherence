@@ -9,7 +9,6 @@ defmodule CoherenceTest.ViewHelpers do
   @unlock_link   "Send an unlock email"
   @register_link "Need An Account?"
   @confirmation_link "Resend confirmation email"
-  @invite_link   "Invite Someone"
   @signin_link   "Sign In"
   @signout_link  "Sign Out"
 

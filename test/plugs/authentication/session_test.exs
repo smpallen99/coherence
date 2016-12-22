@@ -14,11 +14,8 @@ defmodule CoherenceTest.Plug.Session do
     log: false
   ]
 
-  @session_opts Plug.Session.init @default_opts
-
   @secret String.duplicate("abcdef0123456789", 8)
   @signing_opts Plug.Session.init(Keyword.put(@default_opts, :encrypt, false))
-  @encrypted_opts Plug.Session.init(@default_opts)
 
   def sign_conn(conn, secret \\ @secret) do
     put_in(conn.secret_key_base, secret)

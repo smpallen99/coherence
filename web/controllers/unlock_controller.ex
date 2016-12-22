@@ -48,7 +48,7 @@ defmodule Coherence.UnlockController do
       case LockableService.unlock_token(user) do
         {:ok, user} ->
           if user_schema.locked?(user) do
-            send_user_email :unlock, user, router_helpers.unlock_url(conn, :edit, user.unlock_token)
+            send_user_email :unlock, user, router_helpers().unlock_url(conn, :edit, user.unlock_token)
             conn
             |> put_flash(:info, "Unlock Instructions sent.")
             |> redirect_to(:unlock_create, params)
@@ -96,8 +96,6 @@ defmodule Coherence.UnlockController do
         end
     end
   end
-
-  @lockable_failure "Failed to update lockable attributes "
 
   @doc false
   @spec clear_unlock_values(schema, module) :: nil | :ok | String.t

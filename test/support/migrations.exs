@@ -26,7 +26,7 @@ defmodule TestCoherence.Migrations do
       add :confirmation_sent_at, :datetime
       # rememberable
       add :remember_created_at, :datetime
-      timestamps
+      timestamps()
     end
     create unique_index(:users, [:email])
 
@@ -36,7 +36,7 @@ defmodule TestCoherence.Migrations do
       add :token_created_at, :datetime
       add :user_id, references(:users, on_delete: :delete_all)
 
-      timestamps
+      timestamps()
     end
     create index(:rememberables, [:user_id])
     create index(:rememberables, [:series_hash])
@@ -48,7 +48,7 @@ defmodule TestCoherence.Migrations do
       add :name, :string
       add :email, :string
       add :token, :string
-      timestamps
+      timestamps()
     end
     create unique_index(:invitations, [:email])
     create index(:invitations, [:token])
@@ -61,7 +61,7 @@ defmodule TestCoherence.Migrations do
       add :current_sign_in_ip, :string
       add :last_sign_in_ip, :string
       add :user_id, references(:users, on_delete: :delete_all)
-      timestamps
+      timestamps()
     end
     create index(:trackables, [:user_id])
     create index(:trackables, [:action])

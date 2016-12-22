@@ -9,14 +9,14 @@ defmodule CoherenceTest.PasswordController do
   setup %{conn: conn} do
     Application.put_env :coherence, :opts, [:confirmable, :authenticatable, :recoverable,
       :lockable, :trackable, :unlockable_with_token, :invitable, :registerable]
-    user = insert_user
+    user = insert_user()
     {:ok, conn: conn, user: user}
   end
 
   def setup_trackable_table(%{conn: conn}) do
     Application.put_env :coherence, :opts, [:confirmable, :authenticatable, :recoverable,
       :lockable, :trackable_table, :unlockable_with_token, :invitable, :registerable]
-    user = insert_user
+    user = insert_user()
     {:ok, conn: conn, user: user}
   end
 

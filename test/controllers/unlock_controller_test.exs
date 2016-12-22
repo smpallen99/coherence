@@ -9,12 +9,12 @@ defmodule CoherenceTest.UnlockController do
     Application.put_env :coherence, :opts, [:authenticatable, :recoverable,
       :lockable, :trackable_table, :unlockable_with_token, :invitable, :registerable]
     Application.put_env(:coherence, :max_failed_login_attempts, 2)
-    user = insert_user
+    user = insert_user()
     {:ok, conn: conn, user: user}
   end
   def setup_controller %{conn: conn} do
     Application.put_env :coherence, :opts, [:authenticatable, :lockable, :unlockable_with_token]
-    user = insert_user
+    user = insert_user()
     {:ok, conn: conn, user: user}
   end
 

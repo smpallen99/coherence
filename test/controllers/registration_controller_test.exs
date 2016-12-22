@@ -4,11 +4,11 @@ defmodule CoherenceTest.RegistrationController do
 
   setup %{conn: conn} do
     Application.put_env :coherence, :opts, [:confirmable, :registerable]
-    user = insert_user
+    user = insert_user()
     conn = assign conn, :current_user, user
     {:ok, conn: conn, user: user}
   end
-  
+
   describe "show" do
     test "can visit show registraion page", %{conn: conn} do
       conn = get conn, registration_path(conn, :show)

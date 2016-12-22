@@ -9,7 +9,7 @@ defmodule CoherenceTest.SessionController do
     Application.put_env :coherence, :opts, [:authenticatable, :recoverable,
       :lockable, :trackable_table, :unlockable_with_token, :invitable, :registerable]
     Application.put_env(:coherence, :max_failed_login_attempts, 2)
-    user = insert_user
+    user = insert_user()
     conn = assign conn, :current_user, user
     {:ok, conn: conn, user: user}
   end

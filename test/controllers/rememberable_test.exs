@@ -20,7 +20,7 @@ defmodule CoherenceTest.Rememberable do
   end
 
   def login_cookie(%{conn: conn}) do
-    user = insert_user
+    user = insert_user()
     {_, series, token} = rememberable = insert_rememberable(user)
     conn = conn
     |> with_session

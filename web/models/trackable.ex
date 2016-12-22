@@ -14,7 +14,7 @@ defmodule Coherence.Trackable do
     field :last_sign_in_ip, :string
     belongs_to :user, Config.user_schema
 
-    timestamps
+    timestamps()
   end
 
   @fields ~w(action sign_in_count current_sign_in_ip current_sign_in_at last_sign_in_ip last_sign_in_at user_id)a
