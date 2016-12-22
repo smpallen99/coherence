@@ -12,6 +12,7 @@ defmodule Coherence.UnlockController do
   use Timex
   use Coherence.Config
   alias Coherence.ControllerHelpers, as: Helpers
+  alias Coherence.{TrackableService, LockableService}
 
   plug Coherence.ValidateOption, :unlockable_with_token
   plug :layout_view
@@ -37,8 +38,6 @@ defmodule Coherence.UnlockController do
   @spec create(conn, params) :: conn
   def create(conn, %{"unlock" => unlock_params} = params) do
     user_schema = Config.user_schema
-    token = random_string 48
-    url = router_helpers().unlock_url(conn, :edit, token)
     email = unlock_params["email"]
     password = unlock_params["password"]
 
@@ -46,12 +45,10 @@ defmodule Coherence.UnlockController do
     |> Config.repo.one
 
     if user != nil and user_schema.checkpw(password, Map.get(user, Config.password_hash)) do
-      Helpers.changeset(:unlock, user.__struct__, user, %{unlock_token: token})
-      |> Config.repo.update
-      |> case do
-        {:ok, _} ->
+      case LockableService.unlock_token(user) do
+        {:ok, user} ->
           if user_schema.locked?(user) do
-            send_user_email :unlock, user, url
+            send_user_email :unlock, user, router_helpers.unlock_url(conn, :edit, user.unlock_token)
             conn
             |> put_flash(:info, "Unlock Instructions sent.")
             |> redirect_to(:unlock_create, params)
@@ -86,8 +83,9 @@ defmodule Coherence.UnlockController do
         |> redirect_to(:unlock_edit_invalid, params)
       user ->
         if user_schema.locked? user do
-          user_schema.unlock! user
+          Helpers.unlock! user
           conn
+          |> TrackableService.track_unlock_token(user, user_schema.trackable_table?)
           |> put_flash(:info, "Your account has been unlocked")
           |> redirect_to(:unlock_edit, params)
         else

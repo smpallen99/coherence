@@ -53,5 +53,17 @@ defmodule TestCoherence.Migrations do
     create unique_index(:invitations, [:email])
     create index(:invitations, [:token])
 
+    create table(:trackables) do
+      add :action, :string
+      add :sign_in_count, :integer, default: 0
+      add :current_sign_in_at, :datetime
+      add :last_sign_in_at, :datetime
+      add :current_sign_in_ip, :string
+      add :last_sign_in_ip, :string
+      add :user_id, references(:users, on_delete: :delete_all)
+      timestamps
+    end
+    create index(:trackables, [:user_id])
+    create index(:trackables, [:action])
   end
 end

@@ -73,6 +73,8 @@ defmodule Mix.Tasks.Coherence.Install do
 
   A `--trackable` option provides login count, current login timestamp, current login ip, last login timestamp, last login ip in your User model.
 
+  A `--trackable-table` option provides `trackable` fields in the `trackables` table.
+
   A `--confirmable` option provides support for confirmation email before the account can be logged in.
 
   An `--invitable` option provides support for invitation emails, allowing the new user to create their account including password creation.
@@ -110,7 +112,7 @@ defmodule Mix.Tasks.Coherence.Install do
 
   """
 
-  @all_options       ~w(authenticatable recoverable lockable trackable rememberable) ++
+  @all_options       ~w(authenticatable recoverable lockable trackable trackable_table rememberable) ++
                        ~w(unlockable_with_token confirmable invitable registerable)
   @all_options_atoms Enum.map(@all_options, &(String.to_atom(&1)))
 
@@ -185,6 +187,7 @@ defmodule Mix.Tasks.Coherence.Install do
     |> gen_model
     |> gen_invitable_migration
     |> gen_rememberable_migration
+    |> gen_trackable_migration
     |> gen_coherence_web
     |> gen_coherence_views
     |> gen_coherence_templates
@@ -432,6 +435,30 @@ config :coherence, #{base}.Coherence.Mailer,
   end
   defp gen_rememberable_migration(config), do: config
 
+  defp gen_trackable_migration(%{trackable_table: true, migrations: true, boilerplate: true} = config) do
+    table_name = config[:user_table_name]
+    do_gen_migration config, "create_coherence_trackable", fn repo, _path, file, name ->
+      change = """
+          create table(:trackables) do
+            add :action, :string
+            add :sign_in_count, :integer, default: 0
+            add :current_sign_in_at, :datetime
+            add :last_sign_in_at, :datetime
+            add :current_sign_in_ip, :string
+            add :last_sign_in_ip, :string
+            add :user_id, references(:#{table_name}, on_delete: :delete_all)
+
+            timestamps
+          end
+          create index(:trackables, [:user_id])
+          create index(:trackables, [:action])
+      """
+      assigns = [mod: Module.concat([repo, Migrations, camelize(name)]),
+                       change: change]
+      create_file file, migration_template(assigns)
+    end
+  end
+  defp gen_trackable_migration(config), do: config
 
   defp do_gen_migration(%{timestamp: timestamp} = config, name, fun) do
     repo = config[:repo]

@@ -15,6 +15,7 @@ defmodule Coherence.PasswordController do
   require Logger
   use Timex
   alias Coherence.ControllerHelpers, as: Helpers
+  alias Coherence.TrackableService
 
   plug :layout_view
   plug :redirect_logged_in when action in [:new, :create, :edit, :update]
@@ -83,7 +84,7 @@ defmodule Coherence.PasswordController do
         |> redirect(to: logged_out_url(conn))
       user ->
         if expired? user.reset_password_sent_at, days: Config.reset_token_expire_days do
-          clear_password_params(user, user_schema, %{})
+          Helpers.changeset(:password, user_schema, user, clear_password_params())
           |> Config.repo.update
 
           conn
@@ -113,13 +114,13 @@ defmodule Coherence.PasswordController do
         |> put_flash(:error, "Invalid reset token")
         |> redirect(to: logged_out_url(conn))
       user ->
-        cs = Helpers.changeset(:password, user_schema, user, password_params)
+        params = password_params
+        |> clear_password_params
+        cs = Helpers.changeset(:password, user_schema, user, params)
         case repo.update(cs) do
           {:ok, user} ->
-            clear_password_params(user, user_schema, %{})
-            |> repo.update
-
             conn
+            |> TrackableService.track_password_reset(user, user_schema.trackable_table?)
             |> put_flash(:info, "Password updated successfully.")
             |> redirect_to(:password_update, params)
           {:error, changeset} ->
@@ -129,10 +130,10 @@ defmodule Coherence.PasswordController do
     end
   end
 
-  defp clear_password_params(user, user_schema, params) do
-    params = Map.put(params, "reset_password_token", nil)
+  defp clear_password_params(params \\ %{}) do
+    params
+    |> Map.put("reset_password_token", nil)
     |> Map.put("reset_password_sent_at", nil)
-    Helpers.changeset(:password, user_schema, user, params)
   end
 
 end

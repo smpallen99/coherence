@@ -12,6 +12,7 @@ defmodule Coherence.SessionController do
   import Rememberable, only: [hash: 1, gen_cookie: 3]
   alias Coherence.ControllerHelpers, as: Helpers
   alias Coherence.{ConfirmableService}
+  import Coherence.TrackableService
 
   plug :layout_view, view: Coherence.SessionView
   plug :redirect_logged_in when action in [:new, :create]
@@ -78,9 +79,15 @@ defmodule Coherence.SessionController do
     if user != nil and user_schema.checkpw(password, Map.get(user, Config.password_hash)) do
       if ConfirmableService.confirmed?(user) || ConfirmableService.unconfirmed_access?(user) do
         unless lockable? and user_schema.locked?(user) do
+          conn = if user.locked_at do
+            Helpers.unlock!(user)
+            track_unlock conn, user, user_schema.trackable_table?
+          else
+            conn
+          end
           apply(Config.auth_module, Config.create_login, [conn, user, [id_key: Config.schema_key]])
           |> reset_failed_attempts(user, lockable?)
-          |> track_login(user, user_schema.trackable?)
+          |> track_login(user, user_schema.trackable?, user_schema.trackable_table?)
           |> save_rememberable(user, remember)
           |> put_flash(:notice, "Signed in successfully.")
           |> redirect_to(:session_create, params)
@@ -99,6 +106,7 @@ defmodule Coherence.SessionController do
       end
     else
       conn
+      |> track_failed_login(user, user_schema.trackable_table?)
       |> failed_login(user, lockable?)
       |> put_status(401)
       |> render(:new, [{login_field, login}, remember: rememberable_enabled?()])
@@ -148,6 +156,7 @@ defmodule Coherence.SessionController do
     {conn, flash, params} =
       if attempts >= Config.max_failed_login_attempts do
         new_conn = assign(conn, :locked, true)
+        |> track_lock(user, user.__struct__.trackable_table?)
         {new_conn, @flash_locked, %{locked_at: Ecto.DateTime.utc}}
       else
         {conn, @flash_invalid, %{}}
