@@ -14,6 +14,10 @@ defmodule <%= base %>.Coherence.RegistrationController do
   require Logger
   alias Coherence.ControllerHelpers, as: Helpers
 
+  @dialyzer [
+    {:nowarn_function, update: 2},
+  ]
+
   plug Coherence.RequireLogin when action in ~w(show edit update delete)a
   plug Coherence.ValidateOption, :registerable
   plug :scrub_params, "registration" when action in [:create, :update]
@@ -21,9 +25,14 @@ defmodule <%= base %>.Coherence.RegistrationController do
   plug :layout_view
   plug :redirect_logged_in when action in [:new, :create]
 
+  @type schema :: Ecto.Schema.t
+  @type conn :: Plug.Conn.t
+  @type params :: Map.t
+
   @doc """
   Render the new user form.
   """
+  @spec new(conn, params) :: conn
   def new(conn, _params) do
     user_schema = Config.user_schema
     cs = Helpers.changeset(:registration, user_schema, user_schema.__struct__)
@@ -37,6 +46,7 @@ defmodule <%= base %>.Coherence.RegistrationController do
   Creates the new user account. Create and send a confirmation if
   this option is enabled.
   """
+  @spec create(conn, params) :: conn
   def create(conn, %{"registration" => registration_params} = params) do
     user_schema = Config.user_schema
     cs = Helpers.changeset(:registration, user_schema, user_schema.__struct__, registration_params)
@@ -62,6 +72,7 @@ defmodule <%= base %>.Coherence.RegistrationController do
   @doc """
   Show the registration page.
   """
+  @spec show(conn, any) :: conn
   def show(conn, _) do
     user = Coherence.current_user(conn)
     render(conn, "show.html", user: user)
@@ -70,6 +81,7 @@ defmodule <%= base %>.Coherence.RegistrationController do
   @doc """
   Edit the registration.
   """
+  @spec edit(conn, any) :: conn
   def edit(conn, _) do
     user = Coherence.current_user(conn)
     changeset = Helpers.changeset(:registration, user.__struct__, user)
@@ -79,6 +91,7 @@ defmodule <%= base %>.Coherence.RegistrationController do
   @doc """
   Update the registration.
   """
+  @spec update(conn, params) :: conn
   def update(conn, %{"registration" => user_params} = params) do
     user_schema = Config.user_schema
     user = Coherence.current_user(conn)
@@ -97,6 +110,7 @@ defmodule <%= base %>.Coherence.RegistrationController do
   @doc """
   Delete a registration.
   """
+  @spec update(conn, params) :: conn
   def delete(conn, params) do
     user = Coherence.current_user(conn)
     conn = Helpers.logout_user(conn)
