@@ -7,6 +7,9 @@ defmodule Coherence.Web do
       import Ecto
       import Ecto.Changeset
       import Ecto.Query, only: [from: 1, from: 2]
+
+      @primary_key {:id, :binary_id, autogenerate: true}
+      @foreign_key_type :binary_id
     end
   end
 
