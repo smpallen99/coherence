@@ -17,7 +17,8 @@
 
   <%%= if @remember do %>
     <div class="form-group">
-      <input type="checkbox"  name="remember"> Remember Me?
+      <input type="checkbox"  name="remember" id="remember">
+      <label for="remember">Remember Me?</label>
     </div>
     <br />
   <%% end %>
