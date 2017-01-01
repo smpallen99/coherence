@@ -1,5 +1,14 @@
+defmodule Mix.Tasks.Coherence.MakeTemplates do
+  use Mix.Task
 
-defmodule MakeControllerTemplates do
+  @shortdoc "Prepares the controller templates"
+
+  @moduledoc """
+  This will copy the controller templates from the
+  `web/controllers/` directory to the
+  `priv/templates/coherence.install/controllers` directory.
+  """
+
   @controller_files [
     confirmable: "confirmation_controller.ex",
     invitable: "invitation_controller.ex",
@@ -13,7 +22,7 @@ defmodule MakeControllerTemplates do
   @source_path Path.join(~w(. web controllers))
   @dest_path Path.join(~w(. priv templates coherence.install controllers coherence))
 
-  def run do
+  def run(_) do
     controller_files
     |> Enum.each(fn fname ->
       contents = Path.join(@source_path, fname)
@@ -23,7 +32,6 @@ defmodule MakeControllerTemplates do
       Path.join(@dest_path, fname)
       |> File.write!(contents)
     end)
+    Mix.shell.info "All controller templates copied"
   end
 end
-
-MakeControllerTemplates.run
