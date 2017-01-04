@@ -48,6 +48,7 @@ defmodule Coherence.Mixfile do
       {:earmark, "== 0.2.1", only: :dev, override: true},
       {:postgrex, ">= 0.0.0", only: :test},
       {:dialyxir, "~> 0.4", only: [:dev], runtime: false},
+      {:credo, "~> 0.5", only: [:dev, :test]}
     ]
   end
 
