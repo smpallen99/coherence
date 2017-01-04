@@ -65,7 +65,8 @@ defmodule Coherence.RegistrationController do
     redirect_to(conn, :registration_create, params)
   end
   defp redirect_or_login(conn, user, params, _) do
-    Helpers.login_user(conn, user, params)
+    conn
+    |> Helpers.login_user(user, params)
     |> redirect_to(:session_create, params)
   end
 
@@ -99,7 +100,8 @@ defmodule Coherence.RegistrationController do
 
     case Config.repo.update(changeset) do
       {:ok, user} ->
-        apply(Config.auth_module, Config.update_login, [conn, user, [id_key: Config.schema_key]])
+        Config.auth_module
+        |> apply(Config.update_login, [conn, user, [id_key: Config.schema_key]])
         |> put_flash(:info, "Account updated successfully.")
         |> redirect_to(:registration_update, params, user)
       {:error, changeset} ->

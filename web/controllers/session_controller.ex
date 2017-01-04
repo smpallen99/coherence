@@ -155,8 +155,10 @@ defmodule Coherence.SessionController do
     attempts = user.failed_attempts + 1
     {conn, flash, params} =
       if attempts >= Config.max_failed_login_attempts do
-        new_conn = assign(conn, :locked, true)
-        |> track_lock(user, user.__struct__.trackable_table?)
+        new_conn =
+          conn
+          |> assign(:locked, true)
+          |> track_lock(user, user.__struct__.trackable_table?)
         {new_conn, @flash_locked, %{locked_at: Ecto.DateTime.utc}}
       else
         {conn, @flash_invalid, %{}}
@@ -251,7 +253,7 @@ defmodule Coherence.SessionController do
   Save the login cookie.
   """
   @spec save_login_cookie(conn, integer, String.t, String.t, String.t, integer) :: conn
-  def save_login_cookie(conn, id, series, token, key \\ "coherence_login", expire \\ 2*24*60*60) do
+  def save_login_cookie(conn, id, series, token, key \\ "coherence_login", expire \\ 2 * 24 * 60 * 60) do
     put_resp_cookie conn, key, gen_cookie(id, series, token), max_age: expire
   end
 
@@ -267,7 +269,8 @@ defmodule Coherence.SessionController do
   """
   @spec get_rememberables(integer) :: [schema]
   def get_rememberables(id) do
-    where(Rememberable, [u], u.user_id == ^id)
+    Rememberable
+    |> where([u], u.user_id == ^id)
     |> Config.repo.all
   end
 
