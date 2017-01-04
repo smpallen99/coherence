@@ -162,11 +162,17 @@ Please adhere to the coding conventions in the project (indentation, accurate co
    ```bash
    git push origin <topic-branch-name>
    ```
+8. If you modified the controllers in `web/controllers/` you need
+   to run a mix task to copy those files to `priv/templates/coherence.install/controllers`.
 
-8. [Open a Pull Request](https://help.github.com/articles/using-pull-requests/)
+   ```bash
+   mix coherence.make_templates
+   ```
+
+9. [Open a Pull Request](https://help.github.com/articles/using-pull-requests/)
     with a clear title and description.
 
-9. If you haven't updated your pull request for a while, you should consider
+10. If you haven't updated your pull request for a while, you should consider
    rebasing on master and resolving any conflicts.
 
    **IMPORTANT**: _Never ever_ merge upstream `master` into your branches. You
