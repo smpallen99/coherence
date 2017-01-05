@@ -23,7 +23,7 @@ defmodule Mix.Tasks.Coherence.MakeTemplates do
   @dest_path Path.join(~w(. priv templates coherence.install controllers coherence))
 
   def run(_) do
-    controller_files
+    controller_files()
     |> Enum.each(fn fname ->
       contents = Path.join(@source_path, fname)
       |> File.read!
