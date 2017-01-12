@@ -117,9 +117,9 @@ defmodule Mix.Tasks.Coherence.Install do
   @all_options_atoms Enum.map(@all_options, &(String.to_atom(&1)))
 
   @default_options   ~w(authenticatable)
-  @full_options      @all_options -- ~w(confirmable invitable rememberable)
-  @full_confirmable  @all_options -- ~w(invitable rememberable)
-  @full_invitable    @all_options -- ~w(confirmable rememberable)
+  @full_options      @all_options -- ~w(confirmable invitable rememberable trackable_table)
+  @full_confirmable  @all_options -- ~w(invitable rememberable trackable_table)
+  @full_invitable    @all_options -- ~w(confirmable rememberable trackable_table)
 
   # the options that default to true, and can be disabled with --no-option
   @default_booleans  ~w(config web views migrations templates models emails boilerplate confirm)
@@ -842,6 +842,8 @@ config :coherence, #{base}.Coherence.Mailer,
         {list_to_atoms(@full_confirmable) ++ acc_bin, acc}
       {:full_invitable, true}, {acc_bin, acc} ->
         {list_to_atoms(@full_invitable) ++ acc_bin, acc}
+      {:trackable_table, true}, {acc_bin, acc} ->
+        {[:trackable_table | acc_bin] -- [:trackable], acc}
       {name, true}, {acc_bin, acc} when name in @all_options_atoms ->
         {[name | acc_bin], acc}
       {name, false}, {acc_bin, acc} when name in @all_options_atoms ->
