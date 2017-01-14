@@ -79,7 +79,7 @@ defmodule Coherence.SessionController do
     if user != nil and user_schema.checkpw(password, Map.get(user, Config.password_hash)) do
       if ConfirmableService.confirmed?(user) || ConfirmableService.unconfirmed_access?(user) do
         unless lockable? and user_schema.locked?(user) do
-          conn = if user.locked_at do
+          conn = if lockable? && user.locked_at do
             Helpers.unlock!(user)
             track_unlock conn, user, user_schema.trackable_table?
           else
