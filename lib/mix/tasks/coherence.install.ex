@@ -418,7 +418,7 @@ config :coherence, #{base}.Coherence.Mailer,
           create table(:rememberables) do
             add :series_hash, :string
             add :token_hash, :string
-            add :token_created_at, :datetime
+            add :token_created_at, :utc_datetime
             add :user_id, references(:#{table_name}, on_delete: :delete_all)
 
             timestamps
@@ -442,8 +442,8 @@ config :coherence, #{base}.Coherence.Mailer,
           create table(:trackables) do
             add :action, :string
             add :sign_in_count, :integer, default: 0
-            add :current_sign_in_at, :datetime
-            add :last_sign_in_at, :datetime
+            add :current_sign_in_at, :utc_datetime
+            add :last_sign_in_at, :utc_datetime
             add :current_sign_in_ip, :string
             add :last_sign_in_ip, :string
             add :user_id, references(:#{table_name}, on_delete: :delete_all)
