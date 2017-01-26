@@ -11,36 +11,36 @@ defmodule <%= base %>.Coherence.UserEmail do
 
   def password(user, url) do
     %Email{}
-    |> from(from_email)
+    |> from(from_email())
     |> to(user_email(user))
-    |> add_reply_to
-    |> subject("#{site_name} - Reset password instructions")
+    |> add_reply_to()
+    |> subject("#{site_name()} - Reset password instructions")
     |> render_body("password.html", %{url: url, name: first_name(user.name)})
   end
 
   def confirmation(user, url) do
     %Email{}
-    |> from(from_email)
+    |> from(from_email())
     |> to(user_email(user))
-    |> add_reply_to
-    |> subject("#{site_name} - Confirm your new account")
+    |> add_reply_to()
+    |> subject("#{site_name()} - Confirm your new account")
     |> render_body("confirmation.html", %{url: url, name: first_name(user.name)})
   end
 
   def invitation(invitation, url) do
     %Email{}
-    |> from(from_email)
+    |> from(from_email())
     |> to(user_email(invitation))
-    |> add_reply_to
-    |> subject("#{site_name} - Invitation to create a new account")
+    |> add_reply_to()
+    |> subject("#{site_name()} - Invitation to create a new account")
     |> render_body("invitation.html", %{url: url, name: first_name(invitation.name)})
   end
 
   def unlock(user, url) do
     %Email{}
-    |> from(from_email)
+    |> from(from_email())
     |> to(user_email(user))
-    |> add_reply_to
+    |> add_reply_to()
     |> subject("#{site_name} - Unlock Instructions")
     |> render_body("unlock.html", %{url: url, name: first_name(user.name)})
   end
@@ -48,7 +48,7 @@ defmodule <%= base %>.Coherence.UserEmail do
   defp add_reply_to(mail) do
     case Coherence.Config.email_reply_to do
       nil              -> mail
-      true             -> reply_to mail, from_email
+      true             -> reply_to mail, from_email()
       address          -> reply_to mail, address
     end
   end
