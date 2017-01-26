@@ -567,10 +567,18 @@ The list of controller actions are:
 * :session
 * :unlock
 
-## Updating the User Model
-
+## Accessing the Currently Logged In User
 During login, a current version of the user model is cashed in the credential store. During each authentication request, the user model is fetched from the credential store and placed in conn.assigns[:current_user] to avoid a database fetch on each request.
 
+You can access the current user's name in a template like this:
+
+```
+<%= @current_user.name %/>
+```
+
+Any of the user model's available data can be accessed this way.
+
+## Updating the User Model
 If the user model is changed after login, a call to `update_login` must be done to update the credential store. For example, in your controller update function, call:
 
 ```elixir
