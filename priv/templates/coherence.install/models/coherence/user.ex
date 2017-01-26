@@ -6,14 +6,14 @@ defmodule <%= user_schema %> do
   schema "<%= user_table_name %>" do
     field :name, :string
     field :email, :string
-    coherence_schema
+    coherence_schema()
 
-    timestamps
+    timestamps()
   end
 
   def changeset(model, params \\ %{}) do
     model
-    |> cast(params, [:name, :email] ++ coherence_fields)
+    |> cast(params, [:name, :email] ++ coherence_fields())
     |> validate_required([:name, :email])
     |> validate_format(:email, ~r/@/)
     |> unique_constraint(:email)
