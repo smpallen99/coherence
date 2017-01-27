@@ -22,11 +22,12 @@ defmodule Coherence.ControllerHelpers do
   """
   @spec layout_view(Plug.Conn.t, Keyword.t) :: Plug.Conn.t
   def layout_view(conn, opts) do
-    case Config.layout do
-      nil -> conn
-      layout -> put_layout conn, layout
-    end
-    |> set_view(opts)
+    conn =
+      case Config.layout do
+        nil -> conn
+        layout -> put_layout conn, layout
+      end
+    set_view(conn, opts)
   end
 
   @doc """
@@ -188,11 +189,11 @@ defmodule Coherence.ControllerHelpers do
   @spec confirm!(Ecto.Schema.t) :: schema_or_error
   def confirm!(user) do
     changeset = ConfirmableService.confirm(user)
-    unless ConfirmableService.confirmed? user do
-      Config.repo.update changeset
-    else
+    if ConfirmableService.confirmed? user do
       changeset = Ecto.Changeset.add_error changeset, :confirmed_at, "already confirmed"
       {:error, changeset}
+    else
+      Config.repo.update changeset
     end
   end
 
@@ -209,12 +210,12 @@ defmodule Coherence.ControllerHelpers do
   def lock!(user, locked_at \\ Ecto.DateTime.utc) do
     user_schema = Config.user_schema
     changeset = user_schema.lock user, locked_at
-    unless user_schema.locked?(user) do
-      changeset
-      |> Config.repo.update
-    else
+    if user_schema.locked?(user) do
       changeset = Ecto.Changeset.add_error changeset, :locked_at, "already locked"
       {:error, changeset}
+    else
+      changeset
+      |> Config.repo.update
     end
   end
 

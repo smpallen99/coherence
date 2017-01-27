@@ -43,7 +43,7 @@ defmodule CoherenceTest.Plug.Session do
     plug :accepts, ["html"]
     plug :fetch_session
     plug :fetch_flash
-    plug Coherence.Authentication.Session, login: true, rememberable: true, rememberable_callback: &Coherence.SessionController._rememberable_callback/5
+    plug Coherence.Authentication.Session, login: true, rememberable: true, rememberable_callback: &Coherence.SessionController.do_rememberable_callback/5
     plug :index
 
     defp index(conn, _opts), do: send_resp(conn, 200, "Authorized")

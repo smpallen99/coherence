@@ -131,7 +131,8 @@ defmodule Coherence.Authentication.IpAddress do
   end
 
   defp to_tuple(string) when is_binary(string) do
-    String.split(string, ".")
+    string
+    |> String.split(".")
     |> Enum.map(&String.to_integer/1)
     |> List.to_tuple
   end

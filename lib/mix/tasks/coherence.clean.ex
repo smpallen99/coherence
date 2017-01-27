@@ -1,6 +1,4 @@
 defmodule Mix.Tasks.Coherence.Clean do
-  @shortdoc "Clean files created by the coherence installer."
-
   @moduledoc """
   This task will clean most of the files installed by the `mix coherence.install` task.
 
@@ -42,14 +40,16 @@ defmodule Mix.Tasks.Coherence.Clean do
   """
   use Mix.Task
 
-  @dialyzer [
-    {:nowarn_function, raise_options_error!: 2},
-  ]
-
   import Coherence.Mix.Utils
   import Mix.Ecto
 
   alias Mix.Tasks.Coherence.Install
+
+  @shortdoc "Clean files created by the coherence installer."
+
+  @dialyzer [
+    {:nowarn_function, raise_options_error!: 2},
+  ]
 
   @config_file "config/config.exs"
   @remove_opts ~w(views templates models controllers emails web migrations config)a
@@ -59,7 +59,8 @@ defmodule Mix.Tasks.Coherence.Clean do
 
   @spec run([String.t] | []) :: any
   def run(args) do
-    OptionParser.parse(args, switches: @switches)
+    args
+    |> OptionParser.parse(switches: @switches)
     |> do_config
     |> do_clean
     |> do_clean_options
@@ -70,6 +71,7 @@ defmodule Mix.Tasks.Coherence.Clean do
       Enum.reduce @remove_opts, config, &(remove! &2, &1)
     end)
   end
+
   defp do_clean_options(config) do
     confirm_once(config, fn config ->
       remove! config, :options
@@ -83,6 +85,7 @@ defmodule Mix.Tasks.Coherence.Clean do
     end
     config
   end
+
   defp confirm_once(config, fun) do
     fun.(config)
   end
@@ -99,7 +102,8 @@ defmodule Mix.Tasks.Coherence.Clean do
   end
 
   defp option_string(options) do
-    Enum.map(options, &Atom.to_string/1)
+    options
+    |> Enum.map(&Atom.to_string/1)
     |> Enum.join(", ")
   end
 
@@ -113,13 +117,15 @@ defmodule Mix.Tasks.Coherence.Clean do
   end
 
   defp get_current_options(options) do
-    Application.get_env(:coherence, :opts)
+    :coherence
+    |> Application.get_env(:opts)
     |> log_invalid_options(options)
   end
 
   defp log_invalid_options(current_options, options) do
     case Enum.filter(options, &(not valid_option?(current_options, &1))) do
-      [] -> options
+      [] ->
+        options
       invalid_list ->
         Mix.shell.info "Option(s) #{option_string(invalid_list)} where not found in your configuration. They will not be removed."
         options -- invalid_list
@@ -129,7 +135,8 @@ defmodule Mix.Tasks.Coherence.Clean do
   defp remove_view_file!(option, config) do
     view_files = Install.view_files
     case view_files[option] do
-      nil -> :ok
+      nil ->
+        :ok
       file_name ->
         path = Path.join(["web", "views", "coherence", file_name])
         confirm config, path, fn -> rm!(path) end
@@ -138,10 +145,12 @@ defmodule Mix.Tasks.Coherence.Clean do
   end
 
   defp remove_template_files!(option, config) do
-    Install.template_files
+    files = Install.template_files
+    files
     |> Enum.find(fn {_, {opt, _}} -> opt == option end)
     |> case do
-      nil -> :ok
+      nil ->
+        :ok
       {path, _} ->
         path = Path.join(["web", "templates", "coherence", "#{path}"])
         confirm config, path, fn -> rm_dir!(path) end
@@ -151,7 +160,8 @@ defmodule Mix.Tasks.Coherence.Clean do
 
   defp remove_controller_files!(option, config) do
     case Install.controller_files[option] do
-      nil -> :ok
+      nil ->
+        :ok
       file_name ->
         path = Path.join(["web", "controllers", "coherence", file_name])
         confirm config, path, fn -> rm!(path) end
@@ -172,9 +182,10 @@ defmodule Mix.Tasks.Coherence.Clean do
   end
 
   defp remove_config_options!(config, contents, options, opts_string) do
-    new_opts_string = Enum.reduce options, opts_string, fn option, acc ->
-      String.replace acc, ~r/(,\s*:#{option})|(:#{option}\s*,?\s*)/, ""
-    end
+    new_opts_string =
+      Enum.reduce options, opts_string, fn option, acc ->
+        String.replace acc, ~r/(,\s*:#{option})|(:#{option}\s*,?\s*)/, ""
+      end
     message = ~s'"opts: #{stringify opts_string}" with "opts: #{stringify new_opts_string}"'
     confirm_config config, message, fn ->
       File.write!(@config_file, String.replace(contents, opts_string, new_opts_string))
@@ -183,7 +194,8 @@ defmodule Mix.Tasks.Coherence.Clean do
   end
 
   defp stringify(item) do
-    inspect(item)
+    item
+    |> inspect
     |> String.replace("\"", "")
   end
 
@@ -196,13 +208,16 @@ defmodule Mix.Tasks.Coherence.Clean do
 
   defp remove!(%{options: options} = config, :options) do
     all_options = Install.all_options
-    options = String.split(options, " ", trim: true)
-    |> Enum.map(&(String.replace &1, "-", "_"))
-    |> Enum.map(&String.to_atom/1)
+    options =
+      options
+      |> String.split(" ", trim: true)
+      |> Enum.map(&(String.replace &1, "-", "_"))
+      |> Enum.map(&String.to_atom/1)
 
     validate_options!(options, all_options)
 
-    get_current_options(options)
+    options
+    |> get_current_options
     |> Enum.map(&(remove_option!(config, &1)))
     |> remove_config_options!(config)
 
@@ -213,49 +228,41 @@ defmodule Mix.Tasks.Coherence.Clean do
     path = "web/templates/coherence"
     confirm config, path, fn -> rm_dir!(path) end
   end
+
   defp remove!(%{views: true} = config, :views) do
     path = "web/views/coherence"
     confirm config, path, fn -> rm_dir!(path) end
   end
+
   defp remove!(%{controllers: true} = config, :controllers) do
     path = "web/controllers/coherence"
     confirm config, path, fn -> rm_dir!(path) end
   end
+
   defp remove!(%{models: true} = config, :models) do
     path = "web/models/coherence"
     confirm config, path, fn -> rm_dir!(path) end
   end
+
   defp remove!(%{web: true} = config, :web) do
     path = "web/coherence_web.ex"
     confirm config, path, fn -> rm!(path) end
   end
+
   defp remove!(%{emails: true} = config, :emails) do
     path = "web/emails/coherence"
     confirm config, path, fn -> rm_dir!(path) end
   end
+
   defp remove!(%{migrations: true} = config, :migrations) do
     case Application.get_env :coherence, :repo do
       nil ->
         Mix.shell.error "Config.repo not configured. Skipping migration removal!"
       repo ->
-        ensure_repo(repo, [])
-        path = Path.relative_to(migrations_path(repo), Mix.Project.app_path)
-        case Path.wildcard(path <> "/*coherence*") do
-          [] -> config
-          files ->
-            if config[:confirm] do
-              Mix.shell.info "Found migrations: " <> Enum.join(files, ", ")
-              Mix.shell.yes? "Delete them?"
-            else
-              true
-            end
-            |> if do
-              Enum.each files, &(rm! &1)
-            end
-            config
-        end
+        do_remove!(config, repo)
     end
   end
+
   defp remove!(%{config: true} = config, :config) do
     confirm config, "coherence config", fn ->
       regex = ~r/# %% Coherence Configuration %%.+?# %% End Coherence Configuration %%/s
@@ -263,12 +270,35 @@ defmodule Mix.Tasks.Coherence.Clean do
       File.write! @config_file, String.replace(conf, regex, "")
     end
   end
+
   defp remove!(config, _), do: config
+
+  defp do_remove!(config, repo) do
+    ensure_repo(repo, [])
+    path = Path.relative_to(migrations_path(repo), Mix.Project.app_path)
+    case Path.wildcard(path <> "/*coherence*") do
+      [] ->
+        config
+      files ->
+        confirmed? =
+          if config[:confirm] do
+            Mix.shell.info "Found migrations: " <> Enum.join(files, ", ")
+            Mix.shell.yes? "Delete them?"
+          else
+            true
+          end
+        if confirmed? do
+          Enum.each files, &(rm! &1)
+        end
+        config
+    end
+  end
 
   defp confirm_config(%{dry_run: true} = config, message, _fun) do
     Mix.shell.info "Update config " <> message
     config
   end
+
   defp confirm_config(%{confirm: true} = config, message, fun) do
     if Mix.shell.yes? "Update config " <> message <> "?" do
       Mix.shell.info "Updating config " <> message
@@ -276,6 +306,7 @@ defmodule Mix.Tasks.Coherence.Clean do
     end
     config
   end
+
   defp confirm_config(config, message, fun) do
     Mix.shell.info "Updating config " <> message
     fun.()
@@ -286,6 +317,7 @@ defmodule Mix.Tasks.Coherence.Clean do
     Mix.shell.info "Delete #{path}"
     config
   end
+
   defp confirm(%{confirm: true} = config, path, fun) do
     if File.exists? path do
       if Mix.shell.yes? "Delete #{path}?" do
@@ -328,11 +360,10 @@ defmodule Mix.Tasks.Coherence.Clean do
     verify_args!(parsed, unknown)
 
     switch_keys = Keyword.keys @switches
-    case Keyword.keys(opts) |> Enum.filter(&(not &1 in switch_keys)) do
+
+    case opts |> Keyword.keys |> Enum.filter(&(not &1 in switch_keys)) do
       [] -> opts
       list -> raise_option_errors(list)
     end
   end
-
-
 end

@@ -25,11 +25,14 @@ defmodule Mix.Tasks.Coherence.MakeTemplates do
   def run(_) do
     controller_files()
     |> Enum.each(fn fname ->
-      contents = Path.join(@source_path, fname)
-      |> File.read!
-      |> String.replace("defmodule Coh", "defmodule <%= base %>.Coh")
+      contents =
+        @source_path
+        |> Path.join(fname)
+        |> File.read!
+        |> String.replace("defmodule Coh", "defmodule <%= base %>.Coh")
 
-      Path.join(@dest_path, fname)
+      @dest_path
+      |> Path.join(fname)
       |> File.write!(contents)
     end)
     Mix.shell.info "All controller templates copied"

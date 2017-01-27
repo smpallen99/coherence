@@ -1,4 +1,8 @@
 defmodule Coherence.CredentialStore.Agent do
+  @moduledoc """
+  An Agent to save credential information.
+  """
+
   @behaviour Coherence.CredentialStore
 
   @type t :: Ecto.Schema.t | Map.t

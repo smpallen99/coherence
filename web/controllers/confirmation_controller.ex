@@ -10,6 +10,7 @@ defmodule Coherence.ConfirmationController do
   use Timex
   alias Coherence.ControllerHelpers, as: Helpers
   alias Coherence.{ConfirmableService}
+  alias Ecto.DateTime
 
   plug Coherence.ValidateOption, :confirmable
 
@@ -36,8 +37,10 @@ defmodule Coherence.ConfirmationController do
   def create(conn, %{"confirmation" => password_params} = params) do
     user_schema = Config.user_schema
     email = password_params["email"]
-    user = where(user_schema, [u], u.email == ^email)
-    |> Config.repo.one
+    user =
+      user_schema
+      |> where([u], u.email == ^email)
+      |> Config.repo.one
 
     changeset = Helpers.changeset :confirmation, user_schema, user_schema.__struct__
     case user do
@@ -68,8 +71,11 @@ defmodule Coherence.ConfirmationController do
   def edit(conn, params) do
     user_schema = Config.user_schema
     token = params["id"]
-    user = where(user_schema, [u], u.confirmation_token == ^token)
-    |> Config.repo.one
+    user =
+      user_schema
+      |> where([u], u.confirmation_token == ^token)
+      |> Config.repo.one
+
     case user do
       nil ->
         changeset = Helpers.changeset :confirmation, user_schema, user_schema.__struct__
@@ -84,7 +90,7 @@ defmodule Coherence.ConfirmationController do
         else
           changeset = Helpers.changeset(:confirmation, user_schema, user, %{
             confirmation_token: nil,
-            confirmed_at: Ecto.DateTime.utc,
+            confirmed_at: DateTime.utc,
             })
           case Config.repo.update(changeset) do
             {:ok, _user} ->

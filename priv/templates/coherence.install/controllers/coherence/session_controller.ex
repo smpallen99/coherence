@@ -196,13 +196,13 @@ defmodule <%= base %>.Coherence.SessionController do
   @spec rememberable_callback(conn, integer, String.t, String.t, Keyword.t) :: conn
   def rememberable_callback(conn, id, series, token, opts) do
     Coherence.RememberableServer.callback fn ->
-      _rememberable_callback(conn, id, series, token, opts)
+      do_rememberable_callback(conn, id, series, token, opts)
     end
   end
 
   @doc false
-  @spec _rememberable_callback(conn, integer, String.t, String.t, Keyword.t) :: conn | {:errror, atom} | {conn, schema | nil}
-  def _rememberable_callback(conn, id, series, token, opts) do
+  @spec do_rememberable_callback(conn, integer, String.t, String.t, Keyword.t) :: conn | {:errror, atom} | {conn, schema | nil}
+  def do_rememberable_callback(conn, id, series, token, opts) do
     repo = Config.repo
     cred_store = Coherence.Authentication.Utils.get_credential_store
     validate_login(id, series, token)
@@ -224,7 +224,7 @@ defmodule <%= base %>.Coherence.SessionController do
               cred_store.put_credentials({gen_cookie(id, series, new_token), Config.user_schema, Config.schema_key})
 
               Config.repo.update! changeset
-              conn = save_login_cookie(conn, id, series, new_token, opts[:login_key], opts[:cookie_expire])
+              conn = save_login_cookie(conn, id, series, new_token, opts)
               |> assign(:remembered, true)
               {conn, user}
             end

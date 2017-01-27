@@ -1,6 +1,7 @@
 defmodule TestCoherence.User do
   use Ecto.Schema
   use Coherence.Schema
+
   import Ecto.Changeset
 
   schema "users" do

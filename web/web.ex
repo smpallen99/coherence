@@ -1,5 +1,11 @@
 defmodule Coherence.Web do
+  @moduledoc """
+  Coherence setting for web resources.
 
+  Similar to a project's Web module
+  """
+
+  @doc false
   def model do
     quote do
       use Ecto.Schema
@@ -10,6 +16,7 @@ defmodule Coherence.Web do
     end
   end
 
+  @doc false
   def controller do
     quote do
       use Phoenix.Controller
@@ -23,21 +30,7 @@ defmodule Coherence.Web do
     end
   end
 
-  # def view do
-  #   quote do
-  #     use Phoenix.View, root: "web/templates"
-  #     # Import convenience functions from controllers
-  #     import Phoenix.Controller, only: [get_csrf_token: 0, get_flash: 2, view_module: 1]
-
-  #     # Use all HTML functionality (forms, tags, etc)
-  #     use Phoenix.HTML
-
-  #     # import UcxLicensing.Router.Helpers
-  #     import Coherence.ErrorHelpers
-  #     import Coherence.Gettext
-  #   end
-  # end
-
+  @doc false
   def router do
     quote do
       use Phoenix.Router
