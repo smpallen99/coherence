@@ -244,7 +244,7 @@ defmodule Coherence.ControllerHelpers do
   def redirect_logged_in(conn, _params) do
     if Coherence.logged_in?(conn) do
       conn
-      |> put_flash(:info, "Already logged in." )
+      |> put_flash(:info, "Already logged in.")
       |> redirect(to: logged_in_url(conn))
       |> halt
     else

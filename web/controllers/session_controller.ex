@@ -292,7 +292,9 @@ defmodule Coherence.SessionController do
     hash_token = hash token
     repo = Config.repo
 
-    delete_expired_tokens!(repo)   # TODO: move the following to an task
+    # TODO: move this to the RememberableServer. But first, we need to change the
+    #       logic below to ignore expired tokens
+    delete_expired_tokens!(repo)
 
     with :ok <- get_invalid_login!(repo, user_id, hash_series, hash_token),
          {:ok, rememberable} <- get_valid_login!(repo, user_id, hash_series, hash_token),

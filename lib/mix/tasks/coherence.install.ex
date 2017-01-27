@@ -460,7 +460,7 @@ config :coherence, #{base}.Coherence.Mailer,
   end
   defp gen_trackable_migration(config), do: config
 
-  defp do_gen_migration(%{timestamp: timestamp} = config, name, fun) do
+  defp do_gen_migration(%{timestamp: current_timestamp} = config, name, fun) do
     repo = config[:repo]
     |> String.split(".")
     |> Module.concat
@@ -470,9 +470,9 @@ config :coherence, #{base}.Coherence.Mailer,
       _ ->
         Path.relative_to(migrations_path(repo), Mix.Project.app_path)
     end
-    file = Path.join(path, "#{timestamp}_#{underscore(name)}.exs")
+    file = Path.join(path, "#{current_timestamp}_#{underscore(name)}.exs")
     fun.(repo, path, file, name)
-    Map.put(config, :timestamp, timestamp + 1)
+    Map.put(config, :timestamp, current_timestamp + 1)
   end
 
   ################
@@ -745,7 +745,7 @@ config :coherence, #{base}.Coherence.Mailer,
 
   defp do_default_config(config, opts) do
     list_to_atoms(@default_booleans)
-    |> Enum.reduce( config, fn opt, acc ->
+    |> Enum.reduce(config, fn opt, acc ->
       Map.put acc, opt, Keyword.get(opts, opt, true)
     end)
   end
