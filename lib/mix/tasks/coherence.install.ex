@@ -247,7 +247,7 @@ config :coherence, #{base}.Coherence.Mailer,
     log_config? = if File.exists? @config_file do
       source = File.read!(@config_file)
       if String.contains? source, @config_marker_start do
-        confirm? && Mix.shell.yes?("Your config file already contains Coherence configuration. Are you sure you add another?")
+        confirm? && Mix.shell.yes?("Your config file already contains Coherence configuration. Are you sure you want to add another?")
       else
         true
       end
