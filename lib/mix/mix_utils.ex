@@ -1,4 +1,5 @@
 defmodule Coherence.Mix.Utils do
+  @moduledoc false
 
   @dialyzer [
     {:nowarn_function, raise_option_errors: 1},
@@ -23,7 +24,9 @@ defmodule Coherence.Mix.Utils do
     list = Enum.map(list, fn option ->
       "--" <> Atom.to_string(option) |> String.replace("_", "-")
     end)
-    |> Enum.join(", ")
+
+    list = Enum.join(list, ", ")
+
     Mix.raise """
     The following option(s) are not supported:
         #{inspect list}
@@ -39,8 +42,10 @@ defmodule Coherence.Mix.Utils do
       """
     end
     unless unknown == [] do
-      opts = Enum.map(unknown, &(elem(&1,0)))
-      |> Enum.join(", ")
+      opts =
+        unknown
+        |> Enum.map(&(elem(&1,0)))
+        |> Enum.join(", ")
       Mix.raise """
       Invalid argument(s) #{opts}
       """

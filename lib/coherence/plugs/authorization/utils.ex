@@ -24,7 +24,8 @@ defmodule Coherence.Authentication.Utils do
   @spec halt_with_error(conn, String.t | function) :: conn
   def halt_with_error(conn, error \\ "unauthorized")
   def halt_with_error(conn, error) when is_function(error) do
-    error.(conn)
+    conn
+    |> error.()
     |> halt
   end
 
@@ -35,7 +36,7 @@ defmodule Coherence.Authentication.Utils do
   end
 
   @spec get_first_req_header(conn, String.t) :: nil | String.t
-  def get_first_req_header(conn, header), do: get_req_header(conn, header) |> header_hd
+  def get_first_req_header(conn, header), do: conn |> get_req_header(header) |> header_hd
 
   @spec delete_token_session(conn) :: conn
   def delete_token_session(conn) do
