@@ -66,7 +66,6 @@ defmodule <%= base %>.Coherence.ViewHelpers do
 
       coherence_links(conn, :layout)             # when not logged in
       Generates: #{@register_link}  #{@signin_link}
-
   """
   def coherence_links(conn, which, opts \\ [])
   def coherence_links(conn, :new_session, opts) do

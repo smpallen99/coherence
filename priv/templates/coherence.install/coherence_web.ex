@@ -14,7 +14,6 @@ defmodule <%= base %>.Coherence.Web do
       import <%= base %>.ErrorHelpers
       import <%= base %>.Gettext
       import <%= base %>.Coherence.ViewHelpers
-
     end
   end
 
