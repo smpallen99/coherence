@@ -379,8 +379,13 @@ config :coherence, #{base}.Coherence.Mailer,
         |> Enum.map(&("    " <> &1))
         |> Enum.join("\n")
 
+      statement = case verb do
+                    :alter -> "#{verb} table(:#{table_name}) do"
+                    :create -> gen_table_statement(table_name)
+                  end
+
       change = """
-          #{verb} table(:#{table_name}) do
+          #{statement}
       #{adds}
           end
       #{constraints}
@@ -395,7 +400,7 @@ config :coherence, #{base}.Coherence.Mailer,
   defp gen_invitable_migration(%{invitable: true, migrations: true, boilerplate: true} = config) do
     do_gen_migration config, "create_coherence_invitable", fn repo, _path, file, name ->
       change = """
-          create table(:invitations) do
+          #{gen_table_statement(:invitations)}
             add :name, :string
             add :email, :string
             add :token, :string
@@ -415,11 +420,11 @@ config :coherence, #{base}.Coherence.Mailer,
     table_name = config[:user_table_name]
     do_gen_migration config, "create_coherence_rememberable", fn repo, _path, file, name ->
       change = """
-          create table(:rememberables) do
+          #{gen_table_statement(:rememberables)}
             add :series_hash, :string
             add :token_hash, :string
             add :token_created_at, :utc_datetime
-            add :user_id, references(:#{table_name}, on_delete: :delete_all)
+            add :user_id, #{gen_reference(table_name)}
 
             timestamps
           end
@@ -439,14 +444,14 @@ config :coherence, #{base}.Coherence.Mailer,
     table_name = config[:user_table_name]
     do_gen_migration config, "create_coherence_trackable", fn repo, _path, file, name ->
       change = """
-          create table(:trackables) do
+          #{gen_table_statement(:trackables)}
             add :action, :string
             add :sign_in_count, :integer, default: 0
             add :current_sign_in_at, :utc_datetime
             add :last_sign_in_at, :utc_datetime
             add :current_sign_in_ip, :string
             add :last_sign_in_ip, :string
-            add :user_id, references(:#{table_name}, on_delete: :delete_all)
+            add :user_id, #{gen_reference(table_name)}
 
             timestamps
           end
@@ -474,6 +479,26 @@ config :coherence, #{base}.Coherence.Mailer,
     fun.(repo, path, file, name)
     Map.put(config, :timestamp, timestamp + 1)
   end
+
+  defp gen_table_statement(table_name) do
+    if use_binary_id?() do
+      """
+      create table(:#{table_name}, primary_key: false) do
+            add :id, :binary_id, primary_key: true
+      """
+    else
+      """
+      create table(:#{table_name}) do
+      """
+    end
+  end
+
+  defp gen_reference(table_name) do
+    type_hint = if use_binary_id?(), do: ", type: :binary_id", else: ""
+    "references(:#{table_name}, on_delete: :delete_all#{type_hint})"
+  end
+
+  defp use_binary_id?, do: !!Application.get_env(:phoenix, :generators)[:binary_id]
 
   ################
   # Web
