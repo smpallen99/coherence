@@ -75,6 +75,12 @@ defmodule Coherence.Schema do
           |> unique_constraint(:email)
           |> validate_coherence(params)
         end
+
+        def changeset(model, params, :password) do
+          model
+          |> cast(params, ~w(password password_confirmation reset_password_token reset_password_sent_at))
+          |> validate_coherence_password_reset(params)
+        end
       end
 
   """
@@ -238,6 +244,12 @@ defmodule Coherence.Schema do
           changeset
           |> validate_length(:password, min: 4)
           |> validate_current_password(params)
+          |> validate_password(params)
+        end
+
+        def validate_coherence_password_reset(changeset, params) do
+          changeset
+          |> validate_length(:password, min: 4)
           |> validate_password(params)
         end
 
