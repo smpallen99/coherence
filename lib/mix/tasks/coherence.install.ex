@@ -4,6 +4,7 @@ defmodule Mix.Tasks.Coherence.Install do
   import Macro, only: [camelize: 1, underscore: 1]
   import Mix.Generator
   import Mix.Ecto
+  import Coherence.Config, only: [use_binary_id?: 0]
   import Coherence.Mix.Utils
 
   @shortdoc "Configure the Coherence Package"
@@ -497,8 +498,6 @@ config :coherence, #{base}.Coherence.Mailer,
     type_hint = if use_binary_id?(), do: ", type: :binary_id", else: ""
     "references(:#{table_name}, on_delete: :delete_all#{type_hint})"
   end
-
-  defp use_binary_id?, do: !!Application.get_env(:phoenix, :generators)[:binary_id]
 
   ################
   # Web
