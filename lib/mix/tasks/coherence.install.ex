@@ -897,9 +897,13 @@ config :coherence, #{base}.Coherence.Mailer,
     |> Enum.reduce(opts, &config_option/2)
   end
 
-  defp config_option(opt, acc) do
-    str = Atom.to_string(opt)
-    |> String.replace("_", "-")
+  defp config_option(opt, acc) when is_atom(opt) do
+    str = opt |> Atom.to_string |> String.replace("_", "-")
+    ["--" <> str | acc]
+  end
+
+  defp config_option(opt, acc) when is_tuple(opt) do
+    str = opt |> elem(0) |> Atom.to_string |> String.replace("_", "-")
     ["--" <> str | acc]
   end
 
