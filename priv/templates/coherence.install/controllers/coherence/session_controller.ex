@@ -1,7 +1,6 @@
 defmodule <%= base %>.Coherence.SessionController do
   @moduledoc """
   Handle the authentication actions.
-
   """
   use Coherence.Web, :controller
   use Timex
