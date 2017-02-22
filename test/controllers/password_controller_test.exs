@@ -91,19 +91,18 @@ defmodule CoherenceTest.PasswordController do
       assert user.reset_password_sent_at == old_sent_at
     end
 
-    test "valid token has expired", %{conn: conn} do
+    test "valid token has expired, reset token gets removed", %{conn: conn} do
       {:ok, sent_at} = Ecto.DateTime.cast("2016-01-01 00:00:00")
       token = random_string 48
       user = insert_user(%{reset_password_sent_at: sent_at, reset_password_token: token})
       old_password_hash = user.password_hash
-      old_sent_at = user.reset_password_sent_at
       params = %{"password" => %{reset_password_token: token, password: "123123", password_confirmation: "123123"}}
       put(conn, password_path(conn, :update, user.id), params)
       user = Repo.get!(TestCoherence.User, user.id)
 
       assert old_password_hash == user.password_hash
-      assert user.reset_password_token == token
-      assert user.reset_password_sent_at == old_sent_at
+      assert user.reset_password_token == nil
+      assert user.reset_password_sent_at == nil
     end
   end
 
