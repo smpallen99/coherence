@@ -6,7 +6,7 @@ defmodule <%= base %>.Coherence.ViewHelpers do
   alias Coherence.Config
 
   @seperator {:safe, "&nbsp; | &nbsp;"}
-  @helpers Module.concat(Application.get_env(:coherence, :module), Router.Helpers)
+  @helpers Module.concat(Application.get_env(:coherence, :module), Web.Router.Helpers)
 
   @recover_link  "Forgot your password?"
   @unlock_link   "Send an unlock email"

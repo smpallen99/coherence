@@ -10,9 +10,9 @@ defmodule <%= base %>.Coherence.Web do
       # Use all HTML functionality (forms, tags, etc)
       use Phoenix.HTML
 
-      import <%= base %>.Router.Helpers
-      import <%= base %>.ErrorHelpers
-      import <%= base %>.Gettext
+      import <%= base %>.Web.Router.Helpers
+      import <%= base %>.Web.ErrorHelpers
+      import <%= base %>.Web.Gettext
       import <%= base %>.Coherence.ViewHelpers
     end
   end
