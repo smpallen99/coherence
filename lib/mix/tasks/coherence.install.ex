@@ -689,13 +689,13 @@ config :coherence, #{base}.Coherence.Mailer,
         coherence_routes :protected
       end
 
-      scope "/", #{base} do
+      scope "/", #{base}.Web do
         pipe_through :browser
         get "/", PageController, :index
         # Add public routes below
       end
 
-      scope "/", #{base} do
+      scope "/", #{base}.Web do
         pipe_through :protected
         # Add protected routes below
       end

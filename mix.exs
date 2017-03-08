@@ -36,11 +36,11 @@ defmodule Coherence.Mixfile do
     [
       {:ecto, "~> 2.0"},
       {:comeonin, "~> 2.4"},
-      {:phoenix, "~> 1.2"},
+      {:phoenix, "~> 1.3.0-rc"},
       {:phoenix_html, "~> 2.6"},
       {:gettext, "~> 0.11"},
       {:uuid, "~> 1.0"},
-      {:phoenix_swoosh, "~> 0.1.3"},
+      {:phoenix_swoosh, path: "../phoenix_swoosh"},
       {:timex, "~> 3.0"},
       {:timex_ecto, "~> 3.0"},
       {:floki, "~> 0.8", only: :test},
