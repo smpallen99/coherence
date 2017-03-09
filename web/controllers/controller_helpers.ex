@@ -41,13 +41,13 @@ defmodule Coherence.ControllerHelpers do
   end
 
   @doc """
-  Get the MyProject.Router.Helpers module.
+  Get the MyProject.Web.Router.Helpers module.
 
   Returns the projects Router.Helpers module.
   """
   @spec router_helpers() :: module
   def router_helpers do
-    Module.concat(Config.module, Router.Helpers)
+    Module.concat(Config.module, Web.Router.Helpers)
   end
 
   @doc """
@@ -55,7 +55,7 @@ defmodule Coherence.ControllerHelpers do
   """
   @spec logged_out_url(Plug.Conn.t) :: String.t
   def logged_out_url(conn) do
-    Config.logged_out_url || Module.concat(Config.module, Router.Helpers).session_path(conn, :new)
+    Config.logged_out_url || Module.concat(Config.module, Web.Router.Helpers).session_path(conn, :new)
   end
 
   @doc """
