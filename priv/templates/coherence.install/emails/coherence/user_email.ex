@@ -41,7 +41,7 @@ defmodule <%= base %>.Coherence.UserEmail do
     |> from(from_email())
     |> to(user_email(user))
     |> add_reply_to()
-    |> subject("#{site_name} - Unlock Instructions")
+    |> subject("#{site_name()} - Unlock Instructions")
     |> render_body("unlock.html", %{url: url, name: first_name(user.name)})
   end
 

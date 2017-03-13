@@ -9,7 +9,7 @@ defmodule Coherence.ViewHelpers do
   @type schema :: Ecto.Schema.t
 
   @seperator {:safe, "&nbsp; | &nbsp;"}
-  @helpers Module.concat(Application.get_env(:coherence, :module), Router.Helpers)
+  @helpers Module.concat(Application.get_env(:coherence, :module), Web.Router.Helpers)
 
   @recover_link  "Forgot your password?"
   @unlock_link   "Send an unlock email"

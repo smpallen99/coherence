@@ -1,4 +1,4 @@
-defmodule TestCoherence.Router do
+defmodule TestCoherence.Web.Router do
   use Phoenix.Router
   use Coherence.Router
 

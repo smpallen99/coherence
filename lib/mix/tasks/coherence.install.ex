@@ -622,7 +622,7 @@ config :coherence, #{base}.Coherence.Mailer,
   defp gen_coherence_controllers(%{controllers: true, boilerplate: true, binding: binding} = config) do
     web_prefix = Mix.Phoenix.web_prefix()
     files = Enum.filter_map(@controller_files, &(validate_option(config, elem(&1,0))), &(elem(&1, 1)))
-    |> Enum.map(&({:eex, &1, Path.join(web_prefix, "web/controllers/coherence/#{&1}")}))
+    |> Enum.map(&({:eex, &1, Path.join(web_prefix, "controllers/coherence/#{&1}")}))
 
     copy_from paths(), "priv/templates/coherence.install/controllers/coherence", "", binding, files, config
     config
@@ -657,7 +657,7 @@ config :coherence, #{base}.Coherence.Mailer,
       schema "users" do
         field :name, :string
         field :email, :string
-        coherence_schema       # Add this
+        coherence_schema()       # Add this
 
         timestamps
       end
@@ -684,7 +684,7 @@ config :coherence, #{base}.Coherence.Mailer,
 
     def application do
       [mod: {#{base}, []},
-       applications: [..., :coherence]]
+       extra_applications: [..., :coherence]]
     end
   """
 
@@ -718,7 +718,7 @@ config :coherence, #{base}.Coherence.Mailer,
       # Add this block
       scope "/"#{namespace} do
         pipe_through :browser
-        coherence_routes
+        coherence_routes()
       end
 
       # Add this block

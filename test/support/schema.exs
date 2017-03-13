@@ -4,20 +4,20 @@ defmodule TestCoherence.User do
   import Ecto.Changeset
 
   schema "users" do
-    field :email, :string
-    field :name, :string
     coherence_schema()
 
+    field :email, :string
+    field :name, :string
     timestamps()
   end
 
-  @required_fields ~w(email name)
+  @required_fields ~w(email name)a
   @optional_fields ~w() ++ coherence_fields()
 
   def changeset(model, params \\ %{}) do
     model
-    |> cast(params, @required_fields, @optional_fields)
-    |> validate_required([:name, :email])
+    |> cast(params, @required_fields ++ @optional_fields)
+    |> validate_required(@required_fields)
     |> validate_format(:email, ~r/@/)
     |> unique_constraint(:email)
     |> validate_coherence(params)
@@ -65,12 +65,13 @@ defmodule TestCoherence.Account do
     timestamps()
   end
 
-  @required_fields ~w(email name)
+  @required_fields ~w(email name)a
   @optional_fields ~w() ++ coherence_fields()
 
   def changeset(model, params \\ %{}) do
     model
-    |> cast(params, @required_fields, @optional_fields)
+    |> cast(params, @required_fields ++ @optional_fields)
+    |> validate_required(@required_fields)
     |> unique_constraint(:email)
     |> validate_coherence(params)
   end
@@ -94,12 +95,13 @@ defmodule TestCoherence.Rememberable do
     timestamps()
   end
 
-  @required_fields ~w(series_hash token_hash token_created_at user_id)
+  @required_fields ~w(series_hash token_hash token_created_at user_id)a
   @optional_fields ~w()
 
   def changeset(model, params \\ %{}) do
     model
-    |> cast(params, @required_fields, @optional_fields)
+    |> cast(params, @required_fields ++ @optional_fields)
+    |> validate_required(@required_fields)
   end
 end
 
