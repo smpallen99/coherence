@@ -113,6 +113,7 @@ defmodule Coherence.SessionController do
     end
   end
 
+
   @doc """
   Logout the user.
 

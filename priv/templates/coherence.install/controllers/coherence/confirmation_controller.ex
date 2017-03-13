@@ -3,6 +3,7 @@ defmodule <%= base %>.Coherence.ConfirmationController do
   Handle confirmation actions.
 
   A single action, `edit`, is required for the confirmation module.
+
   """
   use Coherence.Web, :controller
   require Logger
