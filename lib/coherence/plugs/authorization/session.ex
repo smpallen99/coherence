@@ -134,6 +134,7 @@ defmodule Coherence.Authentication.Session do
         |> put_session("user_return_to", nil)
     end
     |> delete_token_session
+    |> delete_user_token
   end
 
   defp default_login_callback do
@@ -223,7 +224,9 @@ defmodule Coherence.Authentication.Session do
     |> login.()
   end
   defp assert_login({conn, user_data}, _, assign_key) do
-    assign_user_data(conn, user_data, assign_key)
+    conn
+    |> assign_user_data(user_data, assign_key)
+    |> create_user_token(user_data, Config.user_token, assign_key)
   end
   defp assert_login(conn, _, _), do: conn
 end
