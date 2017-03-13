@@ -42,8 +42,10 @@ defmodule <%= base %>.Coherence.PasswordController do
   def create(conn, %{"password" => password_params} = params) do
     user_schema = Config.user_schema
     email = password_params["email"]
-    user = where(user_schema, [u], u.email == ^email)
-    |> Config.repo.one
+    user =
+      user_schema
+      |> where([u], u.email == ^email)
+      |> Config.repo.one
 
     case user do
       nil ->
@@ -75,8 +77,10 @@ defmodule <%= base %>.Coherence.PasswordController do
   def edit(conn, params) do
     user_schema = Config.user_schema
     token = params["id"]
-    user = where(user_schema, [u], u.reset_password_token == ^token)
-    |> Config.repo.one
+    user =
+      user_schema
+      |> where([u], u.reset_password_token == ^token)
+      |> Config.repo.one
     case user do
       nil ->
         conn
@@ -106,8 +110,10 @@ defmodule <%= base %>.Coherence.PasswordController do
     user_schema = Config.user_schema
     repo = Config.repo
     token = password_params["reset_password_token"]
-    user = where(user_schema, [u], u.reset_password_token == ^token)
-    |> repo.one
+    user =
+      user_schema
+      |> where([u], u.reset_password_token == ^token)
+      |> repo.one
     case user do
       nil ->
         conn

@@ -168,6 +168,12 @@ defmodule MyProject.User do
     |> validate_format(:email, ~r/@/)
     |> validate_coherence(params)                         # Add this
   end
+
+  def changeset(model, params, :password) do
+    model
+    |> cast(params, ~w(password password_confirmation reset_password_token reset_password_sent_at))
+    |> validate_coherence_password_reset(params)
+  end
 end
 ```
 
@@ -214,6 +220,29 @@ You can override this default configs. For example: you can add the following co
 config :coherence,
   require_current_password: false,
   max_failed_login_attempts: 3
+```
+
+## Phoenix Channel Authentication
+
+Coherence supports channel authentication using `Phoenix.Token`. To enable channel authentication do the following:
+
+Add the following option to coherence configuration.
+
+```elixir
+config :coherence,
+  user_token: true,
+```
+Update your socket module
+
+```elixir
+defmodule MyProject.UserSocket do
+  use Phoenix.Socket
+  def connect(%{"token" => token}, socket) do
+    case Coherence.verify_user_token(socket, token, &assign/3) do
+      {:error, _} -> :error
+      {:ok, socket} -> {:ok, socket}
+    end
+  end
 ```
 
 ## Option Overview
@@ -568,6 +597,7 @@ The list of controller actions are:
 * :unlock
 
 ## Accessing the Currently Logged In User
+
 During login, a current version of the user model is cashed in the credential store. During each authentication request, the user model is fetched from the credential store and placed in conn.assigns[:current_user] to avoid a database fetch on each request.
 
 You can access the current user's name in a template like this:
@@ -579,6 +609,7 @@ You can access the current user's name in a template like this:
 Any of the user model's available data can be accessed this way.
 
 ## Updating the User Model
+
 If the user model is changed after login, a call to `update_login` must be done to update the credential store. For example, in your controller update function, call:
 
 ```elixir

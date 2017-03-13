@@ -128,7 +128,7 @@ defmodule Coherence.Authentication.Session do
   @spec delete_login(conn, Keyword.t) :: conn
   def delete_login(conn, opts \\ []) do
     store = Keyword.get(opts, :store, Coherence.CredentialStore.Session)
-    conn = case get_session(conn, @session_key) do
+    case get_session(conn, @session_key) do
       nil ->
         conn
       key ->
@@ -138,7 +138,8 @@ defmodule Coherence.Authentication.Session do
         |> put_session(@session_key, nil)
         |> put_session("user_return_to", nil)
     end
-    delete_token_session conn
+    |> delete_token_session
+    |> delete_user_token
   end
 
   defp default_login_callback do
@@ -252,8 +253,10 @@ defmodule Coherence.Authentication.Session do
     |> put_session("user_return_to", Path.join(["/" | conn.path_info]))
     |> login.()
   end
-  defp assert_login({conn, user_data}, _, assign_key),
-    do: assign_user_data(conn, user_data, assign_key)
-  defp assert_login(conn, _, _),
-    do: conn
+  defp assert_login({conn, user_data}, _, assign_key) do
+    conn
+    |> assign_user_data(user_data, assign_key)
+    |> create_user_token(user_data, Config.user_token, assign_key)
+  end
+  defp assert_login(conn, _, _), do: conn
 end
