@@ -12,16 +12,22 @@ defmodule TestCoherence.User do
     timestamps()
   end
 
-  @required_fields ~w(email name)
+  @required_fields ~w(email name)a
   @optional_fields ~w() ++ coherence_fields()
 
   def changeset(model, params \\ %{}) do
     model
-    |> cast(params, @required_fields, @optional_fields)
-    |> validate_required([:name, :email])
+    |> cast(params, @required_fields ++ @optional_fields)
+    |> validate_required(@required_fields)
     |> validate_format(:email, ~r/@/)
     |> unique_constraint(:email)
     |> validate_coherence(params)
+  end
+
+  def changeset(model, params, :password) do
+    model
+    |> cast(params, ~w(password password_confirmation reset_password_token reset_password_sent_at))
+    |> validate_coherence_password_reset(params)
   end
 end
 
@@ -60,14 +66,21 @@ defmodule TestCoherence.Account do
     timestamps()
   end
 
-  @required_fields ~w(email name)
+  @required_fields ~w(email name)a
   @optional_fields ~w() ++ coherence_fields()
 
   def changeset(model, params \\ %{}) do
     model
-    |> cast(params, @required_fields, @optional_fields)
+    |> cast(params, @required_fields ++ @optional_fields)
+    |> validate_required(@required_fields)
     |> unique_constraint(:email)
     |> validate_coherence(params)
+  end
+
+  def changeset(model, params, :password) do
+    model
+    |> cast(params, ~w(password password_confirmation reset_password_token reset_password_sent_at))
+    |> validate_coherence_password_reset(params)
   end
 end
 
@@ -83,36 +96,12 @@ defmodule TestCoherence.Rememberable do
     timestamps()
   end
 
-  @required_fields ~w(series_hash token_hash token_created_at user_id)
+  @required_fields ~w(series_hash token_hash token_created_at user_id)a
   @optional_fields ~w()
 
   def changeset(model, params \\ %{}) do
     model
-    |> cast(params, @required_fields, @optional_fields)
+    |> cast(params, @required_fields ++ @optional_fields)
+    |> validate_required(@required_fields)
   end
 end
-
-# defmodule TestCoherence.Trackable do
-#   use Coherence.Web, :model
-#   alias Coherence.Config
-
-#   schema "trackables" do
-#     field :action, :string, null: false
-#     field :sign_in_count, :integer, default: 0
-#     field :current_sign_in_at, Ecto.DateTime
-#     field :last_sign_in_at, Ecto.DateTime
-#     field :current_sign_in_ip, :string
-#     field :last_sign_in_ip, :string
-#     belongs_to :user, Module.concat(Config.module, Config.user_schema)
-
-#     timestamps()
-#   end
-
-#   @fields ~w(action sign_i_count current_sign_in_ip current_sign_in_at last_sign_in_ip last_sign_in_at user_id)a
-
-#   def changeset(model, params \\ %{}) do
-#     model
-#     |> cast(params, @fields)
-#     |> validate_required([:action, :user_id])
-#   end
-# end

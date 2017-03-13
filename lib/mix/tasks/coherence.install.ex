@@ -1,4 +1,14 @@
 defmodule Mix.Tasks.Coherence.Install do
+  use Mix.Task
+
+  import Macro, only: [camelize: 1, underscore: 1]
+  import Mix.Generator
+  import Mix.Ecto
+  import Coherence.Config, only: [use_binary_id?: 0]
+  import Coherence.Mix.Utils
+
+  @shortdoc "Configure the Coherence Package"
+
   @moduledoc """
   Configure the Coherence User Model for your Phoenix application. Coherence
   is composed of a number of modules that can be enabled with this installer.
@@ -414,14 +424,17 @@ defmodule Mix.Tasks.Coherence.Install do
         |> Enum.map(&("    " <> &1))
         |> Enum.join("\n")
 
-      change =
-        """
-            #{verb} table(:#{table_name}) do
-        #{adds}
-            end
-        #{constraints}
-        """
+      statement = case verb do
+                    :alter -> "#{verb} table(:#{table_name}) do"
+                    :create -> gen_table_statement(table_name)
+                  end
 
+      change = """
+          #{statement}
+      #{adds}
+          end
+      #{constraints}
+      """
       assigns = [mod: Module.concat([repo, Migrations, camelize(name)]),
                        change: change]
       create_file file, migration_template(assigns)
@@ -432,17 +445,16 @@ defmodule Mix.Tasks.Coherence.Install do
 
   defp gen_invitable_migration(%{invitable: true, migrations: true, boilerplate: true} = config) do
     do_gen_migration config, "create_coherence_invitable", fn repo, _path, file, name ->
-      change =
-        """
-            create table(:invitations) do
-              add :name, :string
-              add :email, :string
-              add :token, :string
-              timestamps
-            end
-            create unique_index(:invitations, [:email])
-            create index(:invitations, [:token])
-        """
+      change = """
+          #{gen_table_statement(:invitations)}
+            add :name, :string
+            add :email, :string
+            add :token, :string
+            timestamps
+          end
+          create unique_index(:invitations, [:email])
+          create index(:invitations, [:token])
+      """
       assigns = [mod: Module.concat([repo, Migrations, camelize(name)]),
                        change: change]
       create_file file, migration_template(assigns)
@@ -454,21 +466,20 @@ defmodule Mix.Tasks.Coherence.Install do
   defp gen_rememberable_migration(%{rememberable: true, migrations: true, boilerplate: true} = config) do
     table_name = config[:user_table_name]
     do_gen_migration config, "create_coherence_rememberable", fn repo, _path, file, name ->
-      change =
-        """
-            create table(:rememberables) do
-              add :series_hash, :string
-              add :token_hash, :string
-              add :token_created_at, :utc_datetime
-              add :user_id, references(:#{table_name}, on_delete: :delete_all)
+      change = """
+          #{gen_table_statement(:rememberables)}
+            add :series_hash, :string
+            add :token_hash, :string
+            add :token_created_at, :utc_datetime
+            add :user_id, #{gen_reference(table_name)}
 
-              timestamps
-            end
-            create index(:rememberables, [:user_id])
-            create index(:rememberables, [:series_hash])
-            create index(:rememberables, [:token_hash])
-            create unique_index(:rememberables, [:user_id, :series_hash, :token_hash])
-        """
+            timestamps
+          end
+          create index(:rememberables, [:user_id])
+          create index(:rememberables, [:series_hash])
+          create index(:rememberables, [:token_hash])
+          create unique_index(:rememberables, [:user_id, :series_hash, :token_hash])
+      """
       assigns = [mod: Module.concat([repo, Migrations, camelize(name)]),
                        change: change]
       create_file file, migration_template(assigns)
@@ -480,22 +491,21 @@ defmodule Mix.Tasks.Coherence.Install do
   defp gen_trackable_migration(%{trackable_table: true, migrations: true, boilerplate: true} = config) do
     table_name = config[:user_table_name]
     do_gen_migration config, "create_coherence_trackable", fn repo, _path, file, name ->
-      change =
-        """
-            create table(:trackables) do
-              add :action, :string
-              add :sign_in_count, :integer, default: 0
-              add :current_sign_in_at, :utc_datetime
-              add :last_sign_in_at, :utc_datetime
-              add :current_sign_in_ip, :string
-              add :last_sign_in_ip, :string
-              add :user_id, references(:#{table_name}, on_delete: :delete_all)
+      change = """
+          #{gen_table_statement(:trackables)}
+            add :action, :string
+            add :sign_in_count, :integer, default: 0
+            add :current_sign_in_at, :utc_datetime
+            add :last_sign_in_at, :utc_datetime
+            add :current_sign_in_ip, :string
+            add :last_sign_in_ip, :string
+            add :user_id, #{gen_reference(table_name)}
 
-              timestamps
-            end
-            create index(:trackables, [:user_id])
-            create index(:trackables, [:action])
-        """
+            timestamps
+          end
+          create index(:trackables, [:user_id])
+          create index(:trackables, [:action])
+      """
       assigns = [mod: Module.concat([repo, Migrations, camelize(name)]),
                        change: change]
       create_file file, migration_template(assigns)
@@ -521,6 +531,24 @@ defmodule Mix.Tasks.Coherence.Install do
     file = Path.join(path, "#{current_timestamp}_#{underscore(name)}.exs")
     fun.(repo, path, file, name)
     Map.put(config, :timestamp, current_timestamp + 1)
+  end
+
+  defp gen_table_statement(table_name) do
+    if use_binary_id?() do
+      """
+      create table(:#{table_name}, primary_key: false) do
+            add :id, :binary_id, primary_key: true
+      """
+    else
+      """
+      create table(:#{table_name}) do
+      """
+    end
+  end
+
+  defp gen_reference(table_name) do
+    type_hint = if use_binary_id?(), do: ", type: :binary_id", else: ""
+    "references(:#{table_name}, on_delete: :delete_all#{type_hint})"
   end
 
   ################
@@ -700,6 +728,12 @@ defmodule Mix.Tasks.Coherence.Install do
         |> validate_required([:name, :email])
         |> unique_constraint(:email)
         |> validate_coherence(params)             # Add this
+      end
+
+      def changeset(model, params, :password) do
+        model
+        |> cast(params, ~w(password password_confirmation reset_password_token reset_password_sent_at))
+        |> validate_coherence_password_reset(params)
       end
     end
     """
@@ -997,15 +1031,13 @@ defmodule Mix.Tasks.Coherence.Install do
       """)
   end
 
-  def get_config_options(config_opts, opts),
-    do: Enum.reduce(config_opts, opts, &config_option/2)
+  defp config_option(opt, acc) when is_atom(opt) do
+    str = opt |> Atom.to_string |> String.replace("_", "-")
+    ["--" <> str | acc]
+  end
 
-  defp config_option(opt, acc) do
-    str =
-      opt
-      |> Atom.to_string
-      |> String.replace("_", "-")
-
+  defp config_option(opt, acc) when is_tuple(opt) do
+    str = opt |> elem(0) |> Atom.to_string |> String.replace("_", "-")
     ["--" <> str | acc]
   end
 
