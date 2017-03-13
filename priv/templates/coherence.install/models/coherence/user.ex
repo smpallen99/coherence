@@ -1,6 +1,6 @@
 defmodule <%= user_schema %> do
   @moduledoc false
-  use <%= base %>.Web, :model
+  use Ecto.Schema
   use Coherence.Schema
 
   schema "<%= user_table_name %>" do

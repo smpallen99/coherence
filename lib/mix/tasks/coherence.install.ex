@@ -309,7 +309,8 @@ config :coherence, #{base}.Coherence.Mailer,
 
   defp check_for_model(%{user_schema: user_schema} = config) do
     user_schema = Module.concat user_schema, nil
-    Map.put(config, :model_found?, Code.ensure_compiled?(user_schema) or model_exists?(user_schema, "web/models"))
+    web_prefix = Mix.Phoenix.web_prefix()
+    Map.put(config, :model_found?, Code.ensure_compiled?(user_schema) or model_exists?(user_schema, Path.join(web_prefix, "coherence")))
   end
   defp check_for_model(config), do: config
 
@@ -317,9 +318,10 @@ config :coherence, #{base}.Coherence.Mailer,
     name = module_to_string(user_schema)
     |> String.downcase
     binding = Kernel.binding() ++ [base: config[:base], user_table_name: config[:user_table_name]]
+    web_prefix = Mix.Phoenix.web_prefix()
     copy_from paths(),
       "priv/templates/coherence.install/models/coherence", "", binding, [
-        {:eex, "user.ex", "web/models/coherence/#{name}.ex"}
+        {:eex, "user.ex", Path.join(web_prefix, "coherence/#{name}.ex")}
       ], config
     config
   end
@@ -503,18 +505,20 @@ config :coherence, #{base}.Coherence.Mailer,
   # Web
 
   defp gen_coherence_web(%{web: true, boilerplate: true, binding: binding} = config) do
+    web_prefix = Mix.Phoenix.web_prefix()
     copy_from paths(),
       "priv/templates/coherence.install", "", binding, [
-        {:eex, "coherence_web.ex", "web/coherence_web.ex"},
+        {:eex, "coherence_web.ex", Path.join(web_prefix, "coherence_web.ex")},
       ], config
     config
   end
   defp gen_coherence_web(config), do: config
 
   defp gen_redirects(%{boilerplate: true, binding: binding} = config) do
+    web_prefix = Mix.Phoenix.web_prefix()
     copy_from paths(),
       "priv/templates/coherence.install/controllers/coherence", "", binding, [
-        {:eex, "redirects.ex", "web/controllers/coherence/redirects.ex"},
+        {:eex, "redirects.ex", Path.join(web_prefix, "controllers/coherence/redirects.ex")},
       ], config
     config
   end
@@ -539,8 +543,9 @@ config :coherence, #{base}.Coherence.Mailer,
   def view_files, do: @view_files
 
   def gen_coherence_views(%{views: true, boilerplate: true, binding: binding} = config) do
+    web_prefix = Mix.Phoenix.web_prefix()
     files = Enum.filter_map(@view_files, &(validate_option(config, elem(&1,0))), &(elem(&1, 1)))
-    |> Enum.map(&({:eex, &1, "web/views/coherence/#{&1}"}))
+    |> Enum.map(&({:eex, &1, Path.join(web_prefix, "views/coherence/#{&1}")}))
 
     copy_from paths(), "priv/templates/coherence.install/views/coherence", "", binding, files, config
     config
@@ -579,7 +584,8 @@ config :coherence, #{base}.Coherence.Mailer,
   defp copy_templates(binding, name, file_list, config) do
     files = for fname <- file_list do
       fname = "#{fname}.html.eex"
-      {:eex, fname, "web/templates/coherence/#{name}/#{fname}"}
+      web_prefix = Mix.Phoenix.web_prefix()
+      {:eex, fname, Path.join(web_prefix, "templates/coherence/#{name}/#{fname}")}
     end
 
     copy_from paths(),
@@ -590,10 +596,11 @@ config :coherence, #{base}.Coherence.Mailer,
   # Mailer
 
   defp gen_coherence_mailer(%{binding: binding, use_email?: true, boilerplate: true} = config) do
+    web_prefix = Mix.Phoenix.web_prefix()
     copy_from paths(),
       "priv/templates/coherence.install/emails/coherence", "", binding, [
-        {:eex, "coherence_mailer.ex", "web/emails/coherence/coherence_mailer.ex"},
-        {:eex, "user_email.ex", "web/emails/coherence/user_email.ex"},
+        {:eex, "coherence_mailer.ex", Path.join(web_prefix, "emails/coherence/coherence_mailer.ex")},
+        {:eex, "user_email.ex", Path.join(web_prefix, "emails/coherence/user_email.ex")},
       ], config
     config
   end
@@ -613,8 +620,9 @@ config :coherence, #{base}.Coherence.Mailer,
   def controller_files, do: @controller_files
 
   defp gen_coherence_controllers(%{controllers: true, boilerplate: true, binding: binding} = config) do
+    web_prefix = Mix.Phoenix.web_prefix()
     files = Enum.filter_map(@controller_files, &(validate_option(config, elem(&1,0))), &(elem(&1, 1)))
-    |> Enum.map(&({:eex, &1, "web/controllers/coherence/#{&1}"}))
+    |> Enum.map(&({:eex, &1, Path.join(web_prefix, "web/controllers/coherence/#{&1}")}))
 
     copy_from paths(), "priv/templates/coherence.install/controllers/coherence", "", binding, files, config
     config
@@ -643,7 +651,7 @@ config :coherence, #{base}.Coherence.Mailer,
     Add the following items to your User model (Phoenix v1.2).
 
     defmodule #{base}.User do
-      use #{base}.Web, :model
+      use Ecto.Schema
       use Coherence.Schema     # Add this
 
       schema "users" do
@@ -719,13 +727,13 @@ config :coherence, #{base}.Coherence.Mailer,
         coherence_routes :protected
       end
 
-      scope "/", #{base} do
+      scope "/", #{base}.Web do
         pipe_through :browser
         get "/", PageController, :index
         # Add public routes below
       end
 
-      scope "/", #{base} do
+      scope "/", #{base}.Web do
         pipe_through :protected
         # Add protected routes below
       end
