@@ -1,6 +1,7 @@
 defmodule <%= base %>.Coherence.SessionController do
   @moduledoc """
   Handle the authentication actions.
+
   """
   use Coherence.Web, :controller
   use Timex
@@ -78,7 +79,7 @@ defmodule <%= base %>.Coherence.SessionController do
     if user != nil and user_schema.checkpw(password, Map.get(user, Config.password_hash)) do
       if ConfirmableService.confirmed?(user) || ConfirmableService.unconfirmed_access?(user) do
         unless lockable? and user_schema.locked?(user) do
-          conn = if user.locked_at do
+          conn = if lockable? && user.locked_at do
             Helpers.unlock!(user)
             track_unlock conn, user, user_schema.trackable_table?
           else
@@ -154,8 +155,10 @@ defmodule <%= base %>.Coherence.SessionController do
     attempts = user.failed_attempts + 1
     {conn, flash, params} =
       if attempts >= Config.max_failed_login_attempts do
-        new_conn = assign(conn, :locked, true)
-        |> track_lock(user, user.__struct__.trackable_table?)
+        new_conn =
+          conn
+          |> assign(:locked, true)
+          |> track_lock(user, user.__struct__.trackable_table?)
         {new_conn, @flash_locked, %{locked_at: Ecto.DateTime.utc}}
       else
         {conn, @flash_invalid, %{}}
@@ -250,7 +253,7 @@ defmodule <%= base %>.Coherence.SessionController do
   Save the login cookie.
   """
   @spec save_login_cookie(conn, integer, String.t, String.t, String.t, integer) :: conn
-  def save_login_cookie(conn, id, series, token, key \\ "coherence_login", expire \\ 2*24*60*60) do
+  def save_login_cookie(conn, id, series, token, key \\ "coherence_login", expire \\ 2 * 24 * 60 * 60) do
     put_resp_cookie conn, key, gen_cookie(id, series, token), max_age: expire
   end
 
@@ -266,7 +269,8 @@ defmodule <%= base %>.Coherence.SessionController do
   """
   @spec get_rememberables(integer) :: [schema]
   def get_rememberables(id) do
-    where(Rememberable, [u], u.user_id == ^id)
+    Rememberable
+    |> where([u], u.user_id == ^id)
     |> Config.repo.all
   end
 

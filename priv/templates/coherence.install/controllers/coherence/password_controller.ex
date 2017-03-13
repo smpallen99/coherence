@@ -42,8 +42,10 @@ defmodule <%= base %>.Coherence.PasswordController do
   def create(conn, %{"password" => password_params} = params) do
     user_schema = Config.user_schema
     email = password_params["email"]
-    user = where(user_schema, [u], u.email == ^email)
-    |> Config.repo.one
+    user =
+      user_schema
+      |> where([u], u.email == ^email)
+      |> Config.repo.one
 
     case user do
       nil ->
@@ -75,8 +77,10 @@ defmodule <%= base %>.Coherence.PasswordController do
   def edit(conn, params) do
     user_schema = Config.user_schema
     token = params["id"]
-    user = where(user_schema, [u], u.reset_password_token == ^token)
-    |> Config.repo.one
+    user =
+      user_schema
+      |> where([u], u.reset_password_token == ^token)
+      |> Config.repo.one
     case user do
       nil ->
         conn
@@ -106,26 +110,37 @@ defmodule <%= base %>.Coherence.PasswordController do
     user_schema = Config.user_schema
     repo = Config.repo
     token = password_params["reset_password_token"]
-    user = where(user_schema, [u], u.reset_password_token == ^token)
-    |> repo.one
+    user =
+      user_schema
+      |> where([u], u.reset_password_token == ^token)
+      |> repo.one
     case user do
       nil ->
         conn
         |> put_flash(:error, "Invalid reset token")
         |> redirect(to: logged_out_url(conn))
       user ->
-        params = password_params
-        |> clear_password_params
-        cs = Helpers.changeset(:password, user_schema, user, params)
-        case repo.update(cs) do
-          {:ok, user} ->
-            conn
-            |> TrackableService.track_password_reset(user, user_schema.trackable_table?)
-            |> put_flash(:info, "Password updated successfully.")
-            |> redirect_to(:password_update, params)
-          {:error, changeset} ->
-            conn
-            |> render("edit.html", changeset: changeset)
+        if expired? user.reset_password_sent_at, days: Config.reset_token_expire_days do
+          Helpers.changeset(:password, user_schema, user, clear_password_params())
+          |> Config.repo.update
+
+          conn
+          |> put_flash(:error, "Password reset token expired.")
+          |> redirect(to: logged_out_url(conn))
+        else
+          params = password_params
+          |> clear_password_params
+          cs = Helpers.changeset(:password, user_schema, user, params)
+          case repo.update(cs) do
+            {:ok, user} ->
+              conn
+              |> TrackableService.track_password_reset(user, user_schema.trackable_table?)
+              |> put_flash(:info, "Password updated successfully.")
+              |> redirect_to(:password_update, params)
+            {:error, changeset} ->
+              conn
+              |> render("edit.html", changeset: changeset)
+          end
         end
     end
   end
@@ -135,5 +150,4 @@ defmodule <%= base %>.Coherence.PasswordController do
     |> Map.put("reset_password_token", nil)
     |> Map.put("reset_password_sent_at", nil)
   end
-
 end
