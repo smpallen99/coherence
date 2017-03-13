@@ -172,6 +172,14 @@ defmodule Coherence.Config do
     end)
   end
 
+  @doc """
+  Test if Phoenix is configured to use binary ids by default
+  """
+  @spec use_binary_id?() :: boolean
+  def use_binary_id? do
+    !!Application.get_env(:phoenix, :generators)[:binary_id]
+  end
+
   defp has_any_option?(fun) do
     if opts() == :all do
       true
