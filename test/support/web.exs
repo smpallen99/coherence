@@ -9,7 +9,7 @@ defmodule TestCoherence.Coherence.Web do
       # Use all HTML functionality (forms, tags, etc)
       use Phoenix.HTML
 
-      import TestCoherence.Router.Helpers
+      import TestCoherence.Web.Router.Helpers
       import Coherence.ViewHelpers
 
     end

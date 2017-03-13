@@ -1,6 +1,6 @@
 defmodule CoherenceTest.RegistrationController do
   use TestCoherence.ConnCase
-  import TestCoherence.Router.Helpers
+  import TestCoherence.Web.Router.Helpers
 
   setup %{conn: conn} do
     Application.put_env :coherence, :opts, [:confirmable, :registerable]
@@ -40,8 +40,8 @@ defmodule CoherenceTest.RegistrationController do
       conn = post conn, registration_path(conn, :create), params
       errors = conn.assigns.changeset.errors
       assert errors[:password] == {"can't be blank", []}
-      assert errors[:email] == {"can't be blank", []}
-      assert errors[:name] == {"can't be blank", []}
+      assert errors[:email] == {"can't be blank", [validation: :required]}
+      assert errors[:name] == {"can't be blank", [validation: :required]}
     end
   end
 

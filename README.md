@@ -29,7 +29,7 @@ Coherence provides flexibility by adding namespaced templates and views for only
 
 Once the boilerplate has been generated, you are free to customize the source as required.
 
-As well, a `web/coherence_web.ex` is added. Migrations are also generated to add the required database fields.
+As well, a `lib/my_project/web/coherence_web.ex` is added. Migrations are also generated to add the required database fields.
 
 See the [Docs](https://hexdocs.pm/coherence/Coherence.html) and [Wiki](https://github.com/smpallen99/coherence/wiki) for more information.
 
@@ -38,13 +38,13 @@ See the [Docs](https://hexdocs.pm/coherence/Coherence.html) and [Wiki](https://g
   1. Add coherence to your list of dependencies in `mix.exs`:
 
         def deps do
-          [{:coherence, "~> 0.3"}]
+          [{:coherence, github: "smpallen99/coherence", branch: "phx-1.3"}]
         end
 
   2. Ensure coherence is started before your application:
 
         def application do
-          [applications: [:coherence]]
+          extra_applications: [..., :coherence]]
         end
 
 ## Upgrading
@@ -82,7 +82,7 @@ This will:
 * add view files web/views/coherence/
 * add template files to web/templates/coherence
 * add email files to web/emails/coherence
-* add web/coherence_web.ex file
+* add lib/my_project/web/coherence_web.ex file
 
 You should review your `config/config.exs` as there are a couple items you will need to customize like email address and mail api_key. If you don't edit the email_from value to something different than it's default emails may not be sent.
 
@@ -156,7 +156,7 @@ defmodule MyProject.User do
   schema "users" do
     field :name, :string
     field :email, :string
-    coherence_schema                                      # Add this
+    coherence_schema()                                    # Add this
 
     timestamps
   end
@@ -447,12 +447,12 @@ If the controllers are generated, you will need to change your router to use the
 
   scope "/", MyProject do   # note the addition of MyProject
     pipe_through :public
-    coherence_routes :public
+    coherence_routes()
   end
 
   scope "/", MyProject do   # note the addition of MyProject
     pipe_through :browser
-    coherence_routes :private
+    coherence_routes :protected
   end
   # ...
 end
@@ -480,7 +480,7 @@ For example, to have the user redirected to the login screen after logging out a
 ```elixir
 defmodule Coherence.Redirects do
   use Redirects
-  import MyProject.Router.Helpers
+  import MyProject.Web.Router.Helpers
 
   # override the log out action back to the log in page
   def session_delete(conn, _), do: redirect(conn, session_path(conn, :new))
@@ -491,14 +491,14 @@ See the documentation for further details.
 
 ### Customizing layout
 
-By default coherence uses its own layout, that is installed to `web/templates/coherence/layout/app.html.eex`.
+By default coherence uses its own layout, that is installed to `lib/my_project/web/templates/coherence/layout/app.html.eex`.
 
 If you want to customize coherence controllers layout, you can follow different approaches:
 
-* Edit the generated layout at `web/templates/coherence/layout/app.html.eex`.
+* Edit the generated layout at `lib/my_project/web/templates/coherence/layout/app.html.eex`.
 * Set `:layout` in your config file. e.g. `config :coherence, :layout, {MyProject.LayoutView, :app}`
 * Install coherence controllers to application and edit them, to use layout module different from `Coherence.LayoutView`
-* And the last solution is to use `plug :put_layout` in your `web/router.ex` file. For example:
+* And the last solution is to use `plug :put_layout` in your `lib/my_project/web/router.ex` file. For example:
 
 ```elixir
 defmodule MyApp.Router do
@@ -531,7 +531,7 @@ For example, the following defines a changeset/3 function in your user model:
 Now add a new `changeset/3` function to the user model. The following example defines a custom changeset for the registration controller:
 
 ```elixir
-  # web/models/coherence/user.ex
+  # lib/my_project/web/models/coherence/user.ex
   defmodule CoherenceDemo.User do
     use CoherenceDemo.Web, :model
     use Coherence.Schema

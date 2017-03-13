@@ -1,7 +1,7 @@
 defmodule CoherenceTest.Rememberable do
   use TestCoherence.ConnCase
   alias Coherence.{Rememberable, SessionController}
-  import TestCoherence.Router.Helpers
+  import TestCoherence.Web.Router.Helpers
   import Ecto.Query
 
   def with_session(conn) do
