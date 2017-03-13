@@ -131,7 +131,7 @@ defmodule Mix.Tasks.Coherence.Clean do
     case view_files[option] do
       nil -> :ok
       file_name ->
-        path = Path.join(["web", "views", "coherence", file_name])
+        path = Path.join(["lib", otp_app(), "web", "views", "coherence", file_name])
         confirm config, path, fn -> rm!(path) end
     end
     option
@@ -143,7 +143,7 @@ defmodule Mix.Tasks.Coherence.Clean do
     |> case do
       nil -> :ok
       {path, _} ->
-        path = Path.join(["web", "templates", "coherence", "#{path}"])
+        path = Path.join(["lib", otp_app(), "web", "templates", "coherence", "#{path}"])
         confirm config, path, fn -> rm_dir!(path) end
     end
     option
@@ -153,7 +153,7 @@ defmodule Mix.Tasks.Coherence.Clean do
     case Install.controller_files[option] do
       nil -> :ok
       file_name ->
-        path = Path.join(["web", "controllers", "coherence", file_name])
+        path = Path.join(["lib", otp_app(), "web", "controllers", "coherence", file_name])
         confirm config, path, fn -> rm!(path) end
     end
     option
@@ -210,27 +210,27 @@ defmodule Mix.Tasks.Coherence.Clean do
   end
 
   defp remove!(%{templates: true} = config, :templates) do
-    path = "web/templates/coherence"
+    path = Path.join ["lib", otp_app(), "web/templates/coherence"]
     confirm config, path, fn -> rm_dir!(path) end
   end
   defp remove!(%{views: true} = config, :views) do
-    path = "web/views/coherence"
+    path = Path.join ["lib", otp_app(), "web/views/coherence"]
     confirm config, path, fn -> rm_dir!(path) end
   end
   defp remove!(%{controllers: true} = config, :controllers) do
-    path = "web/controllers/coherence"
+    path = Path.join ["lib", otp_app(), "web/controllers/coherence"]
     confirm config, path, fn -> rm_dir!(path) end
   end
   defp remove!(%{models: true} = config, :models) do
-    path = "web/models/coherence"
+    path = Path.join ["lib", otp_app(), "web/models/coherence"]
     confirm config, path, fn -> rm_dir!(path) end
   end
   defp remove!(%{web: true} = config, :web) do
-    path = "web/coherence_web.ex"
+    path = Path.join ["lib", otp_app(), "web/coherence_web.ex"]
     confirm config, path, fn -> rm!(path) end
   end
   defp remove!(%{emails: true} = config, :emails) do
-    path = "web/emails/coherence"
+    path = Path.join ["lib", otp_app(), "web/emails/coherence"]
     confirm config, path, fn -> rm_dir!(path) end
   end
   defp remove!(%{migrations: true} = config, :migrations) do
@@ -334,5 +334,8 @@ defmodule Mix.Tasks.Coherence.Clean do
     end
   end
 
+  defp otp_app do
+    Mix.Project.config[:app] |> to_string
+  end
 
 end
