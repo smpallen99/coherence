@@ -83,7 +83,8 @@ defmodule <%= base %>.Coherence.InvitationController do
   @spec edit(conn, params) :: conn
   def edit(conn, params) do
     token = params["id"]
-    where(Invitation, [u], u.token == ^token)
+    Invitation
+    |> where([u], u.token == ^token)
     |> Config.repo.one
     |> case do
       nil ->
@@ -109,8 +110,8 @@ defmodule <%= base %>.Coherence.InvitationController do
     token = params["token"]
     repo = Config.repo
     user_schema = Config.user_schema
-
-    where(Invitation, [u], u.token == ^token)
+    Invitation
+    |> where([u], u.token == ^token)
     |> repo.one
     |> case do
       nil ->

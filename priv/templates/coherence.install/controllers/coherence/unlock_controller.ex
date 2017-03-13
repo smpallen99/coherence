@@ -41,8 +41,10 @@ defmodule <%= base %>.Coherence.UnlockController do
     email = unlock_params["email"]
     password = unlock_params["password"]
 
-    user = where(user_schema, [u], u.email == ^email)
-    |> Config.repo.one
+    user =
+      user_schema
+      |> where([u], u.email == ^email)
+      |> Config.repo.one
 
     if user != nil and user_schema.checkpw(password, Map.get(user, Config.password_hash)) do
       case LockableService.unlock_token(user) do
@@ -74,7 +76,8 @@ defmodule <%= base %>.Coherence.UnlockController do
   def edit(conn, params) do
     user_schema = Config.user_schema
     token = params["id"]
-    where(user_schema, [u], u.unlock_token == ^token)
+    user_schema
+    |> where([u], u.unlock_token == ^token)
     |> Config.repo.one
     |> case do
       nil ->

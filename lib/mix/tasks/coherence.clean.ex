@@ -222,7 +222,7 @@ defmodule Mix.Tasks.Coherence.Clean do
     confirm config, path, fn -> rm_dir!(path) end
   end
   defp remove!(%{models: true} = config, :models) do
-    path = Path.join ["lib", otp_app(), "web/models/coherence"]
+    path = Path.join ["lib", otp_app(), "web/coherence"]
     confirm config, path, fn -> rm_dir!(path) end
   end
   defp remove!(%{web: true} = config, :web) do
