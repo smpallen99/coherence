@@ -48,6 +48,8 @@ defmodule Coherence.Config do
   *                    where apply(Module, function, args) will be used
   * :verify_user_token (fn socket, token -> Phoenix.Token.verify(socket, "user socket", token, max_age: 2 * 7 * 24 * 60 * 60) end
   *                    can also be a 3 element tuple as described above for :token_generator
+  * :use_binary_id (false) - Use binary ids.
+
   ## Examples
 
       alias Coherence.Config
@@ -80,6 +82,7 @@ defmodule Coherence.Config do
     :changeset,
     :layout,
     :user_token,
+    :use_binary_id,
     {:token_assigns_key, :user_token},
     {:token_generator, &Coherence.SessionService.sign_user_token/2},
     {:verify_user_token, &Coherence.SessionService.verify_user_token/2},
@@ -177,7 +180,7 @@ defmodule Coherence.Config do
   """
   @spec use_binary_id?() :: boolean
   def use_binary_id? do
-    !!Application.get_env(:phoenix, :generators)[:binary_id]
+    !!Application.get_env(:phoenix, :generators)[:binary_id] || Application.get_env(:coherence, :use_binary_id)
   end
 
   defp has_any_option?(fun) do
