@@ -453,7 +453,7 @@ defmodule Coherence.Schema do
   in your models changeset cast.
 
   For example, for `Coherence.Config.opts == [:authenticatable, :recoverable]`
-  `coherence_fiels/0` will return:
+  `coherence_fields/0` will return:
 
       ~w(password_hash password password_confirmation reset_password_token reset_password_sent_at)
   """
