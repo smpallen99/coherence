@@ -144,7 +144,7 @@ defmodule Coherence.InvitationController do
   Resent the invitation based on the invitation's id.
   """
   @spec resend(conn, params) :: conn
-  def resend(conn, %{"id" => id}) do
+  def resend(conn, %{"id" => id} = params) do
     conn = case Config.repo.get(Invitation, id) do
       nil ->
         conn
@@ -154,7 +154,7 @@ defmodule Coherence.InvitationController do
           router_helpers().invitation_url(conn, :edit, invitation.token)
         put_flash conn, :info, "Invitation sent."
     end
-    redirect(conn, to: logged_out_url(conn))
+    redirect_to(conn, :invitation_resend, params)
   end
 
 end
