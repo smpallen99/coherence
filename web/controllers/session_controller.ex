@@ -21,8 +21,8 @@ defmodule Coherence.SessionController do
   @type conn :: Plug.Conn.t
   @type params :: Map.t
 
-  @flash_invalid "Incorrect #{Config.login_field} or password."
-  @flash_locked "Maximum Login attempts exceeded. Your account has been locked."
+  @flash_invalid Gettext.gettext(Coherence.Gettext, "Incorrect #{Config.login_field} or password.")
+  @flash_locked gettext("Maximum Login attempts exceeded. Your account has been locked.")
 
   plug :layout_view, view: Coherence.SessionView
   plug :redirect_logged_in when action in [:new, :create]
@@ -88,7 +88,7 @@ defmodule Coherence.SessionController do
           user_schema.lockable?() and user_schema.locked?(user))
       else
         conn
-        |> put_flash(:error, "You must confirm your account before you can login.")
+        |> put_flash(:error, gettext("You must confirm your account before you can login."))
         |> put_status(406)
         |> render("new.html", [{login_field, login}, remember: rememberable_enabled?()])
       end
@@ -103,7 +103,7 @@ defmodule Coherence.SessionController do
 
   defp do_lockable(conn, login_field, _, true) do
     conn
-    |> put_flash(:error, "Too many failed login attempts. Account has been locked.")
+    |> put_flash(:error, gettext("Too many failed login attempts. Account has been locked."))
     |> assign(:locked, true)
     |> put_status(423)
     |> render("new.html", [{login_field, ""}, remember: rememberable_enabled?()])
@@ -122,7 +122,7 @@ defmodule Coherence.SessionController do
     |> reset_failed_attempts(user, lockable?)
     |> track_login(user, user_schema.trackable?(), user_schema.trackable_table?())
     |> save_rememberable(user, remember)
-    |> put_flash(:notice, "Signed in successfully.")
+    |> put_flash(:notice, gettext("Signed in successfully."))
     |> redirect_to(:session_create, params)
   end
 
@@ -234,10 +234,10 @@ defmodule Coherence.SessionController do
 
         conn
         |> delete_req_header(opts[:login_key])
-        |> put_flash(:error, """
+        |> put_flash(:error, gettext("""
           You are using an invalid security token for this site! This security
           violation has been logged.
-          """)
+          """))
         |> redirect(to: logged_out_url(conn))
         |> halt
     end

@@ -18,14 +18,14 @@
   <%%= if @remember do %>
     <div class="form-group">
       <input type="checkbox"  name="remember" id="remember">
-      <label for="remember">Remember Me?</label>
+      <label for="remember"><%= gettext "Remember Me?" %></label>
     </div>
     <br />
   <%% end %>
 
   <div class="form-group">
-    <%%= submit "Sign In", class: "btn btn-primary" %>
-    <%%= link "Cancel", to: Coherence.Config.logged_out_url("/"), class: "btn" %>
+    <%%= submit <%= gettext "Sign In" %>, class: "btn btn-primary" %>
+    <%%= link <%= gettext "Cancel" %>, to: Coherence.Config.logged_out_url("/"), class: "btn" %>
   </div>
 
   <div class="form-group">

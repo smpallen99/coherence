@@ -15,8 +15,8 @@
   </div>
 
   <div class="form-group">
-    <%%= submit "Send Instructions", class: "btn btn-primary" %>
-    <%%= link "Cancel", to: Coherence.Config.logged_out_url("/"), class: "btn" %>
+    <%%= submit <%= gettext "Send Instructions" %>, class: "btn btn-primary" %>
+    <%%= link <%= gettext "Cancel" %>, to: Coherence.Config.logged_out_url("/"), class: "btn" %>
   </div>
 
 <%% end %>

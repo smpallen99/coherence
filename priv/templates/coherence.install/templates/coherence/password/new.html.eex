@@ -11,7 +11,7 @@
   </div>
 
   <div class="form-group">
-    <%%= submit "Reset Password", class: "btn btn-primary" %>
-    <%%= link "Cancel", to: Coherence.Config.logged_out_url("/"), class: "btn" %>
+    <%%= submit <%= gettext "Reset Password" %>, class: "btn btn-primary" %>
+    <%%= link <%= gettext "Cancel" %>, to: Coherence.Config.logged_out_url("/"), class: "btn" %>
   </div>
 <%% end %>

@@ -1,5 +1,5 @@
-<h3>Register Account</h3>
+<h3><%%= gettext "Register Account" %></h3>
 
 <%%= render "form.html", changeset: @changeset,
-                        label: "Register", required: [required: ""],
+                        label: <%= gettext "Register" %>, required: [required: ""],
                         action: registration_path(@conn, :create) %>

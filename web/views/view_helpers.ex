@@ -3,6 +3,8 @@ defmodule Coherence.ViewHelpers do
   Helper functions for Coherence Views.
   """
   use Phoenix.HTML
+  import Coherence.Gettext
+
   alias Coherence.Config
 
   @type conn :: Plug.Conn.t
@@ -11,13 +13,13 @@ defmodule Coherence.ViewHelpers do
   @seperator {:safe, "&nbsp; | &nbsp;"}
   @helpers Module.concat(Application.get_env(:coherence, :module), Router.Helpers)
 
-  @recover_link  "Forgot your password?"
-  @unlock_link   "Send an unlock email"
-  @register_link "Need An Account?"
-  @invite_link   "Invite Someone"
-  @confirm_link  "Resend confirmation email"
-  @signin_link   "Sign In"
-  @signout_link  "Sign Out"
+  @recover_link  gettext("Forgot your password?")
+  @unlock_link   gettext("Send an unlock email")
+  @register_link gettext("Need An Account?")
+  @invite_link   gettext("Invite Someone")
+  @confirm_link  gettext("Resend confirmation email")
+  @signin_link   gettext("Sign In")
+  @signout_link  gettext("Sign Out")
 
   @doc """
   Create coherence template links.
