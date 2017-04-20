@@ -20,6 +20,7 @@ defmodule Coherence.Gettext do
 
   See the [Gettext Docs](http://hexdocs.pm/gettext) for detailed usage.
   """
+
   @dialyzer [
     {:nowarn_function, 'MACRO-dgettext': 3},
     {:nowarn_function, 'MACRO-dgettext': 4},

@@ -1,5 +1,5 @@
 <div>
-  <p>Hello <%= @name %>!<p>
+  <p><%= dgettext("coherence", "Hello") %> <%= @name %>!<p>
   <p>
     <%= dgettext "coherence", "Your new account is almost ready. Click the link below to confirm you new account." %>
   </p>
