@@ -46,12 +46,12 @@ defmodule Coherence.ConfirmationController do
     case user do
       nil ->
         conn
-        |> put_flash(:error, "Could not find that email address")
+        |> put_flash(:error, gettext("Could not find that email address"))
         |> render("new.html", changeset: changeset)
       user ->
         if user_schema.confirmed?(user) do
           conn
-          |> put_flash(:error, "Account already confirmed.")
+          |> put_flash(:error, gettext("Account already confirmed."))
           |> render(:new, [email: "", changeset: changeset])
         else
           conn
@@ -80,12 +80,12 @@ defmodule Coherence.ConfirmationController do
       nil ->
         changeset = Helpers.changeset :confirmation, user_schema, user_schema.__struct__
         conn
-        |> put_flash(:error, "Invalid confirmation token.")
+        |> put_flash(:error, gettext("Invalid confirmation token."))
         |> redirect_to(:confirmation_edit_invalid, params)
       user ->
         if ConfirmableService.expired? user do
           conn
-          |> put_flash(:error, "Confirmation token expired.")
+          |> put_flash(:error, gettext("Confirmation token expired."))
           |> redirect_to(:confirmation_edit_expired, params)
         else
           changeset = Helpers.changeset(:confirmation, user_schema, user, %{
@@ -95,11 +95,11 @@ defmodule Coherence.ConfirmationController do
           case Config.repo.update(changeset) do
             {:ok, _user} ->
               conn
-              |> put_flash(:info, "User account confirmed successfully.")
+              |> put_flash(:info, gettext("User account confirmed successfully."))
               |> redirect_to(:confirmation_edit, params)
             {:error, _changeset} ->
               conn
-              |> put_flash(:error, "Problem confirming user account. Please contact the system administrator.")
+              |> put_flash(:error, gettext("Problem confirming user account. Please contact the system administrator."))
               |> redirect_to(:confirmation_edit_error, params)
           end
         end

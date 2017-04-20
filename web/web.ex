@@ -29,6 +29,7 @@ defmodule Coherence.Web do
 
       import Ecto
       import Ecto.Query
+      import Coherence.Gettext
 
       alias Coherence.Config
       require Redirects
@@ -39,6 +40,12 @@ defmodule Coherence.Web do
   def router do
     quote do
       use Phoenix.Router
+    end
+  end
+
+  def service do
+    quote do
+      import Coherence.Gettext
     end
   end
 
