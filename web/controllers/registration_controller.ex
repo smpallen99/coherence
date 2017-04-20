@@ -102,7 +102,7 @@ defmodule Coherence.RegistrationController do
       {:ok, user} ->
         Config.auth_module
         |> apply(Config.update_login, [conn, user, [id_key: Config.schema_key]])
-        |> put_flash(:info, "Account updated successfully.")
+        |> put_flash(:info, dgettext("coherence", "Account updated successfully."))
         |> redirect_to(:registration_update, params, user)
       {:error, changeset} ->
         render(conn, "edit.html", user: user, changeset: changeset)

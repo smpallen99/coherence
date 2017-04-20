@@ -91,6 +91,8 @@ defmodule Coherence.Schema do
       import unquote(__MODULE__)
       import Ecto.Changeset
 
+      require Coherence.Gettext
+
       alias Coherence.{ConfirmableService}
 
       use Coherence.Config
