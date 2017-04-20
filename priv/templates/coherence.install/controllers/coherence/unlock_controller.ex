@@ -8,19 +8,21 @@ defmodule <%= base %>.Coherence.UnlockController do
   Basic locking and unlocking does not use this controller.
   """
   use Coherence.Web, :controller
-  require Logger
   use Timex
   use Coherence.Config
+
   alias Coherence.ControllerHelpers, as: Helpers
   alias Coherence.{TrackableService, LockableService}
 
-  plug Coherence.ValidateOption, :unlockable_with_token
-  plug :layout_view
-  plug :redirect_logged_in when action in [:new, :create, :edit]
+  require Logger
 
   @type schema :: Ecto.Schema.t
   @type conn :: Plug.Conn.t
   @type params :: Map.t
+
+  plug Coherence.ValidateOption, :unlockable_with_token
+  plug :layout_view
+  plug :redirect_logged_in when action in [:new, :create, :edit]
 
   @doc """
   Render the send reset link form.
@@ -37,7 +39,7 @@ defmodule <%= base %>.Coherence.UnlockController do
   """
   @spec create(conn, params) :: conn
   def create(conn, %{"unlock" => unlock_params} = params) do
-    user_schema = Config.user_schema
+    user_schema = Config.user_schema()
     email = unlock_params["email"]
     password = unlock_params["password"]
 
@@ -76,10 +78,11 @@ defmodule <%= base %>.Coherence.UnlockController do
   def edit(conn, params) do
     user_schema = Config.user_schema
     token = params["id"]
-    user_schema
-    |> where([u], u.unlock_token == ^token)
-    |> Config.repo.one
-    |> case do
+    unlock =
+      user_schema
+      |> where([u], u.unlock_token == ^token)
+      |> Config.repo.one
+    case unlock do
       nil ->
         conn
         |> put_flash(:error, "Invalid unlock token.")
@@ -105,12 +108,15 @@ defmodule <%= base %>.Coherence.UnlockController do
   def clear_unlock_values(user, user_schema) do
     if user.unlock_token or user.locked_at do
       user_schema.changeset(user, %{unlock_token: nil, locked_at: nil})
-      Helpers.changeset(:unlock, user.__struct__, user, %{unlock_token: nil, locked_at: nil})
-      |> Config.repo.update
-      |> case do
+      schema =
+        :unlock
+        |> Helpers.changeset(user.__struct__, user, %{unlock_token: nil, locked_at: nil})
+        |> Config.repo.update
+      case schema do
         {:error, changeset} ->
           lockable_failure changeset
-        _ -> :ok
+        _ ->
+          :ok
       end
     end
   end
