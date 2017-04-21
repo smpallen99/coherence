@@ -1,5 +1,5 @@
 <div>
-  <p><%= "Hello" %> <%= @name %>!<p>
+  <p><%= dgettext "coherence", "Hello", name: @name %><p>
   <p>
     <%= dgettext "coherence", "You requested unlock instructions for your locked account. Please click the link below to unlock your account." %>
   </p>
