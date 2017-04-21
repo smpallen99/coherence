@@ -3,6 +3,7 @@ Code.require_file "../../mix_helpers.exs", __DIR__
 defmodule Mix.Tasks.Coherence.InstallTest do
   use ExUnit.Case
   import MixHelper
+  require Coherence.Gettext
 
   @web_path "lib/coherence/web"
   setup do

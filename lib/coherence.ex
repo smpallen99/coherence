@@ -219,6 +219,7 @@ After installation, if you later want to remove one more options, here are a cou
 Run `$ mix help coherence.install` or `$ mix help coherence.install` for more information.
   """
   use Application
+
   alias Coherence.Config
 
   @doc false
@@ -230,6 +231,26 @@ Run `$ mix help coherence.install` or `$ mix help coherence.install` for more in
   Get the currently logged in user data.
   """
   def current_user(conn), do: conn.assigns[Config.assigns_key]
+
+  @doc """
+  Get the currently assigned user_token
+  """
+  def user_token(conn), do: conn.assigns[Config.token_assigns_key]
+
+  @doc """
+  Verify a user token for channel authentication.
+  """
+  def verify_user_token(socket, token, assign_fun) do
+    result = case Config.verify_user_token do
+      fun when is_function(fun) -> fun.(socket, token)
+      {mod, fun, args} -> apply(mod, fun, args)
+      error -> {:error, Gettext.gettext(Coherence.Gettext, "Invalid Config.verify_user_token option: error: #{inspect error}")}
+    end
+    case result do
+      {:ok, user_id} -> {:ok, assign_fun.(socket, :user_id, user_id)}
+      error -> error
+    end
+  end
 
   @doc """
   Check if user is logged in.

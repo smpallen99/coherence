@@ -1,8 +1,11 @@
 defmodule Coherence.RememberableService do
+  @moduledoc false
 
   use Coherence.Config
+
   import Ecto.Query
   import Plug.Conn
+
   alias Coherence.Rememberable
 
   @doc """
@@ -11,10 +14,11 @@ defmodule Coherence.RememberableService do
   @spec delete_rememberable(Plug.Conn.t, %{id: integer}) :: Plug.Conn.t
   def delete_rememberable(conn, %{id: id}) do
     if Config.has_option :rememberable do
-      where(Rememberable, [u], u.user_id == ^id)
+      Rememberable
+      |> where([u], u.user_id == ^id)
       |> Config.repo.delete_all
-      conn
-      |> delete_resp_cookie(Config.login_cookie)
+
+      delete_resp_cookie(conn, Config.login_cookie)
     else
       conn
     end

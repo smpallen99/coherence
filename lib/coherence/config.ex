@@ -41,6 +41,14 @@ defmodule Coherence.Config do
   * :title  - Layout page title
   * :layout - Customize the layout template e.g. {MyApp.LayoutView, "app.html"}
   * :async_rememberable? (false) - Don't update rememberable seq_no for ajax requests
+  * :user_token (false) - generate tokens for channel authentication
+  * :token_assigns_key (:user_token) - key used to access the channel_token in the conn.assigns map
+  * :token_generator   (fn conn, user -> Phoenix.Token.sign(conn, "user socket", user.id) end) - override the default
+  *                    may also provide an arity 3 function as a tuple {Module, :function, args}
+  *                    where apply(Module, function, args) will be used
+  * :verify_user_token (fn socket, token -> Phoenix.Token.verify(socket, "user socket", token, max_age: 2 * 7 * 24 * 60 * 60) end
+  *                    can also be a 3 element tuple as described above for :token_generator
+  * :use_binary_id (false) - Use binary ids.
 
   ## Examples
 
@@ -73,6 +81,11 @@ defmodule Coherence.Config do
     :site_name,
     :changeset,
     :layout,
+    :user_token,
+    :use_binary_id,
+    {:token_assigns_key, :user_token},
+    {:token_generator, &Coherence.SessionService.sign_user_token/2},
+    {:verify_user_token, &Coherence.SessionService.verify_user_token/2},
     {:password_hash_field, :password_hash},
     {:login_field, :email},
     {:login_cookie, "coherence_login"},
@@ -90,7 +103,7 @@ defmodule Coherence.Config do
     {:unlock_timeout_minutes, 20},
     {:unlock_token_expire_minutes, 5},
     {:session_key, "session_auth"},
-    {:rememberable_cookie_expire_hours, 2*24},
+    {:rememberable_cookie_expire_hours, 2 * 24},
     {:async_rememberable?, false}
   ]
   |> Enum.each(fn
@@ -167,7 +180,7 @@ defmodule Coherence.Config do
   """
   @spec use_binary_id?() :: boolean
   def use_binary_id? do
-    !!Application.get_env(:phoenix, :generators)[:binary_id]
+    !!Application.get_env(:phoenix, :generators)[:binary_id] || Application.get_env(:coherence, :use_binary_id)
   end
 
   defp has_any_option?(fun) do

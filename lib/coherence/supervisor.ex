@@ -1,6 +1,14 @@
 defmodule Coherence.Supervisor do
-  @doc false
+  @moduledoc """
+  Supervisor to start Coherence services.
+
+  Starts the configured credential store agent. Also starts
+  the RememberableServer if this option is configured.
+  """
+
   import Coherence.Authentication.Utils, only: [get_credential_store: 0]
+
+  @doc false
   def start_link() do
     Supervisor.start_link(__MODULE__, :ok, name: __MODULE__)
   end
