@@ -3,7 +3,10 @@ defmodule Coherence.Trackable do
   Schema responsible for saving user tracking data for the --trackable-table option.
   """
   use Coherence.Web, :model
+
   alias Coherence.Config
+
+  @fields ~w(action sign_in_count current_sign_in_ip current_sign_in_at last_sign_in_ip last_sign_in_at user_id)a
 
   schema "trackables" do
     field :action, :string, null: false
@@ -16,8 +19,6 @@ defmodule Coherence.Trackable do
 
     timestamps()
   end
-
-  @fields ~w(action sign_in_count current_sign_in_ip current_sign_in_at last_sign_in_ip last_sign_in_at user_id)a
 
   @doc """
   Creates a changeset based on the `model` and `params`.

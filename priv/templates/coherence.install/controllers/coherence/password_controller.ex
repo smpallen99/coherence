@@ -88,7 +88,8 @@ defmodule <%= base %>.Coherence.PasswordController do
         |> redirect(to: logged_out_url(conn))
       user ->
         if expired? user.reset_password_sent_at, days: Config.reset_token_expire_days do
-          Helpers.changeset(:password, user_schema, user, clear_password_params())
+          :password
+          |> Helpers.changeset(user_schema, user, clear_password_params())
           |> Config.repo.update
 
           conn

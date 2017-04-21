@@ -24,7 +24,8 @@ defmodule Coherence.Authentication.Utils do
   @spec halt_with_error(conn, String.t | function) :: conn
   def halt_with_error(conn, error \\ "unauthorized")
   def halt_with_error(conn, error) when is_function(error) do
-    error.(conn)
+    conn
+    |> error.()
     |> halt
   end
 
@@ -35,7 +36,7 @@ defmodule Coherence.Authentication.Utils do
   end
 
   @spec get_first_req_header(conn, String.t) :: nil | String.t
-  def get_first_req_header(conn, header), do: get_req_header(conn, header) |> header_hd
+  def get_first_req_header(conn, header), do: conn |> get_req_header(header) |> header_hd
 
   @spec delete_token_session(conn) :: conn
   def delete_token_session(conn) do
@@ -62,4 +63,26 @@ defmodule Coherence.Authentication.Utils do
   @spec to_string({si, si, si, si} | String.t) :: String.t
   def to_string({a,b,c,d}), do: "#{a}.#{b}.#{c}.#{d}"
   def to_string(string) when is_binary(string), do: string
+
+  def delete_user_token(conn) do
+    if Config.user_token do
+      assign(conn, Config.token_assigns_key, nil)
+    else
+      conn
+    end
+  end
+
+  def create_user_token(conn, _, nil_or_false, _) when nil_or_false in [nil, false], do: conn
+  def create_user_token(conn, user, _, assign_key) do
+    if conn.assigns[assign_key] do
+      token = case Config.token_generator do
+        {mod, fun, args} -> apply(mod, fun, [conn, user | args])
+        fun when is_function(fun) -> fun.(conn, user)
+        other -> raise "Invalid Config.token_generator option, other: #{inspect other}"
+      end
+      assign(conn, Config.token_assigns_key, token)
+    else
+      conn
+    end
+  end
 end

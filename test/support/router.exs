@@ -24,7 +24,7 @@ defmodule TestCoherence.Web.Router do
     plug :put_secure_browser_headers
     plug Coherence.Authentication.Session, db_model: TestCoherence.User, rememberable: true,
                                            login: &__MODULE__.login_callback/1,
-                                           rememberable_callback: &Coherence.SessionController._rememberable_callback/5
+                                           rememberable_callback: &Coherence.SessionController.do_rememberable_callback/5
   end
 
   scope "/" do

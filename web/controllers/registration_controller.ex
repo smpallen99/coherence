@@ -11,8 +11,14 @@ defmodule Coherence.RegistrationController do
   * delete - delete the user account
   """
   use Coherence.Web, :controller
-  require Logger
+
   alias Coherence.ControllerHelpers, as: Helpers
+
+  require Logger
+
+  @type schema :: Ecto.Schema.t
+  @type conn :: Plug.Conn.t
+  @type params :: Map.t
 
   @dialyzer [
     {:nowarn_function, update: 2},
@@ -25,10 +31,6 @@ defmodule Coherence.RegistrationController do
   plug :layout_view
   plug :redirect_logged_in when action in [:new, :create]
 
-  @type schema :: Ecto.Schema.t
-  @type conn :: Plug.Conn.t
-  @type params :: Map.t
-
   @doc """
   Render the new user form.
   """
@@ -36,8 +38,7 @@ defmodule Coherence.RegistrationController do
   def new(conn, _params) do
     user_schema = Config.user_schema
     cs = Helpers.changeset(:registration, user_schema, user_schema.__struct__)
-    conn
-    |> render(:new, email: "", changeset: cs)
+    render(conn, :new, email: "", changeset: cs)
   end
 
   @doc """
@@ -56,8 +57,7 @@ defmodule Coherence.RegistrationController do
         |> send_confirmation(user, user_schema)
         |> redirect_or_login(user, params, Config.allow_unconfirmed_access_for)
       {:error, changeset} ->
-        conn
-        |> render("new.html", changeset: changeset)
+        render(conn, "new.html", changeset: changeset)
     end
   end
 
@@ -98,11 +98,11 @@ defmodule Coherence.RegistrationController do
     user = Coherence.current_user(conn)
     changeset = Helpers.changeset(:registration, user_schema, user, user_params)
 
-    case Config.repo.update(changeset) do
+    case Config.repo().update(changeset) do
       {:ok, user} ->
         Config.auth_module
         |> apply(Config.update_login, [conn, user, [id_key: Config.schema_key]])
-        |> put_flash(:info, "Account updated successfully.")
+        |> put_flash(:info, dgettext("coherence", "Account updated successfully."))
         |> redirect_to(:registration_update, params, user)
       {:error, changeset} ->
         render(conn, "edit.html", user: user, changeset: changeset)
