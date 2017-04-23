@@ -35,9 +35,8 @@ defmodule Coherence.Mixfile do
   defp deps do
     [
       {:ecto, "~> 2.0"},
-      {:comeonin, "~> 2.4"},
-      {:phoenix, github: "phoenixframework/phoenix", override: true},
-      # {:phoenix, "~> 1.3.0-rc"},
+      {:comeonin, "~> 3.0"},
+      {:phoenix, "~> 1.3.0-rc"},
       {:phoenix_html, "~> 2.6"},
       {:gettext, "~> 0.11"},
       {:uuid, "~> 1.0"},
