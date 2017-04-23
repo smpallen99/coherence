@@ -1,6 +1,6 @@
 <br \>
 
-<h3>Send reset password link</h3>
+<h3><%%= dgettext "coherence", "Send reset password link" %></h3>
 
 <%%= form_for @changeset, password_path(@conn, :create), [as: :password], fn f  -> %>
 
@@ -11,7 +11,7 @@
   </div>
 
   <div class="form-group">
-    <%%= submit <%= gettext "Reset Password" %>, class: "btn btn-primary" %>
-    <%%= link <%= gettext "Cancel" %>, to: Coherence.Config.logged_out_url("/"), class: "btn" %>
+    <%%= submit dgettext("coherence", "Reset Password"), class: "btn btn-primary" %>
+    <%%= link dgettext("coherence", "Cancel"), to: Coherence.Config.logged_out_url("/"), class: "btn" %>
   </div>
 <%% end %>

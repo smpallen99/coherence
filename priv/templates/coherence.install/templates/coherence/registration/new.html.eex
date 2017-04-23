@@ -1,5 +1,5 @@
-<h3><%%= gettext "Register Account" %></h3>
+<h3><%%= dgettext "coherence", "Register Account" %></h3>
 
 <%%= render "form.html", changeset: @changeset,
-                        label: <%= gettext "Register" %>, required: [required: ""],
+                        label: dgettext("coherence", "Register"), required: [required: ""],
                         action: registration_path(@conn, :create) %>

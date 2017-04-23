@@ -26,7 +26,7 @@ defmodule Coherence.RequireLogin do
       conn
     else
       conn
-      |> put_flash(:error, gettext("Invalid Request."))
+      |> put_flash(:error, dgettext("coherence", "Invalid Request."))
       |> redirect(to: logged_out_url(conn))
       |> halt
     end

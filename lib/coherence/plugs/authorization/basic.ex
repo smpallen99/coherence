@@ -49,8 +49,8 @@ defmodule Coherence.Authentication.Basic do
   # @spec init(Keyword.t) :: map
   def init(opts) do
     %{
-      realm: Keyword.get(opts, :realm, gettext("Restricted Area")),
-      error: Keyword.get(opts, :error, gettext("HTTP Authentication Required")),
+      realm: Keyword.get(opts, :realm, dgettext("coherence", "Restricted Area")),
+      error: Keyword.get(opts, :error, dgettext("coherence", "HTTP Authentication Required")),
       store: Keyword.get(opts, :store, Coherence.CredentialStore.Agent),
       assigns_key: Keyword.get(opts, :assigns_key, :current_user),
     }

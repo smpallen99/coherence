@@ -79,7 +79,7 @@ defmodule Coherence.Authentication.IpAddress do
     %{
       allow: Keyword.get(opts, :allow, []),
       deny: Keyword.get(opts, :deny, []),
-      error: Keyword.get(opts, :error, gettext("Unauthorized IP Address")),
+      error: Keyword.get(opts, :error, dgettext("coherence", "Unauthorized IP Address")),
       store: Keyword.get(opts, :store, Coherence.CredentialStore.Agent),
       assign_key: Keyword.get(opts, :assign_key, :current_user),
     }

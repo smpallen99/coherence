@@ -1,11 +1,11 @@
 <div>
   <p><%= "Hello" %> <%= @name %>!<p>
   <p>
-    <%= gettext "You requested unlock instructions for your locked account. Please click the link below to unlock your account." %>
+    <%= dgettext "coherence", "You requested unlock instructions for your locked account. Please click the link below to unlock your account." %>
   </p>
   <p>
-    <a href="<%= @url %>"><%= gettext "Unlock my Account" %></a>
+    <a href="<%= @url %>"><%= dgettext "coherence", "Unlock my Account" %></a>
   </p>
-  <p><%= gettext "Thank you!" %></p>
+  <p><%= dgettext "coherence", "Thank you!" %></p>
 </div>
 

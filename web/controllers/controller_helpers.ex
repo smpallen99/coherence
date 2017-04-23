@@ -8,7 +8,7 @@ defmodule Coherence.ControllerHelpers do
   import Plug.Conn, only: [halt: 1]
   import Coherence.Gettext
   alias Coherence.{ConfirmableService, RememberableService, TrackableService}
-  @lockable_failure gettext("Failed to update lockable attributes ")
+  @lockable_failure dgettext("coherence", "Failed to update lockable attributes ")
 
   @type schema :: Ecto.Schema.t
   @type changeset :: Ecto.Changeset.t
@@ -172,10 +172,10 @@ defmodule Coherence.ControllerHelpers do
 
       send_user_email :confirmation, user, url
       conn
-      |> put_flash(:info, gettext("Confirmation email sent."))
+      |> put_flash(:info, dgettext("coherence", "Confirmation email sent."))
     else
       conn
-      |> put_flash(:info, gettext("Registration created successfully."))
+      |> put_flash(:info, dgettext("coherence", "Registration created successfully."))
     end
   end
 
@@ -191,7 +191,7 @@ defmodule Coherence.ControllerHelpers do
   def confirm!(user) do
     changeset = ConfirmableService.confirm(user)
     if ConfirmableService.confirmed? user do
-      changeset = Ecto.Changeset.add_error changeset, :confirmed_at, gettext("already confirmed")
+      changeset = Ecto.Changeset.add_error changeset, :confirmed_at, dgettext("coherence", "already confirmed")
       {:error, changeset}
     else
       Config.repo.update changeset
@@ -212,7 +212,7 @@ defmodule Coherence.ControllerHelpers do
     user_schema = Config.user_schema
     changeset = user_schema.lock user, locked_at
     if user_schema.locked?(user) do
-      changeset = Ecto.Changeset.add_error changeset, :locked_at, gettext("already locked")
+      changeset = Ecto.Changeset.add_error changeset, :locked_at, dgettext("coherence", "already locked")
       {:error, changeset}
     else
       changeset
@@ -233,7 +233,7 @@ defmodule Coherence.ControllerHelpers do
       changeset
       |> Config.repo.update
     else
-      changeset = Ecto.Changeset.add_error changeset, :locked_at, gettext("not locked")
+      changeset = Ecto.Changeset.add_error changeset, :locked_at, dgettext("coherence", "not locked")
       {:error, changeset}
     end
   end
@@ -246,7 +246,7 @@ defmodule Coherence.ControllerHelpers do
   def redirect_logged_in(conn, _params) do
     if Coherence.logged_in?(conn) do
       conn
-      |> put_flash(:info, gettext("Already logged in."))
+      |> put_flash(:info, dgettext("coherence", "Already logged in."))
       |> redirect(to: logged_in_url(conn))
       |> halt
     else

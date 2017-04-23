@@ -54,11 +54,11 @@ defmodule Coherence.UnlockController do
           if user_schema.locked?(user) do
             send_user_email :unlock, user, router_helpers().unlock_url(conn, :edit, user.unlock_token)
             conn
-            |> put_flash(:info, gettext("Unlock Instructions sent."))
+            |> put_flash(:info, dgettext("coherence", "Unlock Instructions sent."))
             |> redirect_to(:unlock_create, params)
           else
             conn
-            |> put_flash(:error, gettext("Your account is not locked."))
+            |> put_flash(:error, dgettext("coherence", "Your account is not locked."))
             |> redirect_to(:unlock_create_not_locked, params)
           end
         {:error, changeset} ->
@@ -66,7 +66,7 @@ defmodule Coherence.UnlockController do
       end
     else
       conn
-      |> put_flash(:error, gettext("Invalid email or password."))
+      |> put_flash(:error, dgettext("coherence", "Invalid email or password."))
       |> redirect_to(:unlock_create_invalid, params)
     end
   end
@@ -85,19 +85,19 @@ defmodule Coherence.UnlockController do
     case unlock do
       nil ->
         conn
-        |> put_flash(:error, gettext("Invalid unlock token."))
+        |> put_flash(:error, dgettext("coherence", "Invalid unlock token."))
         |> redirect_to(:unlock_edit_invalid, params)
       user ->
         if user_schema.locked? user do
           Helpers.unlock! user
           conn
           |> TrackableService.track_unlock_token(user, user_schema.trackable_table?)
-          |> put_flash(:info, gettext("Your account has been unlocked"))
+          |> put_flash(:info, dgettext("coherence", "Your account has been unlocked"))
           |> redirect_to(:unlock_edit, params)
         else
           clear_unlock_values(user, user_schema)
           conn
-          |> put_flash(:error, gettext("Account is not locked."))
+          |> put_flash(:error, dgettext("coherence", "Account is not locked."))
           |> redirect_to(:unlock_edit_not_locked, params)
         end
     end

@@ -3,20 +3,20 @@
 <%%= form_for @conn, unlock_path(@conn, :create), [as: :unlock], fn f  -> %>
 
   <div class="form-group">
-    <%%= required_label f, :email, class: "control-label" %>
+    <%%= required_label f, dgettext("coherence", "Email"), class: "control-label" %>
     <%%= text_input f, :email, class: "form-control", required: "" %>
     <%%= error_tag f, :email %>
   </div>
 
   <div class="form-group">
-    <%%= required_label f, :password, class: "control-label" %>
+    <%%= required_label f, dgettext("coherence", "Password"), class: "control-label" %>
     <%%= password_input f, :password, class: "form-control", required: "" %>
     <%%= error_tag f, :password %>
   </div>
 
   <div class="form-group">
-    <%%= submit <%= gettext "Send Instructions" %>, class: "btn btn-primary" %>
-    <%%= link <%= gettext "Cancel" %>, to: Coherence.Config.logged_out_url("/"), class: "btn" %>
+    <%%= submit dgettext("coherence", "Send Instructions"), class: "btn btn-primary" %>
+    <%%= link dgettext("coherence", "Cancel"), to: Coherence.Config.logged_out_url("/"), class: "btn" %>
   </div>
 
 <%% end %>

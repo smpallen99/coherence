@@ -10,7 +10,7 @@
   </div>
 
   <div class="form-group">
-    <%%= required_label f, :password, class: "control-label" %>
+    <%%= required_label f, dgettext("coherence", "Password"), class: "control-label" %>
     <%%= password_input f, :password, class: "form-control", required: "" %>
     <%%= error_tag f, :password %>
   </div>
@@ -18,14 +18,14 @@
   <%%= if @remember do %>
     <div class="form-group">
       <input type="checkbox"  name="remember" id="remember">
-      <label for="remember"><%= gettext "Remember Me?" %></label>
+      <label for="remember"><%%= dgettext "coherence", "Remember Me?" %></label>
     </div>
     <br />
   <%% end %>
 
   <div class="form-group">
-    <%%= submit <%= gettext "Sign In" %>, class: "btn btn-primary" %>
-    <%%= link <%= gettext "Cancel" %>, to: Coherence.Config.logged_out_url("/"), class: "btn" %>
+    <%%= submit "Sign In", class: "btn btn-primary" %>
+    <%%= link dgettext("coherence", "Cancel"), to: Coherence.Config.logged_out_url("/"), class: "btn" %>
   </div>
 
   <div class="form-group">

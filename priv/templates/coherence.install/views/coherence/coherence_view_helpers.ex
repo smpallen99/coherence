@@ -9,13 +9,13 @@ defmodule <%= base %>.Coherence.ViewHelpers do
   @seperator {:safe, "&nbsp; | &nbsp;"}
   @helpers Module.concat(Application.get_env(:coherence, :module), Router.Helpers)
 
-  @recover_link  gettext("Forgot your password?")
-  @unlock_link   gettext("Send an unlock email")
-  @register_link gettext("Need An Account?")
-  @invite_link   gettext("Invite Someone")
-  @confirm_link  gettext("Resend confirmation email")
-  @signin_link   gettext("Sign In")
-  @signout_link  gettext("Sign Out")
+  @recover_link  dgettext("coherence", "Forgot your password?")
+  @unlock_link   dgettext("coherence", "Send an unlock email")
+  @register_link dgettext("coherence", "Need An Account?")
+  @invite_link   dgettext("coherence", "Invite Someone")
+  @confirm_link  dgettext("coherence", "Resend confirmation email")
+  @signin_link   dgettext("coherence", "Sign In")
+  @signout_link  dgettext("coherence", "Sign Out")
 
   @doc """
   Create coherence template links.

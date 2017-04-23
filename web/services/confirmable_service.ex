@@ -73,7 +73,7 @@ defmodule Coherence.ConfirmableService do
           IO.warn "#{inspect Config.user_schema}.confirm!/1 has been deprecated. Please use Coherence.ControllerHelpers.confirm!/1 instead."
           changeset = Config.user_schema.changeset(user, %{confirmed_at: Ecto.DateTime.utc, confirmation_token: nil})
           if confirmed? user do
-            changeset = Ecto.Changeset.add_error changeset, :confirmed_at, gettext("already confirmed")
+            changeset = Ecto.Changeset.add_error changeset, :confirmed_at, dgettext("coherence", "already confirmed")
             {:error, changeset}
           else
             Config.repo.update changeset
@@ -108,7 +108,7 @@ defmodule Coherence.ConfirmableService do
     changeset = Config.user_schema.changeset(user, %{confirmed_at: Ecto.DateTime.utc, confirmation_token: nil})
 
     if confirmed? user do
-      changeset = Ecto.Changeset.add_error changeset, :confirmed_at, gettext("already confirmed")
+      changeset = Ecto.Changeset.add_error changeset, :confirmed_at, dgettext("coherence", "already confirmed")
       {:error, changeset}
     else
       Config.repo.update changeset
