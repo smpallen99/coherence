@@ -1,4 +1,17 @@
 defmodule Coherence.CredentialStore.Session do
+  @moduledoc """
+  Stores current credential information.
+
+  Uses an Agent to save logged in credentials.
+
+  Note: If you restart the phoenix server, this information
+  is lost, requiring the user to log in again.
+
+  If you would like to preserve login status across server restart, you
+  can enable the Rememberable option, or configure the Database
+  cache on the Session plug.
+  """
+
   @doc """
   Starts a new credentials store.
   """

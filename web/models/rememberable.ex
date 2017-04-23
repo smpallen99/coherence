@@ -1,9 +1,13 @@
 defmodule Coherence.Rememberable do
+  @moduledoc false
+
   use Coherence.Web, :model
   use Timex
+
   alias Coherence.Config
-  require Logger
   alias __MODULE__
+
+  require Logger
 
   schema "rememberables" do
     field :series_hash, :string
@@ -71,7 +75,8 @@ defmodule Coherence.Rememberable do
 
   @spec hash(String.t) :: String.t
   def hash(string) do
-    :crypto.hash(:sha, String.to_char_list(string))
+    :sha
+    |> :crypto.hash(String.to_char_list(string))
     |> Base.url_encode64
   end
 
@@ -89,5 +94,4 @@ defmodule Coherence.Rememberable do
   defp gen_series do
     Coherence.ControllerHelpers.random_string 10
   end
-
 end

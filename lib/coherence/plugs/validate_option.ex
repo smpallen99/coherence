@@ -1,9 +1,14 @@
 defmodule Coherence.ValidateOption do
-  @behaviour Plug
+  @moduledoc """
+  Plug to validate the given option is enabled in the project's configuration.
+  """
+
   import Coherence.ControllerHelpers, only: [logged_out_url: 1]
   import Plug.Conn
-
   import Phoenix.Controller, only: [put_flash: 3, redirect: 2]
+  import Coherence.Gettext
+
+  @behaviour Plug
 
   @dialyzer [
     {:nowarn_function, call: 2},
@@ -21,7 +26,7 @@ defmodule Coherence.ValidateOption do
       conn
     else
       conn
-      |> put_flash(:error, "Invalid Request.")
+      |> put_flash(:error, dgettext("coherence", "Invalid Request."))
       |> redirect(to: logged_out_url(conn))
       |> halt
     end

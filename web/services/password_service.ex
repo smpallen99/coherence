@@ -16,6 +16,7 @@ defmodule Coherence.PasswordService do
 
   """
   use Coherence.Config
+
   alias Coherence.ControllerHelpers, as: Helpers
 
   @doc """
@@ -28,9 +29,10 @@ defmodule Coherence.PasswordService do
   def reset_password_token(user) do
     token = Helpers.random_string 48
     dt = Ecto.DateTime.utc
-    Helpers.changeset(:password, user.__struct__, user,
+    :password
+    |> Helpers.changeset(user.__struct__, user,
       %{reset_password_token: token, reset_password_sent_at: dt})
-    |> Config.repo.update
+    |> Config.repo().update
   end
 
 end

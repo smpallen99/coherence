@@ -222,6 +222,29 @@ config :coherence,
   max_failed_login_attempts: 3
 ```
 
+## Phoenix Channel Authentication
+
+Coherence supports channel authentication using `Phoenix.Token`. To enable channel authentication do the following:
+
+Add the following option to coherence configuration.
+
+```elixir
+config :coherence,
+  user_token: true,
+```
+Update your socket module
+
+```elixir
+defmodule MyProject.UserSocket do
+  use Phoenix.Socket
+  def connect(%{"token" => token}, socket) do
+    case Coherence.verify_user_token(socket, token, &assign/3) do
+      {:error, _} -> :error
+      {:ok, socket} -> {:ok, socket}
+    end
+  end
+```
+
 ## Option Overview
 
 ### Authenticatable
@@ -574,6 +597,7 @@ The list of controller actions are:
 * :unlock
 
 ## Accessing the Currently Logged In User
+
 During login, a current version of the user model is cashed in the credential store. During each authentication request, the user model is fetched from the credential store and placed in conn.assigns[:current_user] to avoid a database fetch on each request.
 
 You can access the current user's name in a template like this:
@@ -585,6 +609,7 @@ You can access the current user's name in a template like this:
 Any of the user model's available data can be accessed this way.
 
 ## Updating the User Model
+
 If the user model is changed after login, a call to `update_login` must be done to update the credential store. For example, in your controller update function, call:
 
 ```elixir

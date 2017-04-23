@@ -51,26 +51,32 @@ defmodule <%= base %>.Coherence.InvitationController do
         token = random_string 48
         url = router_helpers().invitation_url(conn, :edit, token)
         cs = put_change(cs, :token, token)
-        case Config.repo.insert cs do
-          {:ok, invitation} ->
-            send_user_email :invitation, invitation, url
-            conn
-            |> put_flash(:info, "Invitation sent.")
-            |> redirect_to(:invitation_create, params)
-          {:error, changeset} ->
-            {conn, changeset} = case repo.one from i in Invitation, where: i.email == ^email do
-              nil -> {conn, changeset}
-              invitation ->
-                {assign(conn, :invitation, invitation), add_error(changeset, :email, "Invitation already sent.")}
-            end
-            render(conn, "new.html", changeset: changeset)
-        end
+        do_insert(conn, cs, url, params, email)
       _ ->
         cs = cs
         |> add_error(:email, "User already has an account!")
         |> struct(action: true)
         conn
         |> render("new.html", changeset: cs)
+    end
+  end
+
+  defp do_insert(conn, cs, url, params, email) do
+    repo = Config.repo()
+    case repo.insert cs do
+      {:ok, invitation} ->
+        send_user_email :invitation, invitation, url
+        conn
+        |> put_flash(:info, "Invitation sent.")
+        |> redirect_to(:invitation_create, params)
+      {:error, changeset} ->
+        {conn, changeset} =
+          case repo.one from i in Invitation, where: i.email == ^email do
+            nil -> {conn, changeset}
+            invitation ->
+              {assign(conn, :invitation, invitation), add_error(changeset, :email, "Invitation already sent.")}
+          end
+        render(conn, "new.html", changeset: changeset)
     end
   end
 
@@ -138,8 +144,8 @@ defmodule <%= base %>.Coherence.InvitationController do
   Resent the invitation based on the invitation's id.
   """
   @spec resend(conn, params) :: conn
-  def resend(conn, %{"id" => id}) do
-    case Config.repo.get(Invitation, id) do
+  def resend(conn, %{"id" => id} = params) do
+    conn = case Config.repo.get(Invitation, id) do
       nil ->
         conn
         |> put_flash(:error, "Can't find that token")
@@ -148,7 +154,7 @@ defmodule <%= base %>.Coherence.InvitationController do
           router_helpers().invitation_url(conn, :edit, invitation.token)
         put_flash conn, :info, "Invitation sent."
     end
-    |> redirect(to: logged_out_url(conn))
+    redirect_to(conn, :invitation_resend, params)
   end
 
 end

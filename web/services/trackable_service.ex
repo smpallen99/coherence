@@ -37,13 +37,17 @@ defmodule Coherence.TrackableService do
   Note, the `--trackable` and `--trackable-table` installation options are
   mutually exclusive.
   """
+
   use Coherence.Config
+
+  import Ecto.Query
+
   alias Coherence.ControllerHelpers, as: Helpers
   alias Plug.Conn
+  alias Coherence.Trackable
+
   require Logger
   require Ecto.Query
-  import Ecto.Query
-  alias Coherence.Trackable
 
   @type schema :: Ecto.Schema.t
   @type conn :: Plug.Conn.t
@@ -63,7 +67,7 @@ defmodule Coherence.TrackableService do
   def track_login(conn, user, true, false) do
     {last_at, last_ip, ip, _now} = last_at_and_ip(conn, user)
 
-    Helpers.changeset(:session, user.__struct__, user,
+    changeset = Helpers.changeset(:session, user.__struct__, user,
       %{
         sign_in_count: user.sign_in_count + 1,
         current_sign_in_at: Ecto.DateTime.utc,
@@ -71,18 +75,20 @@ defmodule Coherence.TrackableService do
         last_sign_in_at: last_at,
         last_sign_in_ip: last_ip
       })
-    |> Config.repo.update
-    |> case do
-      {:ok, user} -> Conn.assign conn, Config.assigns_key, user
+
+    case Config.repo().update changeset do
+      {:ok, user} ->
+        Conn.assign conn, Config.assigns_key, user
       {:error, _changeset} ->
         Logger.error ("Failed to update tracking!")
         conn
     end
   end
+
   def track_login(conn, user, false, true) do
     trackable = last_trackable(user.id)
     {last_at, last_ip, ip, _now} = last_at_and_ip(conn, trackable)
-    Helpers.changeset(:session, Trackable, %Trackable{},
+    changeset = Helpers.changeset(:session, Trackable, %Trackable{},
       %{
         action: "login",
         sign_in_count: trackable.sign_in_count + 1,
@@ -92,14 +98,16 @@ defmodule Coherence.TrackableService do
         last_sign_in_ip: last_ip,
         user_id: user.id
       })
-    |> Config.repo.insert
-    |> case do
-      {:ok, _user} -> nil
+
+    case Config.repo.insert changeset do
+      {:ok, _user} ->
+        conn
       {:error, changeset} ->
         Logger.error ("Failed to update tracking! #{inspect changeset.errors}")
+        conn
     end
-    conn
   end
+
   @doc """
   Track user logout.
 
@@ -113,28 +121,31 @@ defmodule Coherence.TrackableService do
   @spec track_logout(conn, schema, boolean, boolean) :: conn
   def track_logout(conn, _, false, false), do: conn
   def track_logout(conn, user, true, false) do
-    Helpers.changeset(:session, user.__struct__, user,
+    changeset = Helpers.changeset(:session, user.__struct__, user,
       %{
         last_sign_in_at: user.current_sign_in_at,
         last_sign_in_ip: user.current_sign_in_ip,
         current_sign_in_at: nil,
         current_sign_in_ip: nil
       })
-    |> Config.repo.update!
+
+    Config.repo.update! changeset
     conn
   end
+
   def track_logout(conn, user, false, true) do
     trackable = last_trackable(user.id)
-    Helpers.changeset(:session, Trackable, trackable,
+    changeset = Helpers.changeset(:session, Trackable, trackable,
       %{
         last_sign_in_at: trackable.current_sign_in_at,
         last_sign_in_ip: trackable.current_sign_in_ip,
         current_sign_in_at: nil,
         current_sign_in_ip: nil,
       })
-    |> Config.repo.update!
 
-    Helpers.changeset(:session, Trackable, %Trackable{},
+    Config.repo.update! changeset
+
+    changeset = Helpers.changeset(:session, Trackable, %Trackable{},
       %{
         action: "logout",
         sign_in_count: trackable.sign_in_count,
@@ -144,46 +155,47 @@ defmodule Coherence.TrackableService do
         current_sign_in_ip: nil,
         user_id: user.id
       })
-    |> Config.repo.insert!
+
+    Config.repo.insert! changeset
     conn
   end
 
   @spec track_password_reset(conn, schema, boolean) :: conn
-  def track_password_reset(conn, _user, false), do: conn
-  def track_password_reset(conn, user, true) do
-    track(conn, user, "password_reset")
-  end
+  def track_password_reset(conn, _user, false),
+    do: conn
+  def track_password_reset(conn, user, true),
+    do: track(conn, user, "password_reset")
 
   @spec track_failed_login(conn, schema, boolean) :: conn
-  def track_failed_login(conn, _user, false), do: conn
-  def track_failed_login(conn, user, true) do
-    track(conn, user, "failed_login")
-  end
+  def track_failed_login(conn, _user, false),
+    do: conn
+  def track_failed_login(conn, user, true),
+    do: track(conn, user, "failed_login")
 
   @spec track_lock(conn, schema, boolean) :: conn
-  def track_lock(conn, _user, false), do: conn
-  def track_lock(conn, user, true) do
-    track(conn, user, "lock")
-  end
+  def track_lock(conn, _user, false),
+    do: conn
+  def track_lock(conn, user, true),
+    do: track(conn, user, "lock")
 
   @spec track_unlock(conn, schema, boolean) :: conn
-  def track_unlock(conn, _user, false), do: conn
-  def track_unlock(conn, user, true) do
-    track(conn, user, "unlock")
-  end
+  def track_unlock(conn, _user, false),
+    do: conn
+  def track_unlock(conn, user, true),
+    do: track(conn, user, "unlock")
 
   @spec track_unlock_token(conn, schema, boolean) :: conn
-  def track_unlock_token(conn, _user, false), do: conn
-  def track_unlock_token(conn, user, true) do
-    track(conn, user, "unlock_token")
-  end
+  def track_unlock_token(conn, _user, false),
+    do: conn
+  def track_unlock_token(conn, user, true),
+    do: track(conn, user, "unlock_token")
 
   ##############
   # Private
 
   defp track(conn, user, action) do
     trackable = last_trackable(user.id)
-    Helpers.changeset(:session, Trackable, %Trackable{},
+    changeset = Helpers.changeset(:session, Trackable, %Trackable{},
       %{
         action: action,
         sign_in_count: trackable.sign_in_count,
@@ -191,7 +203,7 @@ defmodule Coherence.TrackableService do
         last_sign_in_ip: trackable.last_sign_in_ip,
         user_id: user.id
       })
-    |> Config.repo.insert!
+    Config.repo.insert! changeset
     conn
   end
 
@@ -209,14 +221,15 @@ defmodule Coherence.TrackableService do
   end
 
   defp last_trackable(user_id) do
-    where(Trackable, [t], t.user_id == ^user_id)
-    |> order_by(desc: :id)
-    |> limit(1)
-    |> Config.repo.one
-    |> case do
+    schema =
+      Trackable
+      |> where([t], t.user_id == ^user_id)
+      |> order_by(desc: :id)
+      |> limit(1)
+      |> Config.repo.one
+    case schema do
       nil -> %Trackable{}
       trackable -> trackable
     end
   end
-
 end
