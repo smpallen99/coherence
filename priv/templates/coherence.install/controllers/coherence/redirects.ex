@@ -43,7 +43,7 @@ defmodule Coherence.Redirects do
   """
   use Redirects
   # Uncomment the import below if adding overrides
-  # import <%= base %>.Web.Router.Helpers
+  # import <%= base %>.Router.Helpers
 
   # Add function overrides below
 

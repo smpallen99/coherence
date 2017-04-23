@@ -1,0 +1,17 @@
+<br \>
+
+<h3><%%= dgettext "coherence", "Resend Confirmation Instructions" %></h3>
+
+<%%= form_for @changeset, confirmation_path(@conn, :create), [as: :confirmation], fn f  -> %>
+
+  <div class="form-group">
+    <%%= required_label f, dgettext("coherence", "Email"), class: "control-label" %>
+    <%%= text_input f, :email, class: "form-control", required: "" %>
+    <%%= error_tag f, :email %>
+  </div>
+
+  <div class="form-group">
+    <%%= submit dgettext("coherence", "Resend Email"), class: "btn btn-primary" %>
+    <%%= link dgettext("coherence", "Cancel"), to: Coherence.Config.logged_out_url("/"), class: "btn" %>
+  </div>
+<%% end %>

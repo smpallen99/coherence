@@ -21,7 +21,7 @@ defmodule Coherence.UnlockController do
   @type params :: Map.t
 
   plug Coherence.ValidateOption, :unlockable_with_token
-  plug :layout_view
+  plug :layout_view, view: Coherence.UnlockView
   plug :redirect_logged_in when action in [:new, :create, :edit]
 
   @doc """

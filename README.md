@@ -10,6 +10,10 @@
 > <div style="font-color: red">Alert: Project under active development!</div>
 >
 > This is an early release. So expect changes and new features in the near future.
+>
+> Note: Coherence has been updated with experimental support for Phoenix 1.3 phx generators. The work is not yet complete, but should allow you to use the mix tasks in phx projects.
+>
+> For backwards compatiblity, the `mix coherence.install` and `mix coherence.clean` remain the same. For projects that have converted the new 1.3 project structure, please use `mix coh.install` and `mix coh.clean`.
 
 Checkout the [Coherence Demo Project](https://github.com/smpallen99/coherence_demo) to see an example project using Coherence.
 
@@ -38,7 +42,7 @@ See the [Docs](https://hexdocs.pm/coherence/Coherence.html) and [Wiki](https://g
   1. Add coherence to your list of dependencies in `mix.exs`:
 
         def deps do
-          [{:coherence, github: "smpallen99/coherence", branch: "phx-1.3"}]
+          [{:coherence, github: "smpallen99/coherence"}]
         end
 
   2. Ensure coherence is started before your application:

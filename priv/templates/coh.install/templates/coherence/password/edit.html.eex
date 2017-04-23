@@ -1,0 +1,25 @@
+<br \>
+
+<h3><%%= dgettext "coherence", "Create a New Password" %></h3>
+
+<%%= form_for @changeset, password_path(@conn, :update, @changeset.data), [as: :password], fn f  -> %>
+
+  <%%= hidden_input f, :reset_password_token %>
+
+  <div class="form-group">
+    <%%= required_label f, dgettext("coherence", "Password"), class: "control-label" %>
+    <%%= password_input f, :password, class: "form-control", required: "" %>
+    <%%= error_tag f, :password %>
+  </div>
+
+  <div class="form-group">
+    <%%= required_label f, dgettext("coherence", "Password Confirmation"), class: "control-label" %>
+    <%%= password_input f, :password_confirmation, class: "form-control", required: "" %>
+    <%%= error_tag f, :password_confirmation %>
+  </div>
+
+  <div class="form-group">
+    <%%= submit dgettext("coherence", "Update Password"), class: "btn btn-primary" %>
+    <%%= link dgettext("coherence", "Cancel"), to: Coherence.Config.logged_out_url("/"), class: "btn" %>
+  </div>
+<%% end %>
