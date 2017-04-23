@@ -5,7 +5,7 @@ defmodule Mix.Tasks.Coherence.InstallTest do
   import MixHelper
   require Coherence.Gettext
 
-  @web_path "lib/coherence/web"
+  @web_path "web"
   setup do
     :ok
   end
@@ -313,7 +313,7 @@ defmodule Mix.Tasks.Coherence.InstallTest do
         (~w(--repo=TestCoherence.Repo  --authenticatable --log-only --no-views --no-templates --no-migrations))
         |> Mix.Tasks.Coherence.Install.run
 
-        assert_file "coherence/user.ex" |> web_path, fn file ->
+        assert_file "models/coherence/user.ex" |> web_path, fn file ->
           file =~ "defmodule Coherence.User do"
           file =~ "use Coherence.Web, :model"
           file =~ "use Coherence.Schema"
@@ -336,7 +336,7 @@ defmodule Mix.Tasks.Coherence.InstallTest do
         (~w(--repo=TestCoherence.Repo  --authenticatable --log-only --no-views --no-templates --module=TestCoherence --no-migrations) ++ ["--model=Client clients"])
         |> Mix.Tasks.Coherence.Install.run
 
-        assert_file "coherence/client.ex" |> web_path, fn file ->
+        assert_file "models/coherence/client.ex" |> web_path, fn file ->
           file =~ "defmodule TestCoherence.Client do"
           file =~ "use TestCoherence.Web, :model"
           file =~ "use Coherence.Schema"

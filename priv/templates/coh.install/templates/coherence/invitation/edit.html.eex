@@ -1,0 +1,49 @@
+<br \>
+
+<%%= form_for @changeset, invitation_path(@conn, :create_user), fn f  -> %>
+
+  <%%= if @changeset.action do %>
+    <div class="alert alert-danger">
+      <p><%%= dgettext "coherence", "Oops, something went wrong! Please check the errors below." %></p>
+    </div>
+  <%% end %>
+
+  <input type="hidden" name="token" value="<%%= @token %>">
+
+  <div class="form-group">
+    <%%= required_label f, dgettext("coherence", "Email"), class: "control-label" %>
+    <%%= text_input f, :name, class: "form-control", required: "" %>
+    <%%= error_tag f, :name %>
+  </div>
+
+  <%%= unless (login_field = Coherence.Config.login_field) == :email do %>
+    <div class="form-group">
+      <%%= required_label f, login_field, class: "control-label" %>
+      <%%= text_input f, login_field, class: "form-control", required: "" %>
+      <%%= error_tag f, login_field %>
+    </div>
+  <%% end %>
+
+  <div class="form-group">
+    <%%= required_label f, dgettext("coherence", "Email"), class: "control-label" %>
+    <%%= text_input f, :email, class: "form-control", required: "" %>
+    <%%= error_tag f, :email %>
+  </div>
+
+  <div class="form-group">
+    <%%= required_label f, dgettext("coherence", "Password"), class: "control-label" %>
+    <%%= password_input f, :password, class: "form-control", required: "" %>
+    <%%= error_tag f, :password %>
+  </div>
+
+  <div class="form-group">
+    <%%= required_label f, dgettext("coherence", "Password Confirmation"), class: "control-label" %>
+    <%%= password_input f, :password_confirmation, class: "form-control", required: "" %>
+    <%%= error_tag f, :password_confirmation %>
+  </div>
+
+  <div class="form-group">
+    <%%= submit dgettext("coherence", "Create"), class: "btn btn-primary" %>
+    <%%= link dgettext("coherence", "Cancel"), to: Coherence.Config.logged_out_url("/"), class: "btn" %>
+  </div>
+<%% end %>

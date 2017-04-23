@@ -17,7 +17,7 @@ defmodule Coherence.PasswordController do
   alias Coherence.ControllerHelpers, as: Helpers
   alias Coherence.TrackableService
 
-  plug :layout_view
+  plug :layout_view, view: Coherence.PasswordView
   plug :redirect_logged_in when action in [:new, :create, :edit, :update]
 
   @type schema :: Ecto.Schema.t

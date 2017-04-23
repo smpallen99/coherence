@@ -7,7 +7,7 @@ defmodule <%= base %>.Coherence.ViewHelpers do
   import Coherence.Gettext
 
   @seperator {:safe, "&nbsp; | &nbsp;"}
-  @helpers Module.concat(Application.get_env(:coherence, :module), Web.Router.Helpers)
+  @helpers Module.concat(Application.get_env(:coherence, :module), Router.Helpers)
 
   @recover_link  dgettext("coherence", "Forgot your password?")
   @unlock_link   dgettext("coherence", "Send an unlock email")
