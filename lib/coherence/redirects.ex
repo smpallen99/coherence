@@ -19,6 +19,7 @@ defmodule Redirects do
   * registration_create/2
   * registration_delete/2
   * invitation_create/2
+  * invitation_resend/2
   * confirmation_create/2
   * confirmation_edit_invalid/2
   * confirmation_edit_expired/2
@@ -62,6 +63,7 @@ defmodule Redirects do
   @callback registration_delete(conn :: term, params :: term) :: term
 
   @callback invitation_create(conn :: term, params :: term) :: term
+  @callback invitation_resend(conn :: term, params :: term) :: term
 
   @callback confirmation_create(conn :: term, params :: term) :: term
   @callback confirmation_edit_invalid(conn :: term, params :: term) :: term
@@ -124,6 +126,8 @@ defmodule Redirects do
 
       @doc false
       def invitation_create(conn, _), do: redirect(conn, to: logged_out_url(conn))
+      @doc false
+      def invitation_resend(conn, _), do: redirect(conn, to: logged_out_url(conn))
 
       @doc false
       def confirmation_create(conn, _), do: redirect(conn, to: logged_out_url(conn))
@@ -141,7 +145,7 @@ defmodule Redirects do
         unlock_create_not_locked: 2, unlock_create_invalid: 2, unlock_create: 2,
         unlock_edit_not_locked: 2, unlock_edit: 2, unlock_edit_invalid: 2,
         registration_create: 2, registration_update: 3, registration_delete: 2,
-        invitation_create: 2,
+        invitation_create: 2, invitation_resend: 2,
         confirmation_create: 2, confirmation_edit_invalid: 2, confirmation_edit_expired: 2,
         confirmation_edit: 2, confirmation_edit_error: 2
       ]

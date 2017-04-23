@@ -6,8 +6,9 @@ defmodule Coherence.ControllerHelpers do
   require Logger
   import Phoenix.Controller, only: [put_flash: 3, redirect: 2, put_layout: 2, put_view: 2]
   import Plug.Conn, only: [halt: 1]
+  import Coherence.Gettext
   alias Coherence.{ConfirmableService, RememberableService, TrackableService}
-  @lockable_failure "Failed to update lockable attributes "
+  @lockable_failure dgettext("coherence", "Failed to update lockable attributes ")
 
   @type schema :: Ecto.Schema.t
   @type changeset :: Ecto.Changeset.t
@@ -22,11 +23,12 @@ defmodule Coherence.ControllerHelpers do
   """
   @spec layout_view(Plug.Conn.t, Keyword.t) :: Plug.Conn.t
   def layout_view(conn, opts) do
-    case Config.layout do
-      nil -> conn
-      layout -> put_layout conn, layout
-    end
-    |> set_view(opts)
+    conn =
+      case Config.layout do
+        nil -> conn
+        layout -> put_layout conn, layout
+      end
+    set_view(conn, opts)
   end
 
   @doc """
@@ -170,10 +172,10 @@ defmodule Coherence.ControllerHelpers do
 
       send_user_email :confirmation, user, url
       conn
-      |> put_flash(:info, "Confirmation email sent.")
+      |> put_flash(:info, dgettext("coherence", "Confirmation email sent."))
     else
       conn
-      |> put_flash(:info, "Registration created successfully.")
+      |> put_flash(:info, dgettext("coherence", "Registration created successfully."))
     end
   end
 
@@ -188,11 +190,11 @@ defmodule Coherence.ControllerHelpers do
   @spec confirm!(Ecto.Schema.t) :: schema_or_error
   def confirm!(user) do
     changeset = ConfirmableService.confirm(user)
-    unless ConfirmableService.confirmed? user do
-      Config.repo.update changeset
-    else
-      changeset = Ecto.Changeset.add_error changeset, :confirmed_at, "already confirmed"
+    if ConfirmableService.confirmed? user do
+      changeset = Ecto.Changeset.add_error changeset, :confirmed_at, dgettext("coherence", "already confirmed")
       {:error, changeset}
+    else
+      Config.repo.update changeset
     end
   end
 
@@ -209,12 +211,12 @@ defmodule Coherence.ControllerHelpers do
   def lock!(user, locked_at \\ Ecto.DateTime.utc) do
     user_schema = Config.user_schema
     changeset = user_schema.lock user, locked_at
-    unless user_schema.locked?(user) do
+    if user_schema.locked?(user) do
+      changeset = Ecto.Changeset.add_error changeset, :locked_at, dgettext("coherence", "already locked")
+      {:error, changeset}
+    else
       changeset
       |> Config.repo.update
-    else
-      changeset = Ecto.Changeset.add_error changeset, :locked_at, "already locked"
-      {:error, changeset}
     end
   end
 
@@ -231,7 +233,7 @@ defmodule Coherence.ControllerHelpers do
       changeset
       |> Config.repo.update
     else
-      changeset = Ecto.Changeset.add_error changeset, :locked_at, "not locked"
+      changeset = Ecto.Changeset.add_error changeset, :locked_at, dgettext("coherence", "not locked")
       {:error, changeset}
     end
   end
@@ -244,7 +246,7 @@ defmodule Coherence.ControllerHelpers do
   def redirect_logged_in(conn, _params) do
     if Coherence.logged_in?(conn) do
       conn
-      |> put_flash(:info, "Already logged in." )
+      |> put_flash(:info, dgettext("coherence", "Already logged in."))
       |> redirect(to: logged_in_url(conn))
       |> halt
     else

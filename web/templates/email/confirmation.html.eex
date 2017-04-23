@@ -1,11 +1,11 @@
 <div>
-  <p>Hello <%= @name %>!<p>
+  <p><%= dgettext "coherence", "Hello %{name}!", name: @name %><p>
   <p>
-    Your new account is almost ready. Click the link below to confirm you new account.
+    <%= dgettext "coherence", "Your new account is almost ready. Click the link below to confirm you new account." %>
   </p>
   <p>
-    <a href="<%= @url %>">Confirm my Account</a>
+    <a href="<%= @url %>"><%= dgettext "coherence", "Confirm my Account" %></a>
   </p>
-  <p>Thank you!</p>
+  <p><%= dgettext "coherence", "Thank you!" %></p>
 </div>
 

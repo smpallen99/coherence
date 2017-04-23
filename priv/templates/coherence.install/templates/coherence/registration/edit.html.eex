@@ -1,5 +1,5 @@
-<h3>Edit Account</h3>
+<h3><%%= dgettext "coherence", "Edit Account" %></h3>
 
 <%%= render "form.html", changeset: @changeset,
-                        label: "Update", required: [],
+                        label: dgettext("coherence", "Update"), required: [],
                         action: registration_path(@conn, :update) %>

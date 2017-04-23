@@ -41,6 +41,7 @@ defmodule Coherence.Authentication.IpAddress do
   @behaviour Plug
   import Plug.Conn
   import Coherence.Authentication.Utils
+  import Coherence.Gettext
   require Logger
   alias Coherence.Authentication.Utils
   use Bitwise
@@ -78,7 +79,7 @@ defmodule Coherence.Authentication.IpAddress do
     %{
       allow: Keyword.get(opts, :allow, []),
       deny: Keyword.get(opts, :deny, []),
-      error: Keyword.get(opts, :error, "Unauthorized IP Address"),
+      error: Keyword.get(opts, :error, dgettext("coherence", "Unauthorized IP Address")),
       store: Keyword.get(opts, :store, Coherence.CredentialStore.Agent),
       assign_key: Keyword.get(opts, :assign_key, :current_user),
     }
@@ -131,7 +132,8 @@ defmodule Coherence.Authentication.IpAddress do
   end
 
   defp to_tuple(string) when is_binary(string) do
-    String.split(string, ".")
+    string
+    |> String.split(".")
     |> Enum.map(&String.to_integer/1)
     |> List.to_tuple
   end
