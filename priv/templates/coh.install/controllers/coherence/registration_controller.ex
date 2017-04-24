@@ -1,4 +1,4 @@
-defmodule <%= base %>.Coherence.RegistrationController do
+defmodule <%= base %>.Web.Coherence.RegistrationController do
   @moduledoc """
   Handle account registration actions.
 

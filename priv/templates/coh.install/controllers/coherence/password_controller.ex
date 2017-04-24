@@ -1,4 +1,4 @@
-defmodule <%= base %>.Coherence.PasswordController do
+defmodule <%= base %>.Web.Coherence.PasswordController do
   @moduledoc """
   Handle password recovery actions.
 
