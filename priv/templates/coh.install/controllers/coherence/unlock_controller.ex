@@ -1,4 +1,4 @@
-defmodule <%= base %>.Coherence.UnlockController do
+defmodule <%= base %>.Web.Coherence.UnlockController do
   @moduledoc """
   Handle unlock_with_token actions.
 

@@ -1,4 +1,4 @@
-defmodule <%= base %>.Coherence.InvitationController do
+defmodule <%= base %>.Web.Coherence.InvitationController do
   @moduledoc """
   Handle invitation actions.
 

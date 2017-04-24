@@ -21,7 +21,7 @@ defmodule Coherence.SessionController do
   @type conn :: Plug.Conn.t
   @type params :: Map.t
 
-  @flash_invalid Gettext.gettext(Coherence.Gettext, "Incorrect #{Config.login_field} or password.")
+  @flash_invalid dgettext("coherence", "Incorrect %{login_field} or password.", login_field: Config.login_field)
   @flash_locked dgettext("coherence", "Maximum Login attempts exceeded. Your account has been locked.")
 
   plug :layout_view, view: Coherence.SessionView
