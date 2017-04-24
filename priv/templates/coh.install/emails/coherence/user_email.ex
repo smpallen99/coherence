@@ -6,7 +6,7 @@ defmodule <%= base %>.Coherence.UserEmail do
   alias Swoosh.Email
   require Logger
   alias Coherence.Config
-  import <%= base %>.Gettext
+  import <%= base %>.Web.Gettext
 
   defp site_name, do: Config.site_name(inspect Config.module)
 

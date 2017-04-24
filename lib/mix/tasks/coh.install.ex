@@ -340,7 +340,7 @@ defmodule Mix.Tasks.Coh.Install do
 
     binding = Kernel.binding() ++ [base: config[:base], user_table_name: config[:user_table_name]]
     copy_from paths(),
-      "priv/templates/coherence.install/models/coherence", "", binding, [
+      "priv/templates/coh.install/models/coherence", "", binding, [
         {:eex, "user.ex", Path.join(web_path(), "coherence/#{name}.ex")}
       ], config
     config
@@ -554,7 +554,7 @@ defmodule Mix.Tasks.Coh.Install do
 
   defp gen_coherence_web(%{web: true, boilerplate: true, binding: binding} = config) do
     copy_from paths(),
-      "priv/templates/coherence.install", "", binding, [
+      "priv/templates/coh.install", "", [{:otp_app, Mix.Phoenix.otp_app()} | binding], [
         {:eex, "coherence_web.ex", Path.join(web_path(), "coherence_web.ex")},
       ], config
     config
@@ -564,7 +564,7 @@ defmodule Mix.Tasks.Coh.Install do
 
   defp gen_redirects(%{boilerplate: true, binding: binding} = config) do
     copy_from paths(),
-      "priv/templates/coherence.install/controllers/coherence", "", binding, [
+      "priv/templates/coh.install/controllers/coherence", "", binding, [
         {:eex, "redirects.ex", Path.join(web_path(), "controllers/coherence/redirects.ex")},
       ], config
     config
@@ -594,7 +594,7 @@ defmodule Mix.Tasks.Coh.Install do
     files = Enum.filter_map(@view_files, &(validate_option(config, elem(&1,0))), &(elem(&1, 1)))
     |> Enum.map(&({:eex, &1, Path.join(web_path(), "views/coherence/#{&1}")}))
 
-    copy_from paths(), "priv/templates/coherence.install/views/coherence", "", [{:otp_app, Mix.Phoenix.otp_app()} | binding], files, config
+    copy_from paths(), "priv/templates/coh.install/views/coherence", "", [{:otp_app, Mix.Phoenix.otp_app()} | binding], files, config
     config
   end
 
@@ -638,7 +638,7 @@ defmodule Mix.Tasks.Coh.Install do
     end
 
     copy_from paths(),
-      "priv/templates/coherence.install/templates/coherence/#{name}", "", binding, files, config
+      "priv/templates/coh.install/templates/coherence/#{name}", "", binding, files, config
   end
 
   ################
@@ -646,7 +646,7 @@ defmodule Mix.Tasks.Coh.Install do
 
   defp gen_coherence_mailer(%{binding: binding, use_email?: true, boilerplate: true} = config) do
     copy_from paths(),
-      "priv/templates/coherence.install/emails/coherence", "", binding, [
+      "priv/templates/coh.install/emails/coherence", "", binding, [
         {:eex, "coherence_mailer.ex", Path.join(web_path(), "emails/coherence/coherence_mailer.ex")},
         {:eex, "user_email.ex", Path.join(web_path(), "emails/coherence/user_email.ex")},
       ], config
@@ -673,7 +673,7 @@ defmodule Mix.Tasks.Coh.Install do
     files = Enum.filter_map(@controller_files, &(validate_option(config, elem(&1,0))), &(elem(&1, 1)))
     |> Enum.map(&({:eex, &1, Path.join(web_path(), "controllers/coherence/#{&1}")}))
 
-    copy_from paths(), "priv/templates/coherence.install/controllers/coherence", "", binding, files, config
+    copy_from paths(), "priv/templates/coh.install/controllers/coherence", "", binding, files, config
     config
   end
 
