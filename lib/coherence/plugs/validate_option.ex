@@ -6,7 +6,8 @@ defmodule Coherence.ValidateOption do
   import Coherence.ControllerHelpers, only: [logged_out_url: 1]
   import Plug.Conn
   import Phoenix.Controller, only: [put_flash: 3, redirect: 2]
-  import Coherence.Gettext
+
+  alias Coherence.Messages
 
   @behaviour Plug
 
@@ -26,7 +27,7 @@ defmodule Coherence.ValidateOption do
       conn
     else
       conn
-      |> put_flash(:error, dgettext("coherence", "Invalid Request."))
+      |> put_flash(:error, Messages.backend().invalid_request())
       |> redirect(to: logged_out_url(conn))
       |> halt
     end

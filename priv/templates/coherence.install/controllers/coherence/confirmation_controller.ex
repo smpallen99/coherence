@@ -5,12 +5,12 @@ defmodule <%= base %>.Coherence.ConfirmationController do
   A single action, `edit`, is required for the confirmation module.
 
   """
-  use Coherence.Web, :controller
-  require Logger
-  use Timex
-  alias Coherence.ControllerHelpers, as: Helpers
+  use <%= base %>.Coherence.Web, :controller
+
   alias Coherence.{ConfirmableService}
   alias Ecto.DateTime
+
+  require Logger
 
   plug Coherence.ValidateOption, :confirmable
 

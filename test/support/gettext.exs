@@ -1,4 +1,4 @@
-defmodule Coherence.Gettext do
+defmodule TestCoherence.Gettext do
   @moduledoc """
   A module providing Internationalization with a gettext-based API.
 

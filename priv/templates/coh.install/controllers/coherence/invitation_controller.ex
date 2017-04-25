@@ -10,11 +10,12 @@ defmodule <%= base %>.Web.Coherence.InvitationController do
   * create_user - create a new user database record
   * resend - resend an invitation token email
   """
-  use Coherence.Web, :controller
-  use Timex
-  alias Coherence.{Config, Invitation}
-  alias Coherence.ControllerHelpers, as: Helpers
+  use <%= base %>.Coherence.Web, :controller
+
   import Ecto.Changeset
+
+  alias Coherence.{Config, Invitation}
+
   require Logger
 
   plug Coherence.ValidateOption, :invitable

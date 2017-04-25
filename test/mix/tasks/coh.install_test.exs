@@ -3,7 +3,6 @@ Code.require_file "../../mix_helpers.exs", __DIR__
 defmodule Mix.Tasks.Coh.InstallTest do
   use ExUnit.Case
   import MixHelper
-  require Coherence.Gettext
 
   @web_path "lib/coherence/web"
   setup do
@@ -31,7 +30,7 @@ defmodule Mix.Tasks.Coh.InstallTest do
       |> assert_file_list(@all_controllers, web_path("controllers/coherence/"))
 
       assert_file web_path("controllers/coherence/session_controller.ex"), fn file ->
-        assert file =~ "defmodule TestCoherence.Coherence.SessionController do"
+        assert file =~ "defmodule TestCoherence.Web.Coherence.SessionController do"
       end
 
       assert_file web_path("controllers/coherence/redirects.ex"), fn file ->
@@ -71,13 +70,13 @@ defmodule Mix.Tasks.Coh.InstallTest do
       |> assert_file_list(@all_controllers, "controllers/coherence" |> web_path)
 
       assert_file "controllers/coherence/session_controller.ex" |> web_path, fn file ->
-        assert file =~ "defmodule TestCoherence.Coherence.SessionController do"
+        assert file =~ "defmodule TestCoherence.Web.Coherence.SessionController do"
       end
       assert_file "controllers/coherence/password_controller.ex" |> web_path, fn file ->
-        assert file =~ "defmodule TestCoherence.Coherence.PasswordController do"
+        assert file =~ "defmodule TestCoherence.Web.Coherence.PasswordController do"
       end
       assert_file "controllers/coherence/invitation_controller.ex" |> web_path, fn file ->
-        assert file =~ "defmodule TestCoherence.Coherence.InvitationController do"
+        assert file =~ "defmodule TestCoherence.Web.Coherence.InvitationController do"
       end
     end
   end

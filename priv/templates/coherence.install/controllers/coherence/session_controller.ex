@@ -3,16 +3,13 @@ defmodule <%= base %>.Coherence.SessionController do
   Handle the authentication actions.
 
   """
-  use Coherence.Web, :controller
-  use Timex
-  use Coherence.Config
+  use <%= base %>.Coherence.Web, :controller
 
   import Coherence.TrackableService
   import Ecto.Query
   import Coherence.Rememberable, only: [hash: 1, gen_cookie: 3]
 
   alias Coherence.{Rememberable}
-  alias Coherence.ControllerHelpers, as: Helpers
   alias Coherence.{ConfirmableService}
 
   require Logger

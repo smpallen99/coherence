@@ -39,12 +39,15 @@ defmodule Coherence.Authentication.IpAddress do
   """
 
   @behaviour Plug
+  use Bitwise
+
   import Plug.Conn
   import Coherence.Authentication.Utils
-  import Coherence.Gettext
-  require Logger
+
   alias Coherence.Authentication.Utils
-  use Bitwise
+  alias Coherence.Messages
+
+  require Logger
 
   @dialyzer [
     {:nowarn_function, call: 2},
@@ -79,7 +82,7 @@ defmodule Coherence.Authentication.IpAddress do
     %{
       allow: Keyword.get(opts, :allow, []),
       deny: Keyword.get(opts, :deny, []),
-      error: Keyword.get(opts, :error, dgettext("coherence", "Unauthorized IP Address")),
+      error: Keyword.get(opts, :error, Messages.backend().unauthorized_ip_address()),
       store: Keyword.get(opts, :store, Coherence.CredentialStore.Agent),
       assign_key: Keyword.get(opts, :assign_key, :current_user),
     }

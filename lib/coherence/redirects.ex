@@ -116,9 +116,10 @@ defmodule Redirects do
       def registration_create(conn, _), do: redirect(conn, to: logged_out_url(conn))
       @doc false
       def registration_update(conn, _, user) do
-        path = Application.get_env(:coherence, :module)
-        |> Module.concat(Web.Router.Helpers)
-        |> apply(:registration_path, [conn, :show])
+        path =
+          Coherence.Config.router()
+          |> Module.concat(Helpers)
+          |> apply(:registration_path, [conn, :show])
         redirect(conn, to: path)
       end
       @doc false

@@ -85,7 +85,9 @@ defmodule TestCoherence.Account do
 end
 
 defmodule TestCoherence.Rememberable do
-  use Coherence.Web, :model
+  use Ecto.Schema
+  use Coherence.Schema
+  import Ecto.Changeset
   alias Coherence.Config
 
   schema "rememberables" do

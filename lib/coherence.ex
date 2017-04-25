@@ -220,7 +220,7 @@ Run `$ mix help coherence.install` or `$ mix help coherence.install` for more in
   """
   use Application
 
-  alias Coherence.Config
+  alias Coherence.{Config, Messages}
 
   @doc false
   def start(_type, _args) do
@@ -242,9 +242,12 @@ Run `$ mix help coherence.install` or `$ mix help coherence.install` for more in
   """
   def verify_user_token(socket, token, assign_fun) do
     result = case Config.verify_user_token do
-      fun when is_function(fun) -> fun.(socket, token)
-      {mod, fun, args} -> apply(mod, fun, args)
-      error -> {:error, Gettext.gettext(Coherence.Gettext, "Invalid Config.verify_user_token option: error: #{inspect error}")}
+      fun when is_function(fun) ->
+        fun.(socket, token)
+      {mod, fun, args} ->
+        apply(mod, fun, args)
+      error ->
+        {:error, Messages.backend().verify_user_token(user_token: Config.verify_user_token(), error: error)}
     end
     case result do
       {:ok, user_id} -> {:ok, assign_fun.(socket, :user_id, user_id)}
