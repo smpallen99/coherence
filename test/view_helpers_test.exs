@@ -1,7 +1,7 @@
 defmodule CoherenceTest.ViewHelpers do
   use TestCoherence.ConnCase
   import Plug.Conn
-  alias Coherence.ViewHelpers
+  alias TestCoherence.ViewHelpers
   alias TestCoherence.User
   import Phoenix.HTML, only: [safe_to_string: 1]
 

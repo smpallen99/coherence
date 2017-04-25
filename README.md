@@ -11,9 +11,9 @@
 >
 > This is an early release. So expect changes and new features in the near future.
 >
-> Note: Coherence has been updated with experimental support for Phoenix 1.3 phx generators. The work is not yet complete, but should allow you to use the mix tasks in phx projects.
+> Note: Coherence has been updated with experimental support for Phoenix 1.3 phx generators. The work is mostly complete except for umbrella project support.
 >
-> For backwards compatiblity, the `mix coherence.install` and `mix coherence.clean` remain the same. For projects that have converted the new 1.3 project structure, please use `mix coh.install` and `mix coh.clean`.
+> For backwards compatiblity, the `mix coherence.install` and `mix coherence.clean` *remain the same*. For projects that have converted the new 1.3 project structure, please use `mix coh.install` and `mix coh.clean`.
 
 Checkout the [Coherence Demo Project](https://github.com/smpallen99/coherence_demo) to see an example project using Coherence.
 
@@ -29,7 +29,7 @@ Coherence is a full featured, configurable authentication system for Phoenix, wi
 * [Unlockable With Token](#unlockable-with-token): provides a link to send yourself an unlock email.
 * [Rememberable](#remember-me): provides persistent login with 'Remember me?' check box on login page.
 
-Coherence provides flexibility by adding namespaced templates and views for only the options specified by the `mix coherence.install` command. This boiler plate code is added to your `web/templates/coherence` and `web/views/coherence` directories.
+Coherence provides flexibility by adding namespaced templates and views for only the options specified by the `mix coh.install` command. This boiler plate code is added to your `lib/my_project/web/templates/coherence` and `lib/my_project/web/views/coherence` directories.
 
 Once the boilerplate has been generated, you are free to customize the source as required.
 
@@ -63,7 +63,7 @@ mix coherence.install --reinstall
 
 Run a `git diff` to review the updated files. If you had updated any of the boilerplate files, you may need to manually integrate the changes into the newly generated files.
 
-Run `mix help coherence.install` for more information.
+Run `mix help coh.install` for more information.
 
 ## Getting Started
 
@@ -72,7 +72,7 @@ First, decide with modules you would like to use for your project. For the follo
 Run the installer
 
 ```bash
-$ mix coherence.install --full-invitable
+$ mix coh.install --full-invitable
 ```
 
 This will:
@@ -83,10 +83,11 @@ This will:
   * timestamp_add_coherence_to_user.exs if the User model already exists
   * timestamp_create_coherence_user.exs if the User model does not exist
   * timestamp_create_coherence_invitable.exs
-* add view files web/views/coherence/
-* add template files to web/templates/coherence
-* add email files to web/emails/coherence
+* add view files lib/my_project/web/views/coherence/
+* add template files to lib/my_project/web/templates/coherence
+* add email files to lib/my_project/web/emails/coherence
 * add lib/my_project/web/coherence_web.ex file
+* add lib/my_project/web/coherence_messages.ex file
 
 You should review your `config/config.exs` as there are a couple items you will need to customize like email address and mail api_key. If you don't edit the email_from value to something different than it's default emails may not be sent.
 
@@ -95,9 +96,9 @@ See [Installer](#installer) for more install options.
 You will need to update a few files manually.
 
 ```elixir
-# web/router.ex
+# lib/my_project/web/router.ex
 
-defmodule MyProject.Router do
+defmodule MyProject.Web.Router do
   use MyProject.Web, :router
   use Coherence.Router         # Add this
 
@@ -162,7 +163,7 @@ defmodule MyProject.User do
     field :email, :string
     coherence_schema()                                    # Add this
 
-    timestamps
+    timestamps()
   end
 
   def changeset(model, params \\ %{}) do
@@ -185,10 +186,10 @@ An alternative approach is add the authentication plugs to individual controller
 
 For example, lets say you want to show a list of products for everyone visiting the site, but only want authenticated users to be able to create, update, and delete products. You could do the following:
 
-Ensure the following is in your `web/router.ex` file:
+Ensure the following is in your `lib/my_project/web/router.ex` file:
 
 ```elixir
-  scope "/", MyProject do
+  scope "/", MyProject.Web do
     pipe_through :browser
     resources "/products", ProductController
   end
@@ -197,7 +198,7 @@ Ensure the following is in your `web/router.ex` file:
 In your product controller add the following:
 
 ```elixir
-defmodule MyProject.ProductController do
+defmodule MyProject.Web.ProductController do
   use MyProject.Web, :controller
 
   plug Coherence.Authentication.Session, [protected: true] when action != :index
@@ -239,7 +240,7 @@ config :coherence,
 Update your socket module
 
 ```elixir
-defmodule MyProject.UserSocket do
+defmodule MyProject.Web.UserSocket do
   use Phoenix.Socket
   def connect(%{"token" => token}, socket) do
     case Coherence.verify_user_token(socket, token, &assign/3) do
@@ -248,6 +249,20 @@ defmodule MyProject.UserSocket do
     end
   end
 ```
+
+## Localization with Gettext
+
+Coherence supports `Gettext` for all User facing messages. Your project's `Gettext` module is used by default.
+
+All Coherence messages use `dgettext` with the `"coherence"` domain. This means that after you run `mix gettext.extract`, you will see `coherence.pot` files generated. Running `mix gettext.merge priv/gettext` will generate the corresponding `coherence.po` files.
+
+Coherence does not come with pre-translated `.po` files. We figure that you will want to tweak the Coherence language to suite your application.
+
+All files added to your project with the Coherence generators include a `import MyProject.Web.Gettext` with the `"coherence"` domain.
+
+The other messages that Coherence uses internal are pulled from the `my_project/web/coherence_messages.ex` file that is generated with the `coh.install` mix task. You can edit this file and customize it as required.
+
+To assist in upgrades to future releases of Coherence, the `MyProject.Coherence.Messages` module uses the `Coherence.Messages` behaviour which defines each message function. So, if you miss a message after upgrading, you will see a message during compile time.
 
 ## Option Overview
 
@@ -393,32 +408,32 @@ The following examples illustrate various configuration scenarios for the instal
 
 ```bash
   # Install with only the `authenticatable` option
-  $ mix coherence.install
+  $ mix co.install
 
   # Install all the options except `confirmable` and `invitable`
-  $ mix coherence.install --full
+  $ mix coh.install --full
 
   # Install all the options except `invitable`
-  $ mix coherence.install --full-confirmable
+  $ mix coh.install --full-confirmable
 
   # Install all the options except `confirmable`
-  $ mix coherence.install --full-invitable
+  $ mix coh.install --full-invitable
 
   # Install the `full` options except `lockable` and `trackable`
-  $ mix coherence.install --full --no-lockable --no-trackable
+  $ mix coh.install --full --no-lockable --no-trackable
 ```
 
 And some reinstall examples:
 
 ```bash
   # Reinstall with defaults (--silent --no-migrations --no-config --confirm-once)
-  $ mix coherence.install --reinstall
+  $ mix coh.install --reinstall
 
   # Confirm to overwrite files, show instructions, and generate migrations
-  $ mix coherence.install --reinstall --no-confirm-once --with-migrations
+  $ mix coh.install --reinstall --no-confirm-once --with-migrations
 ```
 
-Run `$ mix help coherence.install` for more information.
+Run `$ mix help coh.install` for more information.
 
 ### Clean
 
@@ -426,58 +441,58 @@ The following examples illustrate how to remove the files created by the install
 
 ```bash
   # Clean all the installed files
-  $ mix coherence.clean --all
+  $ mix coh.clean --all
 
   # Clean only the installed view and template files
-  $ mix coherence.clean --views --templates
+  $ mix coh.clean --views --templates
 
   # Clean all but the models
-  $ mix coherence.clean --all --no-models
+  $ mix coh.clean --all --no-models
 
   # Prompt once to confirm the removal
-  $ mix coherence.clean --all --confirm-once
+  $ mix coh.clean --all --confirm-once
 ```
 
 After installation, if you later want to remove one more options, here are a couple examples:
 
 ```bash
   # Clean one option
-  $ mix coherence.clean --options=recoverable
+  $ mix coh.clean --options=recoverable
 
   # Clean several options without confirmation
-  $ mix coherence.clean --no-confirm --options="recoverable unlockable-with-token"
+  $ mix coh.clean --no-confirm --options="recoverable unlockable-with-token"
 
   # Test the uninstaller without removing files
-  $ mix coherence.clean --dry-run --options="recoverable unlockable-with-token"
+  $ mix coh.clean --dry-run --options="recoverable unlockable-with-token"
 ```
 
 ## Customization
 
-The `coherence.install` mix task generates a bunch of boiler plate code so you can easily customize the views, templates, and mailer.
+The `coh.install` mix task generates a bunch of boiler plate code so you can easily customize the views, templates, and mailer.
 
 Also, checkout the Coherence.Config module for a list of config items you can use to tune the behaviour of Coherence.
 
 ### Custom Controllers
 
-By default, controller boilerplate is not generated unless the `--controllers` option is provided to `mix coherence.install`.
+By default, controller boilerplate is not generated unless the `--controllers` option is provided to `mix coh.install`.
 
-The generated controllers are named `MyProject.Coherence.SessionController` as an example. Generated controllers are located in `web/controllers/coherence/`
+The generated controllers are named `MyProject.Coherence.SessionController` as an example. Generated controllers are located in `lib/my_project/web/controllers/coherence/`
 
 If the controllers are generated, you will need to change your router to use the new names. For example:
 
 ```elixir
-  # web/router.ex
+  # lib/my_project/web/router.ex
   use MyProject.Web, :router
   use Coherence.Router
 
   # ...
 
-  scope "/", MyProject do   # note the addition of MyProject
+  scope "/", MyProject.Web do   # note the addition of MyProject
     pipe_through :public
     coherence_routes()
   end
 
-  scope "/", MyProject do   # note the addition of MyProject
+  scope "/", MyProject.Web do   # note the addition of MyProject
     pipe_through :browser
     coherence_routes :protected
   end
@@ -500,7 +515,7 @@ config :coherence,
 
 ### Customizing Redirections
 
-Many of the controller actions redirect the user after create and update actions. These redirections can be customized by adding function call backs in the `web/controllers/redirect.ex` module that is generated by the `mix coherence.install` task.
+Many of the controller actions redirect the user after create and update actions. These redirections can be customized by adding function call backs in the `lib/my_project/web/controllers/redirect.ex` module that is generated by the `mix coh.install` task.
 
 For example, to have the user redirected to the login screen after logging out at the following:
 
@@ -523,15 +538,15 @@ By default coherence uses its own layout, that is installed to `lib/my_project/w
 If you want to customize coherence controllers layout, you can follow different approaches:
 
 * Edit the generated layout at `lib/my_project/web/templates/coherence/layout/app.html.eex`.
-* Set `:layout` in your config file. e.g. `config :coherence, :layout, {MyProject.LayoutView, :app}`
+* Set `:layout` in your config file. e.g. `config :coherence, :layout, {MyProject.Web.LayoutView, :app}`
 * Install coherence controllers to application and edit them, to use layout module different from `Coherence.LayoutView`
 * And the last solution is to use `plug :put_layout` in your `lib/my_project/web/router.ex` file. For example:
 
 ```elixir
-defmodule MyApp.Router do
+defmodule MyApp.Web.Router do
   # ...
   pipeline :coherence do
-    plug :put_layout, {MyProject.LayoutView, :app}
+    plug :put_layout, {MyProject.Web.LayoutView, :app}
   end
   # ...
   scope "/" do
@@ -558,7 +573,7 @@ For example, the following defines a changeset/3 function in your user model:
 Now add a new `changeset/3` function to the user model. The following example defines a custom changeset for the registration controller:
 
 ```elixir
-  # lib/my_project/web/models/coherence/user.ex
+  # lib/coherence/coherence/user.ex
   defmodule CoherenceDemo.User do
     use CoherenceDemo.Web, :model
     use Coherence.Schema
@@ -737,10 +752,10 @@ We appreciate any contribution to Coherence. Check our [CODE_OF_CONDUCT.md](CODE
 
 ## License
 
-`coherence` is Copyright (c) 2016 E-MetroTel
+`coherence` is Copyright (c) 2016-2017 E-MetroTel
 
 The source is released under the MIT License.
 
 Check [LICENSE](LICENSE) for more information.
 
-Much of the authentication code was taken from [PlugAuth](https://github.com/bitgamma/plug_auth), Copyright (c) 2014, Bitgamma OÜ <opensource@bitgamma.com>
+Much of the authentication plugs code was taken from [PlugAuth](https://github.com/bitgamma/plug_auth), Copyright (c) 2014, Bitgamma OÜ <opensource@bitgamma.com>

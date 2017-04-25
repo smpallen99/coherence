@@ -4,7 +4,7 @@ defmodule <%= base %>.Coherence.ViewHelpers do
   """
   use Phoenix.HTML
   alias Coherence.Config
-  import Coherence.Gettext
+  import <%= base %>.Web.Gettext
 
   @seperator {:safe, "&nbsp; | &nbsp;"}
   @helpers Module.concat(Application.get_env(:coherence, :module), Web.Router.Helpers)

@@ -29,7 +29,6 @@ defmodule Coherence.Web do
 
       import Ecto
       import Ecto.Query
-      import Coherence.Gettext
 
       alias Coherence.Config
       require Redirects
@@ -45,7 +44,6 @@ defmodule Coherence.Web do
 
   def service do
     quote do
-      import Coherence.Gettext
     end
   end
 

@@ -1,4 +1,39 @@
-# Changelog
+# Coherence Changelog
+
+## 0.4.0-dev (2017-04-xx)
+
+See these `0.3.1` to `0.4.0` [upgrade instructions](https://gist.github.com/smpallen99/92d826b6f523edd83b4a358cf05e97e7) to bring your existing app up to speed.
+
+* Enhancements
+  * Localization with Gettext
+  * Support the new `Phoenix 1.3` project structure created with `mix phx.new`. Use `mix coh.install`
+  * Support for legacy projects with the `mix coherence.install` task
+  * Callback to redirect invitation resend
+  * Add use_binary_id config
+  * Use the binary_id generators setting in your project
+  * Remove most of the Credo warnings
+  * Support user tokens for channel authentication
+  * Removed compiler warnings for Elixir 1.4
+  * Change datetime to utc_datetime
+  * Added new trackable-table option to reduce noise in user schema
+  * Track login and logout in trackable-table
+  * Added specs and resolved many dialyzer warnings
+  * Added asyc_rememberable? support for near concurrent Ajax requests
+  * Don't increment rememberable sequence number for Ajax requests
+  * Added support for custom layouts
+  * Added configurable require current password to change passwords
+  * Added support for fast switch user (no password required) in dev environment only
+
+* Bug Fixes
+  * Fix session controller when lockable is false
+  * Make remember me clickable
+  * Fixed layout for unauthenticated protected routes
+  * Fixed race conditions in rememberable callback
+
+* Backwards incompatible changes
+  * coherence config requires `:messages_backend` field to be set (MyProject.Coherence.Messages)
+  * coherence_messages.ex file must be generated and included in our app. Done by the installer
+  * coherence config requires `:router` field to be set (MyProject.Web.Router)
 
 ## 0.3.1  (2016-11-26)
 

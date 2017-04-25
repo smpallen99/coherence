@@ -7,11 +7,8 @@ defmodule <%= base %>.Coherence.UnlockController do
 
   Basic locking and unlocking does not use this controller.
   """
-  use Coherence.Web, :controller
-  use Timex
-  use Coherence.Config
+  use <%= base %>.Coherence.Web, :controller
 
-  alias Coherence.ControllerHelpers, as: Helpers
   alias Coherence.{TrackableService, LockableService}
 
   require Logger

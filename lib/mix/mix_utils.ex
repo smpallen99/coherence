@@ -27,28 +27,28 @@ defmodule Coherence.Mix.Utils do
 
     list = Enum.join(list, ", ")
 
-    Mix.raise Gettext.gettext(Coherence.Gettext, """
+    Mix.raise """
     The following option(s) are not supported:
         #{inspect list}
-    """)
+    """
   end
 
   @spec verify_args!([String.t] | [], [String.t] | []) :: String.t | nil
   def verify_args!(parsed, unknown) do
     unless parsed == [] do
       opts = Enum.join parsed, ", "
-      Mix.raise Gettext.gettext(Coherence.Gettext, """
+      Mix.raise """
       Invalid argument(s) #{opts}
-      """)
+      """
     end
     unless unknown == [] do
       opts =
         unknown
         |> Enum.map(&(elem(&1,0)))
         |> Enum.join(", ")
-      Mix.raise Gettext.gettext(Coherence.Gettext, """
+      Mix.raise """
       Invalid argument(s) #{opts}
-      """)
+      """
     end
   end
 

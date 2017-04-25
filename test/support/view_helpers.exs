@@ -1,10 +1,10 @@
-defmodule Coherence.ViewHelpers do
+defmodule TestCoherence.ViewHelpers do
   @moduledoc """
   Helper functions for Coherence Views.
   """
   use Phoenix.HTML
-  import Coherence.Gettext
   alias Coherence.Config
+  alias Coherence.Messages
 
   @type conn :: Plug.Conn.t
   @type schema :: Ecto.Schema.t
@@ -12,13 +12,13 @@ defmodule Coherence.ViewHelpers do
   @seperator {:safe, "&nbsp; | &nbsp;"}
   @helpers Module.concat(Application.get_env(:coherence, :module), Web.Router.Helpers)
 
-  @recover_link  dgettext("coherence", "Forgot your password?")
-  @unlock_link   dgettext("coherence", "Send an unlock email")
-  @register_link dgettext("coherence", "Need An Account?")
-  @invite_link   dgettext("coherence", "Invite Someone")
-  @confirm_link  dgettext("coherence", "Resend confirmation email")
-  @signin_link   dgettext("coherence", "Sign In")
-  @signout_link  dgettext("coherence", "Sign Out")
+  @recover_link  Messages.backend().forgot_your_password()
+  @unlock_link   Messages.backend().send_an_unlock_email()
+  @register_link Messages.backend().need_an_account()
+  @invite_link   Messages.backend().invite_someone()
+  @confirm_link  Messages.backend().resend_confirmation_email()
+  @signin_link   Messages.backend().sign_in()
+  @signout_link  Messages.backend().sign_out()
 
   @doc """
   Create coherence template links.
@@ -186,7 +186,7 @@ defmodule Coherence.ViewHelpers do
     label f, name, opts do
       [
         "#{humanize(name)}\n",
-        content_tag(:abbr, "*", class: "required", title: dgettext("coherence", "required"))
+        content_tag(:abbr, "*", class: "required", title: Messages.backend().required())
       ]
     end
   end

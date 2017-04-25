@@ -11,11 +11,11 @@ defmodule <%= base %>.Web.Coherence.PasswordController do
   * edit - render the reset password form
   * update - verify password, password confirmation, and update the database
   """
-  use Coherence.Web, :controller
-  require Logger
-  use Timex
-  alias Coherence.ControllerHelpers, as: Helpers
+  use <%= base %>.Coherence.Web, :controller
+
   alias Coherence.TrackableService
+
+  require Logger
 
   plug :layout_view, view: Coherence.PasswordView
   plug :redirect_logged_in when action in [:new, :create, :edit, :update]

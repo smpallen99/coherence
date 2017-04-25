@@ -23,7 +23,8 @@ defmodule Coherence.Authentication.Basic do
   @behaviour Plug
   import Plug.Conn
   import Coherence.Authentication.Utils
-  import Coherence.Gettext
+
+  alias Coherence.Messages
 
   @doc """
     Returns the encoded form for the given `user` and `password` combination.
@@ -49,8 +50,8 @@ defmodule Coherence.Authentication.Basic do
   # @spec init(Keyword.t) :: map
   def init(opts) do
     %{
-      realm: Keyword.get(opts, :realm, dgettext("coherence", "Restricted Area")),
-      error: Keyword.get(opts, :error, dgettext("coherence", "HTTP Authentication Required")),
+      realm: Keyword.get(opts, :realm, Messages.backend().restricted_area()),
+      error: Keyword.get(opts, :error, Messages.backend().http_authentication_required()),
       store: Keyword.get(opts, :store, Coherence.CredentialStore.Agent),
       assigns_key: Keyword.get(opts, :assigns_key, :current_user),
     }

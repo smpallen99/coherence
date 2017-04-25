@@ -18,6 +18,26 @@ defmodule <%= base %>.Coherence.Web do
     end
   end
 
+  def controller do
+    quote do
+      use Phoenix.Controller, except: [layout_view: 2] #, namespace: BlogPhx.Web
+      use Coherence.Config
+      use Timex
+
+      import Ecto
+      import Ecto.Query
+      import Plug.Conn
+      import <%= base %>.Web.Router.Helpers
+      import <%= base %>.Web.Gettext
+      import Coherence.ControllerHelpers
+
+      alias Coherence.Config
+      alias Coherence.ControllerHelpers, as: Helpers
+
+      require Redirects
+    end
+  end
+
   @doc """
   When used, dispatch to the appropriate controller/view/etc.
   """

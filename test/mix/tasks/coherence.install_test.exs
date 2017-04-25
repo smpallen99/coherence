@@ -3,7 +3,6 @@ Code.require_file "../../mix_helpers.exs", __DIR__
 defmodule Mix.Tasks.Coherence.InstallTest do
   use ExUnit.Case
   import MixHelper
-  require Coherence.Gettext
 
   @web_path "web"
   setup do
@@ -35,7 +34,7 @@ defmodule Mix.Tasks.Coherence.InstallTest do
       end
 
       assert_file web_path("controllers/coherence/redirects.ex"), fn file ->
-        assert file =~ "import TestCoherence.Web.Router.Helpers"
+        assert file =~ "defmodule Coherence.Redirects do"
       end
     end
   end
