@@ -29,6 +29,7 @@ defmodule Mix.Tasks.Coh.Clean do
   * `--controllers` -- clean controller files
   * `--email` -- clean email files
   * `--web` -- clean the web/coherence_web.ex file
+  * `--messages` -- clean the web/coherence_messages.ex file
   * `--migrations` -- clean the migration files
   * `--options` -- Clean one or more specific options
   * `--dry-run` -- Show what will be removed, but don't actually remove any files
@@ -52,7 +53,7 @@ defmodule Mix.Tasks.Coh.Clean do
   ]
 
   @config_file "config/config.exs"
-  @remove_opts ~w(views templates models controllers emails web migrations config)a
+  @remove_opts ~w(views templates models controllers emails web messages migrations config)a
   @default_opts ~w(confirm)a
   @clean_opts [{:options, :string}]
   @switches Enum.map([:all, :confirm_once | @remove_opts] ++ @default_opts, &({&1, :boolean})) ++ @clean_opts ++ [dry_run: :boolean]
@@ -246,6 +247,11 @@ defmodule Mix.Tasks.Coh.Clean do
 
   defp remove!(%{web: true} = config, :web) do
     path = Path.join ["lib", otp_app(), "web/coherence_web.ex"]
+    confirm config, path, fn -> rm!(path) end
+  end
+
+  defp remove!(%{messages: true} = config, :messages) do
+    path = Path.join ["lib", otp_app(), "web/coherence_messages.ex"]
     confirm config, path, fn -> rm!(path) end
   end
 
