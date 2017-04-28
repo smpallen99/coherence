@@ -181,7 +181,7 @@ defmodule Coherence.SessionController do
 
     put_flash(conn, :error, flash)
   end
-  defp failed_login(conn, _user, _), do: put_flash(conn, :error, Messages.backend().incorrect_login_or_password())
+  defp failed_login(conn, _user, _), do: put_flash(conn, :error, Messages.backend().incorrect_login_or_password(login_field: Config.login_field()))
 
   @doc """
   Call back for the authentication plug.
