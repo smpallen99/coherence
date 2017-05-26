@@ -74,7 +74,7 @@ defmodule <%= base %>.Coherence.ViewHelpers do
     register_link = Keyword.get opts, :register, @register_link
     confirm_link  = Keyword.get opts, :confirm, @confirm_link
 
-    user_schema = Coherence.Config.user_schema
+    user_schema = Config.user_schema
     [
       recover_link(conn, user_schema, recover_link),
       unlock_link(conn, user_schema, unlock_link),

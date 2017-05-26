@@ -41,12 +41,12 @@ defmodule <%= base %>.Coherence.UserEmail do
     |> from(from_email())
     |> to(user_email(user))
     |> add_reply_to()
-    |> subject("#{site_name} - Unlock Instructions")
+    |> subject("#{site_name()} - Unlock Instructions")
     |> render_body("unlock.html", %{url: url, name: first_name(user.name)})
   end
 
   defp add_reply_to(mail) do
-    case Coherence.Config.email_reply_to do
+    case Config.email_reply_to do
       nil              -> mail
       true             -> reply_to mail, from_email()
       address          -> reply_to mail, address
@@ -65,7 +65,7 @@ defmodule <%= base %>.Coherence.UserEmail do
   end
 
   defp from_email do
-    case Coherence.Config.email_from do
+    case Config.email_from do
       nil ->
         Logger.error ~s|Need to configure :coherence, :email_from_name, "Name", and :email_from_email, "me@example.com"|
         nil
