@@ -242,14 +242,14 @@ defmodule Coherence.Schema do
 
         def validate_coherence(changeset, params) do
           changeset
-          |> validate_length(:password, min: 4)
+          |> validate_length(:password, min: Config.minimum_password_length)
           |> validate_current_password(params)
           |> validate_password(params)
         end
 
         def validate_coherence_password_reset(changeset, params) do
           changeset
-          |> validate_length(:password, min: 4)
+          |> validate_length(:password, min: Config.minimum_password_length)
           |> validate_password(params)
         end
 
