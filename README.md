@@ -58,7 +58,7 @@ After upgrading a Coherence version, you should generate the boilerplate files. 
 This option uses your project's existing coherence config and runs the the installer with the same options.
 
 ```shell
-mix coherence.install --reinstall
+mix coherence.install,reinstall
 ```
 
 Run a `git diff` to review the updated files. If you had updated any of the boilerplate files, you may need to manually integrate the changes into the newly generated files.
@@ -72,7 +72,7 @@ First, decide with modules you would like to use for your project. For the follo
 Run the installer
 
 ```bash
-$ mix coh.install --full-invitable
+$ mix coh.install,full-invitable
 ```
 
 This will:
@@ -411,26 +411,26 @@ The following examples illustrate various configuration scenarios for the instal
   $ mix co.install
 
   # Install all the options except `confirmable` and `invitable`
-  $ mix coh.install --full
+  $ mix coh.install,full
 
   # Install all the options except `invitable`
-  $ mix coh.install --full-confirmable
+  $ mix coh.install,full-confirmable
 
   # Install all the options except `confirmable`
-  $ mix coh.install --full-invitable
+  $ mix coh.install,full-invitable
 
   # Install the `full` options except `lockable` and `trackable`
-  $ mix coh.install --full --no-lockable --no-trackable
+  $ mix coh.install,full,no-lockable,no-trackable
 ```
 
 And some reinstall examples:
 
 ```bash
-  # Reinstall with defaults (--silent --no-migrations --no-config --confirm-once)
-  $ mix coh.install --reinstall
+  # Reinstall with defaults (--silent,no-migrations,no-config,confirm-once)
+  $ mix coh.install,reinstall
 
   # Confirm to overwrite files, show instructions, and generate migrations
-  $ mix coh.install --reinstall --no-confirm-once --with-migrations
+  $ mix coh.install,reinstall,no-confirm-once,with-migrations
 ```
 
 Run `$ mix help coh.install` for more information.
@@ -441,29 +441,29 @@ The following examples illustrate how to remove the files created by the install
 
 ```bash
   # Clean all the installed files
-  $ mix coh.clean --all
+  $ mix coh.clean,all
 
   # Clean only the installed view and template files
-  $ mix coh.clean --views --templates
+  $ mix coh.clean,views,templates
 
   # Clean all but the models
-  $ mix coh.clean --all --no-models
+  $ mix coh.clean,all,no-models
 
   # Prompt once to confirm the removal
-  $ mix coh.clean --all --confirm-once
+  $ mix coh.clean,all,confirm-once
 ```
 
 After installation, if you later want to remove one more options, here are a couple examples:
 
 ```bash
   # Clean one option
-  $ mix coh.clean --options=recoverable
+  $ mix coh.clean,options=recoverable
 
   # Clean several options without confirmation
-  $ mix coh.clean --no-confirm --options="recoverable unlockable-with-token"
+  $ mix coh.clean,no-confirm,options="recoverable unlockable-with-token"
 
   # Test the uninstaller without removing files
-  $ mix coh.clean --dry-run --options="recoverable unlockable-with-token"
+  $ mix coh.clean,dry-run,options="recoverable unlockable-with-token"
 ```
 
 ## Customization
@@ -738,6 +738,62 @@ The second example allows any ip except for localhost.
 Coherence is a user management and authentication solution. Support for authorization (access control) can be achieved using another package like [Canary](https://github.com/cpjk/canary).
 
 For an example of using [Canary](https://github.com/cpjk/canary) with Coherence, please visit the [CoherenceDemo canary branch](https://github.com/smpallen99/coherence_demo/tree/canary).
+
+## Contexts
+
+Phoenix 1.3 promotes contexts as an abstraction on top of Ecto schemas or models.
+Coherence generates a User schema that contains a lot of information that's not really needed for many parts of your app.
+Contexts should have no relations to schemas defined outside the context.
+We should define a User schema per context.
+That User schema would only expose fields that are necessary for that context.
+
+For example, your `Billing` context might need your user's address, while the `Core` context doesn't need that information.
+
+Coherence comes with a generator, inspired by the default Phx generators, that will generate a new user schema inside a context.
+Besides generating a schema with the default access functions, this task will generate a `YourApp.YourContext.current_user/1` function with the same API as `Coherence.current_user/1`.
+A `create_user/1` function will not be generated because it doesn't usually make sense to generate a user outside of Coherence's workflow.
+You can use this function to extract the context-specific user from the `conn`.
+
+The command line API for the generator is similar to the Phx context generator, except for the fact taht you don't provide a singular or plural name for the resource.
+By design, the resource name is hardcoded to `User` and the plural is hardcoded to `users`.
+
+For example, you can create a new user in the `Core` context, containing only the `name` and `email` fields (both of them of type string):
+
+```
+mix coh.context Core name:string email:string
+```
+
+The field names and types must match the ones in the `YourApp.User` schema generated by `mix coh.install`.
+Besides the fields you provide explicitly, the schema will by default contain 3 additional fields by default:
+
+1. `:id`, the DB primary key
+2. `:inserted_at`, the time at which the DB row was inserted
+3. `:updated_at`, the time at which the DB row was last updated
+
+The `:inserted_at` and `:updated_at` are generated by the `timestamps()` macro in the official Phx model generator.
+It's probably a good idea to keep them in your schema, but they're optional.
+You can inspect the generated file at `your_app/lib/your_context/user.ex`.
+
+Like the default Phx context generators, this generator will either:
+
+1. create a `your_app/lib/your_context/your_context.ex` to house your context module with some convenience functions *or*
+2. add the user-specific convenience functions to the context module
+
+Specifically, the generator adds the following functions:
+
+* `current_user/1`: This function extracts the `%YourApp.YourContext.User{}` from the `conn`.
+  It's used exactly the same way as `Coherence.current_user/1`, which returns the default Coherence user,
+  but returns instead the context-appropriate user instead of the global one.
+  If the user isn't logged in, `current_user(conn)` returns `nil` (just like `Coherence.current_user/1`)
+  This function calls `Coherence.current_user/1` on the `conn` and creates a `%YourApp.YourContext.User{}` out of the relevant fields.
+  Note that this is a pure function that can be applied to a `conn` anywhere in your app.
+  It's not associated with any route, view or controller.
+  It's your responsibility to get the correct user for your context.
+* Functions `list_user/0`, `get_user/1`, `update_user/2`, `delete_user/1` and `change_user/1`.
+  These functions are the same as the ones generated for any resource by the Phx generators.
+  Coherence doesn't generate a `create_user/1` function because it doesn't usually make sense to create a user except using the normal Coherence way.
+  You can always add a `create_user/1` function to your app if it makes sense.
+
 
 ## Contributing
 
