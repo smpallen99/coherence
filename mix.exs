@@ -38,17 +38,17 @@ defmodule Coherence.Mixfile do
       {:comeonin, "~> 3.0"},
       {:phoenix, "~> 1.3.0-rc", override: true},
       {:phoenix_html, "~> 2.6"},
-      {:gettext, "~> 0.11"},
+      {:gettext, "~> 0.13"},
       {:uuid, "~> 1.0"},
       {:phoenix_swoosh, git: "https://github.com/vircung/phoenix_swoosh.git", branch: "phx-1.3"},
-      {:timex, "~> 3.0"},
-      {:timex_ecto, "~> 3.0"},
+      {:timex, "~> 3.1"},
+      {:timex_ecto, "~> 3.1"},
       {:floki, "~> 0.8", only: :test},
-      {:ex_doc, "== 0.11.5", only: :dev},
-      {:earmark, "== 0.2.1", only: :dev, override: true},
+      {:ex_doc, "~> 0.16", only: :dev},
+      {:earmark, "~> 1.2", only: :dev, override: true},
       {:postgrex, ">= 0.0.0", only: :test},
       {:dialyxir, "~> 0.4", only: [:dev], runtime: false},
-      {:credo, "~> 0.5", only: [:dev, :test]}
+      {:credo, "~> 0.8", only: [:dev, :test]}
     ]
   end
 

@@ -586,14 +586,6 @@ defmodule Mix.Tasks.Coherence.Install do
 
   defp gen_redirects(%{boilerplate: true, binding: binding} = config) do
     copy_from paths(),
-      "priv/templates/coh.install/controllers/coherence", "", binding, [
-        {:eex, "redirects.ex", "web/controllers/coherence/redirects.ex"},
-      ], config
-    config
-  end
-
-  defp gen_redirects(%{boilerplate: true, binding: binding} = config) do
-    copy_from paths(),
       "priv/templates/coherence.install/controllers/coherence", "", binding, [
         {:eex, "redirects.ex", "web/controllers/coherence/redirects.ex"},
       ], config
