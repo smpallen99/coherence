@@ -5,10 +5,10 @@ defmodule TestCoherence.User do
   import Ecto.Changeset
 
   schema "users" do
-    field :email, :string
-    field :name, :string
     coherence_schema()
 
+    field :email, :string
+    field :name, :string
     timestamps()
   end
 
@@ -85,7 +85,9 @@ defmodule TestCoherence.Account do
 end
 
 defmodule TestCoherence.Rememberable do
-  use Coherence.Web, :model
+  use Ecto.Schema
+  use Coherence.Schema
+  import Ecto.Changeset
   alias Coherence.Config
 
   schema "rememberables" do

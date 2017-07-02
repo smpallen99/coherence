@@ -1,6 +1,6 @@
 defmodule CoherenceTest.InvitationController do
   use TestCoherence.ConnCase
-  import TestCoherence.Router.Helpers
+  import TestCoherence.Web.Router.Helpers
   import Coherence.ControllerHelpers, only: [random_string: 1]
 
   setup %{conn: conn} do

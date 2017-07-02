@@ -7,6 +7,8 @@ defmodule Coherence.RequireLogin do
   import Plug.Conn
   import Phoenix.Controller, only: [put_flash: 3, redirect: 2]
 
+  alias Coherence.Messages
+
   @behaviour Plug
 
   @dialyzer [
@@ -25,7 +27,7 @@ defmodule Coherence.RequireLogin do
       conn
     else
       conn
-      |> put_flash(:error, "Invalid Request.")
+      |> put_flash(:error, Messages.backend().invalid_request())
       |> redirect(to: logged_out_url(conn))
       |> halt
     end

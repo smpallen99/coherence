@@ -49,7 +49,9 @@ defmodule Coherence.Config do
   * :verify_user_token (fn socket, token -> Phoenix.Token.verify(socket, "user socket", token, max_age: 2 * 7 * 24 * 60 * 60) end
   *                    can also be a 3 element tuple as described above for :token_generator
   * :use_binary_id (false) - Use binary ids.
-  # :minimum_password_length The minimum password length to be accepted. Default value is 4.
+  * :minimum_password_length The minimum password length to be accepted. Default value is 4.
+  * :messages_backend - (MyApp.Coherence.Messages)
+  * :router: the module name of your Router (`router: MyProject.Router`)
 
   ## Examples
 
@@ -106,7 +108,9 @@ defmodule Coherence.Config do
     {:session_key, "session_auth"},
     {:rememberable_cookie_expire_hours, 2 * 24},
     {:async_rememberable?, false},
-    {:minimum_password_length, 4}
+    {:minimum_password_length, 4},
+    :messages_backend,
+    :router
   ]
   |> Enum.each(fn
         {key, default} ->

@@ -2,12 +2,13 @@ defmodule Coherence.ControllerHelpers do
   @moduledoc """
   Common helper functions for Coherence Controllers.
   """
-  alias Coherence.Config
-  require Logger
   import Phoenix.Controller, only: [put_flash: 3, redirect: 2, put_layout: 2, put_view: 2]
   import Plug.Conn, only: [halt: 1]
-  alias Coherence.{ConfirmableService, RememberableService, TrackableService}
-  @lockable_failure "Failed to update lockable attributes "
+
+  alias Coherence.{ConfirmableService, RememberableService, TrackableService, Messages}
+  alias Coherence.Config
+
+  require Logger
 
   @type schema :: Ecto.Schema.t
   @type changeset :: Ecto.Changeset.t
@@ -22,12 +23,15 @@ defmodule Coherence.ControllerHelpers do
   """
   @spec layout_view(Plug.Conn.t, Keyword.t) :: Plug.Conn.t
   def layout_view(conn, opts) do
-    conn =
-      case Config.layout do
-        nil -> conn
-        layout -> put_layout conn, layout
+    layout =
+      case opts[:layout] || Config.layout() do
+        nil -> {Coherence.LayoutView, "app.html"}
+        layout -> layout
       end
-    set_view(conn, opts)
+
+    conn
+    |> put_layout(layout)
+    |> set_view(opts)
   end
 
   @doc """
@@ -42,13 +46,13 @@ defmodule Coherence.ControllerHelpers do
   end
 
   @doc """
-  Get the MyProject.Router.Helpers module.
+  Get the Router.Helpers module for the project..
 
   Returns the projects Router.Helpers module.
   """
   @spec router_helpers() :: module
   def router_helpers do
-    Module.concat(Config.module, Router.Helpers)
+    Module.concat(Config.router(), Helpers)
   end
 
   @doc """
@@ -56,7 +60,7 @@ defmodule Coherence.ControllerHelpers do
   """
   @spec logged_out_url(Plug.Conn.t) :: String.t
   def logged_out_url(conn) do
-    Config.logged_out_url || Module.concat(Config.module, Router.Helpers).session_path(conn, :new)
+    Config.logged_out_url || router_helpers().session_path(conn, :new)
   end
 
   @doc """
@@ -132,7 +136,7 @@ defmodule Coherence.ControllerHelpers do
   """
   @spec lockable_failure(Ecto.Changeset.t) :: :ok
   def lockable_failure(changeset) do
-    Logger.error @lockable_failure <> inspect(changeset.errors)
+    Logger.error "Failed to update lockable attributes " <> inspect(changeset.errors)
   end
 
   @doc """
@@ -171,10 +175,10 @@ defmodule Coherence.ControllerHelpers do
 
       send_user_email :confirmation, user, url
       conn
-      |> put_flash(:info, "Confirmation email sent.")
+      |> put_flash(:info, Messages.backend().confirmation_email_sent())
     else
       conn
-      |> put_flash(:info, "Registration created successfully.")
+      |> put_flash(:info, Messages.backend().registration_created_successfully())
     end
   end
 
@@ -190,7 +194,7 @@ defmodule Coherence.ControllerHelpers do
   def confirm!(user) do
     changeset = ConfirmableService.confirm(user)
     if ConfirmableService.confirmed? user do
-      changeset = Ecto.Changeset.add_error changeset, :confirmed_at, "already confirmed"
+      changeset = Ecto.Changeset.add_error changeset, :confirmed_at, Messages.backend().already_confirmed()
       {:error, changeset}
     else
       Config.repo.update changeset
@@ -211,7 +215,7 @@ defmodule Coherence.ControllerHelpers do
     user_schema = Config.user_schema
     changeset = user_schema.lock user, locked_at
     if user_schema.locked?(user) do
-      changeset = Ecto.Changeset.add_error changeset, :locked_at, "already locked"
+      changeset = Ecto.Changeset.add_error changeset, :locked_at, Messages.backend().already_locked()
       {:error, changeset}
     else
       changeset
@@ -232,7 +236,7 @@ defmodule Coherence.ControllerHelpers do
       changeset
       |> Config.repo.update
     else
-      changeset = Ecto.Changeset.add_error changeset, :locked_at, "not locked"
+      changeset = Ecto.Changeset.add_error changeset, :locked_at, Messages.backend().not_locked()
       {:error, changeset}
     end
   end
@@ -245,7 +249,7 @@ defmodule Coherence.ControllerHelpers do
   def redirect_logged_in(conn, _params) do
     if Coherence.logged_in?(conn) do
       conn
-      |> put_flash(:info, "Already logged in.")
+      |> put_flash(:info, Messages.backend().already_logged_in())
       |> redirect(to: logged_in_url(conn))
       |> halt
     else

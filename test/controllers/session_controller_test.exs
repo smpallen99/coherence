@@ -1,6 +1,6 @@
 defmodule CoherenceTest.SessionController do
   use TestCoherence.ConnCase
-  import TestCoherence.Router.Helpers
+  import TestCoherence.Web.Router.Helpers
   alias Coherence.{Trackable, ControllerHelpers}
   import Ecto.Query
   alias TestCoherence.User

@@ -6,15 +6,17 @@ defmodule Coherence.ConfirmationController do
 
   """
   use Coherence.Web, :controller
-  require Logger
   use Timex
+
   alias Coherence.ControllerHelpers, as: Helpers
-  alias Coherence.{ConfirmableService}
+  alias Coherence.{ConfirmableService, Messages}
   alias Ecto.DateTime
+
+  require Logger
 
   plug Coherence.ValidateOption, :confirmable
 
-  plug :layout_view
+  plug :layout_view, view: Coherence.ConfirmationView
   plug :redirect_logged_in when action in [:new]
 
   @doc """
@@ -46,12 +48,12 @@ defmodule Coherence.ConfirmationController do
     case user do
       nil ->
         conn
-        |> put_flash(:error, "Could not find that email address")
+        |> put_flash(:error, Messages.backend().could_not_find_that_email_address())
         |> render("new.html", changeset: changeset)
       user ->
         if user_schema.confirmed?(user) do
           conn
-          |> put_flash(:error, "Account already confirmed.")
+          |> put_flash(:error, Messages.backend().account_already_confirmed())
           |> render(:new, [email: "", changeset: changeset])
         else
           conn
@@ -80,12 +82,12 @@ defmodule Coherence.ConfirmationController do
       nil ->
         changeset = Helpers.changeset :confirmation, user_schema, user_schema.__struct__
         conn
-        |> put_flash(:error, "Invalid confirmation token.")
+        |> put_flash(:error, Messages.backend().invalid_confirmation_token())
         |> redirect_to(:confirmation_edit_invalid, params)
       user ->
         if ConfirmableService.expired? user do
           conn
-          |> put_flash(:error, "Confirmation token expired.")
+          |> put_flash(:error, Messages.backend().confirmation_token_expired())
           |> redirect_to(:confirmation_edit_expired, params)
         else
           changeset = Helpers.changeset(:confirmation, user_schema, user, %{
@@ -95,11 +97,11 @@ defmodule Coherence.ConfirmationController do
           case Config.repo.update(changeset) do
             {:ok, _user} ->
               conn
-              |> put_flash(:info, "User account confirmed successfully.")
+              |> put_flash(:info, Messages.backend().user_account_confirmed_successfully())
               |> redirect_to(:confirmation_edit, params)
             {:error, _changeset} ->
               conn
-              |> put_flash(:error, "Problem confirming user account. Please contact the system administrator.")
+              |> put_flash(:error, Messages.backend().problem_confirming_user_account())
               |> redirect_to(:confirmation_edit_error, params)
           end
         end

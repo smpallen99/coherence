@@ -7,20 +7,19 @@ defmodule <%= base %>.Coherence.UnlockController do
 
   Basic locking and unlocking does not use this controller.
   """
-  use Coherence.Web, :controller
-  require Logger
-  use Timex
-  use Coherence.Config
-  alias Coherence.ControllerHelpers, as: Helpers
+  use <%= base %>.Coherence.Web, :controller
+
   alias Coherence.{TrackableService, LockableService}
 
-  plug Coherence.ValidateOption, :unlockable_with_token
-  plug :layout_view
-  plug :redirect_logged_in when action in [:new, :create, :edit]
+  require Logger
 
   @type schema :: Ecto.Schema.t
   @type conn :: Plug.Conn.t
   @type params :: Map.t
+
+  plug Coherence.ValidateOption, :unlockable_with_token
+  plug :layout_view, view: Coherence.UnlockView
+  plug :redirect_logged_in when action in [:new, :create, :edit]
 
   @doc """
   Render the send reset link form.
@@ -37,7 +36,7 @@ defmodule <%= base %>.Coherence.UnlockController do
   """
   @spec create(conn, params) :: conn
   def create(conn, %{"unlock" => unlock_params} = params) do
-    user_schema = Config.user_schema
+    user_schema = Config.user_schema()
     email = unlock_params["email"]
     password = unlock_params["password"]
 
@@ -52,11 +51,11 @@ defmodule <%= base %>.Coherence.UnlockController do
           if user_schema.locked?(user) do
             send_user_email :unlock, user, router_helpers().unlock_url(conn, :edit, user.unlock_token)
             conn
-            |> put_flash(:info, "Unlock Instructions sent.")
+            |> put_flash(:info, dgettext("coherence", "Unlock Instructions sent."))
             |> redirect_to(:unlock_create, params)
           else
             conn
-            |> put_flash(:error, "Your account is not locked.")
+            |> put_flash(:error, dgettext("coherence", "Your account is not locked."))
             |> redirect_to(:unlock_create_not_locked, params)
           end
         {:error, changeset} ->
@@ -64,7 +63,7 @@ defmodule <%= base %>.Coherence.UnlockController do
       end
     else
       conn
-      |> put_flash(:error, "Invalid email or password.")
+      |> put_flash(:error, dgettext("coherence", "Invalid email or password."))
       |> redirect_to(:unlock_create_invalid, params)
     end
   end
@@ -76,25 +75,26 @@ defmodule <%= base %>.Coherence.UnlockController do
   def edit(conn, params) do
     user_schema = Config.user_schema
     token = params["id"]
-    user_schema
-    |> where([u], u.unlock_token == ^token)
-    |> Config.repo.one
-    |> case do
+    unlock =
+      user_schema
+      |> where([u], u.unlock_token == ^token)
+      |> Config.repo.one
+    case unlock do
       nil ->
         conn
-        |> put_flash(:error, "Invalid unlock token.")
+        |> put_flash(:error, dgettext("coherence", "Invalid unlock token."))
         |> redirect_to(:unlock_edit_invalid, params)
       user ->
         if user_schema.locked? user do
           Helpers.unlock! user
           conn
           |> TrackableService.track_unlock_token(user, user_schema.trackable_table?)
-          |> put_flash(:info, "Your account has been unlocked")
+          |> put_flash(:info, dgettext("coherence", "Your account has been unlocked"))
           |> redirect_to(:unlock_edit, params)
         else
           clear_unlock_values(user, user_schema)
           conn
-          |> put_flash(:error, "Account is not locked.")
+          |> put_flash(:error, dgettext("coherence", "Account is not locked."))
           |> redirect_to(:unlock_edit_not_locked, params)
         end
     end
@@ -105,12 +105,15 @@ defmodule <%= base %>.Coherence.UnlockController do
   def clear_unlock_values(user, user_schema) do
     if user.unlock_token or user.locked_at do
       user_schema.changeset(user, %{unlock_token: nil, locked_at: nil})
-      Helpers.changeset(:unlock, user.__struct__, user, %{unlock_token: nil, locked_at: nil})
-      |> Config.repo.update
-      |> case do
+      schema =
+        :unlock
+        |> Helpers.changeset(user.__struct__, user, %{unlock_token: nil, locked_at: nil})
+        |> Config.repo.update
+      case schema do
         {:error, changeset} ->
           lockable_failure changeset
-        _ -> :ok
+        _ ->
+          :ok
       end
     end
   end

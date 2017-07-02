@@ -1,7 +1,7 @@
 defmodule Coherence.CoherenceView do
   use Phoenix.HTML
   use Phoenix.View, root: "web/templates/coherence"
-  import TestCoherence.Router.Helpers
+  import TestCoherence.Web.Router.Helpers
 
   @seperator {:safe, "&nbsp; | &nbsp;"}
 
@@ -38,7 +38,7 @@ end
 
 defmodule Coherence.LayoutView do
   use TestCoherence.Coherence.Web, :view
-  # import TestCoherence.Router.Helpers
+  # import TestCoherence.Web.Router.Helpers
 end
 defmodule TestCoherence.Coherence.InvitationView do
   use TestCoherence.Coherence.Web, :view

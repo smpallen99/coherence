@@ -13,6 +13,7 @@ defmodule Coherence.RegistrationController do
   use Coherence.Web, :controller
 
   alias Coherence.ControllerHelpers, as: Helpers
+  alias Coherence.Messages
 
   require Logger
 
@@ -28,7 +29,7 @@ defmodule Coherence.RegistrationController do
   plug Coherence.ValidateOption, :registerable
   plug :scrub_params, "registration" when action in [:create, :update]
 
-  plug :layout_view
+  plug :layout_view, view: Coherence.RegistrationView
   plug :redirect_logged_in when action in [:new, :create]
 
   @doc """
@@ -102,7 +103,7 @@ defmodule Coherence.RegistrationController do
       {:ok, user} ->
         Config.auth_module
         |> apply(Config.update_login, [conn, user, [id_key: Config.schema_key]])
-        |> put_flash(:info, "Account updated successfully.")
+        |> put_flash(:info, Messages.backend().account_updated_successfully())
         |> redirect_to(:registration_update, params, user)
       {:error, changeset} ->
         render(conn, "edit.html", user: user, changeset: changeset)

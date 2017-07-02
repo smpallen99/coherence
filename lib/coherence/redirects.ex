@@ -117,11 +117,9 @@ defmodule Redirects do
       @doc false
       def registration_update(conn, _, user) do
         path =
-          :coherence
-          |> Application.get_env(:module)
-          |> Module.concat(Router.Helpers)
+          Coherence.Config.router()
+          |> Module.concat(Helpers)
           |> apply(:registration_path, [conn, :show])
-
         redirect(conn, to: path)
       end
       @doc false

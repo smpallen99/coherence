@@ -11,13 +11,13 @@ defmodule <%= base %>.Coherence.PasswordController do
   * edit - render the reset password form
   * update - verify password, password confirmation, and update the database
   """
-  use Coherence.Web, :controller
-  require Logger
-  use Timex
-  alias Coherence.ControllerHelpers, as: Helpers
+  use <%= base %>.Coherence.Web, :controller
+
   alias Coherence.TrackableService
 
-  plug :layout_view
+  require Logger
+
+  plug :layout_view, view: Coherence.PasswordView
   plug :redirect_logged_in when action in [:new, :create, :edit, :update]
 
   @type schema :: Ecto.Schema.t
@@ -51,7 +51,7 @@ defmodule <%= base %>.Coherence.PasswordController do
       nil ->
         changeset = Helpers.changeset :password, user_schema, user_schema.__struct__
         conn
-        |> put_flash(:error, "Could not find that email address")
+        |> put_flash(:error, dgettext("coherence", "Could not find that email address"))
         |> render("new.html", changeset: changeset)
       user ->
         token = random_string 48
@@ -65,7 +65,7 @@ defmodule <%= base %>.Coherence.PasswordController do
         send_user_email :password, user, url
 
         conn
-        |> put_flash(:info, "Reset email sent. Check your email for a reset link.")
+        |> put_flash(:info, dgettext("coherence", "Reset email sent. Check your email for a reset link."))
         |> redirect_to(:password_create, params)
     end
   end
@@ -84,15 +84,16 @@ defmodule <%= base %>.Coherence.PasswordController do
     case user do
       nil ->
         conn
-        |> put_flash(:error, "Invalid reset token.")
+        |> put_flash(:error, dgettext("coherence", "Invalid reset token."))
         |> redirect(to: logged_out_url(conn))
       user ->
         if expired? user.reset_password_sent_at, days: Config.reset_token_expire_days do
-          Helpers.changeset(:password, user_schema, user, clear_password_params())
+          :password
+          |> Helpers.changeset(user_schema, user, clear_password_params())
           |> Config.repo.update
 
           conn
-          |> put_flash(:error, "Password reset token expired.")
+          |> put_flash(:error, dgettext("coherence", "Password reset token expired."))
           |> redirect(to: logged_out_url(conn))
         else
           changeset = Helpers.changeset(:password, user_schema, user)
@@ -117,21 +118,30 @@ defmodule <%= base %>.Coherence.PasswordController do
     case user do
       nil ->
         conn
-        |> put_flash(:error, "Invalid reset token")
+        |> put_flash(:error, dgettext("coherence", "Invalid reset token"))
         |> redirect(to: logged_out_url(conn))
       user ->
-        params = password_params
-        |> clear_password_params
-        cs = Helpers.changeset(:password, user_schema, user, params)
-        case repo.update(cs) do
-          {:ok, user} ->
-            conn
-            |> TrackableService.track_password_reset(user, user_schema.trackable_table?)
-            |> put_flash(:info, "Password updated successfully.")
-            |> redirect_to(:password_update, params)
-          {:error, changeset} ->
-            conn
-            |> render("edit.html", changeset: changeset)
+        if expired? user.reset_password_sent_at, days: Config.reset_token_expire_days do
+          Helpers.changeset(:password, user_schema, user, clear_password_params())
+          |> Config.repo.update
+
+          conn
+          |> put_flash(:error, dgettext("coherence", "Password reset token expired."))
+          |> redirect(to: logged_out_url(conn))
+        else
+          params = password_params
+          |> clear_password_params
+          cs = Helpers.changeset(:password, user_schema, user, params)
+          case repo.update(cs) do
+            {:ok, user} ->
+              conn
+              |> TrackableService.track_password_reset(user, user_schema.trackable_table?)
+              |> put_flash(:info, dgettext("coherence", "Password updated successfully."))
+              |> redirect_to(:password_update, params)
+            {:error, changeset} ->
+              conn
+              |> render("edit.html", changeset: changeset)
+          end
         end
     end
   end
@@ -141,5 +151,4 @@ defmodule <%= base %>.Coherence.PasswordController do
     |> Map.put("reset_password_token", nil)
     |> Map.put("reset_password_sent_at", nil)
   end
-
 end

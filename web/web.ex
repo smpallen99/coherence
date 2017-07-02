@@ -42,6 +42,11 @@ defmodule Coherence.Web do
     end
   end
 
+  def service do
+    quote do
+    end
+  end
+
   @doc """
   When used, dispatch to the appropriate controller/view/etc.
   """

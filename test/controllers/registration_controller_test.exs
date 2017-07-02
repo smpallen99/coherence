@@ -1,6 +1,6 @@
 defmodule CoherenceTest.RegistrationController do
   use TestCoherence.ConnCase
-  import TestCoherence.Router.Helpers
+  import TestCoherence.Web.Router.Helpers
 
   setup %{conn: conn} do
     Application.put_env :coherence, :opts, [:confirmable, :registerable]

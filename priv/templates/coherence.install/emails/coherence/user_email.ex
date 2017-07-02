@@ -6,6 +6,7 @@ defmodule <%= base %>.Coherence.UserEmail do
   alias Swoosh.Email
   require Logger
   alias Coherence.Config
+  import <%= base %>.Gettext
 
   defp site_name, do: Config.site_name(inspect Config.module)
 
@@ -14,7 +15,7 @@ defmodule <%= base %>.Coherence.UserEmail do
     |> from(from_email())
     |> to(user_email(user))
     |> add_reply_to()
-    |> subject("#{site_name()} - Reset password instructions")
+    |> subject(dgettext("coherence", "%{site_name} - Reset password instructions", site_name: site_name()))
     |> render_body("password.html", %{url: url, name: first_name(user.name)})
   end
 
@@ -23,7 +24,7 @@ defmodule <%= base %>.Coherence.UserEmail do
     |> from(from_email())
     |> to(user_email(user))
     |> add_reply_to()
-    |> subject("#{site_name()} - Confirm your new account")
+    |> subject(dgettext("coherence", "%{site_name} - Confirm your new account", site_name: site_name()))
     |> render_body("confirmation.html", %{url: url, name: first_name(user.name)})
   end
 
@@ -32,7 +33,7 @@ defmodule <%= base %>.Coherence.UserEmail do
     |> from(from_email())
     |> to(user_email(invitation))
     |> add_reply_to()
-    |> subject("#{site_name()} - Invitation to create a new account")
+    |> subject(dgettext("coherence", "%{site_name} - Invitation to create a new account", site_name: site_name()))
     |> render_body("invitation.html", %{url: url, name: first_name(invitation.name)})
   end
 
@@ -41,7 +42,7 @@ defmodule <%= base %>.Coherence.UserEmail do
     |> from(from_email())
     |> to(user_email(user))
     |> add_reply_to()
-    |> subject("#{site_name()} - Unlock Instructions")
+    |> subject(dgettext("coherence", "%{site_name} - Unlock Instructions", site_name: site_name()))
     |> render_body("unlock.html", %{url: url, name: first_name(user.name)})
   end
 

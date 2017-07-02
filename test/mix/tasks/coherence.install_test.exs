@@ -4,6 +4,7 @@ defmodule Mix.Tasks.Coherence.InstallTest do
   use ExUnit.Case
   import MixHelper
 
+  @web_path "web"
   setup do
     :ok
   end
@@ -20,20 +21,20 @@ defmodule Mix.Tasks.Coherence.InstallTest do
       |> Mix.Tasks.Coherence.Install.run
 
       ~w(session_view.ex coherence_view.ex layout_view.ex coherence_view_helpers.ex)
-      |> assert_file_list(@all_views, "web/views/coherence/")
+      |> assert_file_list(@all_views, web_path("views/coherence/"))
 
       ~w(layout session)
-      |> assert_dirs(@all_template_dirs, "web/templates/coherence/")
+      |> assert_dirs(@all_template_dirs, web_path("templates/coherence/"))
 
       ~w(session_controller.ex)
-      |> assert_file_list(@all_controllers, "web/controllers/coherence/")
+      |> assert_file_list(@all_controllers, web_path("controllers/coherence/"))
 
-      assert_file "web/controllers/coherence/session_controller.ex", fn file ->
+      assert_file web_path("controllers/coherence/session_controller.ex"), fn file ->
         assert file =~ "defmodule TestCoherence.Coherence.SessionController do"
       end
 
-      assert_file "web/controllers/coherence/redirects.ex", fn file ->
-        assert file =~ "import TestCoherence.Router.Helpers"
+      assert_file web_path("controllers/coherence/redirects.ex"), fn file ->
+        assert file =~ "defmodule Coherence.Redirects do"
       end
     end
   end
@@ -44,13 +45,13 @@ defmodule Mix.Tasks.Coherence.InstallTest do
       |> Mix.Tasks.Coherence.Install.run
 
       ~w(session_view.ex coherence_view.ex layout_view.ex password_view.ex email_view.ex coherence_view_helpers.ex)
-      |> assert_file_list(@all_views, "web/views/coherence/")
+      |> assert_file_list(@all_views, web_path("views/coherence/"))
 
       ~w(layout session password email)
-      |> assert_dirs(@all_template_dirs, "web/templates/coherence/")
+      |> assert_dirs(@all_template_dirs, "templates/coherence/" |> web_path)
 
       ~w(session_controller.ex password_controller.ex)
-      |> assert_file_list(@all_controllers, "web/controllers/coherence/")
+      |> assert_file_list(@all_controllers, "controllers/coherence/" |> web_path)
     end
   end
 
@@ -60,21 +61,21 @@ defmodule Mix.Tasks.Coherence.InstallTest do
       |> Mix.Tasks.Coherence.Install.run
 
       ~w(session_view.ex coherence_view.ex layout_view.ex password_view.ex invitation_view.ex email_view.ex coherence_view_helpers.ex)
-      |> assert_file_list(@all_views, "web/views/coherence/")
+      |> assert_file_list(@all_views, "views/coherence" |> web_path)
 
       ~w(layout session password invitation email)
-      |> assert_dirs(@all_template_dirs, "web/templates/coherence/")
+      |> assert_dirs(@all_template_dirs, "templates/coherence" |> web_path)
 
       ~w(session_controller.ex password_controller.ex invitation_controller.ex)
-      |> assert_file_list(@all_controllers, "web/controllers/coherence/")
+      |> assert_file_list(@all_controllers, "controllers/coherence" |> web_path)
 
-      assert_file "web/controllers/coherence/session_controller.ex", fn file ->
+      assert_file "controllers/coherence/session_controller.ex" |> web_path, fn file ->
         assert file =~ "defmodule TestCoherence.Coherence.SessionController do"
       end
-      assert_file "web/controllers/coherence/password_controller.ex", fn file ->
+      assert_file "controllers/coherence/password_controller.ex" |> web_path, fn file ->
         assert file =~ "defmodule TestCoherence.Coherence.PasswordController do"
       end
-      assert_file "web/controllers/coherence/invitation_controller.ex", fn file ->
+      assert_file "controllers/coherence/invitation_controller.ex" |> web_path, fn file ->
         assert file =~ "defmodule TestCoherence.Coherence.InvitationController do"
       end
     end
@@ -86,13 +87,13 @@ defmodule Mix.Tasks.Coherence.InstallTest do
       |> Mix.Tasks.Coherence.Install.run
 
       ~w(session_view.ex coherence_view.ex layout_view.ex password_view.ex registration_view.ex email_view.ex confirmation_view.ex coherence_view_helpers.ex)
-      |> assert_file_list(@all_views, "web/views/coherence/")
+      |> assert_file_list(@all_views, "views/coherence/" |> web_path)
 
       ~w(layout session password registration email confirmation)
-      |> assert_dirs(@all_template_dirs, "web/templates/coherence/")
+      |> assert_dirs(@all_template_dirs, "templates/coherence/" |> web_path)
 
       for file <- ~w(new edit form show) do
-        assert_file "web/templates/coherence/registration/#{file}.html.eex"
+        assert_file "templates/coherence/registration/#{file}.html.eex" |> web_path
       end
     end
   end
@@ -103,13 +104,13 @@ defmodule Mix.Tasks.Coherence.InstallTest do
       |> Mix.Tasks.Coherence.Install.run
 
       ~w(session_view.ex coherence_view.ex layout_view.ex password_view.ex registration_view.ex unlock_view.ex email_view.ex coherence_view_helpers.ex)
-      |> assert_file_list(@all_views, "web/views/coherence/")
+      |> assert_file_list(@all_views, "views/coherence/" |> web_path)
 
       ~w(layout session password registration unlock email)
-      |> assert_dirs(@all_template_dirs, "web/templates/coherence/")
+      |> assert_dirs(@all_template_dirs, "templates/coherence/" |> web_path)
 
       ~w(session_controller.ex password_controller.ex registration_controller.ex unlock_controller.ex)
-      |> assert_file_list(@all_controllers, "web/controllers/coherence/")
+      |> assert_file_list(@all_controllers, "controllers/coherence/" |> web_path)
     end
   end
 
@@ -119,10 +120,10 @@ defmodule Mix.Tasks.Coherence.InstallTest do
       |> Mix.Tasks.Coherence.Install.run
 
       ~w(session_view.ex coherence_view.ex layout_view.ex password_view.ex invitation_view.ex unlock_view.ex email_view.ex coherence_view_helpers.ex)
-      |> assert_file_list(@all_views, "web/views/coherence/")
+      |> assert_file_list(@all_views, "views/coherence/" |> web_path)
 
       ~w(layout session password invitation unlock email)
-      |> assert_dirs(@all_template_dirs, "web/templates/coherence/")
+      |> assert_dirs(@all_template_dirs, "templates/coherence/" |> web_path)
     end
   end
 
@@ -132,13 +133,13 @@ defmodule Mix.Tasks.Coherence.InstallTest do
       |> Mix.Tasks.Coherence.Install.run
 
       ~w()
-      |> assert_file_list(@all_views, "web/views/coherence/")
+      |> assert_file_list(@all_views, "views/coherence/" |> web_path)
 
       ~w()
-      |> assert_dirs(@all_template_dirs, "web/templates/coherence/")
+      |> assert_dirs(@all_template_dirs, "templates/coherence/" |> web_path)
 
       ~w()
-      |> assert_file_list(@all_controllers, "web/controllers/coherence/")
+      |> assert_file_list(@all_controllers, "controllers/coherence/" |> web_path)
     end
   end
 
@@ -302,7 +303,7 @@ defmodule Mix.Tasks.Coherence.InstallTest do
         (~w(--repo=TestCoherence.Repo  --authenticatable --log-only --no-views --no-templates --module=TestCoherence --no-migrations))
         |> Mix.Tasks.Coherence.Install.run
 
-        refute_file "web/models/user.ex"
+        refute_file "models/user.ex" |> web_path
       end
     end
 
@@ -311,7 +312,7 @@ defmodule Mix.Tasks.Coherence.InstallTest do
         (~w(--repo=TestCoherence.Repo  --authenticatable --log-only --no-views --no-templates --no-migrations))
         |> Mix.Tasks.Coherence.Install.run
 
-        assert_file "web/models/coherence/user.ex", fn file ->
+        assert_file "models/coherence/user.ex" |> web_path, fn file ->
           file =~ "defmodule Coherence.User do"
           file =~ "use Coherence.Web, :model"
           file =~ "use Coherence.Schema"
@@ -334,7 +335,7 @@ defmodule Mix.Tasks.Coherence.InstallTest do
         (~w(--repo=TestCoherence.Repo  --authenticatable --log-only --no-views --no-templates --module=TestCoherence --no-migrations) ++ ["--model=Client clients"])
         |> Mix.Tasks.Coherence.Install.run
 
-        assert_file "web/models/coherence/client.ex", fn file ->
+        assert_file "models/coherence/client.ex" |> web_path, fn file ->
           file =~ "defmodule TestCoherence.Client do"
           file =~ "use TestCoherence.Web, :model"
           file =~ "use Coherence.Schema"
@@ -383,19 +384,23 @@ defmodule Mix.Tasks.Coherence.InstallTest do
 
   def assert_dirs(dirs, full_dirs, path) do
     Enum.each dirs, fn dir ->
-      assert File.dir? path <> dir
+      assert File.dir? Path.join(path, dir)
     end
     Enum.each full_dirs -- dirs, fn dir ->
-      refute File.dir? path <> dir
+      refute File.dir? Path.join(path, dir)
     end
   end
 
   def assert_file_list(files, full_files, path) do
     Enum.each files, fn file ->
-      assert_file path <> file
+      assert_file Path.join(path, file)
     end
     Enum.each full_files -- files, fn file ->
-      refute_file path <> file
+      refute_file Path.join(path, file)
     end
+  end
+
+  def web_path(path) do
+    Path.join @web_path, path
   end
 end

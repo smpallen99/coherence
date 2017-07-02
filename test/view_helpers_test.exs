@@ -1,7 +1,7 @@
 defmodule CoherenceTest.ViewHelpers do
   use TestCoherence.ConnCase
   import Plug.Conn
-  alias Coherence.ViewHelpers
+  alias TestCoherence.ViewHelpers
   alias TestCoherence.User
   import Phoenix.HTML, only: [safe_to_string: 1]
 
@@ -21,7 +21,7 @@ defmodule CoherenceTest.ViewHelpers do
     {:ok, conn: conn, user: user}
   end
 
-  @helpers Module.concat(Application.get_env(:coherence, :module), Router.Helpers)
+  @helpers Module.concat(Application.get_env(:coherence, :module), Web.Router.Helpers)
 
   test "coherence_path", %{conn: conn} do
     assert ViewHelpers.coherence_path(@helpers, :unlock_path, conn, :new) == "/unlocks/new"

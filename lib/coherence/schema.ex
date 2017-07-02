@@ -90,6 +90,7 @@ defmodule Coherence.Schema do
     quote do
       import unquote(__MODULE__)
       import Ecto.Changeset
+      alias Coherence.Messages
 
       alias Coherence.{ConfirmableService}
 
@@ -181,7 +182,7 @@ defmodule Coherence.Schema do
           if locked?(user) do
             Config.repo.update changeset
           else
-            changeset = Ecto.Changeset.add_error changeset, :locked_at, "not locked"
+            changeset = Ecto.Changeset.add_error changeset, :locked_at, Messages.backend().not_locked()
             {:error, changeset}
           end
         end
@@ -217,7 +218,7 @@ defmodule Coherence.Schema do
           IO.warn "#{inspect Config.user_schema}.lock!/1 has been deprecated. Please use Coherence.ControllerHelpers.lock!/1 instead."
           changeset = Config.user_schema.changeset(user, %{locked_at: locked_at})
           if locked?(user) do
-            changeset = Ecto.Changeset.add_error changeset, :locked_at, "already locked"
+            changeset = Ecto.Changeset.add_error changeset, :locked_at, Messages.backend().already_locked()
             {:error, changeset}
           else
             Config.repo.update changeset
@@ -264,10 +265,10 @@ defmodule Coherence.Schema do
           #       if(checkpw(current_password, Map.get(changeset.data, Config.password_hash), do: true, else: "invalid current password") do
           if Config.require_current_password and (not is_nil(changeset.data.id)) and Map.has_key?(changeset.changes, :password) do
             if is_nil(current_password) do
-              add_error(changeset, :current_password, "can't be blank")
+              add_error(changeset, :current_password, Messages.backend().cant_be_blank())
             else
               if not checkpw(current_password, Map.get(changeset.data, Config.password_hash)) do
-                add_error(changeset, :current_password, "invalid current password")
+                add_error(changeset, :current_password, Messages.backend().invalid_current_password())
               else
                 changeset
               end
@@ -279,7 +280,7 @@ defmodule Coherence.Schema do
 
         def validate_password(changeset, params) do
           if is_nil(Map.get(changeset.data, Config.password_hash)) and is_nil(changeset.changes[:password]) do
-            add_error(changeset, :password, "can't be blank")
+            add_error(changeset, :password, Messages.backend().cant_be_blank())
           else
             changeset
             |> validate_confirmation(:password)

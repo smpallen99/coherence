@@ -20,6 +20,7 @@ defmodule Mix.Tasks.Coherence.Install do
   * Generate appropriate view files.
   * Generate appropriate template files.
   * Generate a `web/coherence_web.ex` file.
+  * Generate a `web/coherence_messages.ex` file.
   * Generate a `web/models/user.ex` file if one does not already exist.
 
   ## Install Examples
@@ -55,6 +56,8 @@ defmodule Mix.Tasks.Coherence.Install do
   A `--model="SomeModule tablename"` option can be given to override the default User module.
 
   A `--repo=CustomRepo` option can be given to override the default Repo module
+
+  A `--router=CustomRouter` option can be given to override the default Router module
 
   A `--default` option will include only `authenticatable`
 
@@ -104,6 +107,7 @@ defmodule Mix.Tasks.Coherence.Install do
 
   * `--no-config` -- Don't append to your `config/config.exs` file.
   * `--no-web` -- Don't create the `coherence_web.ex` file.
+  * `--no-messages` -- Don't create the `coherence_messages.ex` file.
   * `--no-views` -- Don't create the `web/views/coherence/` files.
   * `--no-migrations` -- Don't create the migration files.
   * `--no-templates` -- Don't create the `web/templates/coherence` files.
@@ -131,7 +135,7 @@ defmodule Mix.Tasks.Coherence.Install do
   @full_invitable    @all_options -- ~w(confirmable rememberable trackable_table)
 
   # the options that default to true, and can be disabled with --no-option
-  @default_booleans  ~w(config web views migrations templates models emails boilerplate confirm)
+  @default_booleans  ~w(config web messages views migrations templates models emails boilerplate confirm)
 
   # all boolean_options
   @boolean_options   @default_booleans ++ ~w(default full full_confirmable full_invitable) ++ @all_options
@@ -148,7 +152,7 @@ defmodule Mix.Tasks.Coherence.Install do
     user: :string, repo: :string, migration_path: :string, model: :string,
     log_only: :boolean, confirm_once: :boolean, controllers: :boolean,
     module: :string, installed_options: :boolean, reinstall: :boolean,
-    silent: :boolean, with_migrations: :boolean
+    silent: :boolean, with_migrations: :boolean, router: :string
   ] ++ Enum.map(@boolean_options, &({String.to_atom(&1), :boolean}))
 
   @switch_names Enum.map(@switches, &(elem(&1, 0)))
@@ -198,6 +202,7 @@ defmodule Mix.Tasks.Coherence.Install do
     |> gen_rememberable_migration
     |> gen_trackable_migration
     |> gen_coherence_web
+    |> gen_coherence_messages
     |> gen_coherence_views
     |> gen_coherence_templates
     |> gen_coherence_mailer
@@ -230,6 +235,8 @@ defmodule Mix.Tasks.Coherence.Install do
         user_schema: #{config[:user_schema]},
         repo: #{config[:repo]},
         module: #{config[:base]},
+        router: #{config[:router]},
+        messages_backend: #{config[:base]}.Coherence.Messages,
         logged_out_url: "/",
       """
     (config_block <> from_email <> "  opts: #{inspect config[:opts]}\n")
@@ -564,6 +571,19 @@ defmodule Mix.Tasks.Coherence.Install do
 
   defp gen_coherence_web(config), do: config
 
+  ################
+  # Messages
+
+  defp gen_coherence_messages(%{messages: true, boilerplate: true, binding: binding} = config) do
+    copy_from paths(),
+      "priv/templates/coherence.install", "", [{:otp_app, Mix.Phoenix.otp_app()} | binding], [
+        {:eex, "coherence_messages.ex", "web/coherence_messages.ex"},
+      ], config
+    config
+  end
+
+  defp gen_coherence_messages(config), do: config
+
   defp gen_redirects(%{boilerplate: true, binding: binding} = config) do
     copy_from paths(),
       "priv/templates/coherence.install/controllers/coherence", "", binding, [
@@ -749,13 +769,13 @@ defmodule Mix.Tasks.Coherence.Install do
       end
     """
 
-  defp router_instructions(%{base: base, controllers: controllers}) do
+  defp router_instructions(%{base: base, router: router, controllers: controllers}) do
     namespace = if controllers, do: ", #{base}", else: ""
 
     """
     Add the following to your router.ex file.
 
-    defmodule #{base}.Router do
+    defmodule #{router} do
       use #{base}.Web, :router
       use Coherence.Router         # Add this
 
@@ -780,7 +800,7 @@ defmodule Mix.Tasks.Coherence.Install do
       # Add this block
       scope "/"#{namespace} do
         pipe_through :browser
-        coherence_routes
+        coherence_routes()
       end
 
       # Add this block
@@ -881,6 +901,7 @@ defmodule Mix.Tasks.Coherence.Install do
     base = opts[:module] || binding[:base]
     opts = Keyword.put(opts, :base, base)
     repo = (opts[:repo] || "#{base}.Repo")
+    router = (opts[:router] || "#{base}.Router")
 
     binding = Keyword.put binding ,:base, base
 
@@ -898,6 +919,7 @@ defmodule Mix.Tasks.Coherence.Install do
       user_schema: user_schema,
       user_table_name: user_table_name,
       repo: repo,
+      router: router,
       opts: bin_opts,
       binding: binding,
       log_only: opts[:log_only],
@@ -968,23 +990,6 @@ defmodule Mix.Tasks.Coherence.Install do
 
   defp parse_options(opts) do
     {opts_bin, opts} = Enum.reduce opts, {[], []}, &(option_reduce(&1, &2))
-        # {:default, true}, {acc_bin, acc} ->
-        #   {list_to_atoms(@default_options) ++ acc_bin, acc}
-        # {:full, true}, {acc_bin, acc} ->
-        #   {list_to_atoms(@full_options) ++ acc_bin, acc}
-        # {:full_confirmable, true}, {acc_bin, acc} ->
-        #   {list_to_atoms(@full_confirmable) ++ acc_bin, acc}
-        # {:full_invitable, true}, {acc_bin, acc} ->
-        #   {list_to_atoms(@full_invitable) ++ acc_bin, acc}
-        # {:trackable_table, true}, {acc_bin, acc} ->
-        #   {[:trackable_table | acc_bin] -- [:trackable], acc}
-        # {name, true}, {acc_bin, acc} when name in @all_options_atoms ->
-        #   {[name | acc_bin], acc}
-        # {name, false}, {acc_bin, acc} when name in @all_options_atoms ->
-        #   {acc_bin -- [name], acc}
-        # opt, {acc_bin, acc} ->
-        #   {acc_bin, [opt | acc]}
-      # end
 
     opts_bin = Enum.uniq(opts_bin)
     opts_names = Enum.map opts, &(elem(&1, 0))
@@ -1031,6 +1036,10 @@ defmodule Mix.Tasks.Coherence.Install do
       """)
   end
 
+  def get_config_options(config_opts, opts) do
+    Enum.reduce(config_opts, opts, &config_option/2)
+  end
+
   defp config_option(opt, acc) when is_atom(opt) do
     str = opt |> Atom.to_string |> String.replace("_", "-")
     ["--" <> str | acc]
@@ -1075,4 +1084,5 @@ defmodule Mix.Tasks.Coherence.Install do
     do: Path.join(path, source_dir)
   defp to_app_source(app, source_dir) when is_atom(app),
     do: Application.app_dir(app, source_dir)
+
 end
