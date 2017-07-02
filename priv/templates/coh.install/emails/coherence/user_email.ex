@@ -1,12 +1,12 @@
 Code.ensure_loaded Phoenix.Swoosh
 
-defmodule <%= base %>.Coherence.UserEmail do
+defmodule <%= web_base %>.Coherence.UserEmail do
   @moduledoc false
   use Phoenix.Swoosh, view: Coherence.EmailView, layout: {Coherence.LayoutView, :email}
   alias Swoosh.Email
   require Logger
   alias Coherence.Config
-  import <%= base %>.Web.Gettext
+  import <%= web_base %>.Gettext
 
   defp site_name, do: Config.site_name(inspect Config.module)
 

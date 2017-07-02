@@ -1,4 +1,4 @@
-defmodule <%= base %>.Web.Coherence.ConfirmationController do
+defmodule <%= web_base %>.Coherence.ConfirmationController do
   @moduledoc """
   Handle confirmation actions.
 

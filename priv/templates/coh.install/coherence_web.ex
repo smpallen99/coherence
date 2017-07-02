@@ -11,24 +11,24 @@ defmodule <%= base %>.Coherence.Web do
       # Use all HTML functionality (forms, tags, etc)
       use Phoenix.HTML
 
-      import <%= base %>.Web.Router.Helpers
-      import <%= base %>.Web.ErrorHelpers
-      import <%= base %>.Web.Gettext
+      import <%= web_base %>.Router.Helpers
+      import <%= web_base %>.ErrorHelpers
+      import <%= web_base %>.Gettext
       import <%= base %>.Coherence.ViewHelpers
     end
   end
 
   def controller do
     quote do
-      use Phoenix.Controller, except: [layout_view: 2] #, namespace: BlogPhx.Web
+      use Phoenix.Controller, except: [layout_view: 2]
       use Coherence.Config
       use Timex
 
       import Ecto
       import Ecto.Query
       import Plug.Conn
-      import <%= base %>.Web.Router.Helpers
-      import <%= base %>.Web.Gettext
+      import <%= web_base %>.Router.Helpers
+      import <%= web_base %>.Gettext
       import Coherence.ControllerHelpers
 
       alias Coherence.Config

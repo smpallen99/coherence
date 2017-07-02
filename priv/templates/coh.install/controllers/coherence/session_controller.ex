@@ -1,4 +1,4 @@
-defmodule <%= base %>.Web.Coherence.SessionController do
+defmodule <%= web_base %>.Coherence.SessionController do
   @moduledoc """
   Handle the authentication actions.
 

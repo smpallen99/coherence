@@ -4,10 +4,10 @@ defmodule <%= base %>.Coherence.ViewHelpers do
   """
   use Phoenix.HTML
   alias Coherence.Config
-  import <%= base %>.Web.Gettext
+  import <%= web_base %>.Gettext
 
   @seperator {:safe, "&nbsp; | &nbsp;"}
-  @helpers Module.concat(Application.get_env(:coherence, :module), Web.Router.Helpers)
+  @helpers <%= web_base %>.Router.Helpers
 
   @recover_link  dgettext("coherence", "Forgot your password?")
   @unlock_link   dgettext("coherence", "Send an unlock email")

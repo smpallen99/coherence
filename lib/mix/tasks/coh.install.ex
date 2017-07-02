@@ -904,9 +904,12 @@ defmodule Mix.Tasks.Coh.Install do
       raise "Could not find web_path: #{web_path}"
     end
 
+    web_base = Module.concat(base, Web) |> inspect()
+
     binding =
       binding
       |> Keyword.put(:base, base)
+      |> Keyword.put(:web_base, web_base)
       |> Keyword.put(:web_path, web_path)
       |> Keyword.put(:otp_app, Mix.Phoenix.otp_app())
 
@@ -942,6 +945,7 @@ defmodule Mix.Tasks.Coh.Install do
     ]
     |> Enum.into(opts_map)
     |> do_default_config(opts)
+    # |> IO.inspect(label: "config")
   end
 
   defp do_bin_opts(bin_opts) do
