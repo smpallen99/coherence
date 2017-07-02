@@ -990,23 +990,6 @@ defmodule Mix.Tasks.Coherence.Install do
 
   defp parse_options(opts) do
     {opts_bin, opts} = Enum.reduce opts, {[], []}, &(option_reduce(&1, &2))
-        # {:default, true}, {acc_bin, acc} ->
-        #   {list_to_atoms(@default_options) ++ acc_bin, acc}
-        # {:full, true}, {acc_bin, acc} ->
-        #   {list_to_atoms(@full_options) ++ acc_bin, acc}
-        # {:full_confirmable, true}, {acc_bin, acc} ->
-        #   {list_to_atoms(@full_confirmable) ++ acc_bin, acc}
-        # {:full_invitable, true}, {acc_bin, acc} ->
-        #   {list_to_atoms(@full_invitable) ++ acc_bin, acc}
-        # {:trackable_table, true}, {acc_bin, acc} ->
-        #   {[:trackable_table | acc_bin] -- [:trackable], acc}
-        # {name, true}, {acc_bin, acc} when name in @all_options_atoms ->
-        #   {[name | acc_bin], acc}
-        # {name, false}, {acc_bin, acc} when name in @all_options_atoms ->
-        #   {acc_bin -- [name], acc}
-        # opt, {acc_bin, acc} ->
-        #   {acc_bin, [opt | acc]}
-      # end
 
     opts_bin = Enum.uniq(opts_bin)
     opts_names = Enum.map opts, &(elem(&1, 0))
