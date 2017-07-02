@@ -150,9 +150,13 @@ defmodule Coherence.ControllerHelpers do
   """
   @spec send_user_email(atom, Ecto.Schema.t, String.t) :: any
   def send_user_email(fun, model, url) do
-    email = apply(Module.concat(Config.module, Coherence.UserEmail), fun, [model, url])
-    Logger.debug fn -> "#{fun} email: #{inspect email}" end
-    apply(Module.concat(Config.module, Coherence.Mailer), :deliver, [email])
+    if Config.mailer?() do
+      email = apply(Module.concat(Config.module, Coherence.UserEmail), fun, [model, url])
+      Logger.debug fn -> "#{fun} email: #{inspect email}" end
+      apply(Module.concat(Config.module, Coherence.Mailer), :deliver, [email])
+    else
+      {:error, :no_mailer}
+    end
   end
 
   @doc """
@@ -173,9 +177,12 @@ defmodule Coherence.ControllerHelpers do
         current_password: user.password})
       |> Config.repo.update!
 
-      send_user_email :confirmation, user, url
-      conn
-      |> put_flash(:info, Messages.backend().confirmation_email_sent())
+      if Config.mailer?() do
+        send_user_email :confirmation, user, url
+        put_flash(conn, :info, Messages.backend().confirmation_email_sent())
+      else
+        put_flash(conn, :error, Messages.backend().mailer_required())
+      end
     else
       conn
       |> put_flash(:info, Messages.backend().registration_created_successfully())

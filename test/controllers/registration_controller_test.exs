@@ -30,7 +30,7 @@ defmodule CoherenceTest.RegistrationController do
       conn = assign conn, :current_user, nil
       params = %{"registration" => %{"name" => "John Doe", "email" => "john.doe@example.com", "password" => "123123"}}
       conn = post conn, registration_path(conn, :create), params
-      assert conn.private[:phoenix_flash] == %{"info" => "Confirmation email sent."}
+      assert conn.private[:phoenix_flash] == %{"error" => "Mailer configuration required!"}
       assert html_response(conn, 302)
     end
 

@@ -5,7 +5,6 @@ defmodule CoherenceTest do
 
   test "creates a user" do
     changeset = User.changeset(%User{}, %{name: "test", email: "test@example.com", password: "test", password_confirmation: "test"})
-    IO.inspect changeset
     user = Repo.insert! changeset
     assert user.email == "test@example.com"
   end

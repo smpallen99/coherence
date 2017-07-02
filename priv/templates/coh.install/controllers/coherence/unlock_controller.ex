@@ -49,9 +49,12 @@ defmodule <%= base %>.Web.Coherence.UnlockController do
       case LockableService.unlock_token(user) do
         {:ok, user} ->
           if user_schema.locked?(user) do
-            send_user_email :unlock, user, router_helpers().unlock_url(conn, :edit, user.unlock_token)
-            conn
-            |> put_flash(:info, dgettext("coherence", "Unlock Instructions sent."))
+            if Config.mailer?() do
+              send_user_email :unlock, user, router_helpers().unlock_url(conn, :edit, user.unlock_token)
+              put_flash(conn, :info, dgettext("coherence", "Unlock Instructions sent."))
+            else
+              put_flash(conn, :error, dgettext("coherence", "Mailer configuration required!"))
+            end
             |> redirect_to(:unlock_create, params)
           else
             conn

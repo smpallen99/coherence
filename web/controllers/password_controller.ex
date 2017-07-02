@@ -64,10 +64,12 @@ defmodule Coherence.PasswordController do
           %{reset_password_token: token, reset_password_sent_at: dt})
         Config.repo.update! cs
 
-        send_user_email :password, user, url
-
-        conn
-        |> put_flash(:info, Messages.backend().reset_email_sent())
+        if Config.mailer?() do
+          send_user_email :password, user, url
+          put_flash(conn, :info, Messages.backend().reset_email_sent())
+        else
+          put_flash(conn, :error, Messages.backend().mailer_required())
+        end
         |> redirect_to(:password_create, params)
     end
   end

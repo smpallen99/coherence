@@ -57,6 +57,7 @@ defmodule Coherence.Messages do
   @callback not_locked() :: binary
   @callback required() :: binary
   @callback verify_user_token([{atom, any}]) :: binary
+  @callback mailer_required() :: binary
 
   @doc """
   Returns the Messages module from the users app's configuration

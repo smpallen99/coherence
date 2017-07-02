@@ -48,7 +48,7 @@ defmodule CoherenceTest.InvitationController do
       invitation = insert_invitation()
       params = %{"user" => %{"name" => invitation.name, "email" => invitation.email, password: "12345678"}, "token" => invitation.token }
       conn = post conn, invitation_path(conn, :create_user), params
-      assert conn.private[:phoenix_flash] == %{"info" => "Confirmation email sent."}
+      assert conn.private[:phoenix_flash] == %{"error" => "Mailer configuration required!"}
       assert html_response(conn, 302)
     end
   end
