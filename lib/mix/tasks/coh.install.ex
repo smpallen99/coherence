@@ -348,9 +348,9 @@ defmodule Mix.Tasks.Coh.Install do
   ################
   # Models
 
-  defp check_for_model(%{user_schema: user_schema, web_path: web_path} = config) do
+  defp check_for_model(%{user_schema: user_schema} = config) do
     user_schema = Module.concat user_schema, nil
-    Map.put(config, :model_found?, Code.ensure_compiled?(user_schema) or model_exists?(user_schema, Path.join(web_path, "coherence")))
+    Map.put(config, :model_found?, Code.ensure_compiled?(user_schema) or model_exists?(user_schema, lib_path("coherence")))
   end
 
   defp check_for_model(config), do: config
@@ -359,13 +359,14 @@ defmodule Mix.Tasks.Coh.Install do
     model_found?: false, web_path: web_path} = config) do
     name =
       user_schema
-      |> module_to_string
+      |> String.split(".")
+      |> List.last()
       |> String.downcase
 
     binding = Kernel.binding() ++ [base: config[:base], user_table_name: config[:user_table_name]]
     copy_from paths(),
       "priv/templates/coh.install/models/coherence", "", binding, [
-        {:eex, "user.ex", Path.join(web_path, "coherence/#{name}.ex")}
+        {:eex, "user.ex", Path.join([lib_path(), "coherence", "#{name}.ex"])}
       ], config
     config
   end
@@ -983,7 +984,7 @@ defmodule Mix.Tasks.Coh.Install do
   end
 
   defp parse_model(_, base, _) do
-    {"#{base}.User", :users}
+    {"#{base}.Coherence.User", :users}
   end
 
   defp prefix_model(model, opts) do
@@ -1124,7 +1125,9 @@ defmodule Mix.Tasks.Coh.Install do
   defp to_app_source(app, source_dir) when is_atom(app),
     do: Application.app_dir(app, source_dir)
 
-  # defp web_path(), do: Mix.Phoenix.web_path(Mix.Phoenix.otp_app())
+  defp lib_path(path \\ "") do
+    Path.join ["lib", to_string(Mix.Phoenix.otp_app()), path]
+  end
   defp web_path() do
     Path.join ["lib", to_string(Mix.Phoenix.otp_app()), "web"]
   end

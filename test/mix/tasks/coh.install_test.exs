@@ -4,7 +4,9 @@ defmodule Mix.Tasks.Coh.InstallTest do
   use ExUnit.Case
   import MixHelper
 
-  @web_path "lib/coherence/web"
+  @lib_path Path.join("lib", "coherence")
+  @web_path Path.join(@lib_path, "web")
+
   setup do
     :ok
   end
@@ -156,7 +158,7 @@ defmodule Mix.Tasks.Coh.InstallTest do
 
   describe "generates migrations" do
     test "coh_for_default_model" do
-      in_tmp "coh_for_default_model", fn ->
+      in_tmp "coh_migrations_for_default_model", fn ->
         mk_web_path()
         path = "migrations"
         (~w(--repo=TestCoherence.Repo  --authenticatable --recoverable --log-only --no-views --no-templates --module=TestCoherence --migration-path=#{path}))
@@ -322,18 +324,18 @@ defmodule Mix.Tasks.Coh.InstallTest do
         (~w(--repo=TestCoherence.Repo  --authenticatable --log-only --no-views --no-templates --module=TestCoherence --no-migrations))
         |> Mix.Tasks.Coh.Install.run
 
-        refute_file "models/user.ex" |> web_path
+        refute_file "coherence/user.ex" |> lib_path
       end
     end
 
     test "coh_for default model" do
-      in_tmp "coh_for_default_model", fn ->
+      in_tmp "coh_for_default_model2", fn ->
         mk_web_path()
         (~w(--repo=TestCoherence.Repo  --authenticatable --log-only --no-views --no-templates --no-migrations))
         |> Mix.Tasks.Coh.Install.run
 
-        assert_file "coherence/user.ex" |> web_path, fn file ->
-          file =~ "defmodule Coherence.User do"
+        assert_file "coherence/user.ex" |> lib_path, fn file ->
+          file =~ "defmodule Coherence.Coherence.User do"
           file =~ "use Coherence.Web, :model"
           file =~ "use Coherence.Schema"
           file =~ ~s(schema "users" do)
@@ -341,7 +343,7 @@ defmodule Mix.Tasks.Coh.InstallTest do
           file =~ "field :email, :string"
           file =~ "coherence_schema"
           file =~ "timestamps"
-          file =~ "cast(params, [:name, :email] ++ coherence_fields)"
+          file =~ "cast(params, [:name, :email] ++ coherence_fields())"
           file =~ "validate_required([:name, :email])"
           file =~ "unique_constraint(:email)"
           file =~ "validate_coherence(params)"
@@ -356,7 +358,7 @@ defmodule Mix.Tasks.Coh.InstallTest do
         (~w(--repo=TestCoherence.Repo  --authenticatable --log-only --no-views --no-templates --module=TestCoherence --no-migrations) ++ ["--model=Client clients"])
         |> Mix.Tasks.Coh.Install.run
 
-        assert_file "coherence/client.ex" |> web_path, fn file ->
+        assert_file "coherence/client.ex" |> lib_path, fn file ->
           file =~ "defmodule TestCoherence.Client do"
           file =~ "use TestCoherence.Web, :model"
           file =~ "use Coherence.Schema"
@@ -421,7 +423,10 @@ defmodule Mix.Tasks.Coh.InstallTest do
     end
   end
 
-  def web_path(path) do
+  def web_path(path \\ "") do
     Path.join @web_path, path
+  end
+  def lib_path(path \\ "") do
+    Path.join @lib_path, path
   end
 end
