@@ -375,6 +375,30 @@ defmodule Mix.Tasks.Coh.InstallTest do
       end
     end
 
+    test "coh_for_existing_model" do
+      in_tmp "coh_for_existing_model", fn ->
+        mk_web_path()
+        File.mkdir_p "lib/coherence/accounts"
+        File.write "lib/coherence/accounts/user.ex", """
+        defmodule Coherence.Accounts.User do
+          schema "accounts_users" do
+
+          end
+        end
+        """
+
+        (~w(--repo=TestCoherence.Repo --full-confirmable --log-only --no-views --no-templates --migration-path=migrations))
+        |> Mix.Tasks.Coh.Install.run
+
+        refute_file "coherence/user.ex" |> lib_path
+
+        assert [migration] = Path.wildcard("migrations/*_add_coherence_to_user.exs")
+        assert_file migration, [
+          "alter table(:accounts_users) do"
+        ]
+      end
+    end
+
   end
 
   describe "coh_installed options" do

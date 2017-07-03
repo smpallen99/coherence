@@ -198,7 +198,7 @@ defmodule Mix.Tasks.Coh.Install do
   defp do_run(config) do
     config
     |> validate_project_structure
-    |> check_for_model
+    |> get_existing_model
     |> gen_coherence_config
     |> gen_migration
     |> gen_model
@@ -348,12 +348,57 @@ defmodule Mix.Tasks.Coh.Install do
   ################
   # Models
 
-  defp check_for_model(%{user_schema: user_schema} = config) do
+  defp get_existing_model(%{user_schema: _} = config) do
+    config
+    |> get_compiled_model
+    |> find_existing_model(lib_path())
+  end
+  defp get_existing_model(config), do: config
+
+  defp get_compiled_model(%{user_schema: user_schema} = config) do
     user_schema = Module.concat user_schema, nil
-    Map.put(config, :model_found?, Code.ensure_compiled?(user_schema) or model_exists?(user_schema, lib_path("coherence")))
+    Map.put(config, :model_found?, Code.ensure_compiled?(user_schema))
   end
 
-  defp check_for_model(config), do: config
+  def find_existing_model(%{model_found?: false, user_schema: user_schema} = config, path) do
+    user_schema = Module.concat user_schema, nil
+    model =
+      user_schema
+      |> Module.split()
+      |> List.last
+    [path, "**", "user.ex"]
+    |> Path.join()
+    |> Path.wildcard()
+    |> model_file_and_module(model)
+    |> set_user_schema(config)
+  end
+  def find_existing_model(config, _path), do: config
+
+  defp model_file_and_module(files, model) do
+    Enum.reduce files, [], fn fname, acc ->
+      case File.read fname do
+        {:ok, contents} ->
+          case Regex.run ~r/defmodule\s*(.+\.#{model}) /, contents do
+            nil -> acc
+            [_, module] -> [{contents, module} | acc]
+          end
+        {:error, _} -> acc
+      end
+    end
+  end
+
+  defp set_user_schema([], config), do: config
+  defp set_user_schema([{contents, module} | list], config) do
+    case Regex.run ~r/schema\s+"(.*)"/, contents do
+      nil ->
+        set_user_schema(list, config)
+      [_, table_name] ->
+        config
+        |> Map.put(:model_found?, true)
+        |> Map.put(:user_schema, module)
+        |> Map.put(:user_table_name, table_name)
+    end
+  end
 
   defp gen_model(%{user_schema: user_schema, boilerplate: true, models: true,
     model_found?: false, web_path: web_path} = config) do
@@ -392,24 +437,8 @@ defmodule Mix.Tasks.Coh.Install do
     end
   end
 
-  defp model_exists?(model, path) do
-    with {:ok, files} <- File.ls(path),
-         true <- any_files?(files, model, path) do
-      true
-    else
-      _ -> false
-    end
-  end
-
-  defp any_files?(files, model, path) do
-    Enum.any? files, fn fname ->
-      case File.read Path.join(path, fname) do
-        {:ok, contents} ->
-          contents =~ ~r/defmodule\s*#{inspect model}/
-        {:error, _} -> false
-      end
-    end
-  end
+  # defp model_exists?(model, path) do
+  # end
 
   defp add_timestamp(acc, %{model_found?: false}), do: acc ++ ["", "timestamps()"]
   defp add_timestamp(acc, _), do: acc
