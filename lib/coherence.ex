@@ -233,6 +233,13 @@ Run `$ mix help coherence.install` or `$ mix help coherence.install` for more in
   def current_user(conn), do: conn.assigns[Config.assigns_key]
 
   @doc """
+  Get the currently logged in user name.
+  """
+  def current_user_name(conn, field \\ :name) do
+    (current_user(conn) || %{}) |> Map.get(field)
+  end
+
+  @doc """
   Get the currently assigned user_token
   """
   def user_token(conn), do: conn.assigns[Config.token_assigns_key]
