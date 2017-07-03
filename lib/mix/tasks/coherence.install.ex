@@ -194,6 +194,7 @@ defmodule Mix.Tasks.Coherence.Install do
   defp do_run(%{with_migrations: true}), do: Mix.raise("--with-migrations only valid with --reinstall")
   defp do_run(config) do
     config
+    |> validate_project_structure
     |> check_for_model
     |> gen_coherence_config
     |> gen_migration
@@ -210,6 +211,19 @@ defmodule Mix.Tasks.Coherence.Install do
     |> gen_coherence_controllers
     |> touch_config                # work around for config file not getting recompiled
     |> print_instructions
+  end
+
+  defp validate_project_structure(%{web_path: web_path} = config) do
+    case File.lstat(web_path) do
+      {:ok, %{type: :directory}} ->
+        config
+      _ ->
+        if Mix.shell.yes?("Cannot find web path #{web_path}. Are you sure you want to continue?") do
+          config
+        else
+          Mix.raise "Cannot find web path #{web_path}"
+        end
+    end
   end
 
   defp check_confirm(options, %{confirm: true}), do: options
@@ -902,6 +916,7 @@ defmodule Mix.Tasks.Coherence.Install do
     opts = Keyword.put(opts, :base, base)
     repo = (opts[:repo] || "#{base}.Repo")
     router = (opts[:router] || "#{base}.Router")
+    web_path = opts[:web_path] || "web"
 
     binding =
       binding
@@ -937,6 +952,7 @@ defmodule Mix.Tasks.Coherence.Install do
       reinstall: opts[:reinstall],
       silent: opts[:silent],
       with_migrations: opts[:with_migrations],
+      web_path: web_path
     ]
     |> Enum.into(opts_map)
     |> do_default_config(opts)

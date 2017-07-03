@@ -197,6 +197,7 @@ defmodule Mix.Tasks.Coh.Install do
   defp do_run(%{with_migrations: true}), do: Mix.raise("--with-migrations only valid with --reinstall")
   defp do_run(config) do
     config
+    |> validate_project_structure
     |> check_for_model
     |> gen_coherence_config
     |> gen_migration
@@ -213,6 +214,19 @@ defmodule Mix.Tasks.Coh.Install do
     |> gen_coherence_controllers
     |> touch_config                # work around for config file not getting recompiled
     |> print_instructions
+  end
+
+  defp validate_project_structure(%{web_path: web_path} = config) do
+    case File.lstat(web_path) do
+      {:ok, %{type: :directory}} ->
+        config
+      _ ->
+        if Mix.shell.yes?("Cannot find web path #{web_path}. Are you sure you want to continue?") do
+          config
+        else
+          Mix.raise "Cannot find web path #{web_path}"
+        end
+    end
   end
 
   defp check_confirm(options, %{confirm: true}), do: options
@@ -900,9 +914,9 @@ defmodule Mix.Tasks.Coh.Install do
     router = (opts[:router] || "#{base}.Web.Router")
     web_path = opts[:web_path] || web_path()
 
-    unless File.exists?(web_path) do
-      raise "Could not find web_path: #{web_path}"
-    end
+    # unless File.exists?(web_path) do
+    #   raise "Could not find web_path: #{web_path}"
+    # end
 
     web_base = Module.concat(base, Web) |> inspect()
 
@@ -1112,13 +1126,6 @@ defmodule Mix.Tasks.Coh.Install do
 
   # defp web_path(), do: Mix.Phoenix.web_path(Mix.Phoenix.otp_app())
   defp web_path() do
-    path1 = Path.join ["lib", to_string(Mix.Phoenix.otp_app()), "web"]
-    path2 = "web"
-    cond do
-      File.exists? path1 -> path1
-      File.exists? path2 -> path2
-      true ->
-        raise "Could not find web path '#{path1}'. Please use --web-path option to specify"
-    end
+    Path.join ["lib", to_string(Mix.Phoenix.otp_app()), "web"]
   end
 end

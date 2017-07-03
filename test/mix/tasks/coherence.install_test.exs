@@ -17,6 +17,7 @@ defmodule Mix.Tasks.Coherence.InstallTest do
 
   test "generates_files_for_authenticatable" do
     in_tmp "generates_views_for_authenticatable", fn ->
+      mk_web_path()
       ~w(--repo=TestCoherence.Repo --log-only --no-migrations --controllers --module=TestCoherence)
       |> Mix.Tasks.Coherence.Install.run
 
@@ -41,6 +42,7 @@ defmodule Mix.Tasks.Coherence.InstallTest do
 
   test "generates files for authenticatable recoverable" do
     in_tmp "generates_files_for_authenticatable_recoverable", fn ->
+      mk_web_path()
       ~w(--repo=TestCoherence.Repo  --authenticatable --recoverable --log-only --no-migrations --controllers)
       |> Mix.Tasks.Coherence.Install.run
 
@@ -57,6 +59,7 @@ defmodule Mix.Tasks.Coherence.InstallTest do
 
   test "generates files for authenticatable recoverable invitable" do
     in_tmp "generates_files_for_authenticatable_recoverable_invitable", fn ->
+      mk_web_path()
       ~w(--repo=TestCoherence.Repo  --authenticatable --recoverable --invitable --log-only --no-migrations --controllers --module=TestCoherence)
       |> Mix.Tasks.Coherence.Install.run
 
@@ -83,6 +86,7 @@ defmodule Mix.Tasks.Coherence.InstallTest do
 
   test "generates files for authenticatable recoverable registerable confirmable" do
     in_tmp "generates_files_for_authenticatable_recoverable_registerable_confirmable", fn ->
+      mk_web_path()
       ~w(--repo=TestCoherence.Repo  --authenticatable --recoverable --registerable --confirmable --log-only --no-migrations)
       |> Mix.Tasks.Coherence.Install.run
 
@@ -100,6 +104,7 @@ defmodule Mix.Tasks.Coherence.InstallTest do
 
   test "generates files for authenticatable recoverable unlockable_with_token" do
     in_tmp "generates_files_for_authenticatable_recoverable_registerable_unlockable_with_token", fn ->
+      mk_web_path()
       ~w(--repo=TestCoherence.Repo  --authenticatable --recoverable --registerable --lockable --unlockable-with-token --log-only --no-migrations --controllers)
       |> Mix.Tasks.Coherence.Install.run
 
@@ -116,6 +121,7 @@ defmodule Mix.Tasks.Coherence.InstallTest do
 
   test "generates files for --full-invitable --no-registerable" do
     in_tmp "generates_files_for_fill_invitable_no_registerable", fn ->
+      mk_web_path()
       ~w(--repo=TestCoherence.Repo  --full-invitable --no-registerable --log-only --no-migrations)
       |> Mix.Tasks.Coherence.Install.run
 
@@ -129,6 +135,7 @@ defmodule Mix.Tasks.Coherence.InstallTest do
 
   test "does not generate files for full" do
     in_tmp "does_not_generate_files_for_full", fn ->
+      mk_web_path()
       ~w(--repo=TestCoherence.Repo  --full --log-only --no-migrations --no-boilerplate)
       |> Mix.Tasks.Coherence.Install.run
 
@@ -146,6 +153,7 @@ defmodule Mix.Tasks.Coherence.InstallTest do
   describe "generates migrations" do
     test "for_default_model" do
       in_tmp "for_default_model", fn ->
+        mk_web_path()
         path = "migrations"
         (~w(--repo=TestCoherence.Repo  --authenticatable --recoverable --log-only --no-views --no-templates --module=TestCoherence --migration-path=#{path}))
         |> Mix.Tasks.Coherence.Install.run
@@ -163,6 +171,7 @@ defmodule Mix.Tasks.Coherence.InstallTest do
     end
     test "for_new_model" do
       in_tmp "for_new_model", fn ->
+        mk_web_path()
         path = "migrations"
         (~w(--repo=TestCoherence.Repo  --authenticatable --recoverable --log-only --no-views --no-templates --module=TestCoherence --migration-path=#{path}) ++ ["--model=Client clients"])
         |> Mix.Tasks.Coherence.Install.run
@@ -184,6 +193,7 @@ defmodule Mix.Tasks.Coherence.InstallTest do
     end
     test "for_custom_model" do
       in_tmp "for_custom_model", fn ->
+        mk_web_path()
         path = "migrations"
         (~w(--repo=TestCoherence.Repo  --full --log-only --no-views --no-templates --module=TestCoherence --migration-path=#{path}) ++ ["--model=Account accounts"])
         |> Mix.Tasks.Coherence.Install.run
@@ -209,6 +219,7 @@ defmodule Mix.Tasks.Coherence.InstallTest do
     end
     test "for_invitible" do
       in_tmp "for_invitible", fn ->
+        mk_web_path()
         (~w(--repo=TestCoherence.Repo  --authenticatable --invitable --log-only --no-views --no-templates --migration-path=migrations))
         |> Mix.Tasks.Coherence.Install.run
 
@@ -229,6 +240,7 @@ defmodule Mix.Tasks.Coherence.InstallTest do
     end
     test "for_rememberable" do
       in_tmp "for_rememberable", fn ->
+        mk_web_path()
         (~w(--repo=TestCoherence.Repo  --authenticatable --rememberable --log-only --no-views --no-templates --migration-path=migrations))
         |> Mix.Tasks.Coherence.Install.run
 
@@ -252,6 +264,7 @@ defmodule Mix.Tasks.Coherence.InstallTest do
     end
     test "for_trackable_table" do
       in_tmp "for_trackable_table", fn ->
+        mk_web_path()
         (~w(--repo=TestCoherence.Repo  --authenticatable --trackable-table --log-only --no-views --no-templates --migration-path=migrations))
         |> Mix.Tasks.Coherence.Install.run
 
@@ -275,6 +288,7 @@ defmodule Mix.Tasks.Coherence.InstallTest do
     end
     test "for_rememberable_with_accounts_schema" do
       in_tmp "for_rememberable", fn ->
+        mk_web_path()
         (~w(--repo=TestCoherence.Repo  --authenticatable --rememberable --log-only --no-views --no-templates --migration-path=migrations)++ ["--model=Account accounts"])
         |> Mix.Tasks.Coherence.Install.run
 
@@ -300,6 +314,7 @@ defmodule Mix.Tasks.Coherence.InstallTest do
   describe "model gen" do
     test "does not generate for existing model" do
       in_tmp "does_not_generate_for_existing_model", fn ->
+        mk_web_path()
         (~w(--repo=TestCoherence.Repo  --authenticatable --log-only --no-views --no-templates --module=TestCoherence --no-migrations))
         |> Mix.Tasks.Coherence.Install.run
 
@@ -309,6 +324,7 @@ defmodule Mix.Tasks.Coherence.InstallTest do
 
     test "for default model" do
       in_tmp "for_default_model", fn ->
+        mk_web_path()
         (~w(--repo=TestCoherence.Repo  --authenticatable --log-only --no-views --no-templates --no-migrations))
         |> Mix.Tasks.Coherence.Install.run
 
@@ -332,6 +348,7 @@ defmodule Mix.Tasks.Coherence.InstallTest do
 
     test "for custom model" do
       in_tmp "for_custom_model", fn ->
+        mk_web_path()
         (~w(--repo=TestCoherence.Repo  --authenticatable --log-only --no-views --no-templates --module=TestCoherence --no-migrations) ++ ["--model=Client clients"])
         |> Mix.Tasks.Coherence.Install.run
 
@@ -356,29 +373,38 @@ defmodule Mix.Tasks.Coherence.InstallTest do
 
   describe "installed options" do
     test "install options default" do
-      Application.put_env :coherence, :opts, [:authenticatable]
-      ~w(--installed-options --repo=TestCoherence.Repo)
-      |>  Mix.Tasks.Coherence.Install.run
+      in_tmp "install options default", fn ->
+        mk_web_path()
+        Application.put_env :coherence, :opts, [:authenticatable]
+        ~w(--installed-options --repo=TestCoherence.Repo)
+        |>  Mix.Tasks.Coherence.Install.run
 
-      assert_received {:mix_shell, :info, [output]}
-      assert output == "mix coherence.install --authenticatable"
+        assert_received {:mix_shell, :info, [output]}
+        assert output == "mix coherence.install --authenticatable"
+      end
     end
 
     test "install options authenticatable recoverable" do
-      Application.put_env :coherence, :opts, [:authenticatable, :recoverable]
-      ~w(--installed-options --repo=TestCoherence.Repo)
-      |>  Mix.Tasks.Coherence.Install.run
+      in_tmp "install options authenticatable recoverable", fn ->
+        mk_web_path()
+        Application.put_env :coherence, :opts, [:authenticatable, :recoverable]
+        ~w(--installed-options --repo=TestCoherence.Repo)
+        |>  Mix.Tasks.Coherence.Install.run
 
-      assert_received {:mix_shell, :info, [output]}
-      assert output == "mix coherence.install --authenticatable --recoverable"
+        assert_received {:mix_shell, :info, [output]}
+        assert output == "mix coherence.install --authenticatable --recoverable"
+      end
     end
     test "install options many" do
-      Application.put_env :coherence, :opts, [:confirmable, :rememberable, :registerable, :invitable, :authenticatable, :recoverable, :lockable, :trackable, :unlockable_with_token]
-      ~w(--installed-options --repo=TestCoherence.Repo)
-      |>  Mix.Tasks.Coherence.Install.run
+      in_tmp "install options many", fn ->
+        mk_web_path()
+        Application.put_env :coherence, :opts, [:confirmable, :rememberable, :registerable, :invitable, :authenticatable, :recoverable, :lockable, :trackable, :unlockable_with_token]
+        ~w(--installed-options --repo=TestCoherence.Repo)
+        |>  Mix.Tasks.Coherence.Install.run
 
-      assert_received {:mix_shell, :info, [output]}
-      assert output == "mix coherence.install --confirmable --rememberable --registerable --invitable --authenticatable --recoverable --lockable --trackable --unlockable-with-token"
+        assert_received {:mix_shell, :info, [output]}
+        assert output == "mix coherence.install --confirmable --rememberable --registerable --invitable --authenticatable --recoverable --lockable --trackable --unlockable-with-token"
+      end
     end
   end
 
@@ -400,7 +426,8 @@ defmodule Mix.Tasks.Coherence.InstallTest do
     end
   end
 
-  def web_path(path) do
+  def web_path(path \\ "") do
     Path.join @web_path, path
   end
+  def mk_web_path(), do: File.mkdir_p(web_path())
 end
