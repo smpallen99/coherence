@@ -57,6 +57,6 @@ defmodule Coherence.Mixfile do
     [ maintainers: ["Stephen Pallen"],
       licenses: ["MIT"],
       links: %{ "Github" => "https://github.com/smpallen99/coherence" },
-      files: ~w(lib priv web README.md mix.exs LICENSE)]
+      files: ~w(lib priv README.md mix.exs LICENSE)]
   end
 end
