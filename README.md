@@ -408,7 +408,7 @@ The following examples illustrate various configuration scenarios for the instal
 
 ```bash
   # Install with only the `authenticatable` option
-  $ mix co.install
+  $ mix coh.install
 
   # Install all the options except `confirmable` and `invitable`
   $ mix coh.install --full
