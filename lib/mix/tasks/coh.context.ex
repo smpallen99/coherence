@@ -10,7 +10,7 @@ defmodule Mix.Tasks.Coh.Context do
 
   use Mix.Task
 
-  alias Mix.Phoenix.{Context, Schema}
+  alias Mix.Phoenix.{Context}
   alias Mix.Tasks.Phx.Gen
 
   @switches [binary_id: :boolean, table: :string, web: :string,
