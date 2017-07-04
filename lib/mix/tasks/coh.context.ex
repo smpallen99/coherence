@@ -30,6 +30,11 @@ defmodule Mix.Tasks.Coh.Context do
 
     {context, schema} = build(args)
     binding = [context: context, schema: schema]
+    # Use the Coherence templates instead of the phoenix templates
+    # unless no such template is defined by Coherence, in which case
+    # reuse the corresponding phoenix template.
+    # This allows us to override some functions but still use the Phx
+    # generators to do some of the heavy lifting
     paths = coherence_generator_paths()
 
     prompt_for_conflicts(context)
@@ -40,7 +45,11 @@ defmodule Mix.Tasks.Coh.Context do
   end
 
   defp coherence_generator_paths do
-    # TODO: trace the calls to find out exactly why :phoenix must be among the paths
+    # We need to provide our own paths to the templates.
+    # The :phoenix app must be added to the path because we call some
+    # phoenix functions that use templates defined in the phoenix repo
+    # but use the path we supply as argument instead of the one defined
+    # in their mix task.
     [".", :coherence, :phoenix]
   end
 
