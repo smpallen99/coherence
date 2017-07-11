@@ -1,0 +1,212 @@
+## `msgid`s in this file come from POT (.pot) files.
+##
+## Do not add, change, or remove `msgid`s manually here as
+## they're tied to the ones in the corresponding POT file
+## (with the same domain).
+##
+## Use `mix gettext.extract --merge` or `mix gettext.merge`
+## to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: pl_PL\n"
+
+#: web/controllers/confirmation_controller.ex:54
+msgid "Account already confirmed."
+msgstr "Konto już jest potwierdzone."
+
+#: web/controllers/unlock_controller.ex:100
+msgid "Account is not locked."
+msgstr "Konto nie jest zablokowane."
+
+#: web/controllers/registration_controller.ex:105
+msgid "Account updated successfully."
+msgstr "Pomyślnie zaktualizowano konto."
+
+#: web/controllers/controller_helpers.ex:252
+msgid "Already logged in."
+msgstr "Już zalogowano."
+
+#: web/controllers/invitation_controller.ex:151
+msgid "Can't find that token"
+msgstr "Nie można znaleźć tokena"
+
+#: web/controllers/controller_helpers.ex:178
+msgid "Confirmation email sent."
+msgstr "Wysłano e-mail z potwierdzeniem aktywacji konta."
+
+#: web/controllers/confirmation_controller.ex:88
+msgid "Confirmation token expired."
+msgstr "Klucz do potwierdzania aktywacji konta jest już nieważny."
+
+#: web/controllers/confirmation_controller.ex:49
+#: web/controllers/password_controller.ex:54
+msgid "Could not find that email address"
+msgstr "Nie można znaleźć tego adresu e-mail"
+
+#: web/controllers/controller_helpers.ex:11
+msgid "Failed to update lockable attributes "
+msgstr "Nie można zaktualizować atrybutów blokowania konta "
+
+#: web/views/view_helpers.ex:15
+msgid "Forgot your password?"
+msgstr "Nie pamiętasz hasła?"
+
+#: lib/coherence/plugs/authorization/basic.ex:53
+msgid "HTTP Authentication Required"
+msgstr "Wymagane uwierzytelnianie HTTP"
+
+#: web/controllers/session_controller.ex:24
+msgid "Incorrect %{login_field} or password."
+msgstr "Nieprawidłowy %{login_field} lub hasło."
+
+#: web/controllers/invitation_controller.ex:125
+msgid "Invalid Invitation. Please contact the site administrator."
+msgstr "Nieprawidłowe zaproszenie. Skontaktuj się z administratorem strony."
+
+#: lib/coherence/plugs/require_login.ex:29
+#: lib/coherence/plugs/validate_option.ex:29
+msgid "Invalid Request."
+msgstr "Nieprawidłowe zapytanie."
+
+#: web/controllers/confirmation_controller.ex:83
+msgid "Invalid confirmation token."
+msgstr "Nieprawidłowy klucz do potwierdzania konta."
+
+#: web/controllers/unlock_controller.ex:69
+msgid "Invalid email or password."
+msgstr "Nieprawidłowy e-mail lub hasło."
+
+#: web/controllers/invitation_controller.ex:98
+msgid "Invalid invitation token."
+msgstr "Nieprawidłowy klucz do zapraszania."
+
+#: web/controllers/password_controller.ex:121
+msgid "Invalid reset token"
+msgstr "Nieprawidłowy klucz do resetowania hasła"
+
+#: web/controllers/password_controller.ex:87
+msgid "Invalid reset token."
+msgstr "Nieprawidłowy klucz do resetowania hasła."
+
+#: web/controllers/unlock_controller.ex:88
+msgid "Invalid unlock token."
+msgstr "Nieprawidłowy klucz do odblokowywania konta."
+
+#: web/controllers/invitation_controller.ex:77
+msgid "Invitation already sent."
+msgstr "Zaproszenie już zostało wysłane."
+
+#: web/controllers/invitation_controller.ex:70
+#: web/controllers/invitation_controller.ex:155
+msgid "Invitation sent."
+msgstr "Wysłano zaproszenie."
+
+#: web/views/view_helpers.ex:18
+msgid "Invite Someone"
+msgstr "Zaproś kogoś"
+
+#: web/controllers/session_controller.ex:25
+msgid "Maximum Login attempts exceeded. Your account has been locked."
+msgstr "Przekroczono maksymalną ilość prób logowania. Twoje konto zostało zablokowane."
+
+#: web/views/view_helpers.ex:17
+msgid "Need An Account?"
+msgstr "Potrzebujesz konta?"
+
+#: web/controllers/password_controller.ex:96
+#: web/controllers/password_controller.ex:129
+msgid "Password reset token expired."
+msgstr "Klucz do resetu hasła już jest nieważny."
+
+#: web/controllers/password_controller.ex:139
+msgid "Password updated successfully."
+msgstr "Pomyślnie zaktualizowano hasło."
+
+#: web/controllers/confirmation_controller.ex:102
+msgid "Problem confirming user account. Please contact the system administrator."
+msgstr "Wystąpił problem podczas potwierdzania konta użytkownika. Skontaktuj się z administratorem strony."
+
+#: web/controllers/controller_helpers.ex:181
+msgid "Registration created successfully."
+msgstr "Zarejestrowano pomyślnie."
+
+#: web/views/view_helpers.ex:19
+msgid "Resend confirmation email"
+msgstr "Wyślij ponownie e-mail z potwierdzeniem"
+
+#: web/controllers/password_controller.ex:68
+msgid "Reset email sent. Check your email for a reset link."
+msgstr "Wysłano e-mail do resetowania hasła. Sprawdź swoją skrzynkę e-mail."
+
+#: lib/coherence/plugs/authorization/basic.ex:52
+msgid "Restricted Area"
+msgstr "Strefa z ograniczonym dostępem"
+
+#: web/views/view_helpers.ex:16
+msgid "Send an unlock email"
+msgstr "Wyślij e-mail do odblokowywania konta"
+
+#: web/views/view_helpers.ex:20
+msgid "Sign In"
+msgstr "Zaloguj"
+
+#: web/views/view_helpers.ex:21
+msgid "Sign Out"
+msgstr "Wyloguj"
+
+#: web/controllers/session_controller.ex:125
+msgid "Signed in successfully."
+msgstr "Zalogowano pomyślnie"
+
+#: web/controllers/session_controller.ex:106
+msgid "Too many failed login attempts. Account has been locked."
+msgstr "Za dużo nieudanych prób logowania. Konto zostało zablokowane."
+
+#: lib/coherence/plugs/authorization/ip_address.ex:82
+msgid "Unauthorized IP Address"
+msgstr "Niedozwolony adres IP"
+
+#: web/controllers/unlock_controller.ex:57
+msgid "Unlock Instructions sent."
+msgstr "Wysłano instrukcje odblokowywania konta."
+
+#: web/controllers/confirmation_controller.ex:98
+msgid "User account confirmed successfully."
+msgstr "Konto zostało pomyślnie potwierdzone."
+
+#: web/controllers/invitation_controller.ex:57
+msgid "User already has an account!"
+msgstr "Użytkownik już ma konto!"
+
+#: web/controllers/session_controller.ex:237
+msgid "You are using an invalid security token for this site! This security\nviolation has been logged.\n"
+msgstr "Używasz Nieprawidłowego klucza bezpieczeństwa dla tej strony! To zdarzenie zostało zapisane."
+
+#: web/controllers/session_controller.ex:91
+msgid "You must confirm your account before you can login."
+msgstr "Musisz potwierdzić swoje konto zanim się zalogujesz."
+
+#: web/controllers/unlock_controller.ex:95
+msgid "Your account has been unlocked"
+msgstr "Konto zostało odblokowane"
+
+#: web/controllers/unlock_controller.ex:61
+msgid "Your account is not locked."
+msgstr "Twoje konto nie jest zablokowane."
+
+#: web/controllers/controller_helpers.ex:197
+#: web/services/confirmable_service.ex:111
+msgid "already confirmed"
+msgstr "już jest potwierdzone"
+
+#: web/controllers/controller_helpers.ex:218
+msgid "already locked"
+msgstr "już jest zablokowane"
+
+#: web/controllers/controller_helpers.ex:239
+msgid "not locked"
+msgstr "nie jest zablokowane"
+
+#: web/views/view_helpers.ex:189
+msgid "required"
+msgstr "wymagane"
