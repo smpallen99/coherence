@@ -213,7 +213,10 @@ defmodule Coherence.Config do
   end
 
   def mailer? do
-    !!Application.get_env(:coherence, Bling.Coherence.Mailer)
-  end
+		app_module = Application.get_env(:coherence, :module) || :not_ok
+		quote do
+			!!Application.get_env(:coherence, unquote(app_module).Coherence.Mailer)
+		end
+	end
 
 end
