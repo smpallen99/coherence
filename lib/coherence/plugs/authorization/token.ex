@@ -53,7 +53,7 @@ defmodule Coherence.Authentication.Token do
     Add the credentials for a `token`. `user_data` can be any term but must not be `nil`.
   """
   @spec add_credentials(String.t, t, module) :: t
-  def add_credentials(token, user_data, store \\ Coherence.CredentialStore.Agent) do
+  def add_credentials(token, user_data, store \\ Coherence.CredentialStore.Server) do
     store.put_credentials(token, user_data)
   end
 
@@ -61,7 +61,7 @@ defmodule Coherence.Authentication.Token do
     Remove the credentials for a `token`.
   """
   @spec remove_credentials(String.t, module) :: t
-  def remove_credentials(token, store \\ Coherence.CredentialStore.Agent) do
+  def remove_credentials(token, store \\ Coherence.CredentialStore.Server) do
     store.delete_credentials(token)
   end
 
@@ -82,7 +82,7 @@ defmodule Coherence.Authentication.Token do
       source: opts |> Keyword.fetch!(:source) |> convert_source(param),
       error: Keyword.get(opts, :error, "HTTP Authentication Required"),
       assigns_key: Keyword.get(opts, :assigns_key, :current_user),
-      store: Keyword.get(opts, :store, Coherence.CredentialStore.Agent),
+      store: Keyword.get(opts, :store, Coherence.CredentialStore.Server),
     }
   end
 

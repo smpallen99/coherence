@@ -688,20 +688,20 @@ IpAddress authentication is a good solution for server to server rest APIs.
 
 ```elixir
 creds = Coherence.Authentication.Basic.encode_credentials("Admin", "SecretPass")
-Coherence.CredentialStore.Agent.put_credentials(creds, %{role: :admin})
+Coherence.CredentialStore.Server.put_credentials(creds, %{role: :admin})
 ```
 
 ### Add Token Credentials Example
 
 ```elixir
 token = Coherence.Authentication.Token.generate_token
-Coherence.CredentialStore.Agent.put_credentials(token, %{role: :admin})
+Coherence.CredentialStore.Server.put_credentials(token, %{role: :admin})
 ```
 
 ### Add IP Credentials Example
 
 ```elixir
-Coherence.CredentialStore.Agent.put_credentials({127.0.0.1}, %{role: :admin})
+Coherence.CredentialStore.Server.put_credentials({127.0.0.1}, %{role: :admin})
 ```
 
 IpAddress authentication does not require this step. Its optional. If the user_data

@@ -11,7 +11,7 @@ defmodule Coherence.Authentication.IpAddress do
 
   If you would like access to the current user you must set each authorized IP address like:
 
-      Coherence.CredentialStore.Agent.put_credentials({127.0.0.1}, %{role: :admin})
+      Coherence.CredentialStore.Server.put_credentials({127.0.0.1}, %{role: :admin})
 
   or use a custom store like:
 
@@ -65,7 +65,7 @@ defmodule Coherence.Authentication.IpAddress do
     Add the credentials for a `token`. `user_data` can be any term but must not be `nil`.
   """
   @spec add_credentials(String.t, t, module) :: t
-  def add_credentials(ip, user_data, store \\ Coherence.CredentialStore.Agent) do
+  def add_credentials(ip, user_data, store \\ Coherence.CredentialStore.Server) do
     store.put_credentials(ip, user_data)
   end
 
@@ -73,7 +73,7 @@ defmodule Coherence.Authentication.IpAddress do
     Remove the credentials for a `token`.
   """
   @spec remove_credentials(String.t, module) :: t
-  def remove_credentials(ip, store \\ Coherence.CredentialStore.Agent) do
+  def remove_credentials(ip, store \\ Coherence.CredentialStore.Server) do
     store.delete_credentials(ip)
   end
 
@@ -83,7 +83,7 @@ defmodule Coherence.Authentication.IpAddress do
       allow: Keyword.get(opts, :allow, []),
       deny: Keyword.get(opts, :deny, []),
       error: Keyword.get(opts, :error, Messages.backend().unauthorized_ip_address()),
-      store: Keyword.get(opts, :store, Coherence.CredentialStore.Agent),
+      store: Keyword.get(opts, :store, Coherence.CredentialStore.Server),
       assign_key: Keyword.get(opts, :assign_key, :current_user),
     }
   end

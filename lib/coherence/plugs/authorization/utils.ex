@@ -52,7 +52,7 @@ defmodule Coherence.Authentication.Utils do
       Coherence.Authentication.Session ->
         Coherence.CredentialStore.Session
       Coherence.Authentication.Basic ->
-        Coherence.CredentialStore.Agent
+        Coherence.CredentialStore.Server
     end
   end
 
