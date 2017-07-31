@@ -1,4 +1,4 @@
-defmodule TestCoherence.Web.Router do
+defmodule TestCoherenceWeb.Router do
   use Phoenix.Router
   use Coherence.Router
 
@@ -31,13 +31,13 @@ defmodule TestCoherence.Web.Router do
     pipe_through :browser
     coherence_routes()
 
-    get "/dummies", TestCoherence.DummyController, :index
+    get "/dummies", TestCoherenceWeb.DummyController, :index
   end
   scope "/" do
     pipe_through :protected
     coherence_routes :protected
 
-    get "/dummies/new", TestCoherence.DummyController, :new
+    get "/dummies/new", TestCoherenceWeb.DummyController, :new
   end
 end
 

@@ -8,7 +8,8 @@ defmodule Coherence.Config do
 
   The following items are supported:
 
-  * :module: the name of project module (`module: MyProject`)
+  * :module - the name of project module (`module: MyProject`)
+  * :web_module - the name of the project's web module (`web_module: MyProjectWeb`)
   * :repo: the module name of your Repo (`repo: MyProject.Repo`)
   * :user_schema
   * :schema_key
@@ -72,6 +73,7 @@ defmodule Coherence.Config do
   # opts: :all || [:trackable, :lockable, :rememberable, :confirmable]
   [
     :module,
+    :web_module,
     :repo,
     :user_schema,
     :schema_key,
@@ -213,7 +215,7 @@ defmodule Coherence.Config do
   end
 
   def mailer? do
-    !!Application.get_env(:coherence, Module.concat(module(), Coherence.Mailer))
+    !!Application.get_env(:coherence, Module.concat(web_module(), Coherence.Mailer))
   end
 
 end

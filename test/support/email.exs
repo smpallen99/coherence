@@ -1,14 +1,14 @@
-defmodule TestCoherence.Coherence.Email do
+defmodule TestCoherenceWeb.Coherence.Email do
   defstruct [:from, :to, :subject, :reply_to, :template, :params]
 end
-defmodule TestCoherence.Coherence.Mailer do
+defmodule TestCoherenceWeb.Coherence.Mailer do
   def deliver(email), do: email
 
 end
 
-defmodule TestCoherence.Coherence.UserEmail do
+defmodule TestCoherenceWeb.Coherence.UserEmail do
   defp site_name, do: Coherence.Config.site_name(inspect Coherence.Config.module)
-  alias TestCoherence.Coherence.Email
+  alias TestCoherenceWeb.Coherence.Email
   require Logger
 
   def password(user, url) do
