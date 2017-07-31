@@ -58,7 +58,7 @@ defmodule CoherenceTest.Authentication.Token do
   defp assert_authorized(conn, content) do
     assert conn.status == 200
     assert conn.resp_body == content
-    assert conn.assigns[:current_user] == %{role: :admin}
+    assert conn.assigns[:current_user] == %{id: 1, role: :admin}
   end
 
   defp assert_error_handler_called(conn) do
@@ -70,7 +70,8 @@ defmodule CoherenceTest.Authentication.Token do
   defp auth_param(creds), do: {"auth_token", creds}
 
   setup do
-    Coherence.CredentialStore.Server.put_credentials("secret_token", %{role: :admin})
+    Coherence.CredentialStore.Server.put_credentials("secret_token", %{id: 1, role: :admin})
+    :ok
   end
 
   test "request without credentials using header-based auth" do

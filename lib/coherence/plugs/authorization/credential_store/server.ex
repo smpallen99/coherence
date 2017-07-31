@@ -11,11 +11,6 @@ defmodule Coherence.CredentialStore.Server do
   # The state of the server is a record containing a store and an index.
   # defstruct store: %{}, index: %{}
 
-  # The store is a map mapping credentials to user_data
-  @typep store :: %{T.credentials => T.user_id}
-  # The index is a map mapping the user's id to that user's active sessions.
-  @typep user_data :: %{T.user_id => {T.user_data, integer}}
-
   ###################
   # Public API
 
@@ -79,6 +74,10 @@ defmodule Coherence.CredentialStore.Server do
         {_, cnt} -> {user_data, cnt + 1}
       end)
       |> put_in([:store, credentials], id)
+    {:noreply, state}
+  end
+
+  def handle_cast({:put_credentials, _credentials, _user_data}, state) do
     {:noreply, state}
   end
 

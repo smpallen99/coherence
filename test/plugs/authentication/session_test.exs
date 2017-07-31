@@ -60,8 +60,9 @@ defmodule CoherenceTest.Plug.Session do
   end
 
   setup do
-    # Coherence.Authentication.Session.add_credentials("Admin", "SecretPass", %{role: :admin})
-    :ok
+    user = %{id: 1, role: :admin}
+    # Coherence.Authentication.Session.add_credentials("Admin", "SecretPass", user)
+    {:ok, user: user}
   end
 
   @user_params %{name: "test", email: "test@test.com", password: "secret", password_confirmation: "secret"}
