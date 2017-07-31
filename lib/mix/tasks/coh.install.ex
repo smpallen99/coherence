@@ -256,7 +256,7 @@ defmodule Mix.Tasks.Coh.Install do
         module: #{config[:base]},
         web_module: #{config[:web_base]},
         router: #{config[:router]},
-        messages_backend: #{config[:base]}.Coherence.Messages,
+        messages_backend: #{config[:web_base]}.Coherence.Messages,
         logged_out_url: "/",
       """
     (config_block <> from_email <> "  opts: #{inspect config[:opts]}\n")
