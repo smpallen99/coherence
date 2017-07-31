@@ -473,7 +473,7 @@ defmodule Mix.Tasks.Coherence.Install do
             add :name, :string
             add :email, :string
             add :token, :string
-            timestamps
+            timestamps()
           end
           create unique_index(:invitations, [:email])
           create index(:invitations, [:token])
@@ -496,7 +496,7 @@ defmodule Mix.Tasks.Coherence.Install do
             add :token_created_at, :utc_datetime
             add :user_id, #{gen_reference(table_name)}
 
-            timestamps
+            timestamps()
           end
           create index(:rememberables, [:user_id])
           create index(:rememberables, [:series_hash])
@@ -524,7 +524,7 @@ defmodule Mix.Tasks.Coherence.Install do
             add :last_sign_in_ip, :string
             add :user_id, #{gen_reference(table_name)}
 
-            timestamps
+            timestamps()
           end
           create index(:trackables, [:user_id])
           create index(:trackables, [:action])
@@ -757,7 +757,7 @@ defmodule Mix.Tasks.Coherence.Install do
         field :email, :string
         coherence_schema       # Add this
 
-        timestamps
+        timestamps()
       end
 
       def changeset(model, params \\ %{}) do

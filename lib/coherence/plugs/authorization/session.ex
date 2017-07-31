@@ -249,10 +249,10 @@ defmodule Coherence.Authentication.Session do
     do: {conn, store.get_user_data({auth_key, db_model, id_key})}
 
   defp assert_login({conn, nil}, login, _) when is_function(login) do
-    user_return_to =  
+    user_return_to =
       case conn.query_string do
         "" -> conn.request_path
-        _ -> conn.request_path <> "?" <> conn.query_string 
+        _ -> conn.request_path <> "?" <> conn.query_string
       end
 
     conn

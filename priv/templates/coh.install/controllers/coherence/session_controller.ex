@@ -46,7 +46,7 @@ defmodule <%= web_base %>.Coherence.SessionController do
   def new(conn, _params) do
     login_field = Config.login_field()
     conn
-    |> put_view(Coherence.SessionView)
+    |> put_view(Module.concat(Config.web_module, Coherence.SessionView))
     |> render(:new, [{login_field, ""}, remember: rememberable_enabled?()])
   end
 

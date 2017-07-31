@@ -25,7 +25,7 @@ defmodule Coherence.ControllerHelpers do
   def layout_view(conn, opts) do
     layout =
       case opts[:layout] || Config.layout() do
-        nil -> {Coherence.LayoutView, "app.html"}
+        nil -> {Module.concat(Config.web_module, Coherence.LayoutView), "app.html"}
         layout -> layout
       end
 
@@ -41,7 +41,7 @@ defmodule Coherence.ControllerHelpers do
   def set_view(conn, opts) do
     case opts[:view] do
       nil -> conn
-      view -> put_view conn, view
+      view -> put_view conn, Module.concat(Config.web_module, view)
     end
   end
 
