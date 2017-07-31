@@ -36,6 +36,7 @@ defmodule Mix.Tasks.Coh.InstallTest do
         "module: TestCoherence",
         "router: TestCoherenceWeb.Router",
         "web_module: TestCoherenceWeb",
+        "messages_backend: TestCoherenceWeb.Coherence.Messages,",
         "opts: [:authenticatable]",
       ]
     end
