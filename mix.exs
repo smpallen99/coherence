@@ -50,7 +50,6 @@ defmodule Coherence.Mixfile do
       {:postgrex, ">= 0.0.0", only: :test},
       {:dialyxir, "~> 0.4", only: [:dev], runtime: false},
       {:credo, "~> 0.8", only: [:dev, :test]},
-      {:exactor, "~> 2.2.3", warn_missing: false}
     ]
   end
 

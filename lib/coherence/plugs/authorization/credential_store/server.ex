@@ -1,18 +1,16 @@
 defmodule Coherence.CredentialStore.Server do
-  # ExActor will help us simplify the definition of our GenServer
-  use ExActor.GenServer, export: Coherence.CredentialStore.Server
 
   alias Coherence.CredentialStore.Types, as: T
+
+  @name __MODULE__
 
   @behaviour Coherence.CredentialStore
 
   # Server State
   # ------------
   # The state of the server is a record containing a store and an index.
-  require Record
-  # The state is not part of the server's API, so its type and constructor will be private.
-  # We want to have the flexibility of changing this later for efficiency reasons.
-  Record.defrecordp :state, [store: %{}, index: %{}]
+  # defstruct store: %{}, index: %{}
+
   # The store is a map mapping credentials to user_data
   @typep store :: %{T.credentials => T.user_data}
   # The index is a map mapping the user's id to that user's active sessions.
@@ -28,91 +26,125 @@ defmodule Coherence.CredentialStore.Server do
   # For applications with many concurrent sessions, the benefits probably outweight the costs.
   # For applications without many concurrent sessions these costs aren't great anyway.
 
-  # Public API for our server
-  # -------------------------
+  ###################
+  # Public API
 
-  defstart start_link, do:
-    # initially, both the store and the index are empty
-    initial_state(state(store: %{}, index: %{}))
+  @spec start_link() :: {:ok, pid}
+  def start_link do
+    GenServer.start_link __MODULE__, [], name: @name
+  end
 
   @spec update_user_logins(T.user_data) :: [T.credentials]
-  defcall update_user_logins(%{id: user_id} = user_data), state: state(store: store, index: index) do
+  def update_user_logins(%{id: _} = user_data) do
+    GenServer.call @name, {:update_user_logins, user_data}
+  end
+    # If the user_data doesn't contain an ID, there are no sessions belonging to the user
+    # There is no need to update anything and we just return an empty list
+  def update_user_logins(_), do: []
+
+  @spec get_user_data(T.credentials) :: T.user_data
+  def get_user_data(credentials) do
+    GenServer.call @name, {:get_user_data, credentials}
+  end
+
+  @spec put_credentials(T.credentials, T.user_data) :: T.user_data
+  def put_credentials(credentials, user_data) do
+    GenServer.call @name, {:put_credentials, credentials, user_data}
+  end
+
+  @spec delete_credentials(T.credentials) :: store
+  def delete_credentials(credentials) do
+    GenServer.call @name, {:delete_credentials, credentials}
+  end
+
+  @spec stop() :: no_return
+  def stop do
+    GenServer.cast @name, :stop
+  end
+
+  ###################
+  # Callbacks
+
+  @doc false
+  def init(_) do
+    {:ok, initial_state()}
+  end
+
+  @doc false
+  def handle_call({:update_user_logins, %{id: user_id} = user_data}, _from, state) do
     # TODO:
     # Maybe support updating ths user's ID.
     # Currently it's not obvious what's the best API for this.
     # -----------------------------------------
     # Get credentials for all sessions belonging to user
     # This operations is read-only for the index.
-    sessions_credentials = Map.get(index, user_id, [])
+    sessions_credentials = Map.get(state.index, user_id, [])
     # Build the changes to apply to the store.
     # This is linear on the number of sessions belonging to the user.
     # It is much better than the naive approach without the index,
     # which is linear on the total number of active sessions.
-    delta = for credentials <- sessions_credentials, into: %{}, do: {credentials, user_data}
-    set_and_reply(
+    delta = for credentials <- sessions_credentials, into: %{},
+      do: {credentials, user_data}
       # Update the store with the new user_data model
       # The index data is not touched, so the index is returned unchanged.
-      state(store: Map.merge(store, delta), index: index),
       # Return the updated credentials for all sessions belonging to the user
-      Map.keys(delta)
-    )
-  end
-  defcall update_user_logins(_), do:
-    # If the user_data doesn't contain an ID, there are no sessions belonging to the user
-    # There is no need to update anything and we just return an empty list
-    reply([])
-
-  @spec update_user_logins(T.credentials) :: T.user_data
-  defcall get_user_data(credentials), state: state(store: store) do
-    Map.get(store, credentials) |> reply
+    {:reply, Map.keys(delta), %{state | store: Map.merge(state.store, delta)}}
   end
 
-  @spec  put_credentials(T.credentials, T.user_data) :: T.user_data
-  defcall put_credentials(credentials, user_data), state: state(store: store, index: index) do
+  @doc false
+  def handle_call({:get_user_data, credentials}, _from, state) do
+    {:reply, get_in(state, [:store, credentials]), state}
+  end
+
+  @doc false
+  def handle_call({:put_credentials, credentials, user_data}, _from, state) do
     # The data has been changed; We must update both the index and the store
     # Update the index only if it makes sense
-    possibly_updated_index = maybe_add_credentials_to_index(index, user_data, credentials)
+    possibly_updated_index = maybe_add_credentials_to_index(state.index, user_data, credentials)
     # Always update the store
-    updated_store = add_credentials_to_store(store, user_data, credentials)
+    updated_store = add_credentials_to_store(state.store, user_data, credentials)
     # Update the state and reply
-    set_and_reply(
-      state(store: updated_store, index: possibly_updated_index),
-      # Return the updated store
-      user_data
-    )
+    {:reply, user_data, %{state | store: updated_store, index: possibly_updated_index}}
   end
 
-  @spec  delete_credentials(T.credentials) :: store
-  defcall delete_credentials(credentials), state: state(store: store, index: index) do
-    user_data = Map.get(store, credentials)
+  @doc false
+  def handle_call({:delete_credentials, credentials}, _from, state) do
+    user_data = get_in(state, [:store, credentials])
     # The data has been changed; We must update both the index and the store
     # Update the index only if it makes sense
-    possibly_updated_index = maybe_delete_credentials_from_index(index, user_data, credentials)
+    possibly_updated_index =
+      state
+      |> get_in([:index])
+      |> maybe_delete_credentials_from_index(user_data, credentials)
     # Always update the store
-    updated_store = delete_credentials_from_store(store, credentials)
-    set_and_reply(
-      state(store: updated_store, index: possibly_updated_index),
-      updated_store
-    )
+    updated_store =
+      state
+      |> get_in([:store])
+      |> delete_credentials_from_store(credentials)
+    {:reply, updated_store, %{state | store: updated_store, index: possibly_updated_index}}
   end
 
-  defcast stop, do: stop_server(:normal)
+  @doc false
+  def handle_cast(:stop, state) do
+    {:stop, :normal, state}
+  end
 
-  # Helper functions:
-  # -----------------
+  ##################
+  # Private
+
+  defp initial_state, do: %{store: %{}, index: %{}}
+
+  # If there isn't an entry for user_id in the index, create it.
+  # If there is already an entry for user_id, append the new credentials.
+  # If the user has no credentials, create a new entry in the MapSet
+  # with the new credentials
+  # If the user already has some credentials, put the new credential
   @spec maybe_add_credentials_to_index(index, T.user_data, T.credentials) :: index
   defp maybe_add_credentials_to_index(index, %{id: user_id}, credentials), do:
-    # If there isn't an entry for user_id in the index, create it.
-    # If there is already an entry for user_id, append the new credentials.
-    Map.update(index,
-               user_id,
-               # If the user has no credentials, create a new entry in the MapSet
-               # with the new credentials
-               MapSet.put(MapSet.new(), credentials),
-               # If the user already has some credentials, put the new credential
-               &(MapSet.put(&1, credentials)))      
-  defp maybe_add_credentials_to_index(index, nil, _), do: index
-  defp maybe_add_credentials_to_index(index, _, _), do: index
+    Map.update(index, user_id, MapSet.put(MapSet.new(), credentials),
+       &(MapSet.put(&1, credentials)))
+  defp maybe_add_credentials_to_index(index, _, _),
+    do: index
 
   @spec maybe_delete_credentials_from_index(index, T.user_data, T.credentials) :: index
   defp maybe_delete_credentials_from_index(index, %{id: user_id}, credentials) do
@@ -137,13 +169,12 @@ defmodule Coherence.CredentialStore.Server do
   end
   defp maybe_delete_credentials_from_index(index, nil, _), do: index
   defp maybe_delete_credentials_from_index(index, _, _), do: index
-  
 
   @spec add_credentials_to_store(store, T.user_data, T.credentials) :: store
-  defp add_credentials_to_store(store, user_data, credentials), do:
-    Map.put(store, credentials, user_data)
+  defp add_credentials_to_store(store, user_data, credentials),
+    do: Map.put(store, credentials, user_data)
 
   @spec delete_credentials_from_store(store, T.credentials) :: store
-  defp delete_credentials_from_store(store, credentials), do:
-    Map.delete(store, credentials)
+  defp delete_credentials_from_store(store, credentials),
+    do: Map.delete(store, credentials)
 end
