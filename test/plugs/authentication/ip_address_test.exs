@@ -58,7 +58,7 @@ defmodule CoherenceTest.Authentication.IpAddress do
   end
 
   setup do
-    # Coherence.CredentialStore.Agent.put_credentials("secret_token", %{role: :admin})
+    # Coherence.CredentialStore.Server.put_credentials("secret_token", %{role: :admin})
     :ok
   end
 

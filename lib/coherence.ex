@@ -233,6 +233,31 @@ Run `$ mix help coherence.install` or `$ mix help coherence.install` for more in
   def current_user(conn), do: conn.assigns[Config.assigns_key]
 
   @doc """
+  Updates the user login data in the current sessions.
+
+  Other sessions belonging to the same user won't be updated.
+  Requires access to the `conn`, which means it can't be called outside of the context of a conn.
+  To update all session belonging to the user see `t:update_user_login/1`.
+  """
+  def update_user_login(conn, user) do
+    apply(Config.auth_module,
+          Config.update_login,
+          [conn, user, [id_key: Config.schema_key]])
+  end
+
+  @doc """
+  Updates the user login data in the all sessions belonging to the user.
+
+  All sessions belonging to the same user will be updated.
+  Doesn't need access to the `conn`, which means it can be called anywhere.
+  To update only the current session see `t:update_user_login/2`
+  """
+  def update_user_logins(user) do
+    # Handle a user's DBStore
+    Coherence.CredentialStore.Server.update_user_logins(user)
+  end
+
+  @doc """
   Get the currently logged in user name.
   """
   def current_user_name(conn, field \\ :name) do

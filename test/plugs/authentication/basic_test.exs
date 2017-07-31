@@ -35,7 +35,7 @@ defmodule Coherence.Authentication.Basic.Test do
   end
 
   setup do
-    Coherence.Authentication.Basic.encode_credentials("Admin", "SecretPass") |> Coherence.CredentialStore.Agent.put_credentials(%{role: :admin})
+    Coherence.Authentication.Basic.encode_credentials("Admin", "SecretPass") |> Coherence.CredentialStore.Server.put_credentials(%{role: :admin})
   end
 
   test "request without credentials" do

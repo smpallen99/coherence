@@ -2,7 +2,7 @@ defmodule Coherence.CredentialStore.Session do
   @moduledoc """
   Stores current credential information.
 
-  Uses an Agent to save logged in credentials.
+  Uses an Server to save logged in credentials.
 
   Note: If you restart the phoenix server, this information
   is lost, requiring the user to log in again.
@@ -21,17 +21,19 @@ defmodule Coherence.CredentialStore.Session do
 
   require Logger
   alias Coherence.DbStore
-  alias Coherence.CredentialStore.Agent
+  alias Coherence.CredentialStore.Server
+  alias Coherence.CredentialStore.Types, as: T
 
   @spec start_link() :: {:ok, pid} | {:error, atom}
   def start_link do
-    Agent.start_link
+    Server.start_link()
   end
 
   @doc """
   Gets the user data for the given credentials
   """
-  @spec get_user_data({HashDict.t, nil | struct, integer | nil}) :: any
+
+  @spec get_user_data({T.credentials, nil | struct, integer | nil}) :: any
   def get_user_data({credentials, nil, _}) do
     get_data credentials
   end
@@ -41,7 +43,7 @@ defmodule Coherence.CredentialStore.Session do
         case DbStore.get_user_data(db_model.__struct__, credentials, id_key) do
           nil -> nil
           user_data ->
-            Agent.put_credentials(credentials, user_data)
+            Server.put_credentials(credentials, user_data)
             user_data
         end
       other ->
@@ -49,14 +51,15 @@ defmodule Coherence.CredentialStore.Session do
     end
   end
 
-  defp get_data(credentials), do: Agent.get_user_data(credentials)
+  @spec get_data(T.credentials) :: any
+  defp get_data(credentials), do: Server.get_user_data(credentials)
 
   @doc """
   Puts the `user_data` for the given `credentials`.
   """
-  @spec put_credentials({HashDict.t, any, atom}) :: any
+  @spec put_credentials({T.credentials, any, atom}) :: any
   def put_credentials({credentials, user_data, id_key}) do
-    Agent.put_credentials(credentials, user_data)
+    Server.put_credentials(credentials, user_data)
     DbStore.put_credentials(user_data, credentials, id_key)
   end
 
@@ -65,13 +68,13 @@ defmodule Coherence.CredentialStore.Session do
 
   Returns the current value of `credentials`, if `credentials` exists.
   """
-  @spec delete_credentials(HashDict.t) :: any
+  @spec delete_credentials(T.credentials) :: any
   def delete_credentials(credentials) do
     case get_data credentials do
       nil -> nil
       user_data ->
         DbStore.delete_credentials user_data, credentials
-        Agent.delete_credentials(credentials)
+        Server.delete_credentials(credentials)
     end
   end
 end

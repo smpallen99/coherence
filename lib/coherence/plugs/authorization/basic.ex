@@ -25,11 +25,12 @@ defmodule Coherence.Authentication.Basic do
   import Coherence.Authentication.Utils
 
   alias Coherence.Messages
+  alias Coherence.CredentialStore.Types, as: T
 
   @doc """
     Returns the encoded form for the given `user` and `password` combination.
   """
-  @spec encode_credentials(atom | String.t, String.t | nil) :: String.t
+  @spec encode_credentials(atom | String.t, String.t | nil) :: T.credentials
   def encode_credentials(user, password), do: Base.encode64("#{user}:#{password}")
 
   @spec create_login(String.t, String.t, t, Keyword.t) :: t
@@ -52,7 +53,7 @@ defmodule Coherence.Authentication.Basic do
     %{
       realm: Keyword.get(opts, :realm, Messages.backend().restricted_area()),
       error: Keyword.get(opts, :error, Messages.backend().http_authentication_required()),
-      store: Keyword.get(opts, :store, Coherence.CredentialStore.Agent),
+      store: Keyword.get(opts, :store, Coherence.CredentialStore.Server),
       assigns_key: Keyword.get(opts, :assigns_key, :current_user),
     }
   end

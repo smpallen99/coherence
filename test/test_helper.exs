@@ -1,5 +1,5 @@
 ExUnit.start()
-
+Application.ensure_all_started(:coherence)
 
 Code.require_file "./support/gettext.exs", __DIR__
 Code.require_file "./support/messages.exs", __DIR__

@@ -70,7 +70,7 @@ defmodule CoherenceTest.Authentication.Token do
   defp auth_param(creds), do: {"auth_token", creds}
 
   setup do
-    Coherence.CredentialStore.Agent.put_credentials("secret_token", %{role: :admin})
+    Coherence.CredentialStore.Server.put_credentials("secret_token", %{role: :admin})
   end
 
   test "request without credentials using header-based auth" do
