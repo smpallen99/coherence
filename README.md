@@ -7,9 +7,7 @@
 [license-img]: http://img.shields.io/badge/license-MIT-brightgreen.svg
 [license]: http://opensource.org/licenses/MIT
 
-> <div style="font-color: red">Alert: Project under active development!</div>
->
-> This is an early release. So expect changes and new features in the near future.
+> This version is not compatible with previous Phoenix 1.3.0-rc versions. Please use the 0.4.0 version instead.
 >
 
 Checkout the [Coherence Demo Project](https://github.com/smpallen99/coherence_demo) to see an example project using Coherence.
@@ -109,10 +107,10 @@ See [Installer](#installer) for more install options.
 You will need to update a few files manually.
 
 ```elixir
-# lib/my_project/web/router.ex
+# lib/my_project_web/router.ex
 
-defmodule MyProject.Web.Router do
-  use MyProject.Web, :router
+defmodule MyProjectWeb.Router do
+  use MyProjectWeb, :router
   use Coherence.Router         # Add this
 
   pipeline :browser do
@@ -145,18 +143,18 @@ defmodule MyProject.Web.Router do
     coherence_routes :protected
   end
 
-  scope "/", MyProject do
+  scope "/", MyProjectWeb do
     pipe_through :browser
 
     get "/", PageController, :index
     # add public resources below
   end
 
-  scope "/", MyProject do
+  scope "/", MyProjectWeb do
     pipe_through :protected
 
     # add protected resources below
-    resources "/privates", MyProject.PrivateController
+    resources "/privates", MyProjectWeb.PrivateController
   end
 end
 ```
@@ -168,7 +166,7 @@ If the installer created a user schema (one did not already exist), there is not
 # lib/my_project/accounts/user.ex
 
 defmodule MyProject.Accounts.User do
-  use MyProject.Web, :model
+  use Ecto.Schema
   use Coherence.Schema                                    # Add this
 
   schema "users" do
@@ -199,10 +197,10 @@ An alternative approach is add the authentication plugs to individual controller
 
 For example, lets say you want to show a list of products for everyone visiting the site, but only want authenticated users to be able to create, update, and delete products. You could do the following:
 
-Ensure the following is in your `lib/my_project/web/router.ex` file:
+Ensure the following is in your `lib/my_project_web/router.ex` file:
 
 ```elixir
-  scope "/", MyProject.Web do
+  scope "/", MyProjectWeb do
     pipe_through :browser
     resources "/products", ProductController
   end
@@ -211,8 +209,8 @@ Ensure the following is in your `lib/my_project/web/router.ex` file:
 In your product controller add the following:
 
 ```elixir
-defmodule MyProject.Web.ProductController do
-  use MyProject.Web, :controller
+defmodule MyProjectWeb.ProductController do
+  use MyProjectWeb, :controller
 
   plug Coherence.Authentication.Session, [protected: true] when action != :index
 
@@ -253,7 +251,7 @@ config :coherence,
 Update your socket module
 
 ```elixir
-defmodule MyProject.Web.UserSocket do
+defmodule MyProjectWeb.UserSocket do
   use Phoenix.Socket
   def connect(%{"token" => token}, socket) do
     case Coherence.verify_user_token(socket, token, &assign/3) do
@@ -271,9 +269,9 @@ All Coherence messages use `dgettext` with the `"coherence"` domain. This means 
 
 Coherence does not come with pre-translated `.po` files. We figure that you will want to tweak the Coherence language to suite your application.
 
-All files added to your project with the Coherence generators include a `import MyProject.Web.Gettext` with the `"coherence"` domain.
+All files added to your project with the Coherence generators include a `import MyProjectWeb.Gettext` with the `"coherence"` domain.
 
-The other messages that Coherence uses internal are pulled from the `my_project/web/coherence_messages.ex` file that is generated with the `coh.install` mix task. You can edit this file and customize it as required.
+The other messages that Coherence uses internal are pulled from the `my_project_web/coherence_messages.ex` file that is generated with the `coh.install` mix task. You can edit this file and customize it as required.
 
 To assist in upgrades to future releases of Coherence, the `MyProject.Coherence.Messages` module uses the `Coherence.Messages` behaviour which defines each message function. So, if you miss a message after upgrading, you will see a message during compile time.
 
@@ -494,18 +492,18 @@ The generated controllers are named `MyProject.Coherence.SessionController` as a
 If the controllers are generated, you will need to change your router to use the new names. For example:
 
 ```elixir
-  # lib/my_project/web/router.ex
-  use MyProject.Web, :router
+  # lib/my_project_web/router.ex
+  use MyProjectWeb, :router
   use Coherence.Router
 
   # ...
 
-  scope "/", MyProject.Web do   # note the addition of MyProject
+  scope "/", MyProjectWeb do   # note the addition of MyProject
     pipe_through :public
     coherence_routes()
   end
 
-  scope "/", MyProject.Web do   # note the addition of MyProject
+  scope "/", MyProjectWeb do   # note the addition of MyProject
     pipe_through :browser
     coherence_routes :protected
   end
@@ -528,14 +526,14 @@ config :coherence,
 
 ### Customizing Redirections
 
-Many of the controller actions redirect the user after create and update actions. These redirections can be customized by adding function call backs in the `lib/my_project/web/controllers/coherence/redirect.ex` module that is generated by the `mix coh.install` task.
+Many of the controller actions redirect the user after create and update actions. These redirections can be customized by adding function call backs in the `lib/my_project_web/controllers/coherence/redirect.ex` module that is generated by the `mix coh.install` task.
 
 For example, to have the user redirected to the login screen after logging out at the following:
 
 ```elixir
 defmodule Coherence.Redirects do
   use Redirects
-  import MyProject.Web.Router.Helpers
+  import MyProjectWeb.Router.Helpers
 
   # override the log out action back to the log in page
   def session_delete(conn, _), do: redirect(conn, session_path(conn, :new))
@@ -546,20 +544,20 @@ See the documentation for further details.
 
 ### Customizing layout
 
-By default coherence uses its own layout which is installed to `lib/my_project/web/templates/coherence/layout/app.html.eex`.
+By default coherence uses its own layout which is installed to `lib/my_project_web/templates/coherence/layout/app.html.eex`.
 
 If you want to customize coherence controllers layout, you can follow different approaches:
 
-* Edit the generated layout at `lib/my_project/web/templates/coherence/layout/app.html.eex`.
-* Set `:layout` in your config file. e.g. `config :coherence, :layout, {MyProject.Web.LayoutView, :app}`
+* Edit the generated layout at `lib/my_project_web/templates/coherence/layout/app.html.eex`.
+* Set `:layout` in your config file. e.g. `config :coherence, :layout, {MyProjectWeb.LayoutView, :app}`
 * Install coherence controllers to application and edit them, to use layout module different from `Coherence.LayoutView`
-* And the last solution is to use `plug :put_layout` in your `lib/my_project/web/router.ex` file. For example:
+* And the last solution is to use `plug :put_layout` in your `lib/my_project_web/router.ex` file. For example:
 
 ```elixir
-defmodule MyApp.Web.Router do
+defmodule MyProjectWeb.Router do
   # ...
   pipeline :coherence do
-    plug :put_layout, {MyProject.Web.LayoutView, :app}
+    plug :put_layout, {MyProjectWeb.LayoutView, :app}
   end
   # ...
   scope "/" do
@@ -588,7 +586,7 @@ Now add a new `changeset/3` function to the user model. The following example de
 ```elixir
   # lib/coherence/coherence/user.ex
   defmodule CoherenceDemo.User do
-    use CoherenceDemo.Web, :model
+    use Ecto.Schema
     use Coherence.Schema
 
     # ...
@@ -660,7 +658,7 @@ config :coherence,
   email_from_name: "Some Name",
   email_from_email: "myname@domain.com"
 
-config :coherence, CoherenceDemo.Coherence.Mailer,
+config :coherence, CoherenceDemoWeb.Coherence.Mailer,
   adapter: Swoosh.Adapters.Sendgrid,
   api_key: "Add api key here"
 ```
@@ -672,7 +670,7 @@ config :coherence,
   email_from_name: {:system, "NAME"},
   email_from_email: {:system, "EMAIL"}
 
-config :coherence, CoherenceDemo.Coherence.Mailer,
+config :coherence, CoherenceDemoWeb.Coherence.Mailer,
   api_key: {:system, "API_KEY"}
 ```
 

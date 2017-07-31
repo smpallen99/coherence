@@ -95,6 +95,8 @@ defmodule Mix.Tasks.Coh.Install do
 
   A `--module` option to override the module
 
+  A `--web-module` option to override the web module
+
   A `--installed-options` option to list the previous install options
 
   A `--reinstall` option to reinstall the coherence boilerplate based on your existing configuration options
@@ -155,7 +157,7 @@ defmodule Mix.Tasks.Coh.Install do
     log_only: :boolean, confirm_once: :boolean, controllers: :boolean,
     module: :string, installed_options: :boolean, reinstall: :boolean,
     silent: :boolean, with_migrations: :boolean, router: :string,
-    web_path: :string
+    web_path: :string, web_module: :string
   ] ++ Enum.map(@boolean_options, &({String.to_atom(&1), :boolean}))
 
   @switch_names Enum.map(@switches, &(elem(&1, 0)))
@@ -252,6 +254,7 @@ defmodule Mix.Tasks.Coh.Install do
         user_schema: #{config[:user_schema]},
         repo: #{config[:repo]},
         module: #{config[:base]},
+        web_module: #{config[:web_base]},
         router: #{config[:router]},
         messages_backend: #{config[:base]}.Coherence.Messages,
         logged_out_url: "/",
@@ -263,10 +266,10 @@ defmodule Mix.Tasks.Coh.Install do
     |> log_config
   end
 
-  defp swoosh_config(string, %{base: base, use_email?: true}) do
+  defp swoosh_config(string, %{web_base: web_base, use_email?: true}) do
     string <> "\n" <>
       """
-      config :coherence, #{base}.Coherence.Mailer,
+      config :coherence, #{web_base}.Coherence.Mailer,
         adapter: Swoosh.Adapters.Sendgrid,
         api_key: "your api key here"
       """
@@ -658,7 +661,10 @@ defmodule Mix.Tasks.Coh.Install do
   def view_files, do: @view_files
 
   def gen_coherence_views(%{views: true, boilerplate: true, binding: binding, web_path: web_path} = config) do
-    files = Enum.filter_map(@view_files, &(validate_option(config, elem(&1,0))), &(elem(&1, 1)))
+    files =
+    @view_files
+    |> Enum.filter(&(validate_option(config, elem(&1, 0))))
+    |> Enum.map(&(elem(&1, 1)))
     |> Enum.map(&({:eex, &1, Path.join(web_path, "views/coherence/#{&1}")}))
 
     copy_from paths(), "priv/templates/coh.install/views/coherence", "", [{:otp_app, Mix.Phoenix.otp_app()} | binding], files, config
@@ -737,7 +743,10 @@ defmodule Mix.Tasks.Coh.Install do
   def controller_files, do: @controller_files
 
   defp gen_coherence_controllers(%{controllers: true, boilerplate: true, binding: binding, web_path: web_path} = config) do
-    files = Enum.filter_map(@controller_files, &(validate_option(config, elem(&1,0))), &(elem(&1, 1)))
+    files =
+    @controller_files
+    |> Enum.filter(&(validate_option(config, elem(&1,0))))
+    |> Enum.map(&(elem(&1, 1)))
     |> Enum.map(&({:eex, &1, Path.join(web_path, "controllers/coherence/#{&1}")}))
 
     copy_from paths(), "priv/templates/coh.install/controllers/coherence", "", binding, files, config
@@ -809,14 +818,18 @@ defmodule Mix.Tasks.Coh.Install do
     end
   """
 
-  defp router_instructions(%{base: base, router: router, controllers: controllers}) do
-    namespace = if controllers, do: ", #{base}", else: ""
+  defp router_instructions(config) do
+    controllers = config[:controllers]
+    web_base = config[:web_base]
+    namespace = if controllers, do: ", #{web_base}", else: ""
+    web_module = config[:web_module]
+    router = config[:router]
 
     """
     Add the following to your router.ex file.
 
     defmodule #{router} do
-      use #{base}.Web, :router
+      use #{web_module}, :router
       use Coherence.Router         # Add this
 
       pipeline :browser do
@@ -849,13 +862,13 @@ defmodule Mix.Tasks.Coh.Install do
         coherence_routes :protected
       end
 
-      scope "/", #{base}.Web do
+      scope "/", #{web_base} do
         pipe_through :browser
         get "/", PageController, :index
         # Add public routes below
       end
 
-      scope "/", #{base}.Web do
+      scope "/", #{web_base} do
         pipe_through :protected
         # Add protected routes below
       end
@@ -939,22 +952,24 @@ defmodule Mix.Tasks.Coh.Install do
     # IO.puts "binding: #{inspect binding}"
 
     base = opts[:module] || binding[:base]
+    web_base = opts[:web_module] || base <> "Web"
     opts = Keyword.put(opts, :base, base)
     repo = (opts[:repo] || "#{base}.Repo")
-    router = (opts[:router] || "#{base}.Web.Router")
+    router = (opts[:router] || "#{web_base}.Router")
     web_path = opts[:web_path] || web_path()
+    web_module = web_base <> ".Coherence"
 
     # unless File.exists?(web_path) do
     #   raise "Could not find web_path: #{web_path}"
     # end
 
-    web_base = Module.concat(base, Web) |> inspect()
 
     binding =
       binding
       |> Keyword.put(:base, base)
       |> Keyword.put(:web_base, web_base)
       |> Keyword.put(:web_path, web_path)
+      |> Keyword.put(:web_module, web_module)
       |> Keyword.put(:otp_app, Mix.Phoenix.otp_app())
 
     {user_schema, user_table_name} = parse_model(opts[:model], base, opts)
@@ -986,6 +1001,8 @@ defmodule Mix.Tasks.Coh.Install do
       silent: opts[:silent],
       with_migrations: opts[:with_migrations],
       web_path: web_path,
+      web_base: web_base,
+      web_module: web_module,
     ]
     |> Enum.into(opts_map)
     |> do_default_config(opts)
@@ -1158,6 +1175,7 @@ defmodule Mix.Tasks.Coh.Install do
     Path.join ["lib", to_string(Mix.Phoenix.otp_app()), path]
   end
   defp web_path() do
-    Path.join ["lib", to_string(Mix.Phoenix.otp_app()), "web"]
+    otp_app = to_string(Mix.Phoenix.otp_app())
+    Path.join ["lib", otp_app <> "_web"]
   end
 end

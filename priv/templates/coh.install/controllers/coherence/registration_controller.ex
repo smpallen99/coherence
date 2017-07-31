@@ -10,7 +10,7 @@ defmodule <%= web_base %>.Coherence.RegistrationController do
   * update - update the user account
   * delete - delete the user account
   """
-  use <%= base %>.Coherence.Web, :controller
+  use <%= web_module %>, :controller
 
   require Logger
 

@@ -5,7 +5,7 @@ defmodule Mix.Tasks.Coh.InstallTest do
   import MixHelper
 
   @lib_path Path.join("lib", "coherence")
-  @web_path Path.join(@lib_path, "web")
+  @web_path Path.join("lib", "coherence_web")
 
   setup do
     :ok
@@ -19,6 +19,26 @@ defmodule Mix.Tasks.Coh.InstallTest do
 
   def mk_web_path(path \\ @web_path) do
     File.mkdir_p!(path)
+  end
+
+  test "generates config" do
+    in_tmp "coh_geneates_config", fn ->
+      mk_web_path()
+      File.mkdir "config"
+      File.touch "config/config.exs"
+      ~w(--emails --repo=TestCoherence.Repo --log-only --no-migrations --controllers --module=TestCoherence)
+      |> Mix.Tasks.Coh.Install.run
+
+      assert_file "config/config.exs", [
+        "config :coherence,",
+        "user_schema: TestCoherence.Coherence.User,",
+        "repo: TestCoherence.Repo,",
+        "module: TestCoherence",
+        "router: TestCoherenceWeb.Router",
+        "web_module: TestCoherenceWeb",
+        "opts: [:authenticatable]",
+      ]
+    end
   end
 
   test "coh_generates_files_for_authenticatable" do
@@ -37,11 +57,11 @@ defmodule Mix.Tasks.Coh.InstallTest do
       |> assert_file_list(@all_controllers, web_path("controllers/coherence/"))
 
       assert_file web_path("controllers/coherence/session_controller.ex"), fn file ->
-        assert file =~ "defmodule TestCoherence.Web.Coherence.SessionController do"
+        assert file =~ "defmodule TestCoherenceWeb.Coherence.SessionController do"
       end
 
       assert_file web_path("controllers/coherence/redirects.ex"), fn file ->
-        assert file =~ "import TestCoherence.Web.Router.Helpers"
+        assert file =~ "import TestCoherenceWeb.Router.Helpers"
       end
     end
   end
@@ -79,13 +99,13 @@ defmodule Mix.Tasks.Coh.InstallTest do
       |> assert_file_list(@all_controllers, "controllers/coherence" |> web_path)
 
       assert_file "controllers/coherence/session_controller.ex" |> web_path, fn file ->
-        assert file =~ "defmodule TestCoherence.Web.Coherence.SessionController do"
+        assert file =~ "defmodule TestCoherenceWeb.Coherence.SessionController do"
       end
       assert_file "controllers/coherence/password_controller.ex" |> web_path, fn file ->
-        assert file =~ "defmodule TestCoherence.Web.Coherence.PasswordController do"
+        assert file =~ "defmodule TestCoherenceWeb.Coherence.PasswordController do"
       end
       assert_file "controllers/coherence/invitation_controller.ex" |> web_path, fn file ->
-        assert file =~ "defmodule TestCoherence.Web.Coherence.InvitationController do"
+        assert file =~ "defmodule TestCoherenceWeb.Coherence.InvitationController do"
       end
     end
   end
@@ -336,7 +356,7 @@ defmodule Mix.Tasks.Coh.InstallTest do
 
         assert_file "coherence/user.ex" |> lib_path, fn file ->
           file =~ "defmodule Coherence.Coherence.User do"
-          file =~ "use Coherence.Web, :model"
+          file =~ "use CoherenceWeb, :model"
           file =~ "use Coherence.Schema"
           file =~ ~s(schema "users" do)
           file =~ "field :name, :string"
@@ -360,7 +380,7 @@ defmodule Mix.Tasks.Coh.InstallTest do
 
         assert_file "coherence/client.ex" |> lib_path, fn file ->
           file =~ "defmodule TestCoherence.Client do"
-          file =~ "use TestCoherence.Web, :model"
+          file =~ "use TestCoherenceWeb, :model"
           file =~ "use Coherence.Schema"
           file =~ ~s(schema "clients" do)
           file =~ "field :name, :string"

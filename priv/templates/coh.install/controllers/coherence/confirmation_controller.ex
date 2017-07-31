@@ -5,7 +5,7 @@ defmodule <%= web_base %>.Coherence.ConfirmationController do
   A single action, `edit`, is required for the confirmation module.
 
   """
-  use <%= base %>.Coherence.Web, :controller
+  use <%= web_module %>, :controller
 
   alias Coherence.{ConfirmableService}
   alias Ecto.DateTime

@@ -1,10 +1,13 @@
-defmodule <%= base %>.Coherence.ViewHelpers do
+defmodule <%= web_base %>.Coherence.ViewHelpers do
   @moduledoc """
   Helper functions for Coherence Views.
   """
   use Phoenix.HTML
   alias Coherence.Config
   import <%= web_base %>.Gettext
+
+  @type conn :: Plug.Conn.t
+  @type schema :: Ecto.Schema.t
 
   @seperator {:safe, "&nbsp; | &nbsp;"}
   @helpers <%= web_base %>.Router.Helpers
@@ -68,6 +71,7 @@ defmodule <%= base %>.Coherence.ViewHelpers do
       coherence_links(conn, :layout)             # when not logged in
       Generates: #{@register_link}  #{@signin_link}
   """
+  @spec coherence_links(conn, atom, Keyword.t) :: tuple
   def coherence_links(conn, which, opts \\ [])
   def coherence_links(conn, :new_session, opts) do
     recover_link  = Keyword.get opts, :recover, @recover_link
@@ -112,6 +116,7 @@ defmodule <%= base %>.Coherence.ViewHelpers do
   @doc """
   Helper to avoid compile warnings when options are disabled.
   """
+  @spec coherence_path(module, atom, conn, atom) :: String.t
   def coherence_path(module, route_name, conn, action) do
     apply(module, route_name, [conn, action])
   end
@@ -123,43 +128,58 @@ defmodule <%= base %>.Coherence.ViewHelpers do
   defp concat([h|t], []), do: concat(t, [h])
   defp concat([h|t], acc), do: concat(t, [h, @seperator | acc])
 
+  @spec recover_link(conn, module, false | String.t) :: [any] | []
   def recover_link(_conn, _user_schema, false), do: []
   def recover_link(conn, user_schema, text) do
     if user_schema.recoverable?, do: [recover_link(conn, text)], else: []
   end
+
+  @spec recover_link(conn, String.t) :: tuple
   def recover_link(conn, text \\ @recover_link), do:
     link(text, to: coherence_path(@helpers, :password_path, conn, :new))
 
+  @spec register_link(conn, module, false | String.t) :: [any] | []
   def register_link(_conn, _user_schema, false), do: []
   def register_link(conn, user_schema, text) do
     if user_schema.registerable?, do: [register_link(conn, text)], else: []
   end
+
+  @spec register_link(conn, String.t) :: tuple
   def register_link(conn, text \\ @register_link), do:
     link(text, to: coherence_path(@helpers, :registration_path, conn, :new))
 
+  @spec unlock_link(conn, module, false | String.t) :: [any] | []
   def unlock_link(_conn, _user_schema, false), do: []
   def unlock_link(conn, _user_schema, text) do
     if conn.assigns[:locked], do: [unlock_link(conn, text)], else: []
   end
+
+  @spec unlock_link(conn, String.t) :: tuple
   def unlock_link(conn, text \\ @unlock_link), do:
     link(text, to: coherence_path(@helpers, :unlock_path, conn, :new))
 
+  @spec invitation_link(conn, String.t) :: tuple
   def invitation_link(conn, text \\ @invite_link) do
     link text, to: coherence_path(@helpers, :invitation_path, conn, :new)
   end
 
+  @spec signout_link(conn, String.t, String.t) :: tuple
   def signout_link(conn, text \\ @signout_link, signout_class \\ "") do
     link(text, to: coherence_path(@helpers, :session_path, conn, :delete), method: :delete, class: signout_class)
   end
 
+  @spec confirmation_link(conn, module, false | String.t) :: [any] | []
   def confirmation_link(_conn, _user_schema, false), do: []
   def confirmation_link(conn, user_schema, text) do
     if user_schema.confirmable?, do: [confirmation_link(conn, text)], else: []
   end
+
+  @spec confirmation_link(conn, String.t) :: tuple
   def confirmation_link(conn, text \\ @confirm_link) do
     link(text, to: coherence_path(@helpers, :confirmation_path, conn, :new))
   end
 
+  @spec required_label(atom, String.t | atom, Keyword.t) :: tuple
   def required_label(f, name, opts \\ []) do
     label f, name, opts do
       [
@@ -168,6 +188,17 @@ defmodule <%= base %>.Coherence.ViewHelpers do
       ]
     end
   end
+
+  @spec current_user(conn) :: schema
+  def current_user(conn) do
+    Coherence.current_user(conn)
+  end
+
+  @spec logged_in?(conn) :: boolean
+  def logged_in?(conn) do
+    Coherence.logged_in?(conn)
+  end
+
 
   defp profile_link(current_user, conn) do
     if Config.user_schema.registerable? do

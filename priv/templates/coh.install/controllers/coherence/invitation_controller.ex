@@ -10,7 +10,7 @@ defmodule <%= web_base %>.Coherence.InvitationController do
   * create_user - create a new user database record
   * resend - resend an invitation token email
   """
-  use <%= base %>.Coherence.Web, :controller
+  use <%= web_module %>, :controller
 
   import Ecto.Changeset
 

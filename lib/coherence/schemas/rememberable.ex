@@ -76,7 +76,7 @@ defmodule Coherence.Rememberable do
   @spec hash(String.t) :: String.t
   def hash(string) do
     :sha
-    |> :crypto.hash(String.to_char_list(string))
+    |> :crypto.hash(String.to_charlist(string))
     |> Base.url_encode64
   end
 

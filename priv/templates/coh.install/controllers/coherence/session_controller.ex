@@ -3,7 +3,7 @@ defmodule <%= web_base %>.Coherence.SessionController do
   Handle the authentication actions.
 
   """
-  use <%= base %>.Coherence.Web, :controller
+  use <%= web_module %>, :controller
 
   import Coherence.TrackableService
   import Coherence.Rememberable, only: [hash: 1, gen_cookie: 3]

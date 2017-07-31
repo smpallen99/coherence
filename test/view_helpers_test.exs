@@ -85,7 +85,7 @@ defmodule CoherenceTest.ViewHelpers do
     result2 = item2 |> safe_to_string
 
     assert Floki.find(result1, "li") |> Floki.text == "test"
-    assert Floki.find(result2, "li form a") |> Floki.text == @signout_link
+    assert Floki.find(result2, "li a") |> Floki.text == @signout_link
   end
 
   test "coherence_links :layout not signed" do

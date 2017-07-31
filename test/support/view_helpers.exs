@@ -105,7 +105,7 @@ defmodule TestCoherence.ViewHelpers do
         content_tag(list_tag, signout_link(conn, signout, signout_class))
       ]
     else
-      signin_link = content_tag(list_tag, signin_link(conn, signin))
+      signin_link = content_tag(list_tag, link(signin, to: coherence_path(@helpers, :session_path, conn, :new)))
       if Config.has_option(:registerable) && register do
         [content_tag(list_tag, link(register, to: coherence_path(@helpers, :registration_path, conn, :new))), signin_link]
       else
@@ -134,6 +134,7 @@ defmodule TestCoherence.ViewHelpers do
   def recover_link(conn, user_schema, text) do
     if user_schema.recoverable?, do: [recover_link(conn, text)], else: []
   end
+
   @spec recover_link(conn, String.t) :: tuple
   def recover_link(conn, text \\ @recover_link), do:
     link(text, to: coherence_path(@helpers, :password_path, conn, :new))
@@ -143,6 +144,7 @@ defmodule TestCoherence.ViewHelpers do
   def register_link(conn, user_schema, text) do
     if user_schema.registerable?, do: [register_link(conn, text)], else: []
   end
+
   @spec register_link(conn, String.t) :: tuple
   def register_link(conn, text \\ @register_link), do:
     link(text, to: coherence_path(@helpers, :registration_path, conn, :new))
@@ -152,6 +154,7 @@ defmodule TestCoherence.ViewHelpers do
   def unlock_link(conn, _user_schema, text) do
     if conn.assigns[:locked], do: [unlock_link(conn, text)], else: []
   end
+
   @spec unlock_link(conn, String.t) :: tuple
   def unlock_link(conn, text \\ @unlock_link), do:
     link(text, to: coherence_path(@helpers, :unlock_path, conn, :new))
@@ -159,11 +162,6 @@ defmodule TestCoherence.ViewHelpers do
   @spec invitation_link(conn, String.t) :: tuple
   def invitation_link(conn, text \\ @invite_link) do
     link text, to: coherence_path(@helpers, :invitation_path, conn, :new)
-  end
-
-  @spec signin_link(conn, String.t) :: tuple
-  def signin_link(conn, text \\ @signin_link) do
-    link(text, to: coherence_path(@helpers, :session_path, conn, :new))
   end
 
   @spec signout_link(conn, String.t, String.t) :: tuple
@@ -176,6 +174,7 @@ defmodule TestCoherence.ViewHelpers do
   def confirmation_link(conn, user_schema, text) do
     if user_schema.confirmable?, do: [confirmation_link(conn, text)], else: []
   end
+
   @spec confirmation_link(conn, String.t) :: tuple
   def confirmation_link(conn, text \\ @confirm_link) do
     link(text, to: coherence_path(@helpers, :confirmation_path, conn, :new))
@@ -186,7 +185,7 @@ defmodule TestCoherence.ViewHelpers do
     label f, name, opts do
       [
         "#{humanize(name)}\n",
-        content_tag(:abbr, "*", class: "required", title: Messages.backend().required())
+        content_tag(:abbr, "*", class: "required", title: "required")
       ]
     end
   end
@@ -200,6 +199,7 @@ defmodule TestCoherence.ViewHelpers do
   def logged_in?(conn) do
     Coherence.logged_in?(conn)
   end
+
 
   defp profile_link(current_user, conn) do
     if Config.user_schema.registerable? do

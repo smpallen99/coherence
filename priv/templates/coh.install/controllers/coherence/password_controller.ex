@@ -11,7 +11,7 @@ defmodule <%= web_base %>.Coherence.PasswordController do
   * edit - render the reset password form
   * update - verify password, password confirmation, and update the database
   """
-  use <%= base %>.Coherence.Web, :controller
+  use <%= web_module %>, :controller
 
   alias Coherence.TrackableService
 

@@ -7,7 +7,7 @@ defmodule <%= web_base %>.Coherence.UnlockController do
 
   Basic locking and unlocking does not use this controller.
   """
-  use <%= base %>.Coherence.Web, :controller
+  use <%= web_module %>, :controller
 
   alias Coherence.{TrackableService, LockableService}
 

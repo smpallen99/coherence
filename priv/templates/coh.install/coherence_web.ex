@@ -1,4 +1,4 @@
-defmodule <%= base %>.Coherence.Web do
+defmodule <%= web_module %> do
   @moduledoc false
 
   def view do
@@ -14,7 +14,7 @@ defmodule <%= base %>.Coherence.Web do
       import <%= web_base %>.Router.Helpers
       import <%= web_base %>.ErrorHelpers
       import <%= web_base %>.Gettext
-      import <%= base %>.Coherence.ViewHelpers
+      import <%= web_base %>.Coherence.ViewHelpers
     end
   end
 

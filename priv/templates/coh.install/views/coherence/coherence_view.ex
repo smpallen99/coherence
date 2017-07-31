@@ -1,3 +1,3 @@
 defmodule Coherence.CoherenceView do
-  use <%= base %>.Coherence.Web, :view
+  use <%= web_module %>, :view
 end

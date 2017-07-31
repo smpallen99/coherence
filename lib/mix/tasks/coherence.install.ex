@@ -152,7 +152,8 @@ defmodule Mix.Tasks.Coherence.Install do
     user: :string, repo: :string, migration_path: :string, model: :string,
     log_only: :boolean, confirm_once: :boolean, controllers: :boolean,
     module: :string, installed_options: :boolean, reinstall: :boolean,
-    silent: :boolean, with_migrations: :boolean, router: :string
+    silent: :boolean, with_migrations: :boolean, router: :string,
+    web_module: :string
   ] ++ Enum.map(@boolean_options, &({String.to_atom(&1), :boolean}))
 
   @switch_names Enum.map(@switches, &(elem(&1, 0)))
@@ -249,6 +250,7 @@ defmodule Mix.Tasks.Coherence.Install do
         user_schema: #{config[:user_schema]},
         repo: #{config[:repo]},
         module: #{config[:base]},
+        web_module: #{config[:web_base]},
         router: #{config[:router]},
         messages_backend: #{config[:base]}.Coherence.Messages,
         logged_out_url: "/",
@@ -629,7 +631,8 @@ defmodule Mix.Tasks.Coherence.Install do
   def gen_coherence_views(%{views: true, boilerplate: true, binding: binding} = config) do
     files =
       @view_files
-      |> Enum.filter_map(&(validate_option(config, elem(&1,0))), &(elem(&1, 1)))
+      |> Enum.filter(&(validate_option(config, elem(&1,0))))
+      |> Enum.map(&(elem(&1, 1)))
       |> Enum.map(&({:eex, &1, "web/views/coherence/#{&1}"}))
 
     copy_from paths(), "priv/templates/coh.install/views/coherence", "", binding, files, config
@@ -711,7 +714,8 @@ defmodule Mix.Tasks.Coherence.Install do
   defp gen_coherence_controllers(%{controllers: true, boilerplate: true, binding: binding} = config) do
     files =
       @controller_files
-      |> Enum.filter_map(&(validate_option(config, elem(&1,0))), &(elem(&1, 1)))
+      |> Enum.filter(&(validate_option(config, elem(&1,0))))
+      |> Enum.map(&(elem(&1, 1)))
       |> Enum.map(&({:eex, &1, "web/controllers/coherence/#{&1}"}))
 
     copy_from paths(), "priv/templates/coh.install/controllers/coherence", "", binding, files, config
@@ -913,15 +917,18 @@ defmodule Mix.Tasks.Coherence.Install do
     # IO.puts "binding: #{inspect binding}"
 
     base = opts[:module] || binding[:base]
+    web_base = opts[:web_module] || base <> ".Web"
     opts = Keyword.put(opts, :base, base)
     repo = (opts[:repo] || "#{base}.Repo")
     router = (opts[:router] || "#{base}.Router")
     web_path = opts[:web_path] || "web"
+    web_module = base <> ".Coherence.Web"
 
     binding =
       binding
       |> Keyword.put(:base, base)
       |> Keyword.put(:web_base, base)
+      |> Keyword.put(:web_module, web_module)
       |> Keyword.put(:web_path, "web")
 
     {user_schema, user_table_name} = parse_model(opts[:model], base, opts)
@@ -952,7 +959,8 @@ defmodule Mix.Tasks.Coherence.Install do
       reinstall: opts[:reinstall],
       silent: opts[:silent],
       with_migrations: opts[:with_migrations],
-      web_path: web_path
+      web_path: web_path,
+      web_base: web_base
     ]
     |> Enum.into(opts_map)
     |> do_default_config(opts)
