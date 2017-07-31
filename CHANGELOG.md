@@ -1,6 +1,23 @@
 # Coherence Changelog
 
-## 0.4.0-dev (2017-04-xx)
+## 0.5.0 (2017-08-xx)
+
+* Enhancements
+  * Support the released Version of Phoenix 1.3 project structure
+  * Project name spaced generated view modules
+  * GenServer based Session Store
+    * Single user model stored for multiple logins of the same user
+    * Support to update user model for all logged in sessions
+  * add --web-module installer option
+
+* Bug Fixes
+  * Fixed incorrect reference to CoherenceDemo in Config.mailer?
+
+* Backward incompatible changes
+  * Does not support Phoenix 1.3.0-rc versions with lib/my_project/web project structure
+  * Previous generated controllers and views must be updated
+
+## 0.4.0 (2017-07-03)
 
 See these `0.3.1` to `0.4.0` [upgrade instructions](https://gist.github.com/smpallen99/92d826b6f523edd83b4a358cf05e97e7) to bring your existing app up to speed.
 
