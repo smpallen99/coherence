@@ -69,6 +69,10 @@ For projects created with `mix phx.new`, use the following mix tasks:
 * `coh.install`
 * `coh.clean`
 
+For projects created with `mix phx.new --umbrella`, ensure you are in the app directory and use the following options for the install:
+* `cd apps/my_project`
+* `coh.install --web-module MyProjectWeb --web-path ../my_project_web/lib/my_project_web`
+
 And for projects created with `mix phoenix.new`, use the following:
 
 * `coherence.install`
