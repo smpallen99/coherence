@@ -184,25 +184,6 @@ defmodule Coherence.SessionController do
   defp failed_login(conn, _user, _), do: put_flash(conn, :error, Messages.backend().incorrect_login_or_password(login_field: Config.login_field()))
 
   @doc """
-  Call back for the authentication plug.
-
-  Render the login form.
-  """
-  @spec login_callback(conn) :: conn
-  def login_callback(conn) do
-    conn =
-      if Map.get conn.private, :phoenix_layout do
-        conn
-      else
-        put_layout conn, Config.layout({Module.concat(Config.web_module, Coherence.LayoutView), :app})
-      end
-
-    conn
-    |> new(%{})
-    |> halt
-  end
-
-  @doc """
   Callback for the authenticate plug.
 
   Validate the rememberable cookie. If valid, generate a new token,

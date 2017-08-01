@@ -10,6 +10,8 @@
     * Support to update user model for all logged in sessions
   * add --web-module installer option
   * Generate Invitation, Rememberable, and Trackable schemas
+  * Use app's layout by default. Use --layout option to generate and use a specific layout for coherence. #186
+  * Remove login callback and replace with Phoenix.Controller.redirect. #254
 
 * Bug Fixes
   * Fixed incorrect reference to CoherenceDemo in Config.mailer?

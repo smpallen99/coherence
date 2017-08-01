@@ -1,15 +1,15 @@
 defmodule Coherence.Authentication.Session do
   @moduledoc """
-  Implements Session based authentication. By default, it uses an Agent for
+  Implements Session based authentication. By default, it uses an Server for
   session state. Additionally, a the session can be stored in a database with
-  an Agent based cache.
+  an Server based cache.
 
   The plug can be used to force a login for unauthenticated users for routes
   that need to be protected with a password.
 
   For example:
 
-      plug Coherence.Authentication.Session, login: true
+      plug Coherence.Authentication.Session, protected: true
 
   will present the user for a login if they are accessing a route or controller
   that uses this plug.
@@ -23,8 +23,9 @@ defmodule Coherence.Authentication.Session do
   protected pages.
 
   By default, the user model for a logged-in user can be accessed with
-  `conn.assigns[:current_user]`. This can be changed with the global :assigns_key
-  config option.
+  `Coherence.current_user(conn)` which is just a shortcut for
+  `conn.assigns[:current_user]`. This can be changed with the global
+  :assigns_key config option.
 
   ## Controller Based Authentication
 
@@ -63,11 +64,11 @@ defmodule Coherence.Authentication.Session do
         end
       end
 
-      plug Coherence.Authentication.Session, db_model: MyProject.User, login: true
+      plug Coherence.Authentication.Session, db_model: MyProject.User, protected: true
 
-  You should be aware that the Agent is still used to fetch the user data if can
+  You should be aware that the Server is still used to fetch the user data if can
   be found. If the key is not found, it checks the database. If a record is found
-  in the database, the agent is updated and the user data returned.
+  in the database, the server is updated and the user data returned.
 
 
   This module is derived from https://github.com/lexmag/blaguth
@@ -142,34 +143,33 @@ defmodule Coherence.Authentication.Session do
     |> delete_user_token
   end
 
-  defp default_login_callback do
-    module =
-      :coherence
-      |> Application.get_env(:module)
-      |> Module.concat(Coherence.SessionController)
+  # defp default_login_callback do
+  #   module =
+  #     :coherence
+  #     |> Application.get_env(:module)
+  #     |> Module.concat(Coherence.SessionController)
 
-    Code.ensure_loaded module
+  #   Code.ensure_loaded module
 
-    if function_exported?(module, :login_callback, 1) do
-      &module.login_callback/1
-    else
-      &Coherence.SessionController.login_callback/1
-    end
-  end
+  #   if function_exported?(module, :login_callback, 1) do
+  #     &module.login_callback/1
+  #   else
+  #     &Coherence.SessionController.login_callback/1
+  #   end
+  # end
 
   @doc false
   @spec init(Keyword.t) :: [tuple]
   def init(opts) do
     login =
       case opts[:login] do
-        true  ->
-          default_login_callback()
+        true  -> true
         fun when is_function(fun) ->
           fun
         other ->
           case opts[:protected] do
             nil -> other
-            true -> default_login_callback()
+            true -> true
             other -> other
           end
       end
@@ -205,7 +205,7 @@ defmodule Coherence.Authentication.Session do
       |> get_session_data
       |> verify_auth_key(opts, opts[:store])
       |> verify_rememberable(opts)
-      |> assert_login(opts[:login], opts[:assigns_key])
+      |> assert_login(opts[:login], opts)
     end
   end
 
@@ -225,21 +225,6 @@ defmodule Coherence.Authentication.Session do
     else
       _ -> {conn, nil}
     end
-    # case conn.cookies[key] do
-    #   nil ->
-    #     {conn, nil}
-    #   cookie ->
-    #     case String.split cookie, " " do
-    #       [id, series, token] ->
-    #         case opts[:rememberable_callback] do
-    #           nil ->
-    #             Coherence.SessionController.rememberable_callback(conn, id, series, token, opts)
-    #           fun ->
-    #             fun.(conn, id, series, token, opts)
-    #         end
-    #       _ -> {conn, nil}   # invalid cookie
-    #     end
-    # end
   end
 
   defp verify_rememberable(other, _opts), do: other
@@ -248,18 +233,23 @@ defmodule Coherence.Authentication.Session do
   defp verify_auth_key({conn, auth_key}, %{db_model: db_model, id_key: id_key}, store),
     do: {conn, store.get_user_data({auth_key, db_model, id_key})}
 
-  defp assert_login({conn, nil}, login, _) when is_function(login) do
+  defp assert_login({conn, nil}, login, _opts) when login == true or is_function(login) do
     user_return_to =
       case conn.query_string do
         "" -> conn.request_path
         _ -> conn.request_path <> "?" <> conn.query_string
       end
-
-    conn
-    |> put_session("user_return_to",  user_return_to)
-    |> login.()
+   conn =  put_session(conn, "user_return_to",  user_return_to)
+   if login == true do
+      Phoenix.Controller.redirect conn, to: Module.concat( Config.web_module,
+        Router.Helpers).session_path(conn, :new)
+    else
+      login.(conn)
+    end
+    |> halt
   end
-  defp assert_login({conn, user_data}, _, assign_key) do
+  defp assert_login({conn, user_data}, _, opts) do
+    assign_key = opts[:assigns_key]
     conn
     |> assign_user_data(user_data, assign_key)
     |> create_user_token(user_data, Config.user_token, assign_key)

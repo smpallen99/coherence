@@ -107,6 +107,8 @@ defmodule Mix.Tasks.Coh.Install do
 
   A `--with-migrations` option to reinstall migrations. only valid for --reinstall option
 
+  A `--layout` generate layout template and view (false)
+
   ## Disable Options
 
   * `--no-config` -- Don't append to your `config/config.exs` file.
@@ -157,7 +159,8 @@ defmodule Mix.Tasks.Coh.Install do
     log_only: :boolean, confirm_once: :boolean, controllers: :boolean,
     module: :string, installed_options: :boolean, reinstall: :boolean,
     silent: :boolean, with_migrations: :boolean, router: :string,
-    web_path: :string, web_module: :string, binary_id: :boolean
+    web_path: :string, web_module: :string, binary_id: :boolean,
+    layout: :boolean
   ] ++ Enum.map(@boolean_options, &({String.to_atom(&1), :boolean}))
 
   @switch_names Enum.map(@switches, &(elem(&1, 0)))
@@ -204,6 +207,7 @@ defmodule Mix.Tasks.Coh.Install do
     |> gen_coherence_config
     |> gen_migration
     |> gen_model
+    |> gen_layout_template
     |> gen_invitable_migration
     |> gen_rememberable_migration
     |> gen_trackable_migration
@@ -251,6 +255,12 @@ defmodule Mix.Tasks.Coh.Install do
     else
       ""
     end
+    layout =
+      if config.layout do
+        ~s(\n  layout: {#{config.web_base}.Coherence.LayoutView, "app.html"},)
+      else
+        ""
+      end
 
     config_block = """
       # #{@config_marker_start}   Don't remove this line
@@ -260,7 +270,7 @@ defmodule Mix.Tasks.Coh.Install do
         module: #{config[:base]},
         web_module: #{config[:web_base]},
         router: #{config[:router]},
-        messages_backend: #{config[:web_base]}.Coherence.Messages,
+        messages_backend: #{config[:web_base]}.Coherence.Messages,#{layout}
         logged_out_url: "/",
       """
     (config_block <> from_email <> "  opts: #{inspect config[:opts]}\n")
@@ -728,7 +738,8 @@ defmodule Mix.Tasks.Coh.Install do
   @template_files [
     email: {:use_email?, ~w(confirmation invitation password unlock)},
     invitation: {:invitable, ~w(edit new)},
-    layout: {:all, ~w(app email)},
+    # layout: {:all, ~w(app email)},
+    layout: {:all, ~w(email)},
     password: {:recoverable, ~w(edit new)},
     registration: {:registerable, ~w(new edit form show)},
     session: {:authenticatable, ~w(new)},
@@ -755,6 +766,13 @@ defmodule Mix.Tasks.Coh.Install do
   end
 
   def gen_coherence_templates(config), do: config
+
+  def gen_layout_template(%{layout: true, templates: true, boilerplate: true} = config) do
+    copy_templates(config.binding, :layout, ["app"], config)
+    config
+  end
+
+  def gen_layout_template(config), do: config
 
   defp copy_templates(binding, name, file_list, %{web_path: web_path} = config) do
     files = for fname <- file_list do
@@ -1052,6 +1070,7 @@ defmodule Mix.Tasks.Coh.Install do
       web_base: web_base,
       web_module: web_module,
       use_binary_id?: binding[:use_binary_id?],
+      layout: opts[:layout] || false,
     ]
     |> Enum.into(opts_map)
     |> do_default_config(opts)
@@ -1141,6 +1160,27 @@ defmodule Mix.Tasks.Coh.Install do
 
   def all_options, do: @all_options_atoms
 
+  # def get_layout(opts) do
+  #   get_layout_template opts[:layout] || false
+  # end
+
+  # defp get_layout_template(true), do: {true, nil}
+  # defp get_layout_template(_) do
+  #   case Path.wildcard web_path("templates/layout/app.html.*") do
+  #     []          -> {true, nil}
+  #     [first | _] -> get_layout_view(first)
+  #   end
+  # end
+
+  # defp get_layout_template(templ) do
+  #   with {:ok, file} <- File.read(web_path("views/layout_view.ex")),
+  #        [_, module] <- Regex.run(~r//, file) do
+  #     {false, {module, Path.rootname(templ)}}
+  #   else
+  #     {true, nil}
+  #   end
+  # end
+
   def print_installed_options(_config) do
     ["mix coh.install"]
     |> list_config_options(Application.get_env(:coherence, :opts, []))
@@ -1224,9 +1264,9 @@ defmodule Mix.Tasks.Coh.Install do
     Path.join ["lib", to_string(Mix.Phoenix.otp_app()), path]
   end
 
-  defp web_path() do
+  defp web_path(path \\ "") do
     otp_app = to_string(Mix.Phoenix.otp_app())
-    Path.join ["lib", otp_app <> "_web"]
+    Path.join ["lib", otp_app <> "_web", path]
   end
 
   defp use_binary_id? do

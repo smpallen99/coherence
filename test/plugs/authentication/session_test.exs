@@ -97,7 +97,7 @@ defmodule CoherenceTest.Plug.Session do
       cookie = "#{id} #{series} #{token}"
 
       conn = call_cookie(RememberablePlug, [], cookie)
-      assert conn.status == 200
+      assert conn.status == 302
       refute conn.resp_body == "Authorized"
       refute conn.assigns[:remembered]
     end

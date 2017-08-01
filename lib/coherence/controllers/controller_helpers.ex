@@ -23,14 +23,10 @@ defmodule Coherence.ControllerHelpers do
   """
   @spec layout_view(Plug.Conn.t, Keyword.t) :: Plug.Conn.t
   def layout_view(conn, opts) do
-    layout =
-      case opts[:layout] || Config.layout() do
-        nil -> {Module.concat(Config.web_module, Coherence.LayoutView), "app.html"}
-        layout -> layout
-      end
-
-    conn
-    |> put_layout(layout)
+    case opts[:layout] || Config.layout() do
+      nil -> conn
+      layout -> put_layout conn, layout
+    end
     |> set_view(opts)
   end
 
