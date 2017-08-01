@@ -153,7 +153,7 @@ defmodule Coherence.ControllerHelpers do
     if Config.mailer?() do
       email = apply(Module.concat(Config.web_module, Coherence.UserEmail), fun, [model, url])
       Logger.debug fn -> "#{fun} email: #{inspect email}" end
-      apply(Module.concat(Config.module, Coherence.Mailer), :deliver, [email])
+      apply(Module.concat(Config.web_module, Coherence.Mailer), :deliver, [email])
     else
       {:error, :no_mailer}
     end
