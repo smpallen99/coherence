@@ -14,9 +14,11 @@ defmodule Coherence.InvitationController do
   use Timex
 
   import Ecto.Changeset
+  import Coherence.ControllerHelpers
 
-  alias Coherence.{Config, Invitation, Messages}
+  alias Coherence.{Config}
   alias Coherence.ControllerHelpers, as: Helpers
+  alias Coherence.{Schemas, Messages}
 
   require Logger
 
@@ -33,7 +35,7 @@ defmodule Coherence.InvitationController do
   """
   @spec new(conn, params) :: conn
   def new(conn, _params) do
-    changeset = Invitation.changeset(%Invitation{})
+    changeset = Schemas.change_invitation()
     render(conn, "new.html", changeset: changeset)
   end
 
@@ -45,28 +47,27 @@ defmodule Coherence.InvitationController do
   """
   @spec create(conn, params) :: conn
   def create(conn, %{"invitation" =>  invitation_params} = params) do
-    repo = Config.repo
-    user_schema = Config.user_schema
     email = invitation_params["email"]
-    cs = Invitation.changeset(%Invitation{}, invitation_params)
-    case repo.one from u in user_schema, where: u.email == ^email do
+    cs = Schemas.change_invitation invitation_params
+    # case repo.one from u in user_schema, where: u.email == ^email do
+    case Schemas.get_user_by_email email do
       nil ->
         token = random_string 48
         url = router_helpers().invitation_url(conn, :edit, token)
         cs = put_change(cs, :token, token)
         do_insert(conn, cs, url, params, email)
       _ ->
-        cs = cs
-        |> add_error(:email, Messages.backend().user_already_has_an_account())
-        |> struct(action: true)
+        cs =
+          cs
+          |> add_error(:email, Messages.backend().user_already_has_an_account())
+          |> struct(action: true)
         conn
         |> render("new.html", changeset: cs)
     end
   end
 
   defp do_insert(conn, cs, url, params, email) do
-    repo = Config.repo()
-    case repo.insert cs do
+    case Schemas.create cs do
       {:ok, invitation} ->
         send_user_email :invitation, invitation, url
         conn
@@ -74,10 +75,12 @@ defmodule Coherence.InvitationController do
         |> redirect_to(:invitation_create, params)
       {:error, changeset} ->
         {conn, changeset} =
-          case repo.one from i in Invitation, where: i.email == ^email do
+          case Schemas.get_by_invitation email: email do
             nil -> {conn, changeset}
             invitation ->
-              {assign(conn, :invitation, invitation), add_error(changeset, :email, Messages.backend().invitation_already_sent())}
+              {assign(conn, :invitation, invitation),
+                add_error(changeset, :email,
+                  Messages.backend().invitation_already_sent())}
           end
         render(conn, "new.html", changeset: changeset)
     end
@@ -92,10 +95,7 @@ defmodule Coherence.InvitationController do
   @spec edit(conn, params) :: conn
   def edit(conn, params) do
     token = params["id"]
-    Invitation
-    |> where([u], u.token == ^token)
-    |> Config.repo.one
-    |> case do
+    case Schemas.get_by_invitation token: token do
       nil ->
         conn
         |> put_flash(:error, Messages.backend().invalid_invitation_token())
@@ -117,21 +117,19 @@ defmodule Coherence.InvitationController do
   @spec create_user(conn, params) :: conn
   def create_user(conn, params) do
     token = params["token"]
-    repo = Config.repo
     user_schema = Config.user_schema
-    Invitation
-    |> where([u], u.token == ^token)
-    |> repo.one
-    |> case do
+    case Schemas.get_by_invitation token: token do
       nil ->
         conn
         |> put_flash(:error, Messages.backend().invalid_invitation())
         |> redirect(to: logged_out_url(conn))
       invite ->
-        changeset = Helpers.changeset(:invitation, user_schema, user_schema.__struct__, params["user"])
-        case repo.insert changeset do
+        :invitation
+        |> Helpers.changeset(user_schema, user_schema.__struct__, params["user"])
+        |> Schemas.create
+        |> case do
           {:ok, user} ->
-            repo.delete invite
+            Schemas.delete invite
             conn
             |> send_confirmation(user, user_schema)
             |> redirect(to: logged_out_url(conn))
@@ -148,10 +146,9 @@ defmodule Coherence.InvitationController do
   """
   @spec resend(conn, params) :: conn
   def resend(conn, %{"id" => id} = params) do
-    conn = case Config.repo.get(Invitation, id) do
+    conn = case Schemas.get_invitation id do
       nil ->
-        conn
-        |> put_flash(:error, Messages.backend().cant_find_that_token())
+        put_flash(conn, :error, Messages.backend().cant_find_that_token())
       invitation ->
         send_user_email :invitation, invitation,
           router_helpers().invitation_url(conn, :edit, invitation.token)
@@ -159,5 +156,4 @@ defmodule Coherence.InvitationController do
     end
     redirect_to(conn, :invitation_resend, params)
   end
-
 end

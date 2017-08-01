@@ -4,7 +4,6 @@ defmodule Mix.Tasks.Coherence.Install do
   import Macro, only: [camelize: 1, underscore: 1]
   import Mix.Generator
   import Mix.Ecto
-  import Coherence.Config, only: [use_binary_id?: 0]
   import Coherence.Mix.Utils
 
   @shortdoc "Configure the Coherence Package"
@@ -203,6 +202,10 @@ defmodule Mix.Tasks.Coherence.Install do
     |> gen_invitable_migration
     |> gen_rememberable_migration
     |> gen_trackable_migration
+    |> gen_invitable_schema
+    |> gen_rememberable_schema
+    |> gen_trackable_schema
+    |> gen_schemas_module
     |> gen_coherence_web
     |> gen_coherence_messages
     |> gen_coherence_views
@@ -363,7 +366,7 @@ defmodule Mix.Tasks.Coherence.Install do
       |> module_to_string
       |> String.downcase
 
-    binding = Kernel.binding() ++ [base: config[:base], user_table_name: config[:user_table_name]]
+    binding = Kernel.binding() ++ [user_table_name: config[:user_table_name]] ++ config.binding
     copy_from paths(),
       "priv/templates/coh.install/models/coherence", "", binding, [
         {:eex, "user.ex", "web/models/coherence/#{name}.ex"}
@@ -573,6 +576,54 @@ defmodule Mix.Tasks.Coherence.Install do
     type_hint = if use_binary_id?(), do: ", type: :binary_id", else: ""
     "references(:#{table_name}, on_delete: :delete_all#{type_hint})"
   end
+
+  ################
+  # Schema
+
+  defp gen_trackable_schema(%{trackable_table: true, boilerplate: true, models: true} = config) do
+    gen_schema_schema config, "trackable.ex"
+  end
+  defp gen_trackable_schema(config), do: config
+
+  defp gen_invitable_schema(%{invitable: true, boilerplate: true, models: true} = config) do
+    gen_schema_schema config, "invitation.ex"
+  end
+  defp gen_invitable_schema(config), do: config
+
+  defp gen_rememberable_schema(%{rememberable: true, boilerplate: true, models: true} = config) do
+    gen_schema_schema config, "rememberable.ex"
+  end
+  defp gen_rememberable_schema(config), do: config
+
+  def gen_schema_schema(config, file_name) do
+    copy_from paths(),
+      "priv/templates/coh.install/models/coherence", lib_path("coherence"), config.binding, [
+        {:eex, file_name, file_name},
+      ], config
+    config
+  end
+
+  def gen_schemas_module(%{boilerplate: true, models: true} = config) do
+    schema_list =
+      [
+        {Invitation, config[:invitable]},
+        {Rememberable, config[:rememberable]},
+        {Trackable, config[:trackable_table]}
+      ]
+      |> Enum.filter(& elem(&1, 1))
+      |> Enum.map(& Module.concat([config.base, Coherence, elem(&1, 0)]))
+
+    binding = [{:schema_list, schema_list |> inspect},
+      {:trackable?, config[:trackable_table]} | config.binding]
+
+    copy_from paths(),
+      "priv/templates/coh.install/models/coherence", lib_path("coherence"), binding, [
+        {:eex, "schemas.ex", "schemas.ex"},
+      ], config
+    config
+  end
+
+  def gen_schemas_module(config), do: config
 
   ################
   # Web
@@ -923,6 +974,7 @@ defmodule Mix.Tasks.Coherence.Install do
     router = (opts[:router] || "#{base}.Router")
     web_path = opts[:web_path] || "web"
     web_module = base <> ".Coherence.Web"
+    use_binary_id? = use_binary_id?()
 
     binding =
       binding
@@ -930,6 +982,7 @@ defmodule Mix.Tasks.Coherence.Install do
       |> Keyword.put(:web_base, base)
       |> Keyword.put(:web_module, web_module)
       |> Keyword.put(:web_path, "web")
+      |> Keyword.put(:use_binary_id?, use_binary_id?)
 
     {user_schema, user_table_name} = parse_model(opts[:model], base, opts)
 
@@ -960,7 +1013,8 @@ defmodule Mix.Tasks.Coherence.Install do
       silent: opts[:silent],
       with_migrations: opts[:with_migrations],
       web_path: web_path,
-      web_base: web_base
+      web_base: web_base,
+      use_binary_id?: use_binary_id?
     ]
     |> Enum.into(opts_map)
     |> do_default_config(opts)
@@ -1113,4 +1167,15 @@ defmodule Mix.Tasks.Coherence.Install do
   defp to_app_source(app, source_dir) when is_atom(app),
     do: Application.app_dir(app, source_dir)
 
+  defp lib_path(path) do
+    Path.join ["lib", to_string(Mix.Phoenix.otp_app()), path]
+  end
+
+  defp use_binary_id? do
+    binary_ids? =
+      Mix.Phoenix.otp_app()
+      |> Application.get_env(:generators, [])
+      |> Keyword.get(:binary_id)
+    Coherence.Config.use_binary_id? || binary_ids?
+  end
 end

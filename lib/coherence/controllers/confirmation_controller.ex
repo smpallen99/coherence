@@ -11,6 +11,7 @@ defmodule Coherence.ConfirmationController do
   alias Coherence.ControllerHelpers, as: Helpers
   alias Coherence.{ConfirmableService, Messages}
   alias Ecto.DateTime
+  alias Coherence.Schemas
 
   require Logger
 
@@ -39,10 +40,7 @@ defmodule Coherence.ConfirmationController do
   def create(conn, %{"confirmation" => password_params} = params) do
     user_schema = Config.user_schema
     email = password_params["email"]
-    user =
-      user_schema
-      |> where([u], u.email == ^email)
-      |> Config.repo.one
+    user = Schemas.get_by_user email: email
 
     changeset = Helpers.changeset :confirmation, user_schema, user_schema.__struct__
     case user do
@@ -73,10 +71,8 @@ defmodule Coherence.ConfirmationController do
   def edit(conn, params) do
     user_schema = Config.user_schema
     token = params["id"]
-    user =
-      user_schema
-      |> where([u], u.confirmation_token == ^token)
-      |> Config.repo.one
+
+    user = Schemas.get_by_user confirmation_token: token
 
     case user do
       nil ->

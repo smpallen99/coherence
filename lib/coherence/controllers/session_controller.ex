@@ -9,12 +9,12 @@ defmodule Coherence.SessionController do
 
   import Coherence.TrackableService
   import Ecto.Query
-  import Coherence.Rememberable, only: [hash: 1, gen_cookie: 3]
+  import Coherence.Schemas, only: [schema: 1]
+  # import Coherence.Rememberable, only: [hash: 1, gen_cookie: 3]
 
-  alias Coherence.{Rememberable}
+  # alias Coherence.{Rememberable}
   alias Coherence.ControllerHelpers, as: Helpers
-  alias Coherence.{ConfirmableService}
-  alias Coherence.Messages
+  alias Coherence.{ConfirmableService, Messages, Schemas}
 
   require Logger
 
@@ -156,7 +156,7 @@ defmodule Coherence.SessionController do
   def reset_failed_attempts(conn, %{failed_attempts: attempts} = user, true) when attempts > 0 do
     :session
     |> Helpers.changeset(user.__struct__, user, %{failed_attempts: 0})
-    |> Config.repo.update
+    |> Schemas.update
     |> log_lockable_update
     conn
   end
@@ -176,7 +176,7 @@ defmodule Coherence.SessionController do
       end
     :session
     |> Helpers.changeset(user.__struct__, user, Map.put(params, :failed_attempts, attempts))
-    |> Config.repo.update
+    |> Schemas.update
     |> log_lockable_update
 
     put_flash(conn, :error, flash)
@@ -222,7 +222,8 @@ defmodule Coherence.SessionController do
       {:ok, rememberable} ->
         # Logger.debug "Valid login :ok"
         Config.user_schema()
-        |> Config.repo().get(id)
+        id
+        |> Schemas.get_user
         |> do_valid_login(conn, [id, rememberable, series, token], opts)
       {:error, :not_found} ->
         Logger.debug "No valid login found"
@@ -253,7 +254,7 @@ defmodule Coherence.SessionController do
       id
       |> gen_cookie(series, token)
       |> cred_store.delete_credentials
-      {changeset, new_token} = Rememberable.update_login(rememberable)
+      {changeset, new_token} = schema(Rememberable).update_login(rememberable)
 
       cred_store.put_credentials({gen_cookie(id, series, new_token), Config.user_schema(), Config.schema_key()})
 
@@ -280,7 +281,7 @@ defmodule Coherence.SessionController do
 
   defp save_rememberable(conn, _user, none) when none in [nil, false], do: conn
   defp save_rememberable(conn, user, _) do
-    {changeset, series, token} = Rememberable.create_login(user)
+    {changeset, series, token} = schema(Rememberable).create_login(user)
     Config.repo().insert! changeset
     opts = [
       login_key: Config.login_cookie(),
@@ -327,23 +328,31 @@ defmodule Coherence.SessionController do
   end
 
   defp get_invalid_login!(repo, user_id, series, token) do
-    case repo.one Rememberable.get_invalid_login(user_id, series, token) do
+    case repo.one schema(Rememberable).get_invalid_login(user_id, series, token) do
       0 -> :ok
       _ ->
-        repo.delete_all Rememberable.delete_all(user_id)
+        repo.delete_all schema(Rememberable).delete_all(user_id)
         {:error, :invalid_token}
     end
   end
 
   defp get_valid_login!(repo, user_id, series, token) do
-    case repo.one Rememberable.get_valid_login(user_id, series, token) do
+    case repo.one schema(Rememberable).get_valid_login(user_id, series, token) do
       nil   -> {:error, :not_found}
       item  -> {:ok, item}
     end
   end
 
   defp delete_expired_tokens!(repo) do
-    repo.delete_all Rememberable.delete_expired_tokens()
+    repo.delete_all schema(Rememberable).delete_expired_tokens()
+  end
+
+  defp hash(value) do
+    schema(Rememberable).hash value
+  end
+
+  defp gen_cookie(user_id, series, token) do
+    schema(Rememberable).gen_cookie user_id, series, token
   end
 
 end

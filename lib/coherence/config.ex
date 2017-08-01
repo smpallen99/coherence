@@ -188,7 +188,7 @@ defmodule Coherence.Config do
   """
   @spec use_binary_id?() :: boolean
   def use_binary_id? do
-    !!Application.get_env(:phoenix, :generators)[:binary_id] || Application.get_env(:coherence, :use_binary_id)
+    !!Application.get_env(:phoenix, :generators, [])[:binary_id] || Application.get_env(:coherence, :use_binary_id)
   end
 
   defp has_any_option?(fun) do

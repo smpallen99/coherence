@@ -1,6 +1,7 @@
 defmodule CoherenceTest.Rememberable do
   use TestCoherence.ConnCase
-  alias Coherence.{Rememberable, SessionController}
+  alias Coherence.{SessionController}
+  alias TestCoherence.Coherence.Rememberable
   import TestCoherenceWeb.Router.Helpers
   import Ecto.Query
 

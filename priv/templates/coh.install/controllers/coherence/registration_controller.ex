@@ -12,6 +12,9 @@ defmodule <%= web_base %>.Coherence.RegistrationController do
   """
   use <%= web_module %>, :controller
 
+  alias Coherence.ControllerHelpers, as: Helpers
+  alias Coherence.{Messages, Schemas}
+
   require Logger
 
   @type schema :: Ecto.Schema.t
@@ -48,8 +51,10 @@ defmodule <%= web_base %>.Coherence.RegistrationController do
   @spec create(conn, params) :: conn
   def create(conn, %{"registration" => registration_params} = params) do
     user_schema = Config.user_schema
-    cs = Helpers.changeset(:registration, user_schema, user_schema.__struct__, registration_params)
-    case Config.repo.insert(cs) do
+    :registration
+    |> Helpers.changeset(user_schema, user_schema.__struct__, registration_params)
+    |> Schemas.create
+    |> case do
       {:ok, user} ->
         conn
         |> send_confirmation(user, user_schema)
@@ -94,13 +99,14 @@ defmodule <%= web_base %>.Coherence.RegistrationController do
   def update(conn, %{"registration" => user_params} = params) do
     user_schema = Config.user_schema
     user = Coherence.current_user(conn)
-    changeset = Helpers.changeset(:registration, user_schema, user, user_params)
-
-    case Config.repo().update(changeset) do
+    :registration
+    |> Helpers.changeset(user_schema, user, user_params)
+    |> Schemas.update
+    |> case do
       {:ok, user} ->
         Config.auth_module
         |> apply(Config.update_login, [conn, user, [id_key: Config.schema_key]])
-        |> put_flash(:info, dgettext("coherence", "Account updated successfully."))
+        |> put_flash(:info, Messages.backend().account_updated_successfully())
         |> redirect_to(:registration_update, params, user)
       {:error, changeset} ->
         render(conn, "edit.html", user: user, changeset: changeset)
@@ -114,7 +120,7 @@ defmodule <%= web_base %>.Coherence.RegistrationController do
   def delete(conn, params) do
     user = Coherence.current_user(conn)
     conn = Helpers.logout_user(conn)
-    Config.repo.delete! user
+    Schemas.delete! user
     redirect_to(conn, :registration_delete, params)
   end
 end

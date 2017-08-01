@@ -3,7 +3,7 @@ defmodule CoherenceTest.PasswordController do
   import TestCoherenceWeb.Router.Helpers
   import Coherence.ControllerHelpers, only: [random_string: 1]
   alias TestCoherence.Repo
-  alias Coherence.Trackable
+  alias TestCoherence.Coherence.Trackable
   alias Coherence.PasswordService
 
   setup %{conn: conn} do

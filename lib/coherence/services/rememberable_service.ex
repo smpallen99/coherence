@@ -3,10 +3,9 @@ defmodule Coherence.RememberableService do
 
   use Coherence.Config
 
-  import Ecto.Query
   import Plug.Conn
 
-  alias Coherence.Rememberable
+  alias Coherence.Schemas
 
   @doc """
   Delete a rememberable token.
@@ -15,8 +14,8 @@ defmodule Coherence.RememberableService do
   def delete_rememberable(conn, %{id: id}) do
     if Config.has_option :rememberable do
       Rememberable
-      |> where([u], u.user_id == ^id)
-      |> Config.repo.delete_all
+      |> Schemas.query_by(user_id: id)
+      |> Schemas.delete_all
 
       delete_resp_cookie(conn, Config.login_cookie)
     else

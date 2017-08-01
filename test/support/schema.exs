@@ -84,30 +84,6 @@ defmodule TestCoherence.Account do
   end
 end
 
-defmodule TestCoherence.Rememberable do
-  use Ecto.Schema
-  use Coherence.Schema
-  import Ecto.Changeset
-  alias Coherence.Config
-
-  schema "rememberables" do
-    field :series_hash, :string
-    field :token_hash, :string
-    field :token_created_at, Timex.Ecto.DateTime
-    belongs_to :user, Module.concat(Config.module, Config.user_schema)
-    timestamps()
-  end
-
-  @required_fields ~w(series_hash token_hash token_created_at user_id)a
-  @optional_fields ~w()
-
-  def changeset(model, params \\ %{}) do
-    model
-    |> cast(params, @required_fields ++ @optional_fields)
-    |> validate_required(@required_fields)
-  end
-end
-
 defmodule TestCoherence.Coherence.User do
   use Ecto.Schema
   use Coherence.Schema
@@ -161,6 +137,10 @@ defmodule TestCoherence.Coherence.Invitation do
     |> unique_constraint(:email)
     |> validate_format(:email, ~r/@/)
   end
+
+  def new_changeset(params \\ %{}) do
+    changeset __MODULE__.__struct__, params
+  end
 end
 
 defmodule TestCoherence.Coherence.Account do
@@ -196,24 +176,73 @@ end
 
 defmodule TestCoherence.Coherence.Rememberable do
   use Ecto.Schema
-  use Coherence.Schema
+
+  import Ecto.Query
   import Ecto.Changeset
+
   alias Coherence.Config
 
   schema "rememberables" do
     field :series_hash, :string
     field :token_hash, :string
     field :token_created_at, Timex.Ecto.DateTime
-    belongs_to :user, Module.concat(Config.module, Coherence.User)
+    belongs_to :user, Module.concat(Config.module, Config.user_schema)
     timestamps()
   end
 
-  @required_fields ~w(series_hash token_hash token_created_at user_id)a
-  @optional_fields ~w()
+  use Coherence.Rememberable
 
   def changeset(model, params \\ %{}) do
     model
-    |> cast(params, @required_fields ++ @optional_fields)
-    |> validate_required(@required_fields)
+    |> cast(params, ~w(series_hash token_hash token_created_at user_id))
+    |> validate_required(~w(series_hash token_hash token_created_at user_id)a)
   end
+
+  def new_changeset(params \\ %{}) do
+    changeset %Rememberable{}, params
+  end
+end
+
+defmodule TestCoherence.Coherence.Trackable do
+  @moduledoc """
+  Schema responsible for saving user tracking data for the --trackable-table option.
+  """
+  use Ecto.Schema
+  import Ecto.Changeset
+
+  alias Coherence.Config
+
+  @fields ~w(action sign_in_count current_sign_in_ip current_sign_in_at last_sign_in_ip last_sign_in_at user_id)a
+
+  schema "trackables" do
+    field :action, :string, null: false
+    field :sign_in_count, :integer, default: 0
+    field :current_sign_in_at, Ecto.DateTime
+    field :last_sign_in_at, Ecto.DateTime
+    field :current_sign_in_ip, :string
+    field :last_sign_in_ip, :string
+    belongs_to :user, Config.user_schema
+
+    timestamps()
+  end
+
+  @doc """
+  Creates a changeset based on the `model` and `params`.
+
+  If no params are provided, an invalid changeset is returned
+  with no validation performed.
+  """
+  def changeset(model, params \\ %{}) do
+    model
+    |> cast(params, @fields)
+    |> validate_required([:action, :user_id])
+  end
+
+  @doc """
+  Creates a changeset for a new schema
+  """
+  def new_changeset(params \\ %{}) do
+    changeset %__MODULE__{}, params
+  end
+
 end

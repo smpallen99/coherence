@@ -29,12 +29,14 @@ defmodule Coherence.ConfirmableService do
 
   import Coherence.ControllerHelpers
 
-  alias Coherence.Messages
+  alias Coherence.{Messages, Schemas}
 
   defmacro __using__(opts \\ []) do
     quote do
       # import unquote(__MODULE__)
       use Coherence.Config
+
+      alias Coherence.Schemas
 
       def confirmable? do
         Config.has_option(:confirmable) and
@@ -61,7 +63,7 @@ defmodule Coherence.ConfirmableService do
         Returns a changeset ready for Repo.update
         """
         def confirm(user) do
-          Config.user_schema.changeset(user, %{confirmed_at: Ecto.DateTime.utc, confirmation_token: nil})
+          Schemas.change_user(user, %{confirmed_at: Ecto.DateTime.utc, confirmation_token: nil})
         end
 
         @doc """
@@ -73,7 +75,7 @@ defmodule Coherence.ConfirmableService do
         """
         def confirm!(user) do
           IO.warn "#{inspect Config.user_schema}.confirm!/1 has been deprecated. Please use Coherence.ControllerHelpers.confirm!/1 instead."
-          changeset = Config.user_schema.changeset(user, %{confirmed_at: Ecto.DateTime.utc, confirmation_token: nil})
+          changeset = Schemas.change_user(user, %{confirmed_at: Ecto.DateTime.utc, confirmation_token: nil})
           if confirmed? user do
             changeset = Ecto.Changeset.add_error changeset, :confirmed_at, Messages.backend().already_confirmed()
             {:error, changeset}
@@ -95,7 +97,7 @@ defmodule Coherence.ConfirmableService do
   """
   @spec confirm(Ecto.Schema.t) :: Ecto.Changeset.t
   def confirm(user) do
-    Config.user_schema.changeset(user, %{confirmed_at: Ecto.DateTime.utc, confirmation_token: nil})
+    Schemas.change_user(user, %{confirmed_at: Ecto.DateTime.utc, confirmation_token: nil})
   end
 
   @doc """
@@ -107,13 +109,13 @@ defmodule Coherence.ConfirmableService do
   """
   @spec confirm!(Ecto.Schema.t) :: Ecto.Changeset.t | {:error, Ecto.Changeset.t}
   def confirm!(user) do
-    changeset = Config.user_schema.changeset(user, %{confirmed_at: Ecto.DateTime.utc, confirmation_token: nil})
+    changeset = Schemas.change_user(user, %{confirmed_at: Ecto.DateTime.utc, confirmation_token: nil})
 
     if confirmed? user do
       changeset = Ecto.Changeset.add_error changeset, :confirmed_at, Messages.backend().already_confirmed()
       {:error, changeset}
     else
-      Config.repo.update changeset
+      Schemas.update changeset
     end
   end
 

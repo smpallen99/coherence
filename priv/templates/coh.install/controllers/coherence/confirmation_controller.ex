@@ -6,9 +6,11 @@ defmodule <%= web_base %>.Coherence.ConfirmationController do
 
   """
   use <%= web_module %>, :controller
+  use Timex
 
-  alias Coherence.{ConfirmableService}
+  alias Coherence.{ConfirmableService, Messages}
   alias Ecto.DateTime
+  alias <%= base %>.Coherence.Schemas
 
   require Logger
 
@@ -37,21 +39,18 @@ defmodule <%= web_base %>.Coherence.ConfirmationController do
   def create(conn, %{"confirmation" => password_params} = params) do
     user_schema = Config.user_schema
     email = password_params["email"]
-    user =
-      user_schema
-      |> where([u], u.email == ^email)
-      |> Config.repo.one
+    user = Schemas.get_by_user email: email
 
     changeset = Helpers.changeset :confirmation, user_schema, user_schema.__struct__
     case user do
       nil ->
         conn
-        |> put_flash(:error, dgettext("coherence", "Could not find that email address"))
+        |> put_flash(:error, Messages.backend().could_not_find_that_email_address())
         |> render("new.html", changeset: changeset)
       user ->
         if user_schema.confirmed?(user) do
           conn
-          |> put_flash(:error, dgettext("coherence", "Account already confirmed."))
+          |> put_flash(:error, Messages.backend().account_already_confirmed())
           |> render(:new, [email: "", changeset: changeset])
         else
           conn
@@ -71,21 +70,19 @@ defmodule <%= web_base %>.Coherence.ConfirmationController do
   def edit(conn, params) do
     user_schema = Config.user_schema
     token = params["id"]
-    user =
-      user_schema
-      |> where([u], u.confirmation_token == ^token)
-      |> Config.repo.one
+
+    user = Schemas.get_by_user confirmation_token: token
 
     case user do
       nil ->
         changeset = Helpers.changeset :confirmation, user_schema, user_schema.__struct__
         conn
-        |> put_flash(:error, dgettext("coherence", "Invalid confirmation token."))
+        |> put_flash(:error, Messages.backend().invalid_confirmation_token())
         |> redirect_to(:confirmation_edit_invalid, params)
       user ->
         if ConfirmableService.expired? user do
           conn
-          |> put_flash(:error, dgettext("coherence", "Confirmation token expired."))
+          |> put_flash(:error, Messages.backend().confirmation_token_expired())
           |> redirect_to(:confirmation_edit_expired, params)
         else
           changeset = Helpers.changeset(:confirmation, user_schema, user, %{
@@ -95,11 +92,11 @@ defmodule <%= web_base %>.Coherence.ConfirmationController do
           case Config.repo.update(changeset) do
             {:ok, _user} ->
               conn
-              |> put_flash(:info, dgettext("coherence", "User account confirmed successfully."))
+              |> put_flash(:info, Messages.backend().user_account_confirmed_successfully())
               |> redirect_to(:confirmation_edit, params)
             {:error, _changeset} ->
               conn
-              |> put_flash(:error, dgettext("coherence", "Problem confirming user account. Please contact the system administrator."))
+              |> put_flash(:error, Messages.backend().problem_confirming_user_account())
               |> redirect_to(:confirmation_edit_error, params)
           end
         end

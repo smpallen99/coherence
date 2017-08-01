@@ -419,7 +419,7 @@ defmodule Coherence.Schema do
         field :last_sign_in_ip, :string
       end
       if Coherence.Config.has_option(:trackable_table) do
-        has_many :trackables, Coherence.Trackable
+        has_many :trackables, Module.concat(Config.module, Coherence.Trackable)
       end
       if Coherence.Config.has_option(:lockable) do
         field :failed_attempts, :integer, default: 0

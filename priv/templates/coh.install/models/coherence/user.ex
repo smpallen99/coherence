@@ -3,6 +3,11 @@ defmodule <%= user_schema %> do
   use Ecto.Schema
   use Coherence.Schema
 
+  <%= if use_binary_id? do %>
+  @primary_key {:id, :binary_id, autogenerate: true}
+  @foreign_key_type :binary_id
+  <% end %>
+
   schema "<%= user_table_name %>" do
     field :name, :string
     field :email, :string

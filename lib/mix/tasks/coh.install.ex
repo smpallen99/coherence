@@ -4,7 +4,7 @@ defmodule Mix.Tasks.Coh.Install do
   import Macro, only: [camelize: 1, underscore: 1]
   import Mix.Generator
   import Mix.Ecto
-  import Coherence.Config, only: [use_binary_id?: 0]
+  # import Coherence.Config, only: [use_binary_id?: 0]
   import Coherence.Mix.Utils
 
   @shortdoc "Configure the Coherence Package"
@@ -157,7 +157,7 @@ defmodule Mix.Tasks.Coh.Install do
     log_only: :boolean, confirm_once: :boolean, controllers: :boolean,
     module: :string, installed_options: :boolean, reinstall: :boolean,
     silent: :boolean, with_migrations: :boolean, router: :string,
-    web_path: :string, web_module: :string
+    web_path: :string, web_module: :string, binary_id: :boolean
   ] ++ Enum.map(@boolean_options, &({String.to_atom(&1), :boolean}))
 
   @switch_names Enum.map(@switches, &(elem(&1, 0)))
@@ -207,6 +207,10 @@ defmodule Mix.Tasks.Coh.Install do
     |> gen_invitable_migration
     |> gen_rememberable_migration
     |> gen_trackable_migration
+    |> gen_invitable_schema
+    |> gen_rememberable_schema
+    |> gen_trackable_schema
+    |> gen_schemas_module
     |> gen_coherence_web
     |> gen_coherence_messages
     |> gen_coherence_views
@@ -411,7 +415,7 @@ defmodule Mix.Tasks.Coh.Install do
       |> List.last()
       |> String.downcase
 
-    binding = Kernel.binding() ++ [base: config[:base], user_table_name: config[:user_table_name]]
+    binding = Kernel.binding() ++ [user_table_name: config[:user_table_name]] ++ config.binding
     copy_from paths(),
       "priv/templates/coh.install/models/coherence", "", binding, [
         {:eex, "user.ex", Path.join([lib_path(), "coherence", "#{name}.ex"])}
@@ -605,6 +609,54 @@ defmodule Mix.Tasks.Coh.Install do
     type_hint = if use_binary_id?(), do: ", type: :binary_id", else: ""
     "references(:#{table_name}, on_delete: :delete_all#{type_hint})"
   end
+
+  ################
+  # Schema
+
+  defp gen_trackable_schema(%{trackable_table: true, boilerplate: true, models: true} = config) do
+    gen_schema_schema config, "trackable.ex"
+  end
+  defp gen_trackable_schema(config), do: config
+
+  defp gen_invitable_schema(%{invitable: true, boilerplate: true, models: true} = config) do
+    gen_schema_schema config, "invitation.ex"
+  end
+  defp gen_invitable_schema(config), do: config
+
+  defp gen_rememberable_schema(%{rememberable: true, boilerplate: true, models: true} = config) do
+    gen_schema_schema config, "rememberable.ex"
+  end
+  defp gen_rememberable_schema(config), do: config
+
+  def gen_schema_schema(config, file_name) do
+    copy_from paths(),
+      "priv/templates/coh.install/models/coherence", lib_path("coherence"), config.binding, [
+        {:eex, file_name, file_name},
+      ], config
+    config
+  end
+
+  def gen_schemas_module(%{boilerplate: true, models: true} = config) do
+    schema_list =
+      [
+        {Invitation, config[:invitable]},
+        {Rememberable, config[:rememberable]},
+        {Trackable, config[:trackable_table]}
+      ]
+      |> Enum.filter(& elem(&1, 1))
+      |> Enum.map(& Module.concat([config.base, Coherence, elem(&1, 0)]))
+
+    binding = [{:schema_list, schema_list |> inspect},
+      {:trackable?, config[:trackable_table]} | config.binding]
+
+    copy_from paths(),
+      "priv/templates/coh.install/models/coherence", lib_path("coherence"), binding, [
+        {:eex, "schemas.ex", "schemas.ex"},
+      ], config
+    config
+  end
+
+  def gen_schemas_module(config), do: config
 
   ################
   # Web
@@ -959,11 +1011,6 @@ defmodule Mix.Tasks.Coh.Install do
     web_path = opts[:web_path] || web_path()
     web_module = web_base <> ".Coherence"
 
-    # unless File.exists?(web_path) do
-    #   raise "Could not find web_path: #{web_path}"
-    # end
-
-
     binding =
       binding
       |> Keyword.put(:base, base)
@@ -971,6 +1018,7 @@ defmodule Mix.Tasks.Coh.Install do
       |> Keyword.put(:web_path, web_path)
       |> Keyword.put(:web_module, web_module)
       |> Keyword.put(:otp_app, Mix.Phoenix.otp_app())
+      |> Keyword.put(:use_binary_id?, use_binary_id?())
 
     {user_schema, user_table_name} = parse_model(opts[:model], base, opts)
 
@@ -1003,6 +1051,7 @@ defmodule Mix.Tasks.Coh.Install do
       web_path: web_path,
       web_base: web_base,
       web_module: web_module,
+      use_binary_id?: binding[:use_binary_id?],
     ]
     |> Enum.into(opts_map)
     |> do_default_config(opts)
@@ -1174,8 +1223,17 @@ defmodule Mix.Tasks.Coh.Install do
   defp lib_path(path \\ "") do
     Path.join ["lib", to_string(Mix.Phoenix.otp_app()), path]
   end
+
   defp web_path() do
     otp_app = to_string(Mix.Phoenix.otp_app())
     Path.join ["lib", otp_app <> "_web"]
+  end
+
+  defp use_binary_id? do
+    binary_ids? =
+      Mix.Phoenix.otp_app()
+      |> Application.get_env(:generators, [])
+      |> Keyword.get(:binary_id)
+    Coherence.Config.use_binary_id? || binary_ids?
   end
 end

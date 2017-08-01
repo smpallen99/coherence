@@ -32,12 +32,13 @@ defmodule Coherence.LockableService do
   import Coherence.ControllerHelpers
 
   alias Coherence.ControllerHelpers, as: Helpers
+  alias Coherence.Schemas
 
   def unlock_token(user) do
     token = random_string 48
     :unlock
     |> Helpers.changeset(user.__struct__, user, %{unlock_token: token})
-    |> Config.repo().update
+    |> Schemas.update
   end
 
 end

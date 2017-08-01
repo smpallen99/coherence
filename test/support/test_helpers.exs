@@ -1,5 +1,5 @@
 defmodule TestCoherence.TestHelpers do
-  alias Coherence.{Rememberable}
+  alias TestCoherence.{Coherence.Rememberable}
   import Phoenix.HTML, only: [safe_to_string: 1]
   import Coherence.ControllerHelpers, only: [random_string: 1]
   import Plug.Conn

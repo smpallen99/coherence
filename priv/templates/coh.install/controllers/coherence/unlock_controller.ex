@@ -8,8 +8,11 @@ defmodule <%= web_base %>.Coherence.UnlockController do
   Basic locking and unlocking does not use this controller.
   """
   use <%= web_module %>, :controller
+  use Timex
+  use Coherence.Config
 
-  alias Coherence.{TrackableService, LockableService}
+  alias Coherence.ControllerHelpers, as: Helpers
+  alias Coherence.{TrackableService, LockableService, Messages}
 
   require Logger
 
@@ -51,14 +54,14 @@ defmodule <%= web_base %>.Coherence.UnlockController do
           if user_schema.locked?(user) do
             if Config.mailer?() do
               send_user_email :unlock, user, router_helpers().unlock_url(conn, :edit, user.unlock_token)
-              put_flash(conn, :info, dgettext("coherence", "Unlock Instructions sent."))
+              put_flash(conn, :info, Messages.backend().unlock_instructions_sent())
             else
-              put_flash(conn, :error, dgettext("coherence", "Mailer configuration required!"))
+              put_flash(conn, :error, Messages.backend().mailer_required())
             end
             |> redirect_to(:unlock_create, params)
           else
             conn
-            |> put_flash(:error, dgettext("coherence", "Your account is not locked."))
+            |> put_flash(:error, Messages.backend().your_account_is_not_locked())
             |> redirect_to(:unlock_create_not_locked, params)
           end
         {:error, changeset} ->
@@ -66,7 +69,7 @@ defmodule <%= web_base %>.Coherence.UnlockController do
       end
     else
       conn
-      |> put_flash(:error, dgettext("coherence", "Invalid email or password."))
+      |> put_flash(:error, Messages.backend().invalid_email_or_password())
       |> redirect_to(:unlock_create_invalid, params)
     end
   end
@@ -85,19 +88,19 @@ defmodule <%= web_base %>.Coherence.UnlockController do
     case unlock do
       nil ->
         conn
-        |> put_flash(:error, dgettext("coherence", "Invalid unlock token."))
+        |> put_flash(:error, Messages.backend().invalid_unlock_token())
         |> redirect_to(:unlock_edit_invalid, params)
       user ->
         if user_schema.locked? user do
           Helpers.unlock! user
           conn
           |> TrackableService.track_unlock_token(user, user_schema.trackable_table?)
-          |> put_flash(:info, dgettext("coherence", "Your account has been unlocked"))
+          |> put_flash(:info, Messages.backend().your_account_has_been_unlocked())
           |> redirect_to(:unlock_edit, params)
         else
           clear_unlock_values(user, user_schema)
           conn
-          |> put_flash(:error, dgettext("coherence", "Account is not locked."))
+          |> put_flash(:error, Messages.backend().account_is_not_locked())
           |> redirect_to(:unlock_edit_not_locked, params)
         end
     end

@@ -1,7 +1,8 @@
 defmodule CoherenceTest.UnlockController do
   use TestCoherence.ConnCase
   import TestCoherenceWeb.Router.Helpers
-  alias Coherence.{Trackable, ControllerHelpers, LockableService}
+  alias Coherence.{ControllerHelpers, LockableService}
+  alias TestCoherence.Coherence.Trackable
   import Ecto.Query
   alias TestCoherence.{User}
 

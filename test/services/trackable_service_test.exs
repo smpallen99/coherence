@@ -1,9 +1,10 @@
 defmodule CoherenceTest.TrackableService do
   use TestCoherence.ConnCase
-  alias Coherence.TrackableService, as: Service
-  alias TestCoherence.{Repo, User}
-  alias Coherence.Trackable
+
   import Ecto.Query
+
+  alias Coherence.TrackableService, as: Service
+  alias TestCoherence.{Repo, User, Coherence.Trackable}
 
   defp current_user(conn), do: conn.assigns[:current_user]
 

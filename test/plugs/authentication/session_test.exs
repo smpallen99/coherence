@@ -2,8 +2,8 @@ defmodule CoherenceTest.Plug.Session do
   use ExUnit.Case, async: true
   use Plug.Test
   alias Coherence.Authentication.Session
-  alias Coherence.{Rememberable, Config}
-  alias TestCoherence.User
+  alias Coherence.{Config}
+  alias TestCoherence.{User, Coherence.Rememberable}
   require Ecto.Query
 
   @default_opts [

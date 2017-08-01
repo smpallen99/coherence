@@ -42,8 +42,78 @@ defmodule Mix.Tasks.Coh.InstallTest do
     end
   end
 
-  test "coh_generates_files_for_authenticatable" do
-    in_tmp "generates_views_for_authenticatable", fn ->
+  test "generates_schemas_module default" do
+    in_tmp "cho_generates_schemas_module_default", fn ->
+      file_name = "coherence/schemas.ex" |> lib_path
+      mk_web_path()
+      ~w(--repo=TestCoherence.Repo --log-only --no-migrations --module=TestCoherence)
+      |> Mix.Tasks.Coh.Install.run
+
+      assert_file file_name, [
+        "def get_user(id) do",
+        "Enum.each [], fn module"
+      ]
+    end
+  end
+
+  test "generates_schemas_module invitation" do
+    in_tmp "cho_generates_schemas_module_invitation", fn ->
+      file_name = "coherence/schemas.ex" |> lib_path
+      mk_web_path()
+      ~w(--repo=TestCoherence.Repo --invitable --log-only --no-migrations --module=TestCoherence)
+      |> Mix.Tasks.Coh.Install.run
+
+      assert_file file_name, [
+        "def get_user(id) do",
+        "Enum.each [TestCoherence.Coherence.Invitation], fn module"
+      ]
+    end
+  end
+
+  test "generates_schemas_module rememberable" do
+    in_tmp "cho_generates_schemas_module_rememberable", fn ->
+      file_name = "coherence/schemas.ex" |> lib_path
+      mk_web_path()
+      ~w(--repo=TestCoherence.Repo --rememberable --log-only --no-migrations --module=TestCoherence)
+      |> Mix.Tasks.Coh.Install.run
+
+      assert_file file_name, [
+        "def get_user(id) do",
+        "Enum.each [TestCoherence.Coherence.Rememberable], fn module"
+      ]
+    end
+  end
+
+  test "generates_schemas_module trackable" do
+    in_tmp "cho_generates_schemas_module_trackable", fn ->
+      file_name = "coherence/schemas.ex" |> lib_path
+      mk_web_path()
+      ~w(--repo=TestCoherence.Repo --trackable-table --log-only --no-migrations --module=TestCoherence)
+      |> Mix.Tasks.Coh.Install.run
+
+      assert_file file_name, [
+        "def get_user(id) do",
+        "Enum.each [TestCoherence.Coherence.Trackable], fn module"
+      ]
+    end
+  end
+
+  test "generates_schemas_module " do
+    in_tmp "cho_generates_schemas_module_rememberable", fn ->
+      file_name = "coherence/schemas.ex" |> lib_path
+      mk_web_path()
+      ~w(--repo=TestCoherence.Repo --rememberable --log-only --no-migrations --module=TestCoherence)
+      |> Mix.Tasks.Coh.Install.run
+
+      assert_file file_name, [
+        "def get_user(id) do",
+        "Enum.each [TestCoherence.Coherence.Rememberable], fn module"
+      ]
+    end
+  end
+
+  test "generates_files_for_authenticatable" do
+    in_tmp "coh_generates_views_for_authenticatable", fn ->
       mk_web_path()
       ~w(--repo=TestCoherence.Repo --log-only --no-migrations --controllers --module=TestCoherence)
       |> Mix.Tasks.Coh.Install.run

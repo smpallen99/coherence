@@ -9,9 +9,11 @@
     * Single user model stored for multiple logins of the same user
     * Support to update user model for all logged in sessions
   * add --web-module installer option
+  * Generate Invitation, Rememberable, and Trackable schemas
 
 * Bug Fixes
   * Fixed incorrect reference to CoherenceDemo in Config.mailer?
+  * Proper support for binary_ids
 
 * Backward incompatible changes
   * Does not support Phoenix 1.3.0-rc versions with lib/my_project/web project structure

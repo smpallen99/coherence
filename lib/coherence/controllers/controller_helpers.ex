@@ -6,7 +6,7 @@ defmodule Coherence.ControllerHelpers do
   import Plug.Conn, only: [halt: 1]
 
   alias Coherence.{ConfirmableService, RememberableService, TrackableService, Messages}
-  alias Coherence.Config
+  alias Coherence.{Config, Schemas}
 
   require Logger
 
@@ -240,8 +240,7 @@ defmodule Coherence.ControllerHelpers do
     user_schema = Config.user_schema
     changeset = user_schema.unlock user
     if user_schema.locked?(user) do
-      changeset
-      |> Config.repo.update
+      Schemas.update changeset
     else
       changeset = Ecto.Changeset.add_error changeset, :locked_at, Messages.backend().not_locked()
       {:error, changeset}
@@ -312,6 +311,10 @@ defmodule Coherence.ControllerHelpers do
     |> apply(Config.delete_login, [conn, [id_key: Config.schema_key]])
     |> TrackableService.track_logout(user, user.__struct__.trackable?, user.__struct__.trackable_table?)
     |> RememberableService.delete_rememberable(user)
+  end
+
+  def schema_module(schema) do
+    Module.concat [Config.module, Coherence, schema]
   end
 
 end
