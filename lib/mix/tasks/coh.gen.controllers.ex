@@ -52,6 +52,7 @@ defmodule Mix.Tasks.Coh.Gen.Controllers do
     opts
     |> do_config(parsed)
     |> do_run
+    |> router_instructions
   end
 
   defp do_run(config) do
@@ -64,12 +65,37 @@ defmodule Mix.Tasks.Coh.Gen.Controllers do
       |> Enum.filter(&installed_option?(config, elem0(&1)))
       |> Enum.map(& {:eex, elem1(&1), elem1(&1)})
 
-    copy_from paths(), "priv/templates/coh.install/controllers/coherence",
+    copy_from paths(), "priv/templates/coh.gen.controllers/controllers/coherence",
       web_path("controllers/coherence"), binding, files, config
   end
 
-  defp elem0(tuple), do: elem(tuple, 0)
-  defp elem1(tuple), do: elem(tuple, 1)
+  defp router_instructions(config) do
+    web_base = config[:web_base]
+    # web_module = config[:web_module]
+    router = Application.get_env(:coherence, :router) |> inspect
+
+    """
+    Modify your router.ex file and change the name spaces as indicated below:
+
+    defmodule #{router} do
+      # ...
+
+      # Change this block
+      scope "/" #{web_base} do
+        pipe_through :browser
+        coherence_routes()
+      end
+
+      # Change this block
+      scope "/" #{web_base} do
+        pipe_through :protected
+        coherence_routes :protected
+      end
+
+      # ...
+    end
+    """
+  end
 
   defp do_config(opts, _parsed) do
     binding =
@@ -145,5 +171,9 @@ defmodule Mix.Tasks.Coh.Gen.Controllers do
   defp installed_option?(config, option) do
     option in config.config_opts
   end
+
+  defp elem0(tuple), do: elem(tuple, 0)
+  defp elem1(tuple), do: elem(tuple, 1)
+
 end
 
