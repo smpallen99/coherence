@@ -91,8 +91,6 @@ defmodule Mix.Tasks.Coh.Install do
 
   A `--migration-path` option to set the migration path
 
-  A `--controllers` option to generate controllers boilerplate (not default)
-
   A `--module` option to override the module
 
   A `--web-module` option to override the web module
@@ -158,7 +156,7 @@ defmodule Mix.Tasks.Coh.Install do
 
   @switches [
     user: :string, repo: :string, migration_path: :string, model: :string,
-    log_only: :boolean, confirm_once: :boolean, controllers: :boolean,
+    log_only: :boolean, confirm_once: :boolean,
     module: :string, installed_options: :boolean, reinstall: :boolean,
     silent: :boolean, with_migrations: :boolean, router: :string,
     web_path: :string, web_module: :string, binary_id: :boolean,
@@ -173,6 +171,7 @@ defmodule Mix.Tasks.Coh.Install do
   def run(args) do
     {opts, parsed, unknown} = OptionParser.parse(args, switches: @switches)
 
+    verify_deprecated!(opts)
     verify_args!(parsed, unknown)
 
     {bin_opts, opts} = parse_options(opts)
@@ -223,7 +222,6 @@ defmodule Mix.Tasks.Coh.Install do
     |> gen_coherence_templates
     |> gen_coherence_mailer
     |> gen_redirects
-    |> gen_coherence_controllers
     |> touch_config                # work around for config file not getting recompiled
     |> print_instructions
   end
@@ -805,33 +803,6 @@ defmodule Mix.Tasks.Coh.Install do
   defp gen_coherence_mailer(config), do: config
 
   ################
-  # Controllers
-
-  @controller_files [
-    confirmable: "confirmation_controller.ex",
-    invitable: "invitation_controller.ex",
-    recoverable: "password_controller.ex",
-    registerable: "registration_controller.ex",
-    authenticatable: "session_controller.ex",
-    unlockable_with_token: "unlock_controller.ex"
-  ]
-
-  def controller_files, do: @controller_files
-
-  defp gen_coherence_controllers(%{controllers: true, boilerplate: true, binding: binding, web_path: web_path} = config) do
-    files =
-    @controller_files
-    |> Enum.filter(&(validate_option(config, elem(&1,0))))
-    |> Enum.map(&(elem(&1, 1)))
-    |> Enum.map(&({:eex, &1, Path.join(web_path, "controllers/coherence/#{&1}")}))
-
-    copy_from paths(), "priv/templates/coh.install/controllers/coherence", "", binding, files, config
-    config
-  end
-
-  defp gen_coherence_controllers(config), do: config
-
-  ################
   # Instructions
 
   defp seeds_instructions(%{repo: repo, user_schema: user_schema, authenticatable: true} = config) do
@@ -895,11 +866,9 @@ defmodule Mix.Tasks.Coh.Install do
   """
 
   defp router_instructions(config) do
-    controllers = config[:controllers]
-    web_base = config[:web_base]
-    namespace = if controllers, do: ", #{web_base}", else: ""
+    router     = config[:router]
+    web_base   = config[:web_base]
     web_module = config[:web_module]
-    router = config[:router]
 
     """
     Add the following to your router.ex file.
@@ -927,13 +896,13 @@ defmodule Mix.Tasks.Coh.Install do
       end
 
       # Add this block
-      scope "/"#{namespace} do
+      scope "/" do
         pipe_through :browser
         coherence_routes()
       end
 
       # Add this block
-      scope "/"#{namespace} do
+      scope "/" do
         pipe_through :protected
         coherence_routes :protected
       end
@@ -1063,7 +1032,6 @@ defmodule Mix.Tasks.Coh.Install do
       opts: bin_opts,
       binding: binding,
       log_only: opts[:log_only],
-      controllers: opts[:controllers],
       migration_path: opts[:migration_path],
       module: opts[:module],
       timestamp: the_timestamp,
@@ -1283,5 +1251,12 @@ defmodule Mix.Tasks.Coh.Install do
       |> Application.get_env(:generators, [])
       |> Keyword.get(:binary_id)
     Coherence.Config.use_binary_id? || binary_ids?
+  end
+
+  defp verify_deprecated!(opts) do
+    if opts[:controllers] do
+      Mix.raise "--controllers not supported.
+         Please use mix coh.gen.controllers instead."
+    end
   end
 end
