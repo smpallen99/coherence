@@ -8,6 +8,7 @@ defmodule <%= web_base %>.Coherence.ConfirmationController do
   use <%= web_module %>, :controller
   use Timex
 
+  alias Coherence.ControllerHelpers, as: Helpers
   alias Coherence.{ConfirmableService, Messages}
   alias Ecto.DateTime
   alias <%= base %>.Coherence.Schemas
@@ -16,7 +17,7 @@ defmodule <%= web_base %>.Coherence.ConfirmationController do
 
   plug Coherence.ValidateOption, :confirmable
 
-  plug :layout_view, view: Coherence.ConfirmationView
+  plug :layout_view, view: Coherence.ConfirmationView, caller: __MODULE__
   plug :redirect_logged_in when action in [:new]
 
   @doc """

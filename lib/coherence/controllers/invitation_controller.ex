@@ -24,7 +24,7 @@ defmodule Coherence.InvitationController do
 
   plug Coherence.ValidateOption, :invitable
   plug :scrub_params, "user" when action in [:create_user]
-  plug :layout_view, view: Coherence.InvitationView
+  plug :layout_view, view: Coherence.InvitationView, caller: __MODULE__
 
   @type schema :: Ecto.Schema.t
   @type conn :: Plug.Conn.t

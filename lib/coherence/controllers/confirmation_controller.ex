@@ -17,7 +17,7 @@ defmodule Coherence.ConfirmationController do
 
   plug Coherence.ValidateOption, :confirmable
 
-  plug :layout_view, view: Coherence.ConfirmationView
+  plug :layout_view, view: Coherence.ConfirmationView, caller: __MODULE__
   plug :redirect_logged_in when action in [:new]
 
   @doc """

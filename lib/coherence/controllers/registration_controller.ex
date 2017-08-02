@@ -29,7 +29,7 @@ defmodule Coherence.RegistrationController do
   plug Coherence.ValidateOption, :registerable
   plug :scrub_params, "registration" when action in [:create, :update]
 
-  plug :layout_view, view: Coherence.RegistrationView
+  plug :layout_view, view: Coherence.RegistrationView, caller: __MODULE__
   plug :redirect_logged_in when action in [:new, :create]
 
   @doc """

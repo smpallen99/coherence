@@ -24,11 +24,19 @@ defmodule Coherence.ControllerHelpers do
   @spec layout_view(Plug.Conn.t, Keyword.t) :: Plug.Conn.t
   def layout_view(conn, opts) do
     case opts[:layout] || Config.layout() do
-      nil -> conn
-      layout -> put_layout conn, layout
+      nil ->
+        mod = (opts[:caller] || None) |> Module.split |> hd
+        check_for_coherence(conn, mod)
+      layout ->
+        put_layout conn, layout
     end
     |> set_view(opts)
   end
+
+  defp check_for_coherence(conn, "Coherence") do
+    put_layout conn, {Module.concat(Config.web_module, LayoutView), :app}
+  end
+  defp check_for_coherence(conn, _), do: conn
 
   @doc """
   Set view plug

@@ -19,26 +19,30 @@ defmodule Mix.Tasks.Coherence.MakeTemplates do
   ]
   def controller_files, do: Enum.map(@controller_files, &(elem(&1, 1)))
 
-  @source_path Path.join(~w(. web controllers))
-  @dest_path_coherence Path.join(~w(. priv templates coherence.install controllers coherence))
+  @source_path Path.join(~w(. lib coherence controllers))
   @dest_path_coh Path.join(~w(. priv templates coh.install controllers coherence))
 
   def run(_) do
-    copy_templates @dest_path_coherence, :coherence
+    if function_exported?(Mix.Phoenix, :otp_app, 0) &&
+      apply(Mix.Phoenix, :otp_app, []) != :coherence do
+
+      raise "Task only supported for Coherence Dev"
+    end
+
     copy_templates @dest_path_coh
     Mix.shell.info "All controller templates copied"
   end
 
-  defp copy_templates(dest_path, which \\ :coh) do
-    suffix = if which == :coherence, do: "Coh", else: "Web.Coh"
+  defp copy_templates(dest_path) do
     controller_files()
     |> Enum.each(fn fname ->
       contents =
         @source_path
         |> Path.join(fname)
         |> File.read!
-        |> String.replace("defmodule Coh", "defmodule <%= base %>.#{suffix}")
-        # |> handle_which(which)
+        |> String.replace("defmodule ", "defmodule <%= web_base %>.")
+        |> String.replace("use Coherence.Web,", "use <%= web_module %>,")
+        |> String.replace("alias Coherence.Schemas", "alias <%= base %>.Coherence.Schemas")
 
       dest_path
       |> Path.join(fname)
@@ -46,10 +50,4 @@ defmodule Mix.Tasks.Coherence.MakeTemplates do
     end)
   end
 
-  # defp handle_which(content, :coherence) do
-  #   String.replace(content, "Web.Router.Helpers", "Router.Helpers")
-  # end
-  # defp handle_which(content, _) do
-  #   content
-  # end
 end

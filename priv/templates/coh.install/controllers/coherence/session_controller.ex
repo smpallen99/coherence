@@ -22,7 +22,7 @@ defmodule <%= web_base %>.Coherence.SessionController do
   @type conn :: Plug.Conn.t
   @type params :: Map.t
 
-  plug :layout_view, view: Coherence.SessionView
+  plug :layout_view, view: Coherence.SessionView, caller: __MODULE__
   plug :redirect_logged_in when action in [:new, :create]
 
   @doc false
@@ -202,7 +202,7 @@ defmodule <%= web_base %>.Coherence.SessionController do
     case validate_login(id, series, token) do
       {:ok, rememberable} ->
         # Logger.debug "Valid login :ok"
-        # Config.user_schema()
+        Config.user_schema()
         id
         |> Schemas.get_user
         |> do_valid_login(conn, [id, rememberable, series, token], opts)

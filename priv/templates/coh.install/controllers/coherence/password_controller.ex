@@ -19,7 +19,7 @@ defmodule <%= web_base %>.Coherence.PasswordController do
 
   require Logger
 
-  plug :layout_view, view: Coherence.PasswordView
+  plug :layout_view, view: Coherence.PasswordView, caller: __MODULE__
   plug :redirect_logged_in when action in [:new, :create, :edit, :update]
 
   @type schema :: Ecto.Schema.t
