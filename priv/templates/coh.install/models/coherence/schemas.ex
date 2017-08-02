@@ -39,6 +39,14 @@ defmodule <%= base %>.Coherence.Schemas do
     @user_schema.changeset @user_schema.__struct__, %{}
   end
 
+  def update_user(user, params) do
+    @repo.update change_user(user, params)
+  end
+
+  def create_user(params) do
+    @repo.insert change_user(params)
+  end
+
   Enum.each <%= schema_list %>, fn module ->
 
     name =

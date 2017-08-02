@@ -239,15 +239,15 @@ defmodule Coherence.Authentication.Session do
         "" -> conn.request_path
         _ -> conn.request_path <> "?" <> conn.query_string
       end
-   conn =  put_session(conn, "user_return_to",  user_return_to)
-   if login == true do
-      Phoenix.Controller.redirect conn, to: Module.concat( Config.web_module,
-        Router.Helpers).session_path(conn, :new)
+    conn =  put_session(conn, "user_return_to",  user_return_to)
+    if login == true do
+      Phoenix.Controller.redirect conn, to: new_session_path(conn)
     else
       login.(conn)
     end
     |> halt
   end
+
   defp assert_login({conn, user_data}, _, opts) do
     assign_key = opts[:assigns_key]
     conn

@@ -102,6 +102,10 @@ defmodule Mix.Tasks.Coherence.Install do
 
   A `--with-migrations` option to reinstall migrations. only valid for --reinstall option
 
+  A `--layout` (false) generate layout template and view
+
+  A `--user-active-field` (false) add active field to user schema and disable logins when set to false.
+
   ## Disable Options
 
   * `--no-config` -- Don't append to your `config/config.exs` file.
@@ -152,7 +156,7 @@ defmodule Mix.Tasks.Coherence.Install do
     log_only: :boolean, confirm_once: :boolean, controllers: :boolean,
     module: :string, installed_options: :boolean, reinstall: :boolean,
     silent: :boolean, with_migrations: :boolean, router: :string,
-    web_module: :string
+    web_module: :string, user_active_field: :boolean, layout: :boolean
   ] ++ Enum.map(@boolean_options, &({String.to_atom(&1), :boolean}))
 
   @switch_names Enum.map(@switches, &(elem(&1, 0)))
@@ -199,6 +203,7 @@ defmodule Mix.Tasks.Coherence.Install do
     |> gen_coherence_config
     |> gen_migration
     |> gen_model
+    |> gen_layout_template
     |> gen_invitable_migration
     |> gen_rememberable_migration
     |> gen_trackable_migration
@@ -255,8 +260,8 @@ defmodule Mix.Tasks.Coherence.Install do
         module: #{config[:base]},
         web_module: #{config[:web_base]},
         router: #{config[:router]},
-        messages_backend: #{config[:base]}.Coherence.Messages,
-        logged_out_url: "/",
+        messages_backend: #{config[:base]}.Coherence.Messages,#{layout_field config}
+        logged_out_url: "/",#{user_active_field config}
       """
     (config_block <> from_email <> "  opts: #{inspect config[:opts]}\n")
     |> swoosh_config(config)
@@ -264,6 +269,16 @@ defmodule Mix.Tasks.Coherence.Install do
     |> write_config(config)
     |> log_config
   end
+
+  defp layout_field(%{layout: true} = config),
+    do: ~s(\n  layout: {#{config.web_base}.Coherence.LayoutView, "app.html"},)
+  defp layout_field(_),
+    do: ""
+
+  defp user_active_field(%{user_active_field?: true}),
+    do: "\n  user_active_field: true,"
+  defp user_active_field(_),
+    do: ""
 
   defp swoosh_config(string, %{base: base, use_email?: true}) do
     string <> "\n" <>
@@ -418,7 +433,7 @@ defmodule Mix.Tasks.Coherence.Install do
   defp add_timestamp(acc, _), do: acc
 
   defp get_field_list(initial_fields, config) do
-    schema_fields = Coherence.Schema.schema_fields()
+    schema_fields = schema_fields(config)
     Enum.reduce(config[:opts], initial_fields, fn opt, acc ->
       case schema_fields[opt] do
         nil -> acc
@@ -695,7 +710,7 @@ defmodule Mix.Tasks.Coherence.Install do
   @template_files [
     email: {:use_email?, ~w(confirmation invitation password unlock)},
     invitation: {:invitable, ~w(edit new)},
-    layout: {:all, ~w(app email)},
+    layout: {:all, ~w(email)},
     password: {:recoverable, ~w(edit new)},
     registration: {:registerable, ~w(new edit form show)},
     session: {:authenticatable, ~w(new)},
@@ -722,6 +737,13 @@ defmodule Mix.Tasks.Coherence.Install do
   end
 
   def gen_coherence_templates(config), do: config
+
+  def gen_layout_template(%{layout: true, templates: true, boilerplate: true} = config) do
+    copy_templates(config.binding, :layout, ["app"], config)
+    config
+  end
+
+  def gen_layout_template(config), do: config
 
   defp copy_templates(binding, name, file_list, config) do
     files =
@@ -983,6 +1005,7 @@ defmodule Mix.Tasks.Coherence.Install do
       |> Keyword.put(:web_module, web_module)
       |> Keyword.put(:web_path, "web")
       |> Keyword.put(:use_binary_id?, use_binary_id?)
+      |> Keyword.put(:user_active_field?, opts[:user_active_field])
 
     {user_schema, user_table_name} = parse_model(opts[:model], base, opts)
 
@@ -1014,7 +1037,9 @@ defmodule Mix.Tasks.Coherence.Install do
       with_migrations: opts[:with_migrations],
       web_path: web_path,
       web_base: web_base,
-      use_binary_id?: use_binary_id?
+      use_binary_id?: use_binary_id?,
+      layout: opts[:layout] || false,
+      user_active_field?: binding[:user_active_field?]
     ]
     |> Enum.into(opts_map)
     |> do_default_config(opts)

@@ -107,7 +107,9 @@ defmodule Mix.Tasks.Coh.Install do
 
   A `--with-migrations` option to reinstall migrations. only valid for --reinstall option
 
-  A `--layout` generate layout template and view (false)
+  A `--layout` (false) generate layout template and view
+
+  A `--user-active-field` (false) add active field to user schema and disable logins when set to false.
 
   ## Disable Options
 
@@ -160,7 +162,7 @@ defmodule Mix.Tasks.Coh.Install do
     module: :string, installed_options: :boolean, reinstall: :boolean,
     silent: :boolean, with_migrations: :boolean, router: :string,
     web_path: :string, web_module: :string, binary_id: :boolean,
-    layout: :boolean
+    layout: :boolean, user_active_field: :boolean
   ] ++ Enum.map(@boolean_options, &({String.to_atom(&1), :boolean}))
 
   @switch_names Enum.map(@switches, &(elem(&1, 0)))
@@ -255,12 +257,6 @@ defmodule Mix.Tasks.Coh.Install do
     else
       ""
     end
-    layout =
-      if config.layout do
-        ~s(\n  layout: {#{config.web_base}.Coherence.LayoutView, "app.html"},)
-      else
-        ""
-      end
 
     config_block = """
       # #{@config_marker_start}   Don't remove this line
@@ -270,8 +266,8 @@ defmodule Mix.Tasks.Coh.Install do
         module: #{config[:base]},
         web_module: #{config[:web_base]},
         router: #{config[:router]},
-        messages_backend: #{config[:web_base]}.Coherence.Messages,#{layout}
-        logged_out_url: "/",
+        messages_backend: #{config[:web_base]}.Coherence.Messages,#{layout_field config}
+        logged_out_url: "/",#{user_active_field config}
       """
     (config_block <> from_email <> "  opts: #{inspect config[:opts]}\n")
     |> swoosh_config(config)
@@ -279,6 +275,16 @@ defmodule Mix.Tasks.Coh.Install do
     |> write_config(config)
     |> log_config
   end
+
+  defp layout_field(%{layout: true} = config),
+    do: ~s(\n  layout: {#{config.web_base}.Coherence.LayoutView, "app.html"},)
+  defp layout_field(_),
+    do: ""
+
+  defp user_active_field(%{user_active_field?: true}),
+    do: "\n  user_active_field: true,"
+  defp user_active_field(_),
+    do: ""
 
   defp swoosh_config(string, %{web_base: web_base, use_email?: true}) do
     string <> "\n" <>
@@ -461,7 +467,7 @@ defmodule Mix.Tasks.Coh.Install do
   defp add_timestamp(acc, _), do: acc
 
   defp get_field_list(initial_fields, config) do
-    schema_fields = Coherence.Schema.schema_fields()
+    schema_fields = schema_fields(config)
     Enum.reduce(config[:opts], initial_fields, fn opt, acc ->
       case schema_fields[opt] do
         nil -> acc
@@ -1037,6 +1043,7 @@ defmodule Mix.Tasks.Coh.Install do
       |> Keyword.put(:web_module, web_module)
       |> Keyword.put(:otp_app, Mix.Phoenix.otp_app())
       |> Keyword.put(:use_binary_id?, use_binary_id?())
+      |> Keyword.put(:user_active_field?, opts[:user_active_field])
 
     {user_schema, user_table_name} = parse_model(opts[:model], base, opts)
 
@@ -1071,6 +1078,7 @@ defmodule Mix.Tasks.Coh.Install do
       web_module: web_module,
       use_binary_id?: binding[:use_binary_id?],
       layout: opts[:layout] || false,
+      user_active_field?: binding[:user_active_field?]
     ]
     |> Enum.into(opts_map)
     |> do_default_config(opts)

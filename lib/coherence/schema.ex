@@ -303,55 +303,6 @@ defmodule Coherence.Schema do
   end
 
   @doc """
-  Get list of migration schema fields for each option.
-
-  Helper function to return a keyword list of the migration fields for each
-  of the supported options.
-
-  TODO: Does this really belong here? Should it not be in a migration support
-  module?
-  """
-
-  def schema_fields, do: [
-    authenticatable: [
-      "# authenticatable",
-      "add :#{Config.password_hash}, :string",
-    ],
-    recoverable: [
-      "# recoverable",
-      "add :reset_password_token, :string",
-      "add :reset_password_sent_at, :utc_datetime"
-    ],
-    rememberable: [
-      "# rememberable",
-      "add :remember_created_at, :utc_datetime"
-    ],
-    trackable: [
-      "# trackable",
-      "add :sign_in_count, :integer, default: 0",
-      "add :current_sign_in_at, :utc_datetime",
-      "add :last_sign_in_at, :utc_datetime",
-      "add :current_sign_in_ip, :string",
-      "add :last_sign_in_ip, :string"
-    ],
-    lockable: [
-      "# lockable",
-      "add :failed_attempts, :integer, default: 0",
-      "add :locked_at, :utc_datetime",
-    ],
-    unlockable_with_token: [
-      "# unlockable_with_token",
-      "add :unlock_token, :string",
-    ],
-    confirmable: [
-      "# confirmable",
-      "add :confirmation_token, :string",
-      "add :confirmed_at, :utc_datetime",
-      "add :confirmation_sent_at, :utc_datetime"
-    ]
-  ]
-
-  @doc """
   Add configure schema fields.
 
   Adds the schema fields to the schema block for the options selected.
@@ -381,6 +332,7 @@ defmodule Coherence.Schema do
         schema "users" do
           field :name, :string
           field :email, :string
+          field :active, :boolean, default: true
 
           # authenticatable
           field :password_hash, :string
@@ -402,6 +354,9 @@ defmodule Coherence.Schema do
         field :current_password, :string, virtual: true
         field :password, :string, virtual: true
         field :password_confirmation, :string, virtual: true
+        if Coherence.Config.user_active_field do
+          field :active, :boolean, default: true
+        end
       end
 
       if Coherence.Config.has_option(:recoverable) do
@@ -469,6 +424,17 @@ defmodule Coherence.Schema do
     |> options_fields(:confirmable)
   end
 
+  defp options_fields(fields, :authenticatable = key) do
+    fields ++
+      cond do
+        not Coherence.Config.has_option(key) ->
+          []
+        Coherence.Config.user_active_field ->
+          ["active" | @optional_fields[key]]
+        true ->
+          @optional_fields[key]
+      end
+  end
   defp options_fields(fields, key) do
     if Coherence.Config.has_option(key) do
       fields ++ @optional_fields[key]

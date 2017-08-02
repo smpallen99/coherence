@@ -52,4 +52,61 @@ defmodule Coherence.Mix.Utils do
     end
   end
 
+  @doc """
+  Get list of migration schema fields for each option.
+
+  Helper function to return a keyword list of the migration fields for each
+  of the supported options.
+
+  TODO: Does this really belong here? Should it not be in a migration support
+  module?
+  """
+
+  def schema_fields(config) do
+    active_field =
+      if config.user_active_field? do
+        ["add :active, :boolean, null: false, default: true"]
+      else
+        []
+      end
+    [
+      authenticatable: [
+        "# authenticatable",
+        "add :password_hash, :string",
+      ] ++ active_field,
+      recoverable: [
+        "# recoverable",
+        "add :reset_password_token, :string",
+        "add :reset_password_sent_at, :utc_datetime"
+      ],
+      rememberable: [
+        "# rememberable",
+        "add :remember_created_at, :utc_datetime"
+      ],
+      trackable: [
+        "# trackable",
+        "add :sign_in_count, :integer, default: 0",
+        "add :current_sign_in_at, :utc_datetime",
+        "add :last_sign_in_at, :utc_datetime",
+        "add :current_sign_in_ip, :string",
+        "add :last_sign_in_ip, :string"
+      ],
+      lockable: [
+        "# lockable",
+        "add :failed_attempts, :integer, default: 0",
+        "add :locked_at, :utc_datetime",
+      ],
+      unlockable_with_token: [
+        "# unlockable_with_token",
+        "add :unlock_token, :string",
+      ],
+      confirmable: [
+        "# confirmable",
+        "add :confirmation_token, :string",
+        "add :confirmed_at, :utc_datetime",
+        "add :confirmation_sent_at, :utc_datetime"
+      ]
+    ]
+  end
+
 end

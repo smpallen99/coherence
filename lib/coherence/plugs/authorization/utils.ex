@@ -85,4 +85,8 @@ defmodule Coherence.Authentication.Utils do
       conn
     end
   end
+
+  def new_session_path(conn) do
+    Module.concat(Config.web_module, Router.Helpers).session_path(conn, :new)
+  end
 end

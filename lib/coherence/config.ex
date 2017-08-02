@@ -53,6 +53,7 @@ defmodule Coherence.Config do
   * :minimum_password_length The minimum password length to be accepted. Default value is 4.
   * :messages_backend - (MyApp.Coherence.Messages)
   * :router: the module name of your Router (`router: MyProject.Router`)
+  * :user_active_field - Include the user active feature
 
   ## Examples
 
@@ -112,7 +113,8 @@ defmodule Coherence.Config do
     {:async_rememberable?, false},
     {:minimum_password_length, 4},
     :messages_backend,
-    :router
+    :router,
+    :user_active_field
   ]
   |> Enum.each(fn
         {key, default} ->

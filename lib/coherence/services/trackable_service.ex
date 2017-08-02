@@ -169,10 +169,10 @@ defmodule Coherence.TrackableService do
     do: track(conn, user, "password_reset")
 
   @spec track_failed_login(conn, schema, boolean) :: conn
-  def track_failed_login(conn, _user, false),
-    do: conn
-  def track_failed_login(conn, user, true),
+  def track_failed_login(conn, %{} = user, true),
     do: track(conn, user, "failed_login")
+  def track_failed_login(conn, _user, _),
+    do: conn
 
   @spec track_lock(conn, schema, boolean) :: conn
   def track_lock(conn, _user, false),
@@ -195,7 +195,7 @@ defmodule Coherence.TrackableService do
   ##############
   # Private
 
-  defp track(conn, user, action) do
+  def track(conn, user, action) do
     trackable = last_trackable(user.id)
     schema = schema Trackable
     changeset = Helpers.changeset(:session, schema, schema.__struct__,
