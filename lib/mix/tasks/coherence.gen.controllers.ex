@@ -1,4 +1,4 @@
-defmodule Mix.Tasks.Coh.Gen.Controllers do
+defmodule Mix.Tasks.Coherence.Gen.Controllers do
   @moduledoc """
   Generate Coherence controllers.
 
@@ -9,7 +9,7 @@ defmodule Mix.Tasks.Coh.Gen.Controllers do
 
       # Install all the controllers for the coherence opts
       # defined in your `config/config.exs` file
-      mix coh.gen.controllers
+      mix coherence.gen.controllers
 
   Once the controllers have been generated, you must update your
   `router.ex` file to properly scope the generated controller(s).
@@ -17,24 +17,19 @@ defmodule Mix.Tasks.Coh.Gen.Controllers do
   For example:
 
       # lib/my_app_web
-      def MyAppWeb.Router do
+      def MyApp.Router do
         # ...
 
-        scope "/", MyAppWeb do
+        scope "/", MyApp do
           pipe_through :browser
           coherence_routes()
         end
-        scope "/", MyAppWeb do
+        scope "/", MyApp do
           pipe_through :protected
           coherence_routes :protected
         end
         # ...
       end
-
-  ## Options
-
-  * `--web-path` override the web path
-  * `--no-confirm` silently overwrite files
   """
   use Mix.Task
 
@@ -48,6 +43,7 @@ defmodule Mix.Tasks.Coh.Gen.Controllers do
     authenticatable: "session_controller.ex",
     unlockable_with_token: "unlock_controller.ex"
   ]
+
   @default_booleans ~w(confirm)
 
   @switches [web_path: :string] ++
@@ -112,7 +108,7 @@ defmodule Mix.Tasks.Coh.Gen.Controllers do
       |> Mix.Phoenix.inflect
 
     base     = opts[:module] || binding[:base]
-    web_base = opts[:web_module] || base <> "Web"
+    web_base = opts[:web_module] || base
 
     binding =
       Enum.into binding, [
@@ -120,7 +116,7 @@ defmodule Mix.Tasks.Coh.Gen.Controllers do
         web_base: web_base,
         opts: Keyword.put(opts, :base, base),
         web_path: opts[:web_path] || web_path(),
-        web_module: web_base <> ".Coherence"
+        web_module: web_base <> ".Coherence.Web"
       ]
 
     %{
@@ -172,15 +168,6 @@ defmodule Mix.Tasks.Coh.Gen.Controllers do
   defp to_app_source(app, source_dir) when is_atom(app),
     do: Application.app_dir(app, source_dir)
 
-  # defp lib_path(path \\ "") do
-  #   Path.join ["lib", to_string(Mix.Phoenix.otp_app()), path]
-  # end
-
-  defp web_path(path \\ "") do
-    otp_app = to_string(Mix.Phoenix.otp_app())
-    Path.join ["lib", otp_app <> "_web", path]
-  end
-
   defp get_config_opts do
     Application.get_env :coherence, :opts, []
   end
@@ -192,5 +179,9 @@ defmodule Mix.Tasks.Coh.Gen.Controllers do
   defp elem0(tuple), do: elem(tuple, 0)
   defp elem1(tuple), do: elem(tuple, 1)
 
+  defp web_path(path \\ "") do
+    otp_app = to_string(Mix.Phoenix.otp_app())
+    Path.join ["web", path]
+  end
 end
 

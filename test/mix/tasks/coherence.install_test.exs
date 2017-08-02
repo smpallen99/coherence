@@ -6,6 +6,9 @@ defmodule Mix.Tasks.Coherence.InstallTest do
 
   @web_path "web"
   setup do
+    Application.put_env :coherence, :opts, [
+      :confirmable, :authenticatable, :recoverable, :lockable, :trackable,
+      :unlockable_with_token, :invitable, :registerable, :rememberable]
     :ok
   end
   # opts: [:invitable, :authenticatable, :recoverable, :lockable, :trackable, :unlockable_with_token, :registerable]
@@ -13,12 +16,11 @@ defmodule Mix.Tasks.Coherence.InstallTest do
   @all_template_dirs ~w(layout session email invitation password registration unlock)
   @all_views ~w(coherence_view_helpers.ex coherence_view.ex confirmation_view.ex email_view.ex invitation_view.ex) ++
     ~w(layout_view.ex password_view.ex registration_view.ex session_view.ex unlock_view.ex)
-  @all_controllers Enum.map(@all_template_dirs -- ~w(layout email), &("#{&1}_controller.ex"))
 
   test "generates_files_for_authenticatable" do
     in_tmp "generates_views_for_authenticatable", fn ->
       mk_web_path()
-      ~w(--repo=TestCoherence.Repo --log-only --no-migrations --controllers --module=TestCoherence)
+      ~w(--repo=TestCoherence.Repo --log-only --no-migrations --module=TestCoherence)
       |> Mix.Tasks.Coherence.Install.run
 
       ~w(session_view.ex coherence_view.ex layout_view.ex coherence_view_helpers.ex)
@@ -26,13 +28,6 @@ defmodule Mix.Tasks.Coherence.InstallTest do
 
       ~w(layout session)
       |> assert_dirs(@all_template_dirs, web_path("templates/coherence/"))
-
-      ~w(session_controller.ex)
-      |> assert_file_list(@all_controllers, web_path("controllers/coherence/"))
-
-      assert_file web_path("controllers/coherence/session_controller.ex"), fn file ->
-        assert file =~ "defmodule TestCoherence.Coherence.SessionController do"
-      end
 
       assert_file web_path("controllers/coherence/redirects.ex"), fn file ->
         assert file =~ "defmodule Coherence.Redirects do"
@@ -43,7 +38,7 @@ defmodule Mix.Tasks.Coherence.InstallTest do
   test "generates files for authenticatable recoverable" do
     in_tmp "generates_files_for_authenticatable_recoverable", fn ->
       mk_web_path()
-      ~w(--repo=TestCoherence.Repo  --authenticatable --recoverable --log-only --no-migrations --controllers)
+      ~w(--repo=TestCoherence.Repo  --authenticatable --recoverable --log-only --no-migrations)
       |> Mix.Tasks.Coherence.Install.run
 
       ~w(session_view.ex coherence_view.ex layout_view.ex password_view.ex email_view.ex coherence_view_helpers.ex)
@@ -51,16 +46,13 @@ defmodule Mix.Tasks.Coherence.InstallTest do
 
       ~w(layout session password email)
       |> assert_dirs(@all_template_dirs, "templates/coherence/" |> web_path)
-
-      ~w(session_controller.ex password_controller.ex)
-      |> assert_file_list(@all_controllers, "controllers/coherence/" |> web_path)
     end
   end
 
   test "generates files for authenticatable recoverable invitable" do
     in_tmp "generates_files_for_authenticatable_recoverable_invitable", fn ->
       mk_web_path()
-      ~w(--repo=TestCoherence.Repo  --authenticatable --recoverable --invitable --log-only --no-migrations --controllers --module=TestCoherence)
+      ~w(--repo=TestCoherence.Repo  --authenticatable --recoverable --invitable --log-only --no-migrations --module=TestCoherence)
       |> Mix.Tasks.Coherence.Install.run
 
       ~w(session_view.ex coherence_view.ex layout_view.ex password_view.ex invitation_view.ex email_view.ex coherence_view_helpers.ex)
@@ -68,19 +60,6 @@ defmodule Mix.Tasks.Coherence.InstallTest do
 
       ~w(layout session password invitation email)
       |> assert_dirs(@all_template_dirs, "templates/coherence" |> web_path)
-
-      ~w(session_controller.ex password_controller.ex invitation_controller.ex)
-      |> assert_file_list(@all_controllers, "controllers/coherence" |> web_path)
-
-      assert_file "controllers/coherence/session_controller.ex" |> web_path, fn file ->
-        assert file =~ "defmodule TestCoherence.Coherence.SessionController do"
-      end
-      assert_file "controllers/coherence/password_controller.ex" |> web_path, fn file ->
-        assert file =~ "defmodule TestCoherence.Coherence.PasswordController do"
-      end
-      assert_file "controllers/coherence/invitation_controller.ex" |> web_path, fn file ->
-        assert file =~ "defmodule TestCoherence.Coherence.InvitationController do"
-      end
     end
   end
 
@@ -105,7 +84,7 @@ defmodule Mix.Tasks.Coherence.InstallTest do
   test "generates files for authenticatable recoverable unlockable_with_token" do
     in_tmp "generates_files_for_authenticatable_recoverable_registerable_unlockable_with_token", fn ->
       mk_web_path()
-      ~w(--repo=TestCoherence.Repo  --authenticatable --recoverable --registerable --lockable --unlockable-with-token --log-only --no-migrations --controllers)
+      ~w(--repo=TestCoherence.Repo  --authenticatable --recoverable --registerable --lockable --unlockable-with-token --log-only --no-migrations)
       |> Mix.Tasks.Coherence.Install.run
 
       ~w(session_view.ex coherence_view.ex layout_view.ex password_view.ex registration_view.ex unlock_view.ex email_view.ex coherence_view_helpers.ex)
@@ -113,9 +92,6 @@ defmodule Mix.Tasks.Coherence.InstallTest do
 
       ~w(layout session password registration unlock email)
       |> assert_dirs(@all_template_dirs, "templates/coherence/" |> web_path)
-
-      ~w(session_controller.ex password_controller.ex registration_controller.ex unlock_controller.ex)
-      |> assert_file_list(@all_controllers, "controllers/coherence/" |> web_path)
     end
   end
 
@@ -144,9 +120,6 @@ defmodule Mix.Tasks.Coherence.InstallTest do
 
       ~w()
       |> assert_dirs(@all_template_dirs, "templates/coherence/" |> web_path)
-
-      ~w()
-      |> assert_file_list(@all_controllers, "controllers/coherence/" |> web_path)
     end
   end
 
