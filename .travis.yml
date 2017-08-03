@@ -7,7 +7,7 @@ elixir:
   - 1.5
   - 1.4
 otp_release:
-  - 29.0
+  - 20.0
   - 19.3
 sudo: false
 notification:
