@@ -18,7 +18,8 @@ defmodule Coherence.InvitationController do
 
   alias Coherence.{Config}
   alias Coherence.ControllerHelpers, as: Helpers
-  alias Coherence.{Schemas, Messages}
+  alias Coherence.Messages
+  alias Coherence.Schemas
 
   require Logger
 
@@ -48,26 +49,25 @@ defmodule Coherence.InvitationController do
   @spec create(conn, params) :: conn
   def create(conn, %{"invitation" =>  invitation_params} = params) do
     email = invitation_params["email"]
-    cs = Schemas.change_invitation invitation_params
+    changeset = Schemas.change_invitation invitation_params
     # case repo.one from u in user_schema, where: u.email == ^email do
     case Schemas.get_user_by_email email do
       nil ->
         token = random_string 48
         url = router_helpers().invitation_url(conn, :edit, token)
-        cs = put_change(cs, :token, token)
-        do_insert(conn, cs, url, params, email)
+        changeset = put_change(changeset, :token, token)
+        do_insert(conn, changeset, url, params, email)
       _ ->
-        cs =
-          cs
+        changeset =
+          changeset
           |> add_error(:email, Messages.backend().user_already_has_an_account())
           |> struct(action: true)
-        conn
-        |> render("new.html", changeset: cs)
+        render(conn, "new.html", changeset: changeset)
     end
   end
 
-  defp do_insert(conn, cs, url, params, email) do
-    case Schemas.create cs do
+  defp do_insert(conn, changeset, url, params, email) do
+    case Schemas.create changeset do
       {:ok, invitation} ->
         send_user_email :invitation, invitation, url
         conn
@@ -102,10 +102,10 @@ defmodule Coherence.InvitationController do
         |> redirect(to: logged_out_url(conn))
       invite ->
         user_schema = Config.user_schema
-        cs = Helpers.changeset(:invitation, user_schema, user_schema.__struct__,
+        changeset = Helpers.changeset(:invitation, user_schema, user_schema.__struct__,
           %{email: invite.email, name: invite.name})
         conn
-        |> render(:edit, changeset: cs, token: invite.token)
+        |> render(:edit, changeset: changeset, token: invite.token)
     end
   end
 
@@ -146,14 +146,15 @@ defmodule Coherence.InvitationController do
   """
   @spec resend(conn, params) :: conn
   def resend(conn, %{"id" => id} = params) do
-    conn = case Schemas.get_invitation id do
-      nil ->
-        put_flash(conn, :error, Messages.backend().cant_find_that_token())
-      invitation ->
-        send_user_email :invitation, invitation,
-          router_helpers().invitation_url(conn, :edit, invitation.token)
-        put_flash conn, :info, Messages.backend().invitation_sent()
-    end
+    conn =
+      case Schemas.get_invitation id do
+        nil ->
+          put_flash(conn, :error, Messages.backend().cant_find_that_token())
+        invitation ->
+          send_user_email :invitation, invitation,
+            router_helpers().invitation_url(conn, :edit, invitation.token)
+          put_flash conn, :info, Messages.backend().invitation_sent()
+      end
     redirect_to(conn, :invitation_resend, params)
   end
 end

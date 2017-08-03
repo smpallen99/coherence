@@ -13,7 +13,8 @@ defmodule Coherence.RegistrationController do
   use Coherence.Web, :controller
 
   alias Coherence.ControllerHelpers, as: Helpers
-  alias Coherence.{Messages, Schemas}
+  alias Coherence.{Messages}
+  alias Coherence.Schemas
 
   require Logger
 
@@ -38,8 +39,8 @@ defmodule Coherence.RegistrationController do
   @spec new(conn, params) :: conn
   def new(conn, _params) do
     user_schema = Config.user_schema
-    cs = Helpers.changeset(:registration, user_schema, user_schema.__struct__)
-    render(conn, :new, email: "", changeset: cs)
+    changeset = Helpers.changeset(:registration, user_schema, user_schema.__struct__)
+    render(conn, :new, email: "", changeset: changeset)
   end
 
   @doc """

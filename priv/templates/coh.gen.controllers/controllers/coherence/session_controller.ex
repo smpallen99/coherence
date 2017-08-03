@@ -14,7 +14,8 @@ defmodule <%= web_base %>.Coherence.SessionController do
 
   # alias Coherence.{Rememberable}
   alias Coherence.ControllerHelpers, as: Helpers
-  alias Coherence.{ConfirmableService, Messages, Schemas}
+  alias Coherence.{ConfirmableService, Messages}
+  alias <%= base %>.Coherence.Schemas
 
   require Logger
 
@@ -77,27 +78,39 @@ defmodule <%= web_base %>.Coherence.SessionController do
     login_field = Config.login_field()
     login_field_str = to_string login_field
     login = params["session"][login_field_str]
-    password = params["session"]["password"]
+    new_bindings = [{login_field, login}, remember: rememberable_enabled?()]
     remember = if Config.user_schema.rememberable?(), do: params["remember"], else: false
-    user = Config.repo.one(from u in user_schema, where: field(u, ^login_field) == ^login)
-    if user != nil and user_schema.checkpw(password, Map.get(user, Config.password_hash())) do
-      if ConfirmableService.confirmed?(user) || ConfirmableService.unconfirmed_access?(user) do
+    # user = Config.repo.one(from u in user_schema, where: field(u, ^login_field) == ^login)
+    user = Schemas.get_by_user [{login_field, login}]
+    if valid_user_login? user, params do
+      if confirmed_access? user do
         do_lockable(conn, login_field, [user, user_schema, remember, lockable?, remember, params],
           user_schema.lockable?() and user_schema.locked?(user))
       else
         conn
         |> put_flash(:error, Messages.backend().you_must_confirm_your_account())
         |> put_status(406)
-        |> render("new.html", [{login_field, login}, remember: rememberable_enabled?()])
+        |> render(:new, new_bindings)
       end
     else
       conn
       |> track_failed_login(user, user_schema.trackable_table?())
       |> failed_login(user, lockable?)
       |> put_status(401)
-      |> render(:new, [{login_field, login}, remember: rememberable_enabled?()])
+      |> render(:new, new_bindings)
     end
   end
+
+  defp confirmed_access?(user) do
+    ConfirmableService.confirmed?(user) || ConfirmableService.unconfirmed_access?(user)
+  end
+
+  defp valid_user_login?(nil, _params), do: false
+  defp valid_user_login?(%{active: false}, _params), do: false
+  defp valid_user_login?(user, %{"session" => %{"password" => password}}) do
+    user.__struct__.checkpw(password, Map.get(user, Config.password_hash()))
+  end
+  defp valid_user_login?(_user, _params), do: false
 
   defp do_lockable(conn, login_field, _, true) do
     conn
@@ -164,24 +177,41 @@ defmodule <%= web_base %>.Coherence.SessionController do
 
   defp failed_login(conn, %{} = user, true) do
     attempts = user.failed_attempts + 1
-    {conn, flash, params} =
-      if attempts >= Config.max_failed_login_attempts() do
-        new_conn =
-          conn
-          |> assign(:locked, true)
-          |> track_lock(user, user.__struct__.trackable_table?())
-        {new_conn, Messages.backend().maximum_login_attempts_exceeded(), %{locked_at: Ecto.DateTime.utc()}}
-      else
-        {conn, Messages.backend().incorrect_login_or_password(login_field: Config.login_field()), %{}}
+    {conn, params} =
+      cond do
+        not user_active?(user) ->
+          {put_flash_inactive_user(conn), %{}}
+        attempts >= Config.max_failed_login_attempts() ->
+          new_conn =
+            conn
+            |> assign(:locked, true)
+            |> track_lock(user, user.__struct__.trackable_table?())
+          {put_flash(new_conn, :error,
+            Messages.backend().maximum_login_attempts_exceeded()),
+            %{locked_at: Ecto.DateTime.utc()}}
+        true ->
+          {put_flash(conn, :error,
+            Messages.backend().incorrect_login_or_password(login_field:
+            Config.login_field())), %{}}
       end
+
     :session
-    |> Helpers.changeset(user.__struct__, user, Map.put(params, :failed_attempts, attempts))
+    |> Helpers.changeset(user.__struct__, user,
+      Map.put(params, :failed_attempts, attempts))
     |> Schemas.update
     |> log_lockable_update
 
-    put_flash(conn, :error, flash)
+    conn
   end
-  defp failed_login(conn, _user, _), do: put_flash(conn, :error, Messages.backend().incorrect_login_or_password(login_field: Config.login_field()))
+
+  defp failed_login(conn, _user, _) do
+    put_flash(conn, :error, Messages.backend().incorrect_login_or_password(
+      login_field: Config.login_field()))
+  end
+
+  def put_flash_inactive_user(conn) do
+    put_flash conn, :error, Messages.backend().account_is_inactive()
+  end
 
   @doc """
   Callback for the authenticate plug.
@@ -334,6 +364,10 @@ defmodule <%= web_base %>.Coherence.SessionController do
 
   defp gen_cookie(user_id, series, token) do
     schema(Rememberable).gen_cookie user_id, series, token
+  end
+
+  defp user_active?(user) do
+    Map.get(user, :active, true)
   end
 
 end

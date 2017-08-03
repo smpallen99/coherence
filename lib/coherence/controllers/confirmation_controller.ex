@@ -40,7 +40,7 @@ defmodule Coherence.ConfirmationController do
   def create(conn, %{"confirmation" => password_params} = params) do
     user_schema = Config.user_schema
     email = password_params["email"]
-    user = Schemas.get_by_user email: email
+    user = Schemas.get_user_by_email email
 
     changeset = Helpers.changeset :confirmation, user_schema, user_schema.__struct__
     case user do

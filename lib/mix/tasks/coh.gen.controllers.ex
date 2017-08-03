@@ -81,7 +81,7 @@ defmodule Mix.Tasks.Coh.Gen.Controllers do
     # web_module = config[:web_module]
     router = Application.get_env(:coherence, :router) |> inspect
 
-    """
+    Mix.shell.info """
     Modify your router.ex file and change the name spaces as indicated below:
 
     defmodule #{router} do
@@ -102,6 +102,7 @@ defmodule Mix.Tasks.Coh.Gen.Controllers do
       # ...
     end
     """
+    config
   end
 
   defp do_config(opts, _parsed) do
@@ -115,13 +116,13 @@ defmodule Mix.Tasks.Coh.Gen.Controllers do
     web_base = opts[:web_module] || base <> "Web"
 
     binding =
-      Enum.into binding, [
+      Enum.into [
         base: base,
         web_base: web_base,
         opts: Keyword.put(opts, :base, base),
         web_path: opts[:web_path] || web_path(),
-        web_module: web_base <> ".Coherence"
-      ]
+        web_module: web_base <> ".Coherence",
+      ], binding
 
     %{
       binding: binding,

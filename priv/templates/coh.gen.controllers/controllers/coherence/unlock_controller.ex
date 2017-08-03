@@ -11,8 +11,11 @@ defmodule <%= web_base %>.Coherence.UnlockController do
   use Timex
   use Coherence.Config
 
+  import Coherence.ControllerHelpers
+
   alias Coherence.ControllerHelpers, as: Helpers
   alias Coherence.{TrackableService, LockableService, Messages}
+  alias <%= base %>.Coherence.Schemas
 
   require Logger
 
@@ -43,10 +46,7 @@ defmodule <%= web_base %>.Coherence.UnlockController do
     email = unlock_params["email"]
     password = unlock_params["password"]
 
-    user =
-      user_schema
-      |> where([u], u.email == ^email)
-      |> Config.repo.one
+    user = Schemas.get_user_by_email(email)
 
     if user != nil and user_schema.checkpw(password, Map.get(user, Config.password_hash)) do
       case LockableService.unlock_token(user) do
@@ -81,11 +81,7 @@ defmodule <%= web_base %>.Coherence.UnlockController do
   def edit(conn, params) do
     user_schema = Config.user_schema
     token = params["id"]
-    unlock =
-      user_schema
-      |> where([u], u.unlock_token == ^token)
-      |> Config.repo.one
-    case unlock do
+    case Schemas.get_by_user unlock_token: token do
       nil ->
         conn
         |> put_flash(:error, Messages.backend().invalid_unlock_token())
@@ -110,11 +106,10 @@ defmodule <%= web_base %>.Coherence.UnlockController do
   @spec clear_unlock_values(schema, module) :: nil | :ok | String.t
   def clear_unlock_values(user, user_schema) do
     if user.unlock_token or user.locked_at do
-      user_schema.changeset(user, %{unlock_token: nil, locked_at: nil})
       schema =
         :unlock
-        |> Helpers.changeset(user.__struct__, user, %{unlock_token: nil, locked_at: nil})
-        |> Config.repo.update
+        |> Helpers.changeset(user_schema, user, %{unlock_token: nil, locked_at: nil})
+        |> Schemas.update
       case schema do
         {:error, changeset} ->
           lockable_failure changeset

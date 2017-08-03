@@ -14,7 +14,8 @@ defmodule Coherence.SessionController do
 
   # alias Coherence.{Rememberable}
   alias Coherence.ControllerHelpers, as: Helpers
-  alias Coherence.{ConfirmableService, Messages, Schemas}
+  alias Coherence.{ConfirmableService, Messages}
+  alias Coherence.Schemas
 
   require Logger
 
@@ -79,7 +80,8 @@ defmodule Coherence.SessionController do
     login = params["session"][login_field_str]
     new_bindings = [{login_field, login}, remember: rememberable_enabled?()]
     remember = if Config.user_schema.rememberable?(), do: params["remember"], else: false
-    user = Config.repo.one(from u in user_schema, where: field(u, ^login_field) == ^login)
+    # user = Config.repo.one(from u in user_schema, where: field(u, ^login_field) == ^login)
+    user = Schemas.get_by_user [{login_field, login}]
     if valid_user_login? user, params do
       if confirmed_access? user do
         do_lockable(conn, login_field, [user, user_schema, remember, lockable?, remember, params],

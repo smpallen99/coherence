@@ -20,7 +20,7 @@ defmodule Mix.Tasks.Coherence.MakeTemplates do
   def controller_files, do: Enum.map(@controller_files, &(elem(&1, 1)))
 
   @source_path Path.join(~w(. lib coherence controllers))
-  @dest_path_coh Path.join(~w(. priv templates coh.install controllers coherence))
+  @dest_path_coh Path.join(~w(. priv templates coh.gen.controllers controllers coherence))
 
   def run(_) do
     if function_exported?(Mix.Phoenix, :otp_app, 0) &&

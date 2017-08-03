@@ -15,7 +15,8 @@ defmodule Coherence.PasswordController do
   use Timex
 
   alias Coherence.ControllerHelpers, as: Helpers
-  alias Coherence.{TrackableService, Messages, Schemas}
+  alias Coherence.{TrackableService, Messages}
+  alias Coherence.Schemas
 
   require Logger
 
@@ -32,9 +33,8 @@ defmodule Coherence.PasswordController do
   @spec new(conn, params) :: conn
   def new(conn, _params) do
     user_schema = Config.user_schema
-    cs = Helpers.changeset :password, user_schema, user_schema.__struct__
-    conn
-    |> render(:new, [email: "", changeset: cs])
+    changeset = Helpers.changeset :password, user_schema, user_schema.__struct__
+    render(conn, :new, [email: "", changeset: changeset])
   end
 
   @doc """
@@ -43,13 +43,8 @@ defmodule Coherence.PasswordController do
   @spec create(conn, params) :: conn
   def create(conn, %{"password" => password_params} = params) do
     user_schema = Config.user_schema
-    email = password_params["email"]
-    user =
-      user_schema
-      |> where([u], u.email == ^email)
-      |> Config.repo.one
 
-    case user do
+    case Schemas.get_user_by_email password_params["email"] do
       nil ->
         changeset = Helpers.changeset :password, user_schema, user_schema.__struct__
         conn
@@ -58,11 +53,10 @@ defmodule Coherence.PasswordController do
       user ->
         token = random_string 48
         url = router_helpers().password_url(conn, :edit, token)
-        Logger.debug "reset email url: #{inspect url}"
+        # Logger.debug "reset email url: #{inspect url}"
         dt = Ecto.DateTime.utc
-        cs = Helpers.changeset(:password, user_schema, user,
+        Config.repo.update! Helpers.changeset(:password, user_schema, user,
           %{reset_password_token: token, reset_password_sent_at: dt})
-        Config.repo.update! cs
 
         if Config.mailer?() do
           send_user_email :password, user, url
@@ -81,11 +75,8 @@ defmodule Coherence.PasswordController do
   def edit(conn, params) do
     user_schema = Config.user_schema
     token = params["id"]
-    user =
-      user_schema
-      |> where([u], u.reset_password_token == ^token)
-      |> Config.repo.one
-    case user do
+
+    case Schemas.get_by_user(reset_password_token: token) do
       nil ->
         conn
         |> put_flash(:error, Messages.backend().invalid_reset_token())
@@ -101,8 +92,7 @@ defmodule Coherence.PasswordController do
           |> redirect(to: logged_out_url(conn))
         else
           changeset = Helpers.changeset(:password, user_schema, user)
-          conn
-          |> render("edit.html", changeset: changeset)
+          render(conn, "edit.html", changeset: changeset)
         end
     end
   end
@@ -130,8 +120,7 @@ defmodule Coherence.PasswordController do
           |> put_flash(:error, Messages.backend().password_reset_token_expired())
           |> redirect(to: logged_out_url(conn))
         else
-          params = password_params
-          |> clear_password_params
+          params = clear_password_params password_params
 
           :password
           |> Helpers.changeset(user_schema, user, params)
