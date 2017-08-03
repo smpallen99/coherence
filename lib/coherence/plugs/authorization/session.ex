@@ -128,6 +128,14 @@ defmodule Coherence.Authentication.Session do
   """
   @spec delete_login(conn, Keyword.t) :: conn
   def delete_login(conn, opts \\ []) do
+    if opts[:all] do
+      delete_user_logins(conn, opts)
+    else
+      delete_current_login(conn, opts)
+    end
+  end
+
+  defp delete_current_login(conn, opts) do
     store = Keyword.get(opts, :store, Coherence.CredentialStore.Session)
     case get_session(conn, @session_key) do
       nil ->
@@ -143,20 +151,11 @@ defmodule Coherence.Authentication.Session do
     |> delete_user_token
   end
 
-  # defp default_login_callback do
-  #   module =
-  #     :coherence
-  #     |> Application.get_env(:module)
-  #     |> Module.concat(Coherence.SessionController)
-
-  #   Code.ensure_loaded module
-
-  #   if function_exported?(module, :login_callback, 1) do
-  #     &module.login_callback/1
-  #   else
-  #     &Coherence.SessionController.login_callback/1
-  #   end
-  # end
+  defp delete_user_logins(conn, opts) do
+    store = Keyword.get(opts, :store, Coherence.CredentialStore.Session)
+    store.delete_user_logins(opts[:all])
+    conn
+  end
 
   @doc false
   @spec init(Keyword.t) :: [tuple]

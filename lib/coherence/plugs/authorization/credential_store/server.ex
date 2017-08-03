@@ -23,9 +23,15 @@ defmodule Coherence.CredentialStore.Server do
   def update_user_logins(%{id: _} = user_data) do
     GenServer.cast @name, {:update_user_logins, user_data}
   end
+
     # If the user_data doesn't contain an ID, there are no sessions belonging to the user
     # There is no need to update anything and we just return an empty list
   def update_user_logins(_), do: []
+
+  @spec delete_user_logins(T.user_data) :: no_return
+  def delete_user_logins(%{id: _} = user_data) do
+    GenServer.cast @name, {:delete_user_logins, user_data}
+  end
 
   @spec get_user_data(T.credentials) :: T.user_data
   def get_user_data(credentials) do
@@ -89,7 +95,15 @@ defmodule Coherence.CredentialStore.Server do
       {user_data, inx}
     end)
     {:noreply, state}
+  end
 
+  @doc false
+  def handle_cast({:delete_user_logins, %{id: id}}, state) do
+    state =
+      state
+      |> remove_all_users_from_store(id)
+      |> update_in([:user_data], & Map.delete(&1, id))
+    {:noreply, state}
   end
 
   @doc false
@@ -103,7 +117,6 @@ defmodule Coherence.CredentialStore.Server do
         {user_data, inx} -> {user_data, inx - 1}
       end)
     {:noreply, state}
-
   end
 
   @doc false
@@ -115,5 +128,11 @@ defmodule Coherence.CredentialStore.Server do
   # Private
 
   defp initial_state, do: %{store: %{}, user_data: %{}}
+
+  defp remove_all_users_from_store(state, id) do
+    update_in(state, [:store], fn store ->
+      for val = {_, v} <- store, v != id, into: %{}, do: val
+    end)
+  end
 
 end

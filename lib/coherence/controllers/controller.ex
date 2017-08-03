@@ -308,13 +308,23 @@ defmodule Coherence.Controller do
 
   Logs out a user and redirects them to the session_delete page.
   """
-  @spec logout_user(conn) :: conn
-  def logout_user(conn) do
+  @spec logout_user(conn, Keyword.t) :: conn
+  def logout_user(conn, opts \\ []) do
     user = Coherence.current_user conn
     Config.auth_module
-    |> apply(Config.delete_login, [conn, [id_key: Config.schema_key]])
+    |> apply(Config.delete_login, [conn, [id_key: Config.schema_key] ++ opts])
     |> TrackableService.track_logout(user, user.__struct__.trackable?, user.__struct__.trackable_table?)
     |> RememberableService.delete_rememberable(user)
+  end
+
+  @doc """
+  Deactivate a user.
+
+  Removes all logged in sessions for a user.
+  """
+  @spec deactivate_user(conn) :: conn
+  def deactivate_user(conn) do
+    logout_user(conn, all: Coherence.current_user(conn))
   end
 
   def schema_module(schema) do

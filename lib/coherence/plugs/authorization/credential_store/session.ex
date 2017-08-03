@@ -77,4 +77,13 @@ defmodule Coherence.CredentialStore.Session do
         Server.delete_credentials(credentials)
     end
   end
+
+  @doc """
+  Deletes the sessions for all logged in users.
+  """
+  @spec delete_user_logins(any) :: no_return
+  def delete_user_logins(user_data) do
+    Server.delete_user_logins user_data
+    DbStore.delete_user_logins user_data
+  end
 end

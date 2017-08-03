@@ -83,6 +83,27 @@ defmodule Coherence.CredentialStore.Server.Test do
     assert ud3 == user_data2
   end
 
+  test "delete_user_logins", %{state: state, user_data: user_data1} do
+    user_data2 = %{id: 2, name: "B"}
+    creds1 = uuid()
+    creds2 = uuid()
+    creds3 = uuid()
+
+    state = put_credentials state, creds1, user_data1
+    state = put_credentials state, creds2, user_data2
+    state = put_credentials state, creds3, user_data1
+
+    state = delete_user_logins state, user_data1
+
+    {_, ud1} = get_user_data state, creds1
+    refute ud1
+    {_, ud2} = get_user_data state, creds2
+    assert ud2 == user_data2
+    {_, ud3} = get_user_data state, creds3
+    refute ud3
+  end
+
+
   ###############
   # Helpers
 
@@ -109,6 +130,12 @@ defmodule Coherence.CredentialStore.Server.Test do
   defp update_user_logins(state, user_data) do
     {:noreply, state1} =
       Server.handle_cast({:update_user_logins, user_data}, state)
+    state1
+  end
+
+  defp delete_user_logins(state, user_data) do
+    {:noreply, state1} =
+      Server.handle_cast({:delete_user_logins, user_data}, state)
     state1
   end
 

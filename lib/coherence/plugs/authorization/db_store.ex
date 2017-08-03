@@ -26,6 +26,12 @@ defprotocol Coherence.DbStore do
   """
   @spec delete_credentials(schema, HashDict.t) :: schema
   def delete_credentials(resource, credentials)
+
+  @doc """
+  Delete all logged in users.
+  """
+  @spec delete_user_logins(schema) :: no_return
+  def delete_user_logins(resource)
 end
 
 defimpl Coherence.DbStore, for: Any do
@@ -33,4 +39,5 @@ defimpl Coherence.DbStore, for: Any do
   def get_user_data(_, _, _), do: nil
   def put_credentials(_, _, _), do: nil
   def delete_credentials(_, _), do: nil
+  def delete_user_logins(_), do: nil
 end
