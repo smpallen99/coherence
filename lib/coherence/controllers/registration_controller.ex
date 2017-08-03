@@ -10,10 +10,9 @@ defmodule Coherence.RegistrationController do
   * update - update the user account
   * delete - delete the user account
   """
-  use Coherence.Web, :controller
+  use CoherenceWeb, :controller
 
-  alias Coherence.ControllerHelpers, as: Helpers
-  alias Coherence.{Messages}
+  alias Coherence.Messages
   alias Coherence.Schemas
 
   require Logger
@@ -39,7 +38,7 @@ defmodule Coherence.RegistrationController do
   @spec new(conn, params) :: conn
   def new(conn, _params) do
     user_schema = Config.user_schema
-    changeset = Helpers.changeset(:registration, user_schema, user_schema.__struct__)
+    changeset = Controller.changeset(:registration, user_schema, user_schema.__struct__)
     render(conn, :new, email: "", changeset: changeset)
   end
 
@@ -53,7 +52,7 @@ defmodule Coherence.RegistrationController do
   def create(conn, %{"registration" => registration_params} = params) do
     user_schema = Config.user_schema
     :registration
-    |> Helpers.changeset(user_schema, user_schema.__struct__, registration_params)
+    |> Controller.changeset(user_schema, user_schema.__struct__, registration_params)
     |> Schemas.create
     |> case do
       {:ok, user} ->
@@ -70,7 +69,7 @@ defmodule Coherence.RegistrationController do
   end
   defp redirect_or_login(conn, user, params, _) do
     conn
-    |> Helpers.login_user(user, params)
+    |> Controller.login_user(user, params)
     |> redirect_to(:session_create, params)
   end
 
@@ -89,7 +88,7 @@ defmodule Coherence.RegistrationController do
   @spec edit(conn, any) :: conn
   def edit(conn, _) do
     user = Coherence.current_user(conn)
-    changeset = Helpers.changeset(:registration, user.__struct__, user)
+    changeset = Controller.changeset(:registration, user.__struct__, user)
     render(conn, "edit.html", user: user, changeset: changeset)
   end
 
@@ -101,7 +100,7 @@ defmodule Coherence.RegistrationController do
     user_schema = Config.user_schema
     user = Coherence.current_user(conn)
     :registration
-    |> Helpers.changeset(user_schema, user, user_params)
+    |> Controller.changeset(user_schema, user, user_params)
     |> Schemas.update
     |> case do
       {:ok, user} ->
@@ -120,7 +119,7 @@ defmodule Coherence.RegistrationController do
   @spec update(conn, params) :: conn
   def delete(conn, params) do
     user = Coherence.current_user(conn)
-    conn = Helpers.logout_user(conn)
+    conn = Controller.logout_user(conn)
     Schemas.delete! user
     redirect_to(conn, :registration_delete, params)
   end

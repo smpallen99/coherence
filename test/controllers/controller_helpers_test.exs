@@ -1,9 +1,10 @@
-defmodule CoherenceTest.ControllerHelpers do
+defmodule CoherenceTest.Controller do
   use TestCoherence.ConnCase
   alias TestCoherence.User
-  alias Coherence.ControllerHelpers, as: Helpers
+  alias Coherence.Controller
   import TestCoherence.TestHelpers
-  doctest Coherence.ControllerHelpers
+
+  doctest Coherence.Controller
 
   setup do
     Application.put_env :coherence, :opts, [:authenticatable, :recoverable,
@@ -13,10 +14,10 @@ defmodule CoherenceTest.ControllerHelpers do
   test "confirm!" do
     user = insert_user()
     refute User.confirmed?(user)
-    {:ok, user} = Helpers.confirm!(user)
+    {:ok, user} = Controller.confirm!(user)
     assert User.confirmed?(user)
 
-    {:error, changeset} = Helpers.confirm!(user)
+    {:error, changeset} = Controller.confirm!(user)
     refute changeset.valid?
     assert changeset.errors == [confirmed_at: {"already confirmed", []}]
   end
@@ -24,10 +25,10 @@ defmodule CoherenceTest.ControllerHelpers do
   test "lock!" do
     user = insert_user()
     refute User.locked?(user)
-    {:ok, user} = Helpers.lock!(user)
+    {:ok, user} = Controller.lock!(user)
     assert User.locked?(user)
 
-    {:error, changeset} = Helpers.lock!(user)
+    {:error, changeset} = Controller.lock!(user)
     refute changeset.valid?
     assert changeset.errors == [locked_at: {"already locked", []}]
   end
@@ -35,10 +36,10 @@ defmodule CoherenceTest.ControllerHelpers do
   test "unlock!" do
     user = insert_user(%{locked_at: Ecto.DateTime.utc})
     assert User.locked?(user)
-    {:ok, user} = Helpers.unlock!(user)
+    {:ok, user} = Controller.unlock!(user)
     refute User.locked?(user)
 
-    {:error, changeset} = Helpers.unlock!(user)
+    {:error, changeset} = Controller.unlock!(user)
     refute changeset.valid?
     assert changeset.errors == [locked_at: {"not locked", []}]
   end

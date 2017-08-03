@@ -1,4 +1,4 @@
-defmodule <%= base %>.Coherence.Schemas do
+defmodule TestCoherence.Coherence.Schemas do
 
   use Coherence.Config
 
@@ -59,7 +59,7 @@ defmodule <%= base %>.Coherence.Schemas do
     @repo.update! change_user(user, params)
   end
 
-  Enum.each <%= schema_list %>, fn module ->
+  Enum.each [Rememberable, Invitation, Trackable], fn module ->
 
     name =
       module
@@ -123,19 +123,19 @@ defmodule <%= base %>.Coherence.Schemas do
       @repo.delete struct
     end
   end
-  <%= if trackable? do %>
+
   def last_trackable(user_id) do
     schema =
-      @repo.one <%= base %>.Coherence.Trackable
+      @repo.one TestCoherence.Coherence.Trackable
         |> where([t], t.user_id == ^user_id)
         |> order_by(desc: :id)
         |> limit(1)
     case schema do
-      nil -> <%= base %>.Coherence.Trackable.__struct__
+      nil -> TestCoherence.Coherence.Trackable.__struct__
       trackable -> trackable
     end
   end
-  <% end %>
+
   def query_by(schema, opts) do
     Enum.reduce opts, schema, fn {k, v}, query ->
       where(query, [b], field(b, ^k) == ^v)

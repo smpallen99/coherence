@@ -8,6 +8,9 @@ defmodule Mix.Tasks.Coh.Gen.ControllersTest do
   @web_path Path.join("lib", "coherence_web")
 
   setup do
+    Application.put_env :coherence, :opts, [
+      :confirmable, :authenticatable, :recoverable, :lockable, :trackable,
+      :unlockable_with_token, :invitable, :registerable, :rememberable]
     :ok
   end
   # opts: [:invitable, :authenticatable, :recoverable, :lockable, :trackable, :unlockable_with_token, :registerable]

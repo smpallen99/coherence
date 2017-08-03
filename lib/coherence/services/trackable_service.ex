@@ -42,7 +42,7 @@ defmodule Coherence.TrackableService do
 
   import Coherence.Schemas, only: [schema: 1]
 
-  alias Coherence.ControllerHelpers, as: Helpers
+  alias Coherence.Controller
   alias Plug.Conn
   alias Coherence.Schemas
 
@@ -67,7 +67,7 @@ defmodule Coherence.TrackableService do
   def track_login(conn, user, true, false) do
     {last_at, last_ip, ip, _now} = last_at_and_ip(conn, user)
 
-    changeset = Helpers.changeset(:session, user.__struct__, user,
+    changeset = Controller.changeset(:session, user.__struct__, user,
       %{
         sign_in_count: user.sign_in_count + 1,
         current_sign_in_at: Ecto.DateTime.utc,
@@ -89,7 +89,7 @@ defmodule Coherence.TrackableService do
     trackable = last_trackable(user.id)
     {last_at, last_ip, ip, _now} = last_at_and_ip(conn, trackable)
     schema = schema Trackable
-    changeset = Helpers.changeset(:session, schema, schema.__struct__,
+    changeset = Controller.changeset(:session, schema, schema.__struct__,
       %{
         action: "login",
         sign_in_count: trackable.sign_in_count + 1,
@@ -122,7 +122,7 @@ defmodule Coherence.TrackableService do
   @spec track_logout(conn, schema, boolean, boolean) :: conn
   def track_logout(conn, _, false, false), do: conn
   def track_logout(conn, user, true, false) do
-    changeset = Helpers.changeset(:session, user.__struct__, user,
+    changeset = Controller.changeset(:session, user.__struct__, user,
       %{
         last_sign_in_at: user.current_sign_in_at,
         last_sign_in_ip: user.current_sign_in_ip,
@@ -137,7 +137,7 @@ defmodule Coherence.TrackableService do
   def track_logout(conn, user, false, true) do
     trackable = last_trackable(user.id)
     schema = schema Trackable
-    changeset = Helpers.changeset(:session, schema, trackable,
+    changeset = Controller.changeset(:session, schema, trackable,
       %{
         last_sign_in_at: trackable.current_sign_in_at,
         last_sign_in_ip: trackable.current_sign_in_ip,
@@ -147,7 +147,7 @@ defmodule Coherence.TrackableService do
 
     Schemas.update! changeset
 
-    changeset = Helpers.changeset(:session, schema, schema.__struct__,
+    changeset = Controller.changeset(:session, schema, schema.__struct__,
       %{
         action: "logout",
         sign_in_count: trackable.sign_in_count,
@@ -198,7 +198,7 @@ defmodule Coherence.TrackableService do
   def track(conn, user, action) do
     trackable = last_trackable(user.id)
     schema = schema Trackable
-    changeset = Helpers.changeset(:session, schema, schema.__struct__,
+    changeset = Controller.changeset(:session, schema, schema.__struct__,
       %{
         action: action,
         sign_in_count: trackable.sign_in_count,
@@ -206,7 +206,7 @@ defmodule Coherence.TrackableService do
         last_sign_in_ip: trackable.last_sign_in_ip,
         user_id: user.id
       })
-    Config.repo.insert! changeset
+    Schemas.create! changeset
     conn
   end
 

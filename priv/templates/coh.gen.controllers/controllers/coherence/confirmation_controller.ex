@@ -8,7 +8,7 @@ defmodule <%= web_base %>.Coherence.ConfirmationController do
   use <%= web_module %>, :controller
   use Timex
 
-  alias Coherence.ControllerHelpers, as: Helpers
+  alias Coherence.Controller
   alias Coherence.{ConfirmableService, Messages}
   alias Ecto.DateTime
   alias <%= base %>.Coherence.Schemas

@@ -1,7 +1,7 @@
 defmodule CoherenceTest.PasswordController do
   use TestCoherence.ConnCase
   import TestCoherenceWeb.Router.Helpers
-  import Coherence.ControllerHelpers, only: [random_string: 1]
+  import Coherence.Controller, only: [random_string: 1]
   alias TestCoherence.Repo
   alias TestCoherence.Coherence.Trackable
   alias Coherence.PasswordService

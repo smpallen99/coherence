@@ -76,7 +76,7 @@ defmodule Redirects do
       @behaviour Redirects
 
       import Phoenix.Controller, only: [redirect: 2]
-      import Coherence.ControllerHelpers
+      import Coherence.Controller
       import Plug.Conn, only: [get_session: 2, put_session: 3]
 
       @doc false

@@ -783,7 +783,7 @@ defmodule Mix.Tasks.Coherence.Install do
       #{user_schema}.changeset(%#{user_schema}{}, %{name: "Test User", email: "testuser@example.com", password: "secret", password_confirmation: "secret"})
       |> #{repo}.insert!
       """
-      confirm = if config[:confirmable], do: "|> Coherence.ControllerHelpers.confirm!\n", else: ""
+      confirm = if config[:confirmable], do: "|> Coherence.Controller.confirm!\n", else: ""
       block <> confirm
   end
 

@@ -3,7 +3,7 @@ defmodule Coherence.ValidateOption do
   Plug to validate the given option is enabled in the project's configuration.
   """
 
-  import Coherence.ControllerHelpers, only: [logged_out_url: 1]
+  import Coherence.Controller, only: [logged_out_url: 1]
   import Plug.Conn
   import Phoenix.Controller, only: [put_flash: 3, redirect: 2]
 

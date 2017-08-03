@@ -1,4 +1,4 @@
-defmodule Coherence.Web do
+defmodule CoherenceWeb do
   @moduledoc """
   Coherence setting for web resources.
 
@@ -25,12 +25,13 @@ defmodule Coherence.Web do
   def controller do
     quote do
       use Phoenix.Controller
-      import Coherence.ControllerHelpers
-
+      import Coherence.Controller
       import Ecto
       import Ecto.Query
 
       alias Coherence.Config
+      alias Coherence.Controller
+
       require Redirects
     end
   end

@@ -1,4 +1,4 @@
-defmodule Coherence.ControllerHelpers do
+defmodule Coherence.Controller do
   @moduledoc """
   Common helper functions for Coherence Controllers.
   """
@@ -101,13 +101,13 @@ defmodule Coherence.ControllerHelpers do
       expired?(user.expire_at, minutes: 10)
 
       iex> Ecto.DateTime.utc
-      ...> |> Coherence.ControllerHelpers.expired?(days: 1)
+      ...> |> Coherence.Controller.expired?(days: 1)
       false
 
       iex> Ecto.DateTime.utc
-      ...> |> Coherence.ControllerHelpers.shift(days: -2)
+      ...> |> Coherence.Controller.shift(days: -2)
       ...> |> Ecto.DateTime.cast!
-      ...> |> Coherence.ControllerHelpers.expired?(days: 1)
+      ...> |> Coherence.Controller.expired?(days: 1)
       true
   """
   @spec expired?(nil | struct, Keyword.t) :: boolean
@@ -122,7 +122,7 @@ defmodule Coherence.ControllerHelpers do
   ## Examples
 
       iex> Ecto.DateTime.cast!("2016-10-10 10:10:10")
-      ...> |> Coherence.ControllerHelpers.shift(days: -2)
+      ...> |> Coherence.Controller.shift(days: -2)
       ...> |> Ecto.DateTime.cast!
       ...> |> to_string
       "2016-10-08 10:10:10"

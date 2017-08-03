@@ -1,7 +1,7 @@
 defmodule TestCoherence.TestHelpers do
   alias TestCoherence.{Coherence.Rememberable}
   import Phoenix.HTML, only: [safe_to_string: 1]
-  import Coherence.ControllerHelpers, only: [random_string: 1]
+  import Coherence.Controller, only: [random_string: 1]
   import Plug.Conn
 
   def to_map(attrs) when is_list(attrs), do: Enum.into(attrs, %{})

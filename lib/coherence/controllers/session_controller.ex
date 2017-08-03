@@ -3,7 +3,7 @@ defmodule Coherence.SessionController do
   Handle the authentication actions.
 
   """
-  use Coherence.Web, :controller
+  use CoherenceWeb, :controller
   use Timex
   use Coherence.Config
 
@@ -13,7 +13,6 @@ defmodule Coherence.SessionController do
   # import Coherence.Rememberable, only: [hash: 1, gen_cookie: 3]
 
   # alias Coherence.{Rememberable}
-  alias Coherence.ControllerHelpers, as: Helpers
   alias Coherence.{ConfirmableService, Messages}
   alias Coherence.Schemas
 
@@ -123,7 +122,7 @@ defmodule Coherence.SessionController do
   defp do_lockable(conn, _login_field, opts, false) do
     [user, user_schema, remember, lockable?, remember, params] = opts
     conn = if lockable? && user.locked_at() do
-      Helpers.unlock!(user)
+      Controller.unlock!(user)
       track_unlock conn, user, user_schema.trackable_table?()
     else
       conn
@@ -168,7 +167,7 @@ defmodule Coherence.SessionController do
   @spec reset_failed_attempts(conn, Ecto.Schema.t, boolean) :: conn
   def reset_failed_attempts(conn, %{failed_attempts: attempts} = user, true) when attempts > 0 do
     :session
-    |> Helpers.changeset(user.__struct__, user, %{failed_attempts: 0})
+    |> Controller.changeset(user.__struct__, user, %{failed_attempts: 0})
     |> Schemas.update
     |> log_lockable_update
     conn
@@ -196,7 +195,7 @@ defmodule Coherence.SessionController do
       end
 
     :session
-    |> Helpers.changeset(user.__struct__, user,
+    |> Controller.changeset(user.__struct__, user,
       Map.put(params, :failed_attempts, attempts))
     |> Schemas.update
     |> log_lockable_update
@@ -306,6 +305,7 @@ defmodule Coherence.SessionController do
   """
   @spec get_rememberables(integer) :: [schema]
   def get_rememberables(id) do
+    Schemas.get_by_rememberable user_id: id
     Rememberable
     |> where([u], u.user_id == ^id)
     |> Config.repo.all

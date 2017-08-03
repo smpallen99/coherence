@@ -17,6 +17,7 @@ Code.require_file "./support/views.exs", __DIR__
 Code.require_file "./support/email.exs", __DIR__
 Code.require_file "./support/test_helpers.exs", __DIR__
 Code.require_file "./support/redirect.exs", __DIR__
+Code.require_file "./support/schemas.exs", __DIR__
 
 defmodule Coherence.RepoSetup do
   use ExUnit.CaseTemplate

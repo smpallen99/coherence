@@ -25,9 +25,9 @@ defmodule Coherence.ConfirmableService do
   """
 
   use Coherence.Config
-  use Coherence.Web, :service
+  use CoherenceWeb, :service
 
-  import Coherence.ControllerHelpers
+  import Coherence.Controller
 
   alias Coherence.{Messages, Schemas}
 

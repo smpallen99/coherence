@@ -29,10 +29,10 @@ defmodule <%= web_module %> do
       import Plug.Conn
       import <%= web_base %>.Router.Helpers
       import <%= web_base %>.Gettext
-      import Coherence.ControllerHelpers
+      import Coherence.Controller
 
       alias Coherence.Config
-      alias Coherence.ControllerHelpers, as: Helpers
+      alias Coherence.Controller
 
       require Redirects
     end

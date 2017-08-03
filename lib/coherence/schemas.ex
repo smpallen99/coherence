@@ -8,6 +8,14 @@ defmodule Coherence.Schemas do
     Module.concat [Config.module, Coherence, schema]
   end
 
+  def list_user do
+    Config.repo.all Config.user_schema
+  end
+
+  def list_by_user(opts) do
+    Config.repo.all query_by(Config.user_schema, opts)
+  end
+
   def get_by_user(opts) do
     Config.repo.get_by Config.user_schema, opts
   end
@@ -36,11 +44,33 @@ defmodule Coherence.Schemas do
     Config.user_schema.changeset Config.user_schema.__struct__, %{}
   end
 
+  def create_user(params) do
+    user_schema = Config.user_schema
+    Config.repo.insert user_schema.new_changeset(params)
+  end
+
+  def create_user!(params) do
+    user_schema = Config.user_schema
+    Config.repo.insert! user_schema.new_changeset(params)
+  end
+
+  def update_user(user, params) do
+    Config.repo.update user.__struct__.changeset(user, params)
+  end
+
+  def update_user!(user, params) do
+    Config.repo.update! user.__struct__.changeset(user, params)
+  end
+
   Enum.each [Invitation, Rememberable, Trackable], fn module ->
     name = module |> inspect |> String.downcase
 
     def unquote(String.to_atom("list_#{name}"))() do
       Config.repo.all schema(unquote(module))
+    end
+
+    def unquote(String.to_atom("list_by_#{name}"))(opts) do
+      Config.repo.all query_by(schema(unquote(module)), opts)
     end
 
     def unquote(String.to_atom("list_#{name}"))(%Ecto.Query{} = query) do
@@ -75,12 +105,24 @@ defmodule Coherence.Schemas do
       Config.repo.insert schema(unquote(module)).new_changeset(params)
     end
 
+    def unquote(String.to_atom("create_#{name}!"))(params) do
+      Config.repo.insert! schema(unquote(module)).new_changeset(params)
+    end
+
     def unquote(String.to_atom("update_#{name}"))(struct, params) do
       Config.repo.update schema(unquote(module)).changeset(struct, params)
     end
 
+    def unquote(String.to_atom("update_#{name}!"))(struct, params) do
+      Config.repo.update! schema(unquote(module)).changeset(struct, params)
+    end
+
     def unquote(String.to_atom("delete_#{name}"))(struct) do
       Config.repo.delete struct
+    end
+
+    def unquote(String.to_atom("delete_#{name}!"))(struct) do
+      Config.repo.delete! struct
     end
 
   end

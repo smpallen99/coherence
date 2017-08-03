@@ -1,7 +1,7 @@
 defmodule CoherenceTest.InvitationController do
   use TestCoherence.ConnCase
   import TestCoherenceWeb.Router.Helpers
-  import Coherence.ControllerHelpers, only: [random_string: 1]
+  import Coherence.Controller, only: [random_string: 1]
 
   setup %{conn: conn} do
     Application.put_env :coherence, :opts, [:confirmable, :authenticatable, :recoverable,

@@ -154,7 +154,7 @@ defmodule Coherence.Schema do
         """
         def locked?(user) do
           !!user.locked_at and
-            !Coherence.ControllerHelpers.expired?(user.locked_at,
+            !Coherence.Controller.expired?(user.locked_at,
                 minutes: Config.unlock_timeout_minutes)
         end
 

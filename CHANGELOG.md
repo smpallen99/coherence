@@ -5,6 +5,7 @@
 * Enhancements
   * Add new `coh.gen.controllers` generator
   * `coh.clean` task now supports phx and phoenix projects
+  * Renamed `Coherence.ControllerHelpers` module to `Coherence.Controller`
 
 * Bug Fixes
   * Fixed issues with generated controllers
@@ -13,8 +14,7 @@
 * Backward incompatible changes
   * `--controllers` option is not supported for the install tasks
   * removed the `coherence.clean` task
-
-
+  * Need to update `seeds.exs` if your using confirmable option
 
 ## 0.5.0 (2017-08-03)
 
