@@ -77,8 +77,7 @@ defmodule Mix.Tasks.Coh.Gen.Controllers do
   end
 
   defp router_instructions(config) do
-    web_base = config[:web_base]
-    # web_module = config[:web_module]
+    web_base = ", " <> config.binding[:web_base]
     router = Application.get_env(:coherence, :router) |> inspect
 
     Mix.shell.info """
@@ -88,13 +87,13 @@ defmodule Mix.Tasks.Coh.Gen.Controllers do
       # ...
 
       # Change this block
-      scope "/" #{web_base} do
+      scope "/"#{web_base} do
         pipe_through :browser
         coherence_routes()
       end
 
       # Change this block
-      scope "/" #{web_base} do
+      scope "/"#{web_base} do
         pipe_through :protected
         coherence_routes :protected
       end

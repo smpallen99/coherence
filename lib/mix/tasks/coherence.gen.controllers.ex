@@ -73,24 +73,23 @@ defmodule Mix.Tasks.Coherence.Gen.Controllers do
   end
 
   defp router_instructions(config) do
-    web_base = config[:web_base]
-    # web_module = config[:web_module]
+    web_base = ", " <> config.binding[:web_base]
     router = Application.get_env(:coherence, :router) |> inspect
 
-    """
+    Mix.shell.info """
     Modify your router.ex file and change the name spaces as indicated below:
 
     defmodule #{router} do
       # ...
 
       # Change this block
-      scope "/" #{web_base} do
+      scope "/"#{web_base} do
         pipe_through :browser
         coherence_routes()
       end
 
       # Change this block
-      scope "/" #{web_base} do
+      scope "/"#{web_base} do
         pipe_through :protected
         coherence_routes :protected
       end
