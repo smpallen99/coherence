@@ -1,6 +1,22 @@
 # Coherence Changelog
 
-## 0.5.0 (2017-08-xx)
+## 0.5.1 (2017-08-xx)
+
+* Enhancements
+  * Add new `coh.gen.controllers` generator
+  * `coh.clean` task now supports phx and phoenix projects
+
+* Bug Fixes
+  * Fixed issues with generated controllers
+  * Fixed issues with clean tasks
+
+* Backward incompatible changes
+  * `--controllers` option is not supported for the install tasks
+  * removed the `coherence.clean` task
+
+
+
+## 0.5.0 (2017-08-03)
 
 * Enhancements
   * Support the released Version of Phoenix 1.3 project structure

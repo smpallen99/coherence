@@ -7,7 +7,7 @@
 [license-img]: http://img.shields.io/badge/license-MIT-brightgreen.svg
 [license]: http://opensource.org/licenses/MIT
 
-> This version is not compatible with previous Phoenix 1.3.0-rc versions. Please use the 0.4.0 version instead.
+> This version is not compatible with previous Phoenix 1.3.0-rc versions. Please use the v0.4.0 version instead.
 >
 
 Checkout the [Coherence Demo Project](https://github.com/smpallen99/coherence_demo) to see an example project using Coherence.
@@ -76,7 +76,7 @@ For projects created with `mix phx.new --umbrella`, ensure you are in the app di
 And for projects created with `mix phoenix.new`, use the following:
 
 * `coherence.install`
-* `coherence.clean`
+* `coh.clean`
 
 The documentation below assumes a phx project. If you are working with a phoenix project, replace `mix coh.task` with `mix coherence.task`.
 
@@ -415,6 +415,12 @@ create unique_index(:rememberables, [:user_id, :series_hash, :token_hash])
 
 The `--rememberable` install option is not provided in any of the installer group options. You must provide the `--rememberable` option to install the migration and its support.
 
+### User Active Field
+
+The `--user-active-field` option can be given to the installer to support inactive users. When a user is set as inactive, they will not be able to login.
+
+Using this option adds a `active` field to the user schema with a default of `true`.
+
 ## Mix Tasks
 
 ### Installer
@@ -489,9 +495,12 @@ Also, checkout the Coherence.Config module for a list of config items you can us
 
 ### Custom Controllers
 
-By default, controller boilerplate is not generated unless the `--controllers` option is provided to `mix coh.install`.
+By default, controller boilerplate is not generated. To add controllers, use the controller generators.
 
-The generated controllers are named `MyProject.Coherence.SessionController` as an example. Generated controllers are located in `lib/my_project/web/controllers/coherence/`
+* For phx projects, use the `mix coh.gen.controllers` task.
+* For phoenix projects, use the `mix coherence.gen.controllers` task.
+
+The generated controllers are named `MyProjectWeb.Coherence.SessionController` as an example. Generated controllers are located in `lib/my_project_web/controllers/coherence/`
 
 If the controllers are generated, you will need to change your router to use the new names. For example:
 
@@ -502,12 +511,12 @@ If the controllers are generated, you will need to change your router to use the
 
   # ...
 
-  scope "/", MyProjectWeb do   # note the addition of MyProject
+  scope "/", MyProjectWeb do   # note the addition of MyProjectWeb
     pipe_through :public
     coherence_routes()
   end
 
-  scope "/", MyProjectWeb do   # note the addition of MyProject
+  scope "/", MyProjectWeb do   # note the addition of MyProjectWeb
     pipe_through :browser
     coherence_routes :protected
   end

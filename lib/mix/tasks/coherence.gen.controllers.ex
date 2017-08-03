@@ -169,7 +169,12 @@ defmodule Mix.Tasks.Coherence.Gen.Controllers do
     do: Application.app_dir(app, source_dir)
 
   defp get_config_opts do
-    Application.get_env :coherence, :opts, []
+    :coherence
+    |> Application.get_env(:opts, [])
+    |> Enum.map(fn
+      {opt, _} -> opt
+      opt      -> opt
+    end)
   end
 
   defp installed_option?(config, option) do
