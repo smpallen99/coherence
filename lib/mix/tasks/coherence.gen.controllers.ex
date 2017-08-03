@@ -180,7 +180,6 @@ defmodule Mix.Tasks.Coherence.Gen.Controllers do
   defp elem1(tuple), do: elem(tuple, 1)
 
   defp web_path(path \\ "") do
-    otp_app = to_string(Mix.Phoenix.otp_app())
     Path.join ["web", path]
   end
 end

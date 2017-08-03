@@ -2,6 +2,10 @@ defmodule Mix.Tasks.Coh.Clean do
   @moduledoc """
   This task will clean most of the files installed by the `mix coh.install` task.
 
+  Projects created with both `coh.install` and `coherence.install` can be
+  cleaned with this task. It will auto detect the project structure and remove
+  the appropriate files.
+
   ## Examples
 
       # Clean all the installed files
@@ -139,7 +143,7 @@ defmodule Mix.Tasks.Coh.Clean do
       nil ->
         :ok
       file_name ->
-        path = Path.join(["lib", otp_app(), "web", "views", "coherence", file_name])
+        path = web_path ["views", "coherence", file_name]
         confirm config, path, fn -> rm!(path) end
     end
     option
@@ -153,18 +157,18 @@ defmodule Mix.Tasks.Coh.Clean do
       nil ->
         :ok
       {path, _} ->
-        path = Path.join(["lib", otp_app(), "web", "templates", "coherence", "#{path}"])
+        path = web_path ["templates", "coherence", "#{path}"]
         confirm config, path, fn -> rm_dir!(path) end
     end
     option
   end
 
   defp remove_controller_files!(option, config) do
-    case Install.controller_files[option] do
+    case controller_files()[option] do
       nil ->
         :ok
       file_name ->
-        path = Path.join(["lib", otp_app(), "web", "controllers", "coherence", file_name])
+        path = web_path ["controllers", "coherence", file_name]
         confirm config, path, fn -> rm!(path) end
     end
     option
@@ -226,37 +230,37 @@ defmodule Mix.Tasks.Coh.Clean do
   end
 
   defp remove!(%{templates: true} = config, :templates) do
-    path = Path.join ["lib", otp_app(), "web/templates/coherence"]
+    path = web_path "templates/coherence"
     confirm config, path, fn -> rm_dir!(path) end
   end
 
   defp remove!(%{views: true} = config, :views) do
-    path = Path.join ["lib", otp_app(), "web/views/coherence"]
+    path = web_path "views/coherence"
     confirm config, path, fn -> rm_dir!(path) end
   end
 
   defp remove!(%{controllers: true} = config, :controllers) do
-    path = Path.join ["lib", otp_app(), "web/controllers/coherence"]
+    path = web_path "controllers/coherence"
     confirm config, path, fn -> rm_dir!(path) end
   end
 
   defp remove!(%{models: true} = config, :models) do
-    path = Path.join ["lib", otp_app(), "coherence"]
+    path = lib_path "coherence"
     confirm config, path, fn -> rm_dir!(path) end
   end
 
   defp remove!(%{web: true} = config, :web) do
-    path = Path.join ["lib", otp_app(), "web/coherence_web.ex"]
+    path = web_path "coherence_web.ex"
     confirm config, path, fn -> rm!(path) end
   end
 
   defp remove!(%{messages: true} = config, :messages) do
-    path = Path.join ["lib", otp_app(), "web/coherence_messages.ex"]
+    path = web_path "coherence_messages.ex"
     confirm config, path, fn -> rm!(path) end
   end
 
   defp remove!(%{emails: true} = config, :emails) do
-    path = Path.join ["lib", otp_app(), "web/emails/coherence"]
+    path = web_path ~w(emails coherence)
     confirm config, path, fn -> rm_dir!(path) end
   end
 
@@ -372,6 +376,20 @@ defmodule Mix.Tasks.Coh.Clean do
       list -> raise_option_errors(list)
     end
   end
+
+  defp coh? do
+    not File.exists?("web")
+  end
+
+  defp web_path(path) when is_binary(path), do: Path.join(web_path(), path)
+  defp web_path(paths), do: Path.join([web_path() | paths])
+  defp web_path do
+    if coh?(), do: Path.join("lib", otp_app() <> "_web"), else: "web"
+  end
+
+  defp lib_path, do: Path.join("lib", otp_app())
+  defp lib_path(path) when is_binary(path), do: Path.join(lib_path(), path)
+  defp lib_path(paths), do: Path.join([lib_path() | paths])
 
   defp otp_app do
     Mix.Project.config[:app] |> to_string

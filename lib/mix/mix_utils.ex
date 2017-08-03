@@ -109,4 +109,13 @@ defmodule Coherence.Mix.Utils do
     ]
   end
 
+  def controller_files, do: [
+    confirmable: "confirmation_controller.ex",
+    invitable: "invitation_controller.ex",
+    recoverable: "password_controller.ex",
+    registerable: "registration_controller.ex",
+    authenticatable: "session_controller.ex",
+    unlockable_with_token: "unlock_controller.ex"
+  ]
+
 end
