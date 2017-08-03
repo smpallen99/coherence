@@ -7,13 +7,10 @@ defmodule <%= web_base %>.Coherence.UnlockController do
 
   Basic locking and unlocking does not use this controller.
   """
-  use <%= web_module %>, :controller
+  use CoherenceWeb, :controller
   use Timex
   use Coherence.Config
 
-  import Coherence.ControllerHelpers
-
-  alias Coherence.ControllerHelpers, as: Helpers
   alias Coherence.{TrackableService, LockableService, Messages}
   alias <%= base %>.Coherence.Schemas
 
@@ -33,7 +30,7 @@ defmodule <%= web_base %>.Coherence.UnlockController do
   @spec new(conn, params) :: conn
   def new(conn, _params) do
     user_schema = Config.user_schema
-    changeset = Helpers.changeset(:unlock, user_schema, user_schema.__struct__)
+    changeset = Controller.changeset(:unlock, user_schema, user_schema.__struct__)
     render conn, "new.html", changeset: changeset
   end
 
@@ -88,7 +85,7 @@ defmodule <%= web_base %>.Coherence.UnlockController do
         |> redirect_to(:unlock_edit_invalid, params)
       user ->
         if user_schema.locked? user do
-          Helpers.unlock! user
+          Controller.unlock! user
           conn
           |> TrackableService.track_unlock_token(user, user_schema.trackable_table?)
           |> put_flash(:info, Messages.backend().your_account_has_been_unlocked())
@@ -108,7 +105,7 @@ defmodule <%= web_base %>.Coherence.UnlockController do
     if user.unlock_token or user.locked_at do
       schema =
         :unlock
-        |> Helpers.changeset(user_schema, user, %{unlock_token: nil, locked_at: nil})
+        |> Controller.changeset(user_schema, user, %{unlock_token: nil, locked_at: nil})
         |> Schemas.update
       case schema do
         {:error, changeset} ->

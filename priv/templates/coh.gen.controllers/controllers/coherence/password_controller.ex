@@ -11,10 +11,9 @@ defmodule <%= web_base %>.Coherence.PasswordController do
   * edit - render the reset password form
   * update - verify password, password confirmation, and update the database
   """
-  use <%= web_module %>, :controller
+  use CoherenceWeb, :controller
   use Timex
 
-  alias Coherence.ControllerHelpers, as: Helpers
   alias Coherence.{TrackableService, Messages}
   alias <%= base %>.Coherence.Schemas
 
@@ -33,7 +32,7 @@ defmodule <%= web_base %>.Coherence.PasswordController do
   @spec new(conn, params) :: conn
   def new(conn, _params) do
     user_schema = Config.user_schema
-    changeset = Helpers.changeset :password, user_schema, user_schema.__struct__
+    changeset = Controller.changeset :password, user_schema, user_schema.__struct__
     render(conn, :new, [email: "", changeset: changeset])
   end
 
@@ -46,7 +45,7 @@ defmodule <%= web_base %>.Coherence.PasswordController do
 
     case Schemas.get_user_by_email password_params["email"] do
       nil ->
-        changeset = Helpers.changeset :password, user_schema, user_schema.__struct__
+        changeset = Controller.changeset :password, user_schema, user_schema.__struct__
         conn
         |> put_flash(:error, Messages.backend().could_not_find_that_email_address())
         |> render("new.html", changeset: changeset)
@@ -55,7 +54,7 @@ defmodule <%= web_base %>.Coherence.PasswordController do
         url = router_helpers().password_url(conn, :edit, token)
         # Logger.debug "reset email url: #{inspect url}"
         dt = Ecto.DateTime.utc
-        Config.repo.update! Helpers.changeset(:password, user_schema, user,
+        Config.repo.update! Controller.changeset(:password, user_schema, user,
           %{reset_password_token: token, reset_password_sent_at: dt})
 
         if Config.mailer?() do
@@ -84,14 +83,14 @@ defmodule <%= web_base %>.Coherence.PasswordController do
       user ->
         if expired? user.reset_password_sent_at, days: Config.reset_token_expire_days do
           :password
-          |> Helpers.changeset(user_schema, user, clear_password_params())
+          |> Controller.changeset(user_schema, user, clear_password_params())
           |> Schemas.update
 
           conn
           |> put_flash(:error, Messages.backend().password_reset_token_expired())
           |> redirect(to: logged_out_url(conn))
         else
-          changeset = Helpers.changeset(:password, user_schema, user)
+          changeset = Controller.changeset(:password, user_schema, user)
           render(conn, "edit.html", changeset: changeset)
         end
     end
@@ -113,7 +112,7 @@ defmodule <%= web_base %>.Coherence.PasswordController do
       user ->
         if expired? user.reset_password_sent_at, days: Config.reset_token_expire_days do
           :password
-          |> Helpers.changeset(user_schema, user, clear_password_params())
+          |> Controller.changeset(user_schema, user, clear_password_params())
           |> Schemas.update
 
           conn
@@ -123,7 +122,7 @@ defmodule <%= web_base %>.Coherence.PasswordController do
           params = clear_password_params password_params
 
           :password
-          |> Helpers.changeset(user_schema, user, params)
+          |> Controller.changeset(user_schema, user, params)
           |> Schemas.update
           |> case do
             {:ok, user} ->

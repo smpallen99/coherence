@@ -5,10 +5,9 @@ defmodule <%= web_base %>.Coherence.ConfirmationController do
   A single action, `edit`, is required for the confirmation module.
 
   """
-  use <%= web_module %>, :controller
+  use CoherenceWeb, :controller
   use Timex
 
-  alias Coherence.Controller
   alias Coherence.{ConfirmableService, Messages}
   alias Ecto.DateTime
   alias <%= base %>.Coherence.Schemas
@@ -28,7 +27,7 @@ defmodule <%= web_base %>.Coherence.ConfirmationController do
   @spec new(Plug.Conn.t, Map.t) :: Plug.Conn.t
   def new(conn, _params) do
     user_schema = Config.user_schema
-    cs = Helpers.changeset :confirmation, user_schema, user_schema.__struct__
+    cs = Controller.changeset :confirmation, user_schema, user_schema.__struct__
     conn
     |> render(:new, [email: "", changeset: cs])
   end
@@ -42,7 +41,7 @@ defmodule <%= web_base %>.Coherence.ConfirmationController do
     email = password_params["email"]
     user = Schemas.get_user_by_email email
 
-    changeset = Helpers.changeset :confirmation, user_schema, user_schema.__struct__
+    changeset = Controller.changeset :confirmation, user_schema, user_schema.__struct__
     case user do
       nil ->
         conn
@@ -76,7 +75,7 @@ defmodule <%= web_base %>.Coherence.ConfirmationController do
 
     case user do
       nil ->
-        changeset = Helpers.changeset :confirmation, user_schema, user_schema.__struct__
+        changeset = Controller.changeset :confirmation, user_schema, user_schema.__struct__
         conn
         |> put_flash(:error, Messages.backend().invalid_confirmation_token())
         |> redirect_to(:confirmation_edit_invalid, params)
@@ -86,7 +85,7 @@ defmodule <%= web_base %>.Coherence.ConfirmationController do
           |> put_flash(:error, Messages.backend().confirmation_token_expired())
           |> redirect_to(:confirmation_edit_expired, params)
         else
-          changeset = Helpers.changeset(:confirmation, user_schema, user, %{
+          changeset = Controller.changeset(:confirmation, user_schema, user, %{
             confirmation_token: nil,
             confirmed_at: DateTime.utc,
             })

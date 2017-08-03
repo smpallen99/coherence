@@ -10,15 +10,12 @@ defmodule <%= web_base %>.Coherence.InvitationController do
   * create_user - create a new user database record
   * resend - resend an invitation token email
   """
-  use <%= web_module %>, :controller
+  use CoherenceWeb, :controller
   use Timex
 
   import Ecto.Changeset
-  import Coherence.ControllerHelpers
 
-  alias Coherence.{Config}
-  alias Coherence.ControllerHelpers, as: Helpers
-  alias Coherence.Messages
+  alias Coherence.{Config, Messages}
   alias <%= base %>.Coherence.Schemas
 
   require Logger
@@ -102,7 +99,7 @@ defmodule <%= web_base %>.Coherence.InvitationController do
         |> redirect(to: logged_out_url(conn))
       invite ->
         user_schema = Config.user_schema
-        changeset = Helpers.changeset(:invitation, user_schema, user_schema.__struct__,
+        changeset = Controller.changeset(:invitation, user_schema, user_schema.__struct__,
           %{email: invite.email, name: invite.name})
         conn
         |> render(:edit, changeset: changeset, token: invite.token)
@@ -125,7 +122,7 @@ defmodule <%= web_base %>.Coherence.InvitationController do
         |> redirect(to: logged_out_url(conn))
       invite ->
         :invitation
-        |> Helpers.changeset(user_schema, user_schema.__struct__, params["user"])
+        |> Controller.changeset(user_schema, user_schema.__struct__, params["user"])
         |> Schemas.create
         |> case do
           {:ok, user} ->
