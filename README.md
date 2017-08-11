@@ -646,7 +646,7 @@ During login, a current version of the user model is cashed in the credential st
 You can access the current user's name in a template like this:
 
 ```
-<%= Coherence.current_user_name(@conn) %/>
+<%= Coherence.current_user_name(@conn) %>
 ```
 
 Any of the user model's available data can be accessed this way.
