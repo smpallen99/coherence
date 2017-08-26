@@ -130,7 +130,6 @@ defmodule Coherence.ControllerHelpers do
   @spec shift(struct, Keyword.t) :: struct
   def shift(datetime, opts) do
     datetime
-    |> Ecto.DateTime.to_erl
     |> Timex.to_datetime
     |> Timex.shift(opts)
   end
