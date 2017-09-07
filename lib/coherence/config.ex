@@ -143,7 +143,7 @@ defmodule Coherence.Config do
     case get_application_env :email_reply_to do
       nil ->
         case {get_application_env(:email_reply_to_name), get_application_env(:email_reply_to_email)} do
-          {nil, nil} -> nil
+          {nil, nil} -> {nil, nil}
           email -> email
         end
       true -> true
