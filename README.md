@@ -36,16 +36,19 @@ See the [Docs](https://hexdocs.pm/coherence/Coherence.html) and [Wiki](https://g
 
   1. Add coherence to your list of dependencies in `mix.exs`:
 
+```elixir
         def deps do
-          [{:coherence, "~> 0.4"}]
+          [{:coherence, "~> 0.5"}]
         end
+```
 
   2. Ensure coherence is started before your application:
 
+```elixir
         def application do
           extra_applications: [..., :coherence]]
         end
-
+```
 ## Upgrading
 
 After upgrading a Coherence version, you should generate the boilerplate files. To assist this process, use the `--reinstall` option.
@@ -104,7 +107,7 @@ This will:
 * add lib/my_project/web/coherence_web.ex file
 * add lib/my_project/web/coherence_messages.ex file
 
-You should review your `config/config.exs` as there are a couple items you will need to customize like email address and mail api_key. If you don't edit the email_from value to something different than it's default emails may not be sent.
+You should review your `config/config.exs` as there are a couple items you will need to customize like email address and mail api_key. If you don't edit the email_from value to something different than its default, emails may not be sent.
 
 See [Installer](#installer) for more install options.
 
