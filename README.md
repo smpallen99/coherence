@@ -35,17 +35,17 @@ See the [Docs](https://hexdocs.pm/coherence/Coherence.html) and [Wiki](https://g
 ## Installation
 
   1. Add coherence to your list of dependencies in `mix.exs`:
-
-        def deps do
-          [{:coherence, "~> 0.4"}]
-        end
-
+```
+def deps do
+  [{:coherence, "~> 0.4"}]
+end
+```
   2. Ensure coherence is started before your application:
-
-        def application do
-          extra_applications: [..., :coherence]]
-        end
-
+```
+def application do
+  extra_applications: [..., :coherence]]
+end
+```
 ## Upgrading
 
 After upgrading a Coherence version, you should generate the boilerplate files. To assist this process, use the `--reinstall` option.
