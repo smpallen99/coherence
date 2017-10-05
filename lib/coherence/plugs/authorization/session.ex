@@ -38,8 +38,9 @@ defmodule Coherence.Authentication.Session do
   example:
 
       defimpl Coherence.DbStore, for: MyProject.User do
+        alias MyProject.{Session, Repo}
+        
         def get_user_data(_, creds, _id_key) do
-          alias MyProject.{Session, Repo}
           case Repo.one from s in Session, where: s.creds == ^creds, preload: :user do
             %{user: user} -> user
             _ -> nil
