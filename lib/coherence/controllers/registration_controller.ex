@@ -60,17 +60,19 @@ defmodule Coherence.RegistrationController do
         |> send_confirmation(user, user_schema)
         |> redirect_or_login(user, params, Config.allow_unconfirmed_access_for)
       {:error, changeset} ->
-        render(conn, "new.html", changeset: changeset)
+        conn
+        |> respond_with(:registration_create_error, %{changeset: changeset})
     end
   end
 
-  defp redirect_or_login(conn, _user, params, 0) do
-    redirect_to(conn, :registration_create, params)
+  defp redirect_or_login(conn, user, params, 0) do
+    conn
+    |> respond_with(:registration_create_success, %{params: params, user: user})
   end
   defp redirect_or_login(conn, user, params, _) do
     conn
     |> Controller.login_user(user, params)
-    |> redirect_to(:session_create, params)
+    |> respond_with(:session_create_success, %{params: params, user: user})
   end
 
   @doc """
@@ -106,10 +108,17 @@ defmodule Coherence.RegistrationController do
       {:ok, user} ->
         Config.auth_module
         |> apply(Config.update_login, [conn, user, [id_key: Config.schema_key]])
-        |> put_flash(:info, Messages.backend().account_updated_successfully())
-        |> redirect_to(:registration_update, params, user)
+        |> respond_with(
+          :registration_update_success,
+          %{
+            user: user,
+            params: params,
+            info: Messages.backend().account_updated_successfully()
+          }
+        )
       {:error, changeset} ->
-        render(conn, "edit.html", user: user, changeset: changeset)
+        conn
+        |> respond_with(:registration_update_error, %{user: user, changeset: changeset})
     end
   end
 
@@ -121,6 +130,6 @@ defmodule Coherence.RegistrationController do
     user = Coherence.current_user(conn)
     conn = Controller.logout_user(conn)
     Schemas.delete! user
-    redirect_to(conn, :registration_delete, params)
+    respond_with(conn, :registration_delete_success, %{params: params})
   end
 end

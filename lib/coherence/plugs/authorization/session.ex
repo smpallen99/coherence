@@ -232,6 +232,12 @@ defmodule Coherence.Authentication.Session do
   defp verify_auth_key({conn, auth_key}, %{db_model: db_model, id_key: id_key}, store),
     do: {conn, store.get_user_data({auth_key, db_model, id_key})}
 
+  defp assert_login({%{private: %{ phoenix_format: format }} = conn, nil}, login, _opts) when format == "json" and (login == true or is_function(login)) do
+    conn
+    |> send_resp(401, "")
+    |> halt
+  end
+
   defp assert_login({conn, nil}, login, _opts) when login == true or is_function(login) do
     user_return_to =
       case conn.query_string do

@@ -45,17 +45,28 @@ defmodule Coherence.ConfirmationController do
     case user do
       nil ->
         conn
-        |> put_flash(:error, Messages.backend().could_not_find_that_email_address())
-        |> render("new.html", changeset: changeset)
+        |> respond_with(
+          :confirmation_create_error,
+          %{
+            changeset: changeset,
+            error: Messages.backend().could_not_find_that_email_address()
+          }
+        )
       user ->
         if user_schema.confirmed?(user) do
           conn
-          |> put_flash(:error, Messages.backend().account_already_confirmed())
-          |> render(:new, [email: "", changeset: changeset])
+          |> respond_with(
+            :confirmation_create_error,
+            %{
+              changeset: changeset,
+              email: "",
+              error: Messages.backend().account_already_confirmed()
+            }
+          )
         else
           conn
           |> send_confirmation(user, user_schema)
-          |> redirect_to(:confirmation_create, params)
+          |> respond_with(:confirmation_create_success, %{params: params})
         end
     end
   end
@@ -77,27 +88,47 @@ defmodule Coherence.ConfirmationController do
       nil ->
         changeset = Controller.changeset :confirmation, user_schema, user_schema.__struct__
         conn
-        |> put_flash(:error, Messages.backend().invalid_confirmation_token())
-        |> redirect_to(:confirmation_edit_invalid, params)
+        |> respond_with(
+          :confirmation_update_invalid,
+          %{
+            params: params,
+            error: Messages.backend().invalid_confirmation_token()
+          }
+        )
       user ->
         if ConfirmableService.expired? user do
           conn
-          |> put_flash(:error, Messages.backend().confirmation_token_expired())
-          |> redirect_to(:confirmation_edit_expired, params)
+          |> respond_with(
+            :confirmation_update_expired,
+            %{
+              params: params,
+              error: Messages.backend().confirmation_token_expired()
+            }
+          )
         else
           changeset = Controller.changeset(:confirmation, user_schema, user, %{
             confirmation_token: nil,
             confirmed_at: DateTime.utc,
-            })
+          })
           case Config.repo.update(changeset) do
             {:ok, _user} ->
               conn
-              |> put_flash(:info, Messages.backend().user_account_confirmed_successfully())
-              |> redirect_to(:confirmation_edit, params)
+              |> respond_with(
+                :confirmation_update_success,
+                %{
+                  params: params,
+                  info: Messages.backend().user_account_confirmed_successfully()
+                }
+              )
             {:error, _changeset} ->
               conn
-              |> put_flash(:error, Messages.backend().problem_confirming_user_account())
-              |> redirect_to(:confirmation_edit_error, params)
+              |> respond_with(
+                :confirmation_update_error,
+                %{
+                  params: params,
+                  error: Messages.backend().problem_confirming_user_account()
+                }
+              )
           end
         end
     end

@@ -47,8 +47,13 @@ defmodule <%= web_base %>.Coherence.PasswordController do
       nil ->
         changeset = Controller.changeset :password, user_schema, user_schema.__struct__
         conn
-        |> put_flash(:error, Messages.backend().could_not_find_that_email_address())
-        |> render("new.html", changeset: changeset)
+        |> respond_with(
+          :password_create_error,
+          %{
+            changeset: changeset,
+            error: Messages.backend().could_not_find_that_email_address()
+          }
+        )
       user ->
         token = random_string 48
         url = router_helpers().password_url(conn, :edit, token)
@@ -59,11 +64,24 @@ defmodule <%= web_base %>.Coherence.PasswordController do
 
         if Config.mailer?() do
           send_user_email :password, user, url
-          put_flash(conn, :info, Messages.backend().reset_email_sent())
+          conn
+          |> respond_with(
+            :password_create_success,
+            %{
+              params: params,
+              info: Messages.backend().reset_email_sent()
+            }
+          )
         else
-          put_flash(conn, :error, Messages.backend().mailer_required())
+          conn
+          |> respond_with(
+            :password_create_success,
+            %{
+              params: params,
+              error: Messages.backend().mailer_required()
+            }
+          )
         end
-        |> redirect_to(:password_create, params)
     end
   end
 
@@ -107,8 +125,10 @@ defmodule <%= web_base %>.Coherence.PasswordController do
     case Schemas.get_by_user reset_password_token: token do
       nil ->
         conn
-        |> put_flash(:error, Messages.backend().invalid_reset_token())
-        |> redirect(to: logged_out_url(conn))
+        |> respond_with(
+          :password_update_error,
+          %{error: Messages.backend().invalid_reset_token()}
+        )
       user ->
         if expired? user.reset_password_sent_at, days: Config.reset_token_expire_days do
           :password
@@ -116,8 +136,10 @@ defmodule <%= web_base %>.Coherence.PasswordController do
           |> Schemas.update
 
           conn
-          |> put_flash(:error, Messages.backend().password_reset_token_expired())
-          |> redirect(to: logged_out_url(conn))
+          |> respond_with(
+            :password_update_error,
+            %{error: Messages.backend().password_reset_token_expired()}
+          )
         else
           params = clear_password_params password_params
 
@@ -128,10 +150,19 @@ defmodule <%= web_base %>.Coherence.PasswordController do
             {:ok, user} ->
               conn
               |> TrackableService.track_password_reset(user, user_schema.trackable_table?)
-              |> put_flash(:info, Messages.backend().password_updated_successfully())
-              |> redirect_to(:password_update, params)
+              |> respond_with(
+                :password_update_success,
+                %{
+                  params: params,
+                  info: Messages.backend().password_updated_successfully()
+                }
+              )
             {:error, changeset} ->
-              render(conn, "edit.html", changeset: changeset)
+              conn
+              |> respond_with(
+                :password_update_error,
+                %{changeset: changeset}
+              )
           end
         end
     end

@@ -2,8 +2,7 @@ defmodule Coherence.Controller do
   @moduledoc """
   Common helper functions for Coherence Controllers.
   """
-  import Phoenix.Controller, only: [put_flash: 3, redirect: 2, put_layout: 2, put_view: 2]
-  import Plug.Conn, only: [halt: 1]
+  import Phoenix.Controller, only: [put_flash: 3, put_layout: 2, put_view: 2]
 
   alias Coherence.{ConfirmableService, RememberableService, TrackableService, Messages}
   alias Coherence.{Config, Schemas}
@@ -259,9 +258,10 @@ defmodule Coherence.Controller do
   def redirect_logged_in(conn, _params) do
     if Coherence.logged_in?(conn) do
       conn
-      |> put_flash(:info, Messages.backend().already_logged_in())
-      |> redirect(to: logged_in_url(conn))
-      |> halt
+      |> respond_with(
+        :session_already_logged_in,
+        %{info: Messages.backend().already_logged_in()}
+      )
     else
       conn
     end
@@ -275,6 +275,16 @@ defmodule Coherence.Controller do
   @spec redirect_to(conn, atom, params, schema) :: conn
   def redirect_to(conn, path, params, user) do
     apply(Coherence.Redirects, path, [conn, params, user])
+  end
+
+  def respond_with(conn, atom, opts \\ %{}) do
+    responder = case conn.private.phoenix_format do
+      "json" ->
+        Coherence.Responders.Json
+      _ ->
+        Coherence.Responders.Html
+    end
+    apply(responder, atom, [conn, opts])
   end
 
   @spec changeset(atom, module, schema, params) :: changeset

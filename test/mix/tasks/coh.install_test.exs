@@ -126,6 +126,14 @@ defmodule Mix.Tasks.Coh.InstallTest do
       assert_file web_path("controllers/coherence/redirects.ex"), fn file ->
         assert file =~ "import TestCoherenceWeb.Router.Helpers"
       end
+
+      assert_file web_path("controllers/coherence/responders/html.ex"), fn file ->
+        assert file =~ "use Responders.Html"
+      end
+
+      assert_file web_path("controllers/coherence/responders/json.ex"), fn file ->
+        assert file =~ "use Responders.Json"
+      end
     end
   end
 
