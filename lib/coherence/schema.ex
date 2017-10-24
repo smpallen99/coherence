@@ -361,15 +361,15 @@ defmodule Coherence.Schema do
 
       if Coherence.Config.has_option(:recoverable) do
         field :reset_password_token, :string
-        field :reset_password_sent_at, Ecto.DateTime
+        field :reset_password_sent_at, :naive_datetime
       end
       if Coherence.Config.has_option(:rememberable) do
-        field :remember_created_at, Ecto.DateTime
+        field :remember_created_at, :naive_datetime
       end
       if Coherence.Config.has_option(:trackable) do
         field :sign_in_count, :integer, default: 0
-        field :current_sign_in_at, Ecto.DateTime
-        field :last_sign_in_at, Ecto.DateTime
+        field :current_sign_in_at, :naive_datetime
+        field :last_sign_in_at, :naive_datetime
         field :current_sign_in_ip, :string
         field :last_sign_in_ip, :string
       end
@@ -378,15 +378,15 @@ defmodule Coherence.Schema do
       end
       if Coherence.Config.has_option(:lockable) do
         field :failed_attempts, :integer, default: 0
-        field :locked_at, Ecto.DateTime
+        field :locked_at, :naive_datetime
       end
       if Coherence.Config.has_option(:unlockable_with_token) do
         field :unlock_token, :string
       end
       if Coherence.Config.has_option(:confirmable) do
         field :confirmation_token, :string
-        field :confirmed_at, Ecto.DateTime
-        field :confirmation_sent_at, Ecto.DateTime
+        field :confirmed_at, :naive_datetime
+        field :confirmation_sent_at, :naive_datetime
         # field :unconfirmed_email, :string
       end
     end
