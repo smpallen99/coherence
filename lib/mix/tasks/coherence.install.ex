@@ -258,6 +258,7 @@ defmodule Mix.Tasks.Coherence.Install do
         module: #{config[:base]},
         web_module: #{config[:web_base]},
         router: #{config[:router]},
+        password_hashing_alg: #{config[:password_hashing_alg]},
         messages_backend: #{config[:base]}.Coherence.Messages,#{layout_field config}
         logged_out_url: "/",#{user_active_field config}
       """
