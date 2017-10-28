@@ -6,5 +6,8 @@ config :coherence, Coherence.Mailer,
   adapter: Swoosh.Adapters.Sendgrid,
   api_key: ""
 
+config :coherence,
+  password_hashing_alg: Comeonin.Bcrypt
+
 import_config "#{Mix.env}.exs"
 

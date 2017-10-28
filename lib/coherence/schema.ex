@@ -30,7 +30,7 @@ defmodule Coherence.Schema do
   The following functions are available when `authenticatable?/0` returns true:
 
   * `checkpw/2` - Validate password.
-  * `encrypt_password/1` - encrypted a password using `Comeonin.Bcrypt.hashpwsalt`
+  * `encrypt_password/1` - encrypted a password using `<password_hashing_alg>.hashpwsalt`
   * `validate_coherence/2` - run the coherence password validations.
   * `validate_password/2` - Used by `validate_coherence for password validation`
 
@@ -231,14 +231,14 @@ defmodule Coherence.Schema do
 
         def checkpw(password, encrypted) do
           try do
-            Comeonin.Bcrypt.checkpw(password, encrypted)
+            apply(Config.password_hashing_alg, :checkpw, [password, encrypted])
           rescue
             _ -> false
           end
         end
 
         def encrypt_password(password) do
-          Comeonin.Bcrypt.hashpwsalt(password)
+          apply(Config.password_hashing_alg, :hashpwsalt, [password])
         end
 
         def validate_coherence(changeset, params) do
