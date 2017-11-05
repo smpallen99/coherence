@@ -85,7 +85,7 @@ The documentation below assumes a phx project. If you are working with a phoenix
 
 ## Getting Started
 
-First, decide with modules you would like to use for your project. For the following example were are going to use a full install except for the confirmable option.
+First, decide which modules you would like to use for your project. For the following example we are going to use a full install except for the confirmable option.
 
 Run the installer
 
