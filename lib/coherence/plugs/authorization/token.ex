@@ -10,7 +10,7 @@ defmodule Coherence.Authentication.Token do
 
     or
 
-      plug Coherence.Authentication.Token, source: :header, param: "X-Auth-Token"
+      plug Coherence.Authentication.Token, source: :header, param: "x-auth-token"
 
     or
 
