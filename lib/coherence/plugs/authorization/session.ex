@@ -240,7 +240,7 @@ defmodule Coherence.Authentication.Session do
       end
     conn =  put_session(conn, "user_return_to",  user_return_to)
     if login == true do
-      Phoenix.Controller.redirect conn, to: new_session_path(conn)
+      Phoenix.Controller.redirect conn, to: Config.logged_out_url || new_session_path(conn)
     else
       login.(conn)
     end
