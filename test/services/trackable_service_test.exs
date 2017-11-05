@@ -1,15 +1,27 @@
 defmodule CoherenceTest.TrackableService do
   use TestCoherence.ConnCase
-  alias Coherence.TrackableService, as: Service
-  alias TestCoherence.{Repo, User}
-  alias Coherence.Trackable
+
   import Ecto.Query
+
+  alias Coherence.TrackableService, as: Service
+  alias TestCoherence.{Repo, User, Coherence.Trackable}
+
+  @session_opts [
+    store: :cookie,
+    key: "_test",
+    signing_salt: "abcdefgh",
+    log: false
+  ]
+
+  @signing_opts Plug.Session.init(@session_opts)
 
   defp current_user(conn), do: conn.assigns[:current_user]
 
   setup %{conn: conn} do
     user = insert_user()
     conn = assign(conn, :current_user, user)
+    |> Plug.Session.call(@signing_opts)
+    |> fetch_session
     |> struct(peer: {{127,0,0,1}, 80})
     {:ok, conn: conn, user: user}
   end

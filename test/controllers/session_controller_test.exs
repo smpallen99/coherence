@@ -1,7 +1,8 @@
 defmodule CoherenceTest.SessionController do
   use TestCoherence.ConnCase
-  import TestCoherence.Router.Helpers
-  alias Coherence.{Trackable, ControllerHelpers}
+  import TestCoherenceWeb.Router.Helpers
+  alias Coherence.Controller
+  alias TestCoherence.Coherence.Trackable
   import Ecto.Query
   alias TestCoherence.User
 
@@ -61,7 +62,7 @@ defmodule CoherenceTest.SessionController do
       conn = post conn, session_path(conn, :create), params
       assert html_response(conn, 401)
       user = Repo.get(User, user.id)
-      locked_at = user.locked_at |> ControllerHelpers.shift(days: -10)
+      locked_at = user.locked_at |> Controller.shift(days: -10)
       User.changeset(user, %{locked_at: locked_at})
       |> Repo.update!
       params = put_in params, ["session", "password"], "supersecret"

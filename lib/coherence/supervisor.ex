@@ -2,7 +2,7 @@ defmodule Coherence.Supervisor do
   @moduledoc """
   Supervisor to start Coherence services.
 
-  Starts the configured credential store agent. Also starts
+  Starts the configured credential store server. Also starts
   the RememberableServer if this option is configured.
   """
 

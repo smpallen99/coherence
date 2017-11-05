@@ -52,7 +52,7 @@ defmodule Coherence.Authentication.Utils do
       Coherence.Authentication.Session ->
         Coherence.CredentialStore.Session
       Coherence.Authentication.Basic ->
-        Coherence.CredentialStore.Agent
+        Coherence.CredentialStore.Server
     end
   end
 
@@ -84,5 +84,9 @@ defmodule Coherence.Authentication.Utils do
     else
       conn
     end
+  end
+
+  def new_session_path(conn) do
+    Module.concat(Config.web_module, Router.Helpers).session_path(conn, :new)
   end
 end

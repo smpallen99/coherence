@@ -90,6 +90,7 @@ defmodule Coherence.Schema do
     quote do
       import unquote(__MODULE__)
       import Ecto.Changeset
+      alias Coherence.Messages
 
       alias Coherence.{ConfirmableService}
 
@@ -153,7 +154,7 @@ defmodule Coherence.Schema do
         """
         def locked?(user) do
           !!user.locked_at and
-            !Coherence.ControllerHelpers.expired?(user.locked_at,
+            !Coherence.Controller.expired?(user.locked_at,
                 minutes: Config.unlock_timeout_minutes)
         end
 
@@ -181,7 +182,7 @@ defmodule Coherence.Schema do
           if locked?(user) do
             Config.repo.update changeset
           else
-            changeset = Ecto.Changeset.add_error changeset, :locked_at, "not locked"
+            changeset = Ecto.Changeset.add_error changeset, :locked_at, Messages.backend().not_locked()
             {:error, changeset}
           end
         end
@@ -217,7 +218,7 @@ defmodule Coherence.Schema do
           IO.warn "#{inspect Config.user_schema}.lock!/1 has been deprecated. Please use Coherence.ControllerHelpers.lock!/1 instead."
           changeset = Config.user_schema.changeset(user, %{locked_at: locked_at})
           if locked?(user) do
-            changeset = Ecto.Changeset.add_error changeset, :locked_at, "already locked"
+            changeset = Ecto.Changeset.add_error changeset, :locked_at, Messages.backend().already_locked()
             {:error, changeset}
           else
             Config.repo.update changeset
@@ -242,14 +243,14 @@ defmodule Coherence.Schema do
 
         def validate_coherence(changeset, params) do
           changeset
-          |> validate_length(:password, min: 4)
+          |> validate_length(:password, min: Config.minimum_password_length)
           |> validate_current_password(params)
           |> validate_password(params)
         end
 
         def validate_coherence_password_reset(changeset, params) do
           changeset
-          |> validate_length(:password, min: 4)
+          |> validate_length(:password, min: Config.minimum_password_length)
           |> validate_password(params)
         end
 
@@ -264,10 +265,10 @@ defmodule Coherence.Schema do
           #       if(checkpw(current_password, Map.get(changeset.data, Config.password_hash), do: true, else: "invalid current password") do
           if Config.require_current_password and (not is_nil(changeset.data.id)) and Map.has_key?(changeset.changes, :password) do
             if is_nil(current_password) do
-              add_error(changeset, :current_password, "can't be blank")
+              add_error(changeset, :current_password, Messages.backend().cant_be_blank())
             else
               if not checkpw(current_password, Map.get(changeset.data, Config.password_hash)) do
-                add_error(changeset, :current_password, "invalid current password")
+                add_error(changeset, :current_password, Messages.backend().invalid_current_password())
               else
                 changeset
               end
@@ -279,7 +280,7 @@ defmodule Coherence.Schema do
 
         def validate_password(changeset, params) do
           if is_nil(Map.get(changeset.data, Config.password_hash)) and is_nil(changeset.changes[:password]) do
-            add_error(changeset, :password, "can't be blank")
+            add_error(changeset, :password, Messages.backend().cant_be_blank())
           else
             changeset
             |> validate_confirmation(:password)
@@ -300,55 +301,6 @@ defmodule Coherence.Schema do
       end
     end
   end
-
-  @doc """
-  Get list of migration schema fields for each option.
-
-  Helper function to return a keyword list of the migration fields for each
-  of the supported options.
-
-  TODO: Does this really belong here? Should it not be in a migration support
-  module?
-  """
-
-  def schema_fields, do: [
-    authenticatable: [
-      "# authenticatable",
-      "add :#{Config.password_hash}, :string",
-    ],
-    recoverable: [
-      "# recoverable",
-      "add :reset_password_token, :string",
-      "add :reset_password_sent_at, :utc_datetime"
-    ],
-    rememberable: [
-      "# rememberable",
-      "add :remember_created_at, :utc_datetime"
-    ],
-    trackable: [
-      "# trackable",
-      "add :sign_in_count, :integer, default: 0",
-      "add :current_sign_in_at, :utc_datetime",
-      "add :last_sign_in_at, :utc_datetime",
-      "add :current_sign_in_ip, :string",
-      "add :last_sign_in_ip, :string"
-    ],
-    lockable: [
-      "# lockable",
-      "add :failed_attempts, :integer, default: 0",
-      "add :locked_at, :utc_datetime",
-    ],
-    unlockable_with_token: [
-      "# unlockable_with_token",
-      "add :unlock_token, :string",
-    ],
-    confirmable: [
-      "# confirmable",
-      "add :confirmation_token, :string",
-      "add :confirmed_at, :utc_datetime",
-      "add :confirmation_sent_at, :utc_datetime"
-    ]
-  ]
 
   @doc """
   Add configure schema fields.
@@ -380,6 +332,7 @@ defmodule Coherence.Schema do
         schema "users" do
           field :name, :string
           field :email, :string
+          field :active, :boolean, default: true
 
           # authenticatable
           field :password_hash, :string
@@ -401,6 +354,9 @@ defmodule Coherence.Schema do
         field :current_password, :string, virtual: true
         field :password, :string, virtual: true
         field :password_confirmation, :string, virtual: true
+        if Coherence.Config.user_active_field do
+          field :active, :boolean, default: true
+        end
       end
 
       if Coherence.Config.has_option(:recoverable) do
@@ -418,7 +374,7 @@ defmodule Coherence.Schema do
         field :last_sign_in_ip, :string
       end
       if Coherence.Config.has_option(:trackable_table) do
-        has_many :trackables, Coherence.Trackable
+        has_many :trackables, Module.concat(Config.module, Coherence.Trackable)
       end
       if Coherence.Config.has_option(:lockable) do
         field :failed_attempts, :integer, default: 0
@@ -468,6 +424,17 @@ defmodule Coherence.Schema do
     |> options_fields(:confirmable)
   end
 
+  defp options_fields(fields, :authenticatable = key) do
+    fields ++
+      cond do
+        not Coherence.Config.has_option(key) ->
+          []
+        Coherence.Config.user_active_field ->
+          ["active" | @optional_fields[key]]
+        true ->
+          @optional_fields[key]
+      end
+  end
   defp options_fields(fields, key) do
     if Coherence.Config.has_option(key) do
       fields ++ @optional_fields[key]

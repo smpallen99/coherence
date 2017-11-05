@@ -1,9 +1,9 @@
 defmodule CoherenceTest.PasswordController do
   use TestCoherence.ConnCase
-  import TestCoherence.Router.Helpers
-  import Coherence.ControllerHelpers, only: [random_string: 1]
+  import TestCoherenceWeb.Router.Helpers
+  import Coherence.Controller, only: [random_string: 1]
   alias TestCoherence.Repo
-  alias Coherence.Trackable
+  alias TestCoherence.Coherence.Trackable
   alias Coherence.PasswordService
 
   setup %{conn: conn} do
@@ -31,7 +31,7 @@ defmodule CoherenceTest.PasswordController do
     test "can reset password when user exist",  %{conn: conn, user: user} do
       params = %{"password" => %{"email" => user.email, "password" => "123123", "password_confirmation" => "123123"}}
       conn = post conn, password_path(conn, :create), params
-      assert conn.private[:phoenix_flash] == %{"info" => "Reset email sent. Check your email for a reset link."}
+      assert conn.private[:phoenix_flash] == %{"error" => "Mailer configuration required!"}
       assert html_response(conn, 302)
     end
   end

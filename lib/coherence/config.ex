@@ -8,7 +8,8 @@ defmodule Coherence.Config do
 
   The following items are supported:
 
-  * :module: the name of project module (`module: MyProject`)
+  * :module - the name of project module (`module: MyProject`)
+  * :web_module - the name of the project's web module (`web_module: MyProjectWeb`)
   * :repo: the module name of your Repo (`repo: MyProject.Repo`)
   * :user_schema
   * :schema_key
@@ -24,8 +25,8 @@ defmodule Coherence.Config do
   * :login_cookie ("coherence_login")                 - The name of the login cookie
   * :auth_module (Coherence.Authentication.Session)
   * :create_login (:create_login)
-  * :uppdate_login (:update_login)
-  * :delete_login (:delete_login})
+  * :update_login (:update_login)
+  * :delete_login (:delete_login)
   * :opts ([])
   * :reset_token_expire_days (2)
   * :confirmation_token_expire_days (5)
@@ -49,6 +50,10 @@ defmodule Coherence.Config do
   * :verify_user_token (fn socket, token -> Phoenix.Token.verify(socket, "user socket", token, max_age: 2 * 7 * 24 * 60 * 60) end
   *                    can also be a 3 element tuple as described above for :token_generator
   * :use_binary_id (false) - Use binary ids.
+  * :minimum_password_length The minimum password length to be accepted. Default value is 4.
+  * :messages_backend - (MyApp.Coherence.Messages)
+  * :router: the module name of your Router (`router: MyProject.Router`)
+  * :user_active_field - Include the user active feature
 
   ## Examples
 
@@ -69,6 +74,7 @@ defmodule Coherence.Config do
   # opts: :all || [:trackable, :lockable, :rememberable, :confirmable]
   [
     :module,
+    :web_module,
     :repo,
     :user_schema,
     :schema_key,
@@ -104,7 +110,11 @@ defmodule Coherence.Config do
     {:unlock_token_expire_minutes, 5},
     {:session_key, "session_auth"},
     {:rememberable_cookie_expire_hours, 2 * 24},
-    {:async_rememberable?, false}
+    {:async_rememberable?, false},
+    {:minimum_password_length, 4},
+    :messages_backend,
+    :router,
+    :user_active_field
   ]
   |> Enum.each(fn
         {key, default} ->
@@ -180,7 +190,7 @@ defmodule Coherence.Config do
   """
   @spec use_binary_id?() :: boolean
   def use_binary_id? do
-    !!Application.get_env(:phoenix, :generators)[:binary_id] || Application.get_env(:coherence, :use_binary_id)
+    !!Application.get_env(:phoenix, :generators, [])[:binary_id] || Application.get_env(:coherence, :use_binary_id)
   end
 
   defp has_any_option?(fun) do
@@ -204,6 +214,10 @@ defmodule Coherence.Config do
       {:system, env_var} -> System.get_env env_var
       value -> value
     end
+  end
+
+  def mailer? do
+    !!Application.get_env(:coherence, Module.concat(web_module(), Coherence.Mailer))
   end
 
 end

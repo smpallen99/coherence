@@ -1,4 +1,4 @@
-defmodule TestCoherence.Endpoint do
+defmodule TestCoherenceWeb.Endpoint do
   use Phoenix.Endpoint, otp_app: :coherence
 
   # def config(one, two) do
@@ -32,5 +32,5 @@ defmodule TestCoherence.Endpoint do
     key: "_binaryid_key",
     signing_salt: "JFbk5iZ6"
 
-  plug TestCoherence.Router
+  plug TestCoherenceWeb.Router
 end

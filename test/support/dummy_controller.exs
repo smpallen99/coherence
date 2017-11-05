@@ -1,4 +1,4 @@
-defmodule TestCoherence.DummyController do
+defmodule TestCoherenceWeb.DummyController do
   use Phoenix.Controller
 
   def index(conn, _) do

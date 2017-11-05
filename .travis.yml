@@ -4,8 +4,8 @@ before_script:
   - psql -c 'create database coherence_test;' -U postgres
 language: elixir
 elixir:
+  - 1.5
   - 1.4
-  - 1.3
 otp_release:
   - 20.0
   - 19.3

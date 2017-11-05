@@ -1,7 +1,8 @@
 defmodule CoherenceTest.UnlockController do
   use TestCoherence.ConnCase
-  import TestCoherence.Router.Helpers
-  alias Coherence.{Trackable, ControllerHelpers, LockableService}
+  import TestCoherenceWeb.Router.Helpers
+  alias Coherence.{Controller, LockableService}
+  alias TestCoherence.Coherence.Trackable
   import Ecto.Query
   alias TestCoherence.{User}
 
@@ -29,7 +30,7 @@ defmodule CoherenceTest.UnlockController do
       assert user.unlock_token
     end
     test "GET edit", %{conn: conn, user: user} do
-      {:ok, user} = ControllerHelpers.lock!(user)
+      {:ok, user} = Controller.lock!(user)
       |> elem(1)
       |> LockableService.unlock_token
       conn = get conn, unlock_path(conn, :edit, user.unlock_token)
@@ -41,7 +42,7 @@ defmodule CoherenceTest.UnlockController do
     setup [:setup_trackable_table]
 
     test "unlock token", %{conn: conn, user: user} do
-      {:ok, user} = ControllerHelpers.lock!(user)
+      {:ok, user} = Controller.lock!(user)
       |> elem(1)
       |> LockableService.unlock_token
       get conn, unlock_path(conn, :edit, user.unlock_token)

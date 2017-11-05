@@ -2,7 +2,8 @@ defmodule Coherence.RememberableTest do
   use TestCoherence.ModelCase
   use Timex
 
-  alias Coherence.{Rememberable, Config}
+  alias Coherence.Config
+  alias TestCoherence.Coherence.Rememberable
 
   setup do
     user = %TestCoherence.User{id: 1}

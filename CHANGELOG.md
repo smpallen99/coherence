@@ -1,4 +1,77 @@
-# Changelog
+# Coherence Changelog
+
+## 0.5.1 (2017-08-xx)
+
+* Enhancements
+  * Add new `coh.gen.controllers` generator
+  * `coh.clean` task now supports phx and phoenix projects
+  * Renamed `Coherence.ControllerHelpers` module to `Coherence.Controller`
+
+* Bug Fixes
+  * Fixed issues with generated controllers
+  * Fixed issues with clean tasks
+
+* Backward incompatible changes
+  * `--controllers` option is not supported for the install tasks
+  * removed the `coherence.clean` task
+  * Need to update `seeds.exs` if your using confirmable option
+
+## 0.5.0 (2017-08-03)
+
+* Enhancements
+  * Support the released Version of Phoenix 1.3 project structure
+  * Project name spaced generated view modules
+  * GenServer based Session Store
+    * Single user model stored for multiple logins of the same user
+    * Support to update user model for all logged in sessions
+  * add --web-module installer option
+  * Generate Invitation, Rememberable, and Trackable schemas
+  * Use app's layout by default. Use --layout option to generate and use a specific layout for coherence. #186
+  * Remove login callback and replace with Phoenix.Controller.redirect. #254
+  # Add support for active field in user schema. #201
+
+* Bug Fixes
+  * Fixed incorrect reference to CoherenceDemo in Config.mailer?
+  * Proper support for binary_ids
+
+* Backward incompatible changes
+  * Does not support Phoenix 1.3.0-rc versions with lib/my_project/web project structure
+  * Previous generated controllers and views must be updated
+
+## 0.4.0 (2017-07-03)
+
+See these `0.3.1` to `0.4.0` [upgrade instructions](https://gist.github.com/smpallen99/92d826b6f523edd83b4a358cf05e97e7) to bring your existing app up to speed.
+
+* Enhancements
+  * Localization with Gettext
+  * Support the new `Phoenix 1.3` project structure created with `mix phx.new`. Use `mix coh.install`
+  * Support for legacy projects with the `mix coherence.install` task
+  * Callback to redirect invitation resend
+  * Add use_binary_id config
+  * Use the binary_id generators setting in your project
+  * Remove most of the Credo warnings
+  * Support user tokens for channel authentication
+  * Removed compiler warnings for Elixir 1.4
+  * Change datetime to utc_datetime
+  * Added new trackable-table option to reduce noise in user schema
+  * Track login and logout in trackable-table
+  * Added specs and resolved many dialyzer warnings
+  * Added asyc_rememberable? support for near concurrent Ajax requests
+  * Don't increment rememberable sequence number for Ajax requests
+  * Added support for custom layouts
+  * Added configurable require current password to change passwords
+  * Added support for fast switch user (no password required) in dev environment only
+
+* Bug Fixes
+  * Fix session controller when lockable is false
+  * Make remember me clickable
+  * Fixed layout for unauthenticated protected routes
+  * Fixed race conditions in rememberable callback
+
+* Backwards incompatible changes
+  * coherence config requires `:messages_backend` field to be set (MyProject.Coherence.Messages)
+  * coherence_messages.ex file must be generated and included in our app. Done by the installer
+  * coherence config requires `:router` field to be set (MyProject.Web.Router)
 
 ## 0.3.1  (2016-11-26)
 

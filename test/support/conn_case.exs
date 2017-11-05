@@ -25,14 +25,14 @@ defmodule TestCoherence.ConnCase do
       import Ecto.Changeset
       import Ecto.Query, only: [from: 1, from: 2]
 
-      import TestCoherence.Router.Helpers
+      import TestCoherenceWeb.Router.Helpers
 
       import TestCoherence.TestHelpers
       alias Coherence.Config
 
 
       # The default endpoint for testing
-      @endpoint TestCoherence.Endpoint
+      @endpoint TestCoherenceWeb.Endpoint
     end
   end
 

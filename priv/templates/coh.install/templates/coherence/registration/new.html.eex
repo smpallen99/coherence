@@ -1,0 +1,5 @@
+<h3><%%= dgettext "coherence", "Register Account" %></h3>
+
+<%%= render "form.html", changeset: @changeset,
+                        label: dgettext("coherence", "Register"), required: [required: ""],
+                        action: registration_path(@conn, :create) %>

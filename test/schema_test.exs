@@ -35,6 +35,12 @@ defmodule CoherenceTest.Schema do
     cs = User.changeset(%User{}, %{name: "test", email: @email, password: "12345", password_confirmation: "99"})
     refute cs.valid?
   end
+  
+  test "invalidates incorrect password length" do
+    cs = User.changeset(%User{}, %{name: "test", email: @email, password: "123", password_confirmation: "123"})
+    refute cs.valid?
+    assert cs.errors == [password: {"should be at least %{count} character(s)", [count: 4, validation: :length, min: 4]}]
+  end
 
   test "checkpw" do
     params = %{name: "test", email: @email, password: "test", password_confirmation: "test"}

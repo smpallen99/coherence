@@ -3,9 +3,11 @@ defmodule Coherence.RequireLogin do
   Plug to protect controllers that require login.
   """
 
-  import Coherence.ControllerHelpers, only: [logged_out_url: 1]
+  import Coherence.Controller, only: [logged_out_url: 1]
   import Plug.Conn
   import Phoenix.Controller, only: [put_flash: 3, redirect: 2]
+
+  alias Coherence.Messages
 
   @behaviour Plug
 
@@ -25,7 +27,7 @@ defmodule Coherence.RequireLogin do
       conn
     else
       conn
-      |> put_flash(:error, "Invalid Request.")
+      |> put_flash(:error, Messages.backend().invalid_request())
       |> redirect(to: logged_out_url(conn))
       |> halt
     end

@@ -2,8 +2,8 @@ defmodule CoherenceTest.Plug.Session do
   use ExUnit.Case, async: true
   use Plug.Test
   alias Coherence.Authentication.Session
-  alias Coherence.{Rememberable, Config}
-  alias TestCoherence.User
+  alias Coherence.{Config}
+  alias TestCoherence.{User, Coherence.Rememberable}
   require Ecto.Query
 
   @default_opts [
@@ -60,8 +60,9 @@ defmodule CoherenceTest.Plug.Session do
   end
 
   setup do
-    # Coherence.Authentication.Session.add_credentials("Admin", "SecretPass", %{role: :admin})
-    :ok
+    user = %{id: 1, role: :admin}
+    # Coherence.Authentication.Session.add_credentials("Admin", "SecretPass", user)
+    {:ok, user: user}
   end
 
   @user_params %{name: "test", email: "test@test.com", password: "secret", password_confirmation: "secret"}
@@ -96,7 +97,7 @@ defmodule CoherenceTest.Plug.Session do
       cookie = "#{id} #{series} #{token}"
 
       conn = call_cookie(RememberablePlug, [], cookie)
-      assert conn.status == 200
+      assert conn.status == 302
       refute conn.resp_body == "Authorized"
       refute conn.assigns[:remembered]
     end

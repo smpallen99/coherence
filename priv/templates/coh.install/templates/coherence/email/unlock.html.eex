@@ -1,0 +1,11 @@
+<div>
+  <p><%%= dgettext "coherence", "Hello %{name}!", name: @name %><p>
+  <p>
+    <%%= dgettext "coherence", "You requested unlock instructions for your locked account. Please click the link below to unlock your account." %>
+  </p>
+  <p>
+    <a href="<%%= @url %>"><%%= dgettext "coherence", "Unlock my Account" %></a>
+  </p>
+  <p><%%= dgettext "coherence", "Thank you!" %></p>
+</div>
+
