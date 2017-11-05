@@ -1,6 +1,6 @@
 # Coherence
 
-[![Build Status](https://travis-ci.org/smpallen99/coherence.png?branch=master)](https://travis-ci.org/smpallen99/coherence) [![Hex Version][hex-img]][hex] [![License][license-img]][license]
+[![Build Status](https://travis-ci.org/smpallen99/coherence.svg?branch=master)](https://travis-ci.org/smpallen99/coherence) [![Hex Version][hex-img]][hex] [![License][license-img]][license]
 
 [hex-img]: https://img.shields.io/hexpm/v/coherence.svg
 [hex]: https://hex.pm/packages/coherence
