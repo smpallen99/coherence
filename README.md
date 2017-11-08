@@ -235,7 +235,8 @@ defmodule MyProjectWeb.ProductController do
 {:max_failed_login_attempts, 5},
 {:unlock_timeout_minutes, 20},
 {:unlock_token_expire_minutes, 5},
-{:rememberable_cookie_expire_hours, 2*24}
+{:rememberable_cookie_expire_hours, 2*24},
+{:allow_silent_password_recovery_for_unknown_user, false}
 ```
 
 You can override this default configs. For example: you can add the following codes inside `config/config.exs`
@@ -349,6 +350,8 @@ Provides `new`, `create`, `edit`, `update` actions for the `/passwords` route.
 Adds a "Forgot your password?" link to the log-in form. When clicked, the user provides their email address and if found, sends a reset password instructions email with a reset link.
 
 The expiry timeout can be changed with the `:reset_token_expire_days` config entry.
+
+By default, providing an unknown email address will result in a form error. If you want to prevent that and display a confirmation message even if the email isn’t found, set the `:allow_silent_password_recovery_for_unknown_user` to `true`.
 
 ### Trackable
 
