@@ -60,14 +60,12 @@ defmodule <%= web_base %>.Coherence.RegistrationController do
         |> send_confirmation(user, user_schema)
         |> redirect_or_login(user, params, Config.allow_unconfirmed_access_for)
       {:error, changeset} ->
-        conn
-        |> respond_with(:registration_create_error, %{changeset: changeset})
+        respond_with(conn, :registration_create_error, %{changeset: changeset})
     end
   end
 
   defp redirect_or_login(conn, user, params, 0) do
-    conn
-    |> respond_with(:registration_create_success, %{params: params, user: user})
+    respond_with(conn, :registration_create_success, %{params: params, user: user})
   end
   defp redirect_or_login(conn, user, params, _) do
     conn
@@ -117,8 +115,7 @@ defmodule <%= web_base %>.Coherence.RegistrationController do
           }
         )
       {:error, changeset} ->
-        conn
-        |> respond_with(:registration_update_error, %{user: user, changeset: changeset})
+        respond_with(conn, :registration_update_error, %{user: user, changeset: changeset})
     end
   end
 

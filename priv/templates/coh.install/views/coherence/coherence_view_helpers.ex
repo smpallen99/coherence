@@ -233,7 +233,7 @@ defmodule <%= web_base %>.Coherence.ViewHelpers do
   end
 
   @doc """
-  TODO: doc.
+  Generates an error string from changeset errors.
   """
   def error_string_from_changeset(changeset) do
     Enum.map(changeset.errors, fn {k, v} ->

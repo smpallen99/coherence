@@ -85,8 +85,7 @@ defmodule Coherence.InvitationController do
                 add_error(changeset, :email,
                   Messages.backend().invitation_already_sent())}
           end
-        conn
-        |> respond_with(:invitation_create_error, %{changeset: changeset})
+        respond_with(conn, :invitation_create_error, %{changeset: changeset})
     end
   end
 
@@ -124,16 +123,15 @@ defmodule Coherence.InvitationController do
     user_schema = Config.user_schema
     case Schemas.get_by_invitation token: token do
       nil ->
-        conn
-        |> respond_with(
+        respond_with(
+          conn,
           :invitation_create_user_error,
           %{
             error: Messages.backend().invalid_invitation()
           }
         )
       invite ->
-        :invitation
-        |> Controller.changeset(user_schema, user_schema.__struct__, params["user"])
+        Controller.changeset(:invitation, user_schema, user_schema.__struct__, params["user"])
         |> Schemas.create
         |> case do
           {:ok, user} ->
@@ -144,8 +142,8 @@ defmodule Coherence.InvitationController do
               :invitation_create_user_success
             )
           {:error, changeset} ->
-            conn
-            |> respond_with(
+            respond_with(
+              conn,
               :invitation_create_user_error,
               %{
                 changeset: changeset,
@@ -165,8 +163,8 @@ defmodule Coherence.InvitationController do
   def resend(conn, %{"id" => id} = params) do
     case Schemas.get_invitation id do
       nil ->
-        conn
-        |> respond_with(
+        respond_with(
+          conn,
           :invitation_resend_error,
           %{
             params: params,
@@ -176,8 +174,8 @@ defmodule Coherence.InvitationController do
       invitation ->
         send_user_email :invitation, invitation,
           router_helpers().invitation_url(conn, :edit, invitation.token)
-        conn
-        |> respond_with(
+        respond_with(
+          conn,
           :invitation_resend_success,
           %{
             params: params,

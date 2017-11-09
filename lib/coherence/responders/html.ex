@@ -2,7 +2,7 @@ defmodule Responders.Html do
 
   defmacro __using__(_) do
     quote location: :keep do
-      @behaviour Responders
+      @behaviour Coherence.Responders
 
       import Phoenix.Controller, only: [redirect: 2, put_flash: 3, render: 3]
       import Coherence.Controller

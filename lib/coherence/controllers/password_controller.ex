@@ -46,8 +46,8 @@ defmodule Coherence.PasswordController do
     case Schemas.get_user_by_email password_params["email"] do
       nil ->
         changeset = Controller.changeset :password, user_schema, user_schema.__struct__
-        conn
-        |> respond_with(
+        respond_with(
+          conn,
           :password_create_error,
           %{
             changeset: changeset,
@@ -64,8 +64,8 @@ defmodule Coherence.PasswordController do
 
         if Config.mailer?() do
           send_user_email :password, user, url
-          conn
-          |> respond_with(
+          respond_with(
+            conn,
             :password_create_success,
             %{
               params: params,
@@ -73,8 +73,8 @@ defmodule Coherence.PasswordController do
             }
           )
         else
-          conn
-          |> respond_with(
+          respond_with(
+            conn,
             :password_create_success,
             %{
               params: params,
@@ -124,8 +124,8 @@ defmodule Coherence.PasswordController do
 
     case Schemas.get_by_user reset_password_token: token do
       nil ->
-        conn
-        |> respond_with(
+        respond_with(
+          conn,
           :password_update_error,
           %{error: Messages.backend().invalid_reset_token()}
         )
@@ -135,8 +135,8 @@ defmodule Coherence.PasswordController do
           |> Controller.changeset(user_schema, user, clear_password_params())
           |> Schemas.update
 
-          conn
-          |> respond_with(
+          respond_with(
+            conn,
             :password_update_error,
             %{error: Messages.backend().password_reset_token_expired()}
           )
@@ -158,8 +158,8 @@ defmodule Coherence.PasswordController do
                 }
               )
             {:error, changeset} ->
-              conn
-              |> respond_with(
+              respond_with(
+                conn,
                 :password_update_error,
                 %{changeset: changeset}
               )

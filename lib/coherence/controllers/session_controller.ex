@@ -86,8 +86,8 @@ defmodule Coherence.SessionController do
         do_lockable(conn, login_field, [user, user_schema, remember, lockable?, remember, params],
           user_schema.lockable?() and user_schema.locked?(user))
       else
-        conn
-        |> respond_with(
+        respond_with(
+          conn,
           :session_create_error,
           %{
             new_bindings: new_bindings,

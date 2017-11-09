@@ -2,7 +2,7 @@ defmodule Responders.Json do
 
   defmacro __using__(_) do
     quote location: :keep do
-      @behaviour Responders
+      @behaviour Coherence.Responders
 
       import Phoenix.Controller, only: [render: 2, render: 3, render: 4]
       import Coherence.Controller
