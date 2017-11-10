@@ -222,6 +222,7 @@ defmodule Mix.Tasks.Coh.Install do
     |> gen_coherence_templates
     |> gen_coherence_mailer
     |> gen_redirects
+    |> gen_responders
     |> touch_config                # work around for config file not getting recompiled
     |> print_instructions
   end
@@ -707,6 +708,17 @@ defmodule Mix.Tasks.Coh.Install do
   end
 
   defp gen_redirects(config), do: config
+
+  defp gen_responders(%{boilerplate: true, binding: binding, web_path: web_path} = config) do
+    copy_from paths(),
+      "priv/templates/coh.install/controllers/coherence/responders", "", binding, [
+        {:eex, "html.ex", Path.join(web_path, "controllers/coherence/responders/html.ex")},
+        {:eex, "json.ex", Path.join(web_path, "controllers/coherence/responders/json.ex")},
+      ], config
+    config
+  end
+
+  defp gen_responders(config), do: config
 
   ################
   # Views

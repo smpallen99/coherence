@@ -558,6 +558,11 @@ end
 
 See the documentation for further details.
 
+### Customizing Responders
+
+To customize how application responds to html or json format, you can override methods in the `lib/my_project_web/controllers/coherence/responders/html.ex` or `lib/my_project_web/controllers/coherence/responders/json.ex`.
+
+
 ### Customizing layout
 
 By default coherence uses its own layout which is installed to `lib/my_project_web/templates/coherence/layout/app.html.eex`.

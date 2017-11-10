@@ -86,17 +86,20 @@ defmodule Coherence.SessionController do
         do_lockable(conn, login_field, [user, user_schema, remember, lockable?, remember, params],
           user_schema.lockable?() and user_schema.locked?(user))
       else
-        conn
-        |> put_flash(:error, Messages.backend().you_must_confirm_your_account())
-        |> put_status(406)
-        |> render(:new, new_bindings)
+        respond_with(
+          conn,
+          :session_create_error,
+          %{
+            new_bindings: new_bindings,
+            error: Messages.backend().you_must_confirm_your_account()
+          }
+        )
       end
     else
       conn
       |> track_failed_login(user, user_schema.trackable_table?())
       |> failed_login(user, lockable?)
-      |> put_status(401)
-      |> render(:new, new_bindings)
+      |> respond_with(:session_create_error, %{new_bindings: new_bindings})
     end
   end
 
@@ -113,10 +116,17 @@ defmodule Coherence.SessionController do
 
   defp do_lockable(conn, login_field, _, true) do
     conn
-    |> put_flash(:error, Messages.backend().too_many_failed_login_attempts())
     |> assign(:locked, true)
-    |> put_status(423)
-    |> render("new.html", [{login_field, ""}, remember: rememberable_enabled?()])
+    |> respond_with(
+      :session_create_error_locked,
+      %{
+        params: [
+          {login_field, ""},
+          remember: rememberable_enabled?()
+        ],
+        error: Messages.backend().too_many_failed_login_attempts()
+      }
+    )
   end
 
   defp do_lockable(conn, _login_field, opts, false) do
@@ -132,8 +142,13 @@ defmodule Coherence.SessionController do
     |> reset_failed_attempts(user, lockable?)
     |> track_login(user, user_schema.trackable?(), user_schema.trackable_table?())
     |> save_rememberable(user, remember)
-    |> put_flash(:notice, Messages.backend().signed_in_successfully())
-    |> redirect_to(:session_create, params)
+    |> respond_with(
+      :session_create_success,
+      %{
+        notice: Messages.backend().signed_in_successfully(),
+        params: params
+      }
+    )
   end
 
   @doc """
@@ -145,7 +160,7 @@ defmodule Coherence.SessionController do
   def delete(conn, params) do
     conn
     |> logout_user
-    |> redirect_to(:session_delete, params)
+    |> respond_with(:session_delete_success, %{params: params})
   end
 
   # @doc """
@@ -369,5 +384,4 @@ defmodule Coherence.SessionController do
   defp user_active?(user) do
     Map.get(user, :active, true)
   end
-
 end
