@@ -37,6 +37,7 @@ defmodule Coherence.Config do
   * :session_key ("session_auth")
   * :rememberable_cookie_expire_hours (2*24)
   * :password_hash_field (:password_hash) - The field used to save the hashed password
+  * :password_hashing_alg (Comeonin.Bcrypt) - Password hashing algorithm to use.
   * :login_field (:email) - The user model field used to login
   * :changeset - Custom user changeset
   * :title  - Layout page title
@@ -93,6 +94,7 @@ defmodule Coherence.Config do
     {:token_generator, &Coherence.SessionService.sign_user_token/2},
     {:verify_user_token, &Coherence.SessionService.verify_user_token/2},
     {:password_hash_field, :password_hash},
+    {:password_hashing_alg, Comeonin.Bcrypt},
     {:login_field, :email},
     {:login_cookie, "coherence_login"},
     {:auth_module, Coherence.Authentication.Session},
