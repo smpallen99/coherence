@@ -234,7 +234,8 @@ defmodule MyProjectWeb.ProductController do
 {:max_failed_login_attempts, 5},
 {:unlock_timeout_minutes, 20},
 {:unlock_token_expire_minutes, 5},
-{:rememberable_cookie_expire_hours, 2*24}
+{:rememberable_cookie_expire_hours, 2*24},
+{:forwarded_invitation_fields, [:email, :name]}
 ```
 
 You can override this default configs. For example: you can add the following codes inside `config/config.exs`
