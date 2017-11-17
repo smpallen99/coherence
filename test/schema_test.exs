@@ -67,7 +67,7 @@ defmodule CoherenceTest.Schema do
 
   test "confirmed?" do
     refute User.confirmed?(%User{})
-    assert User.confirmed?(%User{confirmed_at: Ecto.DateTime.utc})
+    assert User.confirmed?(%User{confirmed_at: DateTime.utc_now})
   end
 
   test "confirm" do
@@ -78,6 +78,6 @@ defmodule CoherenceTest.Schema do
 
   test "locked?" do
     refute User.locked?(%User{})
-    assert User.locked?(%User{locked_at: Ecto.DateTime.utc})
+    assert User.locked?(%User{locked_at: DateTime.utc_now})
   end
 end

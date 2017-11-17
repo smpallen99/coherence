@@ -185,7 +185,7 @@ defmodule TestCoherence.Coherence.Rememberable do
   schema "rememberables" do
     field :series_hash, :string
     field :token_hash, :string
-    field :token_created_at, Timex.Ecto.DateTime
+    field :token_created_at, :utc_datetime
     belongs_to :user, Module.concat(Config.module, Config.user_schema)
     timestamps()
   end
@@ -217,8 +217,8 @@ defmodule TestCoherence.Coherence.Trackable do
   schema "trackables" do
     field :action, :string, null: false
     field :sign_in_count, :integer, default: 0
-    field :current_sign_in_at, Ecto.DateTime
-    field :last_sign_in_at, Ecto.DateTime
+    field :current_sign_in_at, :utc_datetime
+    field :last_sign_in_at, :utc_datetime
     field :current_sign_in_ip, :string
     field :last_sign_in_ip, :string
     belongs_to :user, Config.user_schema

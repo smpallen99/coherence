@@ -33,7 +33,7 @@ defmodule CoherenceTest.TrackableService do
       assert current_user.sign_in_count == 1
       assert current_user.current_sign_in_at
       assert current_user.current_sign_in_ip == "{127, 0, 0, 1}"
-      assert current_user.last_sign_in_at == current_user.current_sign_in_at
+      assert DateTime.to_unix(current_user.last_sign_in_at) == DateTime.to_unix(current_user.current_sign_in_at)
       assert current_user.last_sign_in_ip == current_user.current_sign_in_ip
     end
     test "2nd login", %{conn: conn, user: user} do
@@ -74,7 +74,7 @@ defmodule CoherenceTest.TrackableService do
       assert trackable.sign_in_count == 1
       assert trackable.current_sign_in_at
       assert trackable.current_sign_in_ip == "{127, 0, 0, 1}"
-      assert trackable.last_sign_in_at == trackable.current_sign_in_at
+      assert DateTime.to_unix(trackable.last_sign_in_at) == DateTime.to_unix(trackable.current_sign_in_at)
       assert trackable.last_sign_in_ip == trackable.current_sign_in_ip
       assert trackable.user_id == user.id
       assert trackable.action == "login"

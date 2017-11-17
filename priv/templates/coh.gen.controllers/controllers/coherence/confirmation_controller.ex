@@ -9,7 +9,6 @@ defmodule <%= web_base %>.Coherence.ConfirmationController do
   use Timex
 
   alias Coherence.{ConfirmableService, Messages}
-  alias Ecto.DateTime
   alias Coherence.Schemas
 
   require Logger

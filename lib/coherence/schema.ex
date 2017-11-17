@@ -198,7 +198,7 @@ defmodule Coherence.Schema do
 
         Returns a changeset ready for Repo.update
         """
-        def lock(user, locked_at \\ Ecto.DateTime.utc) do
+        def lock(user, locked_at \\ DateTime.utc_now) do
           Config.user_schema.changeset(user, %{locked_at: locked_at})
         end
 
@@ -214,7 +214,7 @@ defmodule Coherence.Schema do
         deprecated! Please use Coherence.ControllerHelpers.lock!/1.
         """
 
-        def lock!(user, locked_at \\ Ecto.DateTime.utc) do
+        def lock!(user, locked_at \\ DateTime.utc_now) do
           IO.warn "#{inspect Config.user_schema}.lock!/1 has been deprecated. Please use Coherence.ControllerHelpers.lock!/1 instead."
           changeset = Config.user_schema.changeset(user, %{locked_at: locked_at})
           if locked?(user) do
@@ -341,7 +341,7 @@ defmodule Coherence.Schema do
 
           # recoverable
           field :reset_password_token, :string
-          field :reset_password_sent_at, Ecto.DateTime
+          field :reset_password_sent_at, :utc_datetime
 
           timestamps
         end
@@ -361,15 +361,15 @@ defmodule Coherence.Schema do
 
       if Coherence.Config.has_option(:recoverable) do
         field :reset_password_token, :string
-        field :reset_password_sent_at, Ecto.DateTime
+        field :reset_password_sent_at, :utc_datetime
       end
       if Coherence.Config.has_option(:rememberable) do
-        field :remember_created_at, Ecto.DateTime
+        field :remember_created_at, :utc_datetime
       end
       if Coherence.Config.has_option(:trackable) do
         field :sign_in_count, :integer, default: 0
-        field :current_sign_in_at, Ecto.DateTime
-        field :last_sign_in_at, Ecto.DateTime
+        field :current_sign_in_at, :utc_datetime
+        field :last_sign_in_at, :utc_datetime
         field :current_sign_in_ip, :string
         field :last_sign_in_ip, :string
       end
@@ -378,15 +378,15 @@ defmodule Coherence.Schema do
       end
       if Coherence.Config.has_option(:lockable) do
         field :failed_attempts, :integer, default: 0
-        field :locked_at, Ecto.DateTime
+        field :locked_at, :utc_datetime
       end
       if Coherence.Config.has_option(:unlockable_with_token) do
         field :unlock_token, :string
       end
       if Coherence.Config.has_option(:confirmable) do
         field :confirmation_token, :string
-        field :confirmed_at, Ecto.DateTime
-        field :confirmation_sent_at, Ecto.DateTime
+        field :confirmed_at, :utc_datetime
+        field :confirmation_sent_at, :utc_datetime
         # field :unconfirmed_email, :string
       end
     end
