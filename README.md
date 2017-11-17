@@ -357,8 +357,8 @@ Adds the following database field to your User model with the generated migratio
 
 ```elixir
 add :sign_in_count, :integer, default: 0  # how many times the user has logged in
-add :current_sign_in_at, :datetime        # the current login timestamp
-add :last_sign_in_at, :datetime           # the timestamp of the previous login
+add :current_sign_in_at, :utc_datetime    # the current login timestamp
+add :last_sign_in_at, :utc_datetime       # the timestamp of the previous login
 add :current_sign_in_ip, :string          # the current login IP adddress
 add :last_sign_in_ip, :string             # the IP address of the previous login
 ```
@@ -377,7 +377,7 @@ Adds the following database field to your User model with the generated migratio
 ```elixir
 add :failed_attempts, :integer, default: 0
 add :unlock_token, :string
-add :locked_at, :datetime
+add :locked_at, :utc_datetime
 ```
 
 ### Unlockable with Token
@@ -405,7 +405,7 @@ The following table is created by the generated `<timestamp>_create_coherence_re
 create table(:rememberables) do
   add :series_hash, :string
   add :token_hash, :string
-  add :token_created_at, :datetime
+  add :token_created_at, :utc_datetime
   add :user_id, references(:users, on_delete: :delete_all)
 
   timestamps

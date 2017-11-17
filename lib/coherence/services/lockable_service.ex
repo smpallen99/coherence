@@ -8,7 +8,7 @@ defmodule Coherence.LockableService do
   This option adds the following fields to the user schema:
 
   * :failed_attempts, :integer - The number of failed login attempts.
-  * :locked_at, :datetime - The time and date when the account was locked.
+  * :locked_at, :utc_datetime - The time and date when the account was locked.
 
   The following configuration is used to customize lockable behavior:
 

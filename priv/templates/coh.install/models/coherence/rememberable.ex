@@ -15,7 +15,7 @@ defmodule <%= base %>.Coherence.Rememberable do
   schema "rememberables" do
     field :series_hash, :string
     field :token_hash, :string
-    field :token_created_at, Timex.Ecto.DateTime
+    field :token_created_at, :utc_datetime
     belongs_to :user, Module.concat(Config.module, Config.user_schema)<%= if use_binary_id?, do: ", type: :binary_id", else: "" %>
 
     timestamps()

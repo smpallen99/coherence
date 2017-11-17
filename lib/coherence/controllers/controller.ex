@@ -91,7 +91,7 @@ defmodule Coherence.Controller do
   @doc """
   Test if a datetime has expired.
 
-  Convert the datetime from Ecto.DateTime format to Timex format to do
+  Convert the datetime from DateTime format to Timex format to do
   the comparison given the time during in opts.
 
   ## Examples
@@ -99,13 +99,12 @@ defmodule Coherence.Controller do
       expired?(user.expire_at, days: 5)
       expired?(user.expire_at, minutes: 10)
 
-      iex> Ecto.DateTime.utc
+      iex> DateTime.utc_now
       ...> |> Coherence.Controller.expired?(days: 1)
       false
 
-      iex> Ecto.DateTime.utc
+      iex> DateTime.utc_now
       ...> |> Coherence.Controller.shift(days: -2)
-      ...> |> Ecto.DateTime.cast!
       ...> |> Coherence.Controller.expired?(days: 1)
       true
   """
@@ -116,21 +115,19 @@ defmodule Coherence.Controller do
   end
 
   @doc """
-  Shift a Ecto.DateTime.
+  Shift a DateTime.
 
   ## Examples
 
-      iex> Ecto.DateTime.cast!("2016-10-10 10:10:10")
+      iex> {:ok, datetime, _} = DateTime.from_iso8601("2016-10-10 10:10:10Z")
+      iex> datetime
       ...> |> Coherence.Controller.shift(days: -2)
-      ...> |> Ecto.DateTime.cast!
       ...> |> to_string
-      "2016-10-08 10:10:10"
+      "2016-10-08 10:10:10Z"
   """
   @spec shift(struct, Keyword.t) :: struct
   def shift(datetime, opts) do
     datetime
-    |> Ecto.DateTime.to_erl
-    |> Timex.to_datetime
     |> Timex.shift(opts)
   end
 
@@ -173,7 +170,7 @@ defmodule Coherence.Controller do
       token = random_string 48
       url = router_helpers().confirmation_url(conn, :edit, token)
       Logger.debug "confirmation email url: #{inspect url}"
-      dt = Ecto.DateTime.utc
+      dt = DateTime.utc_now
       user
       |> user_schema.changeset(%{confirmation_token: token,
         confirmation_sent_at: dt,
@@ -221,7 +218,7 @@ defmodule Coherence.Controller do
   can set this data far in the future to do a pseudo permanent lock.
   """
   @spec lock!(Ecto.Schema.t, struct) :: schema_or_error
-  def lock!(user, locked_at \\ Ecto.DateTime.utc) do
+  def lock!(user, locked_at \\ DateTime.utc_now) do
     user_schema = Config.user_schema
     changeset = user_schema.lock user, locked_at
     if user_schema.locked?(user) do
