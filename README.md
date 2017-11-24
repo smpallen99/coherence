@@ -244,7 +244,7 @@ config :coherence,
   max_failed_login_attempts: 3
 ```
 
-### Custom registration and sessions routes
+## Custom registration and sessions routes
 
 Coherence supports custom routes for registration and login. These configurations can be set globally or scoped.
 
@@ -286,7 +286,7 @@ scope "/" do
 end
 ```
 
-### Phoenix Channel Authentication
+## Phoenix Channel Authentication
 
 Coherence supports channel authentication using `Phoenix.Token`. To enable channel authentication do the following:
 
