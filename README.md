@@ -23,7 +23,6 @@ Coherence is a full featured, configurable authentication system for Phoenix, wi
 * [Lockable](#lockable): locks an account when a specified number of failed sign-in attempts has been exceeded.
 * [Unlockable With Token](#unlockable-with-token): provides a link to send yourself an unlock email.
 * [Rememberable](#remember-me): provides persistent login with 'Remember me?' check box on login page.
-
 Coherence provides flexibility by adding namespaced templates and views for only the options specified by the `mix coh.install` command. This boiler plate code is added to your `lib/my_project/web/templates/coherence` and `lib/my_project/web/views/coherence` directories.
 
 Once the boilerplate has been generated, you are free to customize the source as required.
@@ -245,7 +244,49 @@ config :coherence,
   max_failed_login_attempts: 3
 ```
 
-## Phoenix Channel Authentication
+### Custom registration and sessions routes
+
+Coherence supports custom routes for registration and login. These configurations can be set globally or scoped.
+
+Which routes can be custom?
+
+```
+%{
+  registrations_new:  "/registrations/new",
+  registrations:      "/registrations",
+  passwords:          "/passwords",
+  confirmations:      "/confirmations",
+  unlocks:            "/unlocks",
+  invitations:        "/invitations",
+  invitations_create: "/invitations/create",
+  invitations_resend: "/invitations/:id/resend",
+  sessions:           "/sessions",
+  registrations_edit: "/registrations/edit"
+}
+```
+
+To set them globally add the following to you configuration:
+
+
+
+```elixir
+config :coherence,
+  default_routes: %{
+    registrations_edit: "/accounts/edit", ...},
+```
+
+To set them scoped for each mode (protected, public, etc..):
+
+```elixir
+scope "/" do
+  pipe_through :protected
+  coherence_routes :protected, [
+    custom_routes: %{registratons_edit: "/accounts/edit", ...}
+  ]
+end
+``
+
+# Phoenix Channel Authentication
 
 Coherence supports channel authentication using `Phoenix.Token`. To enable channel authentication do the following:
 
