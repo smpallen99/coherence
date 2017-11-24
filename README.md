@@ -284,9 +284,9 @@ scope "/" do
     custom_routes: %{registratons_edit: "/accounts/edit", ...}
   ]
 end
-``
+```
 
-# Phoenix Channel Authentication
+### Phoenix Channel Authentication
 
 Coherence supports channel authentication using `Phoenix.Token`. To enable channel authentication do the following:
 
