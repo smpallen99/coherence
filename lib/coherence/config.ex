@@ -220,4 +220,26 @@ defmodule Coherence.Config do
     !!Application.get_env(:coherence, Module.concat(web_module(), Coherence.Mailer))
   end
 
+  def default_routes do
+    case Application.get_env(:coherence, :default_routes) do
+      nil -> 
+        %{
+          registrations_new:  "/registrations/new",
+          registrations:      "/registrations",
+          passwords:          "/passwords",
+          confirmations:      "/confirmations",
+          unlocks:            "/unlocks",
+          invitations:        "/invitations",
+          invitations_create: "/invitations/create",
+          invitations_resend: "/invitations/:id/resend",
+          sessions:           "/sessions",
+          registrations_edit: "/registrations/edit"
+        }
+      %{} = config -> 
+        config
+      true -> 
+        Logger.info "The configuration for default_routes must be a map"
+        nil
+    end
+  end
 end

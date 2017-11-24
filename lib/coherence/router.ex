@@ -65,16 +65,18 @@ defmodule Coherence.Router do
       end
   """
   defmacro coherence_routes(mode \\ [], opts \\ []) do
-    {mode, _opts} = case mode do
+    {mode, opts} = case mode do
       :private ->
         IO.warn "coherence_routes :private has been deprecated. Please use :protected instead."
         {:protected, opts}
       mode when is_atom(mode) -> {mode, opts}
-      []                      -> {:public, []}
+      []                      -> {:public, opts}
       opts when is_list(opts) -> {:all, opts}
     end
     quote location: :keep do
       mode = unquote(mode)
+      opts = unquote(opts)
+      routes = Map.merge(Coherence.Config.default_routes, opts[:custom_routes] || %{})
 
       if mode == :public && Module.get_attribute(__MODULE__, :__COHERENCE_PROTECTED__) do
         raise "Protected routes must follow public routes. Please move 'coherence_routes :protected' below 'coherence_routes'."
@@ -86,62 +88,62 @@ defmodule Coherence.Router do
       if mode == :all or mode == :public do
         Enum.each([:new, :create], fn(action) ->
           if Coherence.Config.has_action?(:authenticatable, action) do
-            resources "/sessions", Coherence.SessionController, only: [action]
+            resources "#{routes.sessions}", Coherence.SessionController, only: [action]
           end
         end)
         if Coherence.Config.has_action?(:registerable, :new) do
-          get "/registrations/new", Coherence.RegistrationController, :new
+          get "#{routes.registrations_new}", Coherence.RegistrationController, :new
         end
         if Coherence.Config.has_action?(:registerable, :create) do
-          post "/registrations", Coherence.RegistrationController, :create
+          post "#{routes.registrations}", Coherence.RegistrationController, :create
         end
         Enum.each([:new, :create, :edit, :update], fn(action) ->
           if Coherence.Config.has_action?(:recoverable, action) do
-            resources "/passwords", Coherence.PasswordController, only: [action]
+            resources "#{routes.passwords}", Coherence.PasswordController, only: [action]
           end
         end)
         Enum.each([:edit, :new, :create], fn(action) ->
           if Coherence.Config.has_action?(:confirmable, action) do
-            resources "/confirmations", Coherence.ConfirmationController, only: [action]
+            resources "#{routes.confirmations}", Coherence.ConfirmationController, only: [action]
           end
         end)
         Enum.each([:new, :create, :edit], fn(action) ->
           if Coherence.Config.has_action?(:unlockable_with_token, action) do
-            resources "/unlocks", Coherence.UnlockController, only: [action]
+            resources "#{routes.unlocks}", Coherence.UnlockController, only: [action]
           end
         end)
         if Coherence.Config.has_action?(:invitable, :edit) do
-          resources "/invitations", Coherence.InvitationController, only: [:edit]
+          resources "#{routes.invitations}", Coherence.InvitationController, only: [:edit]
         end
         if Coherence.Config.has_action?(:invitable, :create_user) do
-          post "/invitations/create", Coherence.InvitationController, :create_user
+          post "#{routes.invitations_create}", Coherence.InvitationController, :create_user
         end
       end
       if mode == :all or mode == :protected do
         if Coherence.Config.has_action?(:invitable, :new) do
-          resources "/invitations", Coherence.InvitationController, only: [:new]
+          resources "#{routes.invitations}", Coherence.InvitationController, only: [:new]
         end
         if Coherence.Config.has_action?(:invitable, :create) do
-          resources "/invitations", Coherence.InvitationController, only: [:create]
+          resources "#{routes.invitations}", Coherence.InvitationController, only: [:create]
         end
         if Coherence.Config.has_action?(:invitable, :resend) do
-          get "/invitations/:id/resend", Coherence.InvitationController, :resend
+          get "#{routes.invitations_resend}", Coherence.InvitationController, :resend
         end
         if Coherence.Config.has_action?(:authenticatable, :delete) do
-          delete "/sessions", Coherence.SessionController, :delete
+          delete "#{routes.sessions}", Coherence.SessionController, :delete
         end
         if Coherence.Config.has_action?(:registerable, :show) do
-          get "/registrations", Coherence.RegistrationController, :show
+          get "#{routes.registrations}", Coherence.RegistrationController, :show
         end
         if Coherence.Config.has_action?(:registerable, :update) do
-          put "/registrations", Coherence.RegistrationController, :update
-          patch "/registrations", Coherence.RegistrationController, :update
+          put "#{routes.registrations}", Coherence.RegistrationController, :update
+          patch "#{routes.registrations}", Coherence.RegistrationController, :update
         end
         if Coherence.Config.has_action?(:registerable, :edit) do
-          get "/registrations/edit", Coherence.RegistrationController, :edit
+          get "#{routes.registrations_edit}", Coherence.RegistrationController, :edit
         end
         if Coherence.Config.has_action?(:registerable, :delete) do
-          delete "/registrations", Coherence.RegistrationController, :delete
+          delete "#{routes.registrations}", Coherence.RegistrationController, :delete
         end
       end
     end

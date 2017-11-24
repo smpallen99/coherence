@@ -51,4 +51,27 @@ defmodule CoherenceTest.Config do
     Application.put_env(:coherence, :opts, [a: [:create]])
     refute Config.has_action?(:a, :new)
   end
+
+  describe "default_routes/0" do
+    test "when are set configured globally" do
+      Application.put_env(:coherence, :default_routes, %{registrations: "memberships"})
+      assert Config.default_routes == %{registrations: "memberships"}
+    end
+
+    test "when are not configured" do
+      Application.put_env(:coherence, :default_routes, nil)
+      assert Config.default_routes == %{
+        registrations_new:  "/registrations/new",
+        registrations:      "/registrations",
+        passwords:          "/passwords",
+        confirmations:      "/confirmations",
+        unlocks:            "/unlocks",
+        invitations:        "/invitations",
+        invitations_create: "/invitations/create",
+        invitations_resend: "/invitations/:id/resend",
+        sessions:           "/sessions",
+        registrations_edit: "/registrations/edit"
+      }
+    end
+  end
 end
