@@ -129,6 +129,7 @@ defmodule MyProjectWeb.Router do
     plug Coherence.Authentication.Session  # Add this
   end
 
+  # Add this block
   pipeline :protected do
     plug :accepts, ["html"]
     plug :fetch_session
