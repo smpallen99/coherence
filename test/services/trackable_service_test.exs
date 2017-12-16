@@ -33,7 +33,7 @@ defmodule CoherenceTest.TrackableService do
       assert current_user.sign_in_count == 1
       assert current_user.current_sign_in_at
       assert current_user.current_sign_in_ip == "{127, 0, 0, 1}"
-      assert current_user.last_sign_in_at == current_user.current_sign_in_at
+      assert naive_eq?(current_user.last_sign_in_at, current_user.current_sign_in_at)
       assert current_user.last_sign_in_ip == current_user.current_sign_in_ip
     end
     test "2nd login", %{conn: conn, user: user} do
@@ -44,7 +44,7 @@ defmodule CoherenceTest.TrackableService do
       assert current_user.sign_in_count == 2
       assert current_user.current_sign_in_at
       assert current_user.current_sign_in_ip == "{127, 0, 0, 1}"
-      refute current_user.last_sign_in_at == current_user.current_sign_in_at
+      refute naive_eq?(current_user.last_sign_in_at, current_user.current_sign_in_at)
       assert current_user.last_sign_in_ip == current_user.current_sign_in_ip
     end
     test "different IP", %{conn: conn, user: user} do
@@ -64,7 +64,7 @@ defmodule CoherenceTest.TrackableService do
       refute user1.current_sign_in_at
       refute user1.current_sign_in_ip
       assert current_user(conn).current_sign_in_ip == user1.last_sign_in_ip
-      assert current_user(conn).current_sign_in_at == user1.last_sign_in_at
+      assert naive_eq?(current_user(conn).current_sign_in_at, user1.last_sign_in_at)
     end
   end
   describe "Trackable-Table" do
@@ -74,7 +74,7 @@ defmodule CoherenceTest.TrackableService do
       assert trackable.sign_in_count == 1
       assert trackable.current_sign_in_at
       assert trackable.current_sign_in_ip == "{127, 0, 0, 1}"
-      assert trackable.last_sign_in_at == trackable.current_sign_in_at
+      assert naive_eq?(trackable.last_sign_in_at, trackable.current_sign_in_at)
       assert trackable.last_sign_in_ip == trackable.current_sign_in_ip
       assert trackable.user_id == user.id
       assert trackable.action == "login"
@@ -94,7 +94,7 @@ defmodule CoherenceTest.TrackableService do
       refute t2.current_sign_in_ip
 
       assert t1.last_sign_in_ip == t2.last_sign_in_ip
-      assert t1.last_sign_in_at == t2.last_sign_in_at
+      assert naive_eq?(t1.last_sign_in_at, t2.last_sign_in_at)
     end
     test "second login", %{conn: conn, user: user} do
       Service.track_login(conn, user, false, true)
@@ -110,7 +110,7 @@ defmodule CoherenceTest.TrackableService do
       assert t3.current_sign_in_at
       assert t3.current_sign_in_ip == "{127, 0, 0, 1}"
       assert t3.user_id == user.id
-      assert t3.last_sign_in_at == t2.last_sign_in_at
+      assert naive_eq?(t2.last_sign_in_at, t3.last_sign_in_at)
       assert t3.last_sign_in_ip == t2.last_sign_in_ip
     end
     test "different IP", %{conn: conn, user: user} do
@@ -145,7 +145,7 @@ defmodule CoherenceTest.TrackableService do
       Service.track_failed_login(conn, user, true)
       [_t1, t2, t3] = Trackable |> order_by(asc: :id) |> Repo.all
       assert t3.action == "failed_login"
-      assert t2.last_sign_in_at == t3.last_sign_in_at
+      assert naive_eq?(t2.last_sign_in_at, t3.last_sign_in_at)
       assert t2.last_sign_in_ip == t3.last_sign_in_ip
     end
     test "lock", %{conn: conn, user: user} do
@@ -154,7 +154,7 @@ defmodule CoherenceTest.TrackableService do
       Service.track_lock(conn, user, true)
       [_t1, t2, t3] = Trackable |> order_by(asc: :id) |> Repo.all
       assert t3.action == "lock"
-      assert t2.last_sign_in_at == t3.last_sign_in_at
+      assert naive_eq?(t2.last_sign_in_at, t3.last_sign_in_at)
       assert t2.last_sign_in_ip == t3.last_sign_in_ip
     end
     test "unlock", %{conn: conn, user: user} do
@@ -163,7 +163,7 @@ defmodule CoherenceTest.TrackableService do
       Service.track_unlock(conn, user, true)
       [_t1, t2, t3] = Trackable |> order_by(asc: :id) |> Repo.all
       assert t3.action == "unlock"
-      assert t2.last_sign_in_at == t3.last_sign_in_at
+      assert naive_eq?(t2.last_sign_in_at, t3.last_sign_in_at)
       assert t2.last_sign_in_ip == t3.last_sign_in_ip
     end
     test "unlock_token", %{conn: conn, user: user} do
@@ -172,9 +172,15 @@ defmodule CoherenceTest.TrackableService do
       Service.track_unlock_token(conn, user, true)
       [_t1, t2, t3] = Trackable |> order_by(asc: :id) |> Repo.all
       assert t3.action == "unlock_token"
-      assert t2.last_sign_in_at == t3.last_sign_in_at
+      assert naive_eq?(t2.last_sign_in_at, t3.last_sign_in_at)
       assert t2.last_sign_in_ip == t3.last_sign_in_ip
     end
 
   end
+
+  defp naive_eq?(%NaiveDateTime{} = dt1, %NaiveDateTime{} = dt2) do
+    remove_microsecond(dt1) == remove_microsecond(dt2)
+  end
+
+  defp remove_microsecond(%NaiveDateTime{} = dt), do: struct(dt, microsecond: {0, 0})
 end

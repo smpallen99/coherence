@@ -17,11 +17,11 @@ defmodule <%= base %>.Coherence.Trackable do
   schema "trackables" do
     field :action, :string, null: false
     field :sign_in_count, :integer, default: 0
-    field :current_sign_in_at, Ecto.DateTime
-    field :last_sign_in_at, Ecto.DateTime
+    field :current_sign_in_at, :naive_datetime
+    field :last_sign_in_at, :naive_datetime
     field :current_sign_in_ip, :string
     field :last_sign_in_ip, :string
-    belongs_to :user, Config.user_schema<%= if use_binary_id?, do: ", type: :binary_id", else: "" %>
+    belongs_to :user, Config.user_schema()<%= if use_binary_id?, do: ", type: :binary_id", else: "" %>
 
     timestamps()
   end
