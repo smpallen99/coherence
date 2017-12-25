@@ -7,7 +7,7 @@
   <%% end %>
 
   <div class="form-group">
-    <%%= required_label f, dgettext("coherence", "Name"), class: "control-label" %>
+    <%%= required_label f, dgettext("coherence", "name"), class: "control-label" %>
     <%%= text_input f, :name, class: "form-control", required: "" %>
     <%%= error_tag f, :name %>
   </div>
@@ -21,7 +21,7 @@
   <%% end %>
 
   <div class="form-group">
-    <%%= required_label f, dgettext("coherence", "Email"), class: "control-label" %>
+    <%%= required_label f, dgettext("coherence", "email"), class: "control-label" %>
     <%%= text_input f, :email, class: "form-control", required: "" %>
     <%%= error_tag f, :email %>
   </div>
@@ -35,13 +35,13 @@
   <%% end %>
 
   <div class="form-group">
-    <%%= required_label f, dgettext("coherence", "Password"), class: "control-label" %>
+    <%%= required_label f, dgettext("coherence", "password"), class: "control-label" %>
     <%%= password_input f, :password, [class: "form-control"] ++ @required %>
     <%%= error_tag f, :password %>
   </div>
 
   <div class="form-group">
-    <%%= required_label f, dgettext("coherence", "Password Confirmation"), class: "control-label" %>
+    <%%= required_label f, dgettext("coherence", "password confirmation"), class: "control-label" %>
     <%%= password_input f, :password_confirmation, [class: "form-control"] ++ @required %>
     <%%= error_tag f, :password_confirmation %>
   </div>
