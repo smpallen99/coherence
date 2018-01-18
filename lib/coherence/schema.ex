@@ -370,8 +370,8 @@ defmodule Coherence.Schema do
         field :sign_in_count, :integer, default: 0
         field :current_sign_in_at, :naive_datetime
         field :last_sign_in_at, :naive_datetime
-        field :current_sign_in_ip, :string
-        field :last_sign_in_ip, :string
+        field :current_sign_in_ip, EctoFields.IP
+        field :last_sign_in_ip, EctoFields.IP
       end
       if Coherence.Config.has_option(:trackable_table) do
         has_many :trackables, Module.concat(Config.module, Coherence.Trackable)

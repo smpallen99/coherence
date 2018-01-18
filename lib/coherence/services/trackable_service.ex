@@ -214,7 +214,7 @@ defmodule Coherence.TrackableService do
 
   defp last_at_and_ip(conn, schema) do
     now = NaiveDateTime.utc_now()
-    ip = conn.peer |> elem(0) |> inspect
+    ip = conn.peer |> elem(0) |> :inet_parse.ntoa |> to_string
     cond do
       is_nil(schema.last_sign_in_at) and is_nil(schema.current_sign_in_at) ->
         {now, ip, ip, now}
