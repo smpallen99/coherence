@@ -161,7 +161,7 @@ defmodule Coherence.Controller do
   end
 
   def get_confirmation_url(conn, token) do
-    case Config.logged_in_url do
+    case Config.confimarion_url do
       nil -> router_helpers().confirmation_url(conn, :edit, token)
       url -> url
         |> String.replace(":token", token)
