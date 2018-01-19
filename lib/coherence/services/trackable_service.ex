@@ -81,8 +81,8 @@ defmodule Coherence.TrackableService do
         Config.auth_module
         |> apply(Config.update_login, [conn, user, [id_key: Config.schema_key]])
         |> Conn.assign(Config.assigns_key, user)
-      {:error, _changeset} ->
-        Logger.error ("Failed to update tracking!")
+      {:error, changeset} ->
+        Logger.error ("Failed to update tracking: #{changeset}")
         conn
     end
   end
