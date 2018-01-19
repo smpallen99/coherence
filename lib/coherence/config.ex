@@ -13,6 +13,7 @@ defmodule Coherence.Config do
   * :repo: the module name of your Repo (`repo: MyProject.Repo`)
   * :user_schema
   * :schema_key
+  * :confimarion_url                                  - Must include :token
   * :logged_out_url
   * :logged_in_url
   * :email_from                                       - Deprecated. Use `email_from_name` and `email_from_email` instead
@@ -78,6 +79,7 @@ defmodule Coherence.Config do
     :repo,
     :user_schema,
     :schema_key,
+    :confimarion_url,
     :logged_out_url,
     :logged_in_url,
     :email_from_name,
