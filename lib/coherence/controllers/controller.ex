@@ -168,6 +168,14 @@ defmodule Coherence.Controller do
     end
   end
 
+  defp external_host(url) do
+    url
+    |> String.replace(":external_hostname", external_hostname(Config.external_hostname))
+  end
+
+  defp external_hostname(nil), do: "http://localhost:4000"
+  defp external_hostname(hostname), do: hostname
+
   @doc """
   Send confirmation email with token.
 
