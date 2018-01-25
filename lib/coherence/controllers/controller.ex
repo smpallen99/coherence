@@ -186,7 +186,7 @@ defmodule Coherence.Controller do
     if user_schema.confirmable? do
       token = random_string 48
       url = get_confirmation_url(conn, token)
-      Logger.debug "confirmation email url: #{inspect url}"
+      Logger.info "confirmation email url: #{inspect url}"
       dt = NaiveDateTime.utc_now()
       user
       |> user_schema.changeset(%{confirmation_token: token,
