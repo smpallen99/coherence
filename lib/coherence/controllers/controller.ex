@@ -164,6 +164,7 @@ defmodule Coherence.Controller do
     case Config.confimarion_url do
       nil -> router_helpers().confirmation_url(conn, :edit, token)
       url -> url
+        |> external_host
         |> String.replace(":token", token)
     end
   end
