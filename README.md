@@ -344,7 +344,7 @@ It is possible to change the confirmation URL sent in the email with config:
 
 ```elixir
 config :coherence,
-  external_hostname: {:system, "EXTERNAL_HOSTNAME"}, # Set external hostname
+  external_hostname: {:system, "EXTERNAL_HOSTNAME"}, # Set external hostname, e.g.: http://localhost:4000
   confimarion_url: ":external_hostname/#/user/confirm/:token", # Can use either hardcoded hostname or :external_hostname, and use :token to embed the generated token
   ```
 
