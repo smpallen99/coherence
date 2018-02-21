@@ -56,7 +56,8 @@ defmodule Coherence.PasswordController do
         )
       user ->
         token = random_string 48
-        url = router_helpers().password_url(conn, :edit, token)
+        uri = %URI{host: conn.host, port: conn.port}
+        url = router_helpers().password_url(uri, :edit, token)
         # Logger.debug "reset email url: #{inspect url}"
         dt = NaiveDateTime.utc_now()
         Config.repo.update! Controller.changeset(:password, user_schema, user,
