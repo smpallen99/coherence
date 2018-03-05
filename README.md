@@ -208,10 +208,10 @@ For example, lets say you want to show a list of products for everyone visiting 
 Ensure the following is in your `lib/my_project_web/router.ex` file:
 
 ```elixir
-  scope "/", MyProjectWeb do
-    pipe_through :browser
-    resources "/products", ProductController
-  end
+scope "/", MyProjectWeb do
+  pipe_through :browser
+  resources "/products", ProductController
+end
 ```
 
 In your product controller add the following:
@@ -432,30 +432,30 @@ Using this option adds a `active` field to the user schema with a default of `tr
 The following examples illustrate various configuration scenarios for the install mix task:
 
 ```bash
-  # Install with only the `authenticatable` option
-  $ mix coh.install
+# Install with only the `authenticatable` option
+$ mix coh.install
 
-  # Install all the options except `confirmable` and `invitable`
-  $ mix coh.install --full
+# Install all the options except `confirmable` and `invitable`
+$ mix coh.install --full
 
-  # Install all the options except `invitable`
-  $ mix coh.install --full-confirmable
+# Install all the options except `invitable`
+$ mix coh.install --full-confirmable
 
-  # Install all the options except `confirmable`
-  $ mix coh.install --full-invitable
+# Install all the options except `confirmable`
+$ mix coh.install --full-invitable
 
-  # Install the `full` options except `lockable` and `trackable`
-  $ mix coh.install --full --no-lockable --no-trackable
+# Install the `full` options except `lockable` and `trackable`
+$ mix coh.install --full --no-lockable --no-trackable
 ```
 
 And some reinstall examples:
 
 ```bash
-  # Reinstall with defaults (--silent --no-migrations --no-config --confirm-once)
-  $ mix coh.install --reinstall
+# Reinstall with defaults (--silent --no-migrations --no-config --confirm-once)
+$ mix coh.install --reinstall
 
-  # Confirm to overwrite files, show instructions, and generate migrations
-  $ mix coh.install --reinstall --no-confirm-once --with-migrations
+# Confirm to overwrite files, show instructions, and generate migrations
+$ mix coh.install --reinstall --no-confirm-once --with-migrations
 ```
 
 Run `$ mix help coh.install` for more information.
@@ -465,30 +465,30 @@ Run `$ mix help coh.install` for more information.
 The following examples illustrate how to remove the files created by the installer:
 
 ```bash
-  # Clean all the installed files
-  $ mix coh.clean --all
+# Clean all the installed files
+$ mix coh.clean --all
 
-  # Clean only the installed view and template files
-  $ mix coh.clean --views --templates
+# Clean only the installed view and template files
+$ mix coh.clean --views --templates
 
-  # Clean all but the models
-  $ mix coh.clean --all --no-models
+# Clean all but the models
+$ mix coh.clean --all --no-models
 
-  # Prompt once to confirm the removal
-  $ mix coh.clean --all --confirm-once
+# Prompt once to confirm the removal
+$ mix coh.clean --all --confirm-once
 ```
 
 After installation, if you later want to remove one more options, here are a couple examples:
 
 ```bash
-  # Clean one option
-  $ mix coh.clean --options=recoverable
+# Clean one option
+$ mix coh.clean --options=recoverable
 
-  # Clean several options without confirmation
-  $ mix coh.clean --no-confirm --options="recoverable unlockable-with-token"
+# Clean several options without confirmation
+$ mix coh.clean --no-confirm --options="recoverable unlockable-with-token"
 
-  # Test the uninstaller without removing files
-  $ mix coh.clean --dry-run --options="recoverable unlockable-with-token"
+# Test the uninstaller without removing files
+$ mix coh.clean --dry-run --options="recoverable unlockable-with-token"
 ```
 
 ## Customization
@@ -597,44 +597,44 @@ The User model changeset used by Coherence can be customized for each Coherence 
 For example, the following defines a changeset/3 function in your user model:
 
 ```elixir
-  # config/config.exs
-  config :coherence,
-    # ...
-    changeset: {MyProject.User, :changeset}
+# config/config.exs
+config :coherence,
+  # ...
+  changeset: {MyProject.User, :changeset}
 ```
 
 Now add a new `changeset/3` function to the user model. The following example defines a custom changeset for the registration controller:
 
 ```elixir
-  # lib/coherence/coherence/user.ex
-  defmodule CoherenceDemo.User do
-    use Ecto.Schema
-    use Coherence.Schema
+# lib/coherence/coherence/user.ex
+defmodule CoherenceDemo.User do
+  use Ecto.Schema
+  use Coherence.Schema
 
-    # ...
+  # ...
 
-    def changeset(model, params \\ %{}) do
-      model
-      |> cast(params, [:name, :email] ++ coherence_fields)
-      |> validate_required([:name, :email])
-      |> validate_format(:email, ~r/@/)
-      |> unique_constraint(:email)
-      |> validate_coherence(params)
-    end
-    def changeset(model, params, :registration) do
-      # custom changeset  for registration controller
-      model
-      |> cast(params, [:name, :email] ++ coherence_fields)
-      |> validate_required([:name, :email])
-      |> validate_format(:email, ~r/@/)
-      |> unique_constraint(:email)
-      |> validate_coherence(params)
-    end
-    def changeset(model, params, _which) do
-      # use the default changeset for all other coherence controllers
-      changeset model, params
-    end
+  def changeset(model, params \\ %{}) do
+    model
+    |> cast(params, [:name, :email] ++ coherence_fields)
+    |> validate_required([:name, :email])
+    |> validate_format(:email, ~r/@/)
+    |> unique_constraint(:email)
+    |> validate_coherence(params)
   end
+  def changeset(model, params, :registration) do
+    # custom changeset  for registration controller
+    model
+    |> cast(params, [:name, :email] ++ coherence_fields)
+    |> validate_required([:name, :email])
+    |> validate_format(:email, ~r/@/)
+    |> unique_constraint(:email)
+    |> validate_coherence(params)
+  end
+  def changeset(model, params, _which) do
+    # use the default changeset for all other coherence controllers
+    changeset model, params
+  end
+end
 ```
 
 When a custom changeset is configured, the changeset function is called with an atom indicating the controller calling the changeset, allowing you to match on specific controllers.
