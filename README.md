@@ -793,7 +793,7 @@ We appreciate any contribution to Coherence. Check our [CODE_OF_CONDUCT.md](CODE
 
 ## License
 
-`coherence` is Copyright (c) 2016-2017 E-MetroTel
+`coherence` is Copyright (c) 2016-2018 E-MetroTel
 
 The source is released under the MIT License.
 
