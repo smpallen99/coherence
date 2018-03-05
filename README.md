@@ -661,7 +661,7 @@ During login, a current version of the user model is cashed in the credential st
 
 You can access the current user's name in a template like this:
 
-```
+```elixir
 <%= Coherence.current_user_name(@conn) %>
 ```
 
