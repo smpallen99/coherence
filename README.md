@@ -255,7 +255,7 @@ Add the following option to coherence configuration.
 
 ```elixir
 config :coherence,
-  user_token: true,
+  user_token: true
 ```
 Update your socket module
 
@@ -511,7 +511,9 @@ The generated controllers are named `MyProjectWeb.Coherence.SessionController` a
 If the controllers are generated, you will need to change your router to use the new names. For example:
 
 ```elixir
-  # lib/my_project_web/router.ex
+# lib/my_project_web/router.ex
+
+defmodule MyProjectWeb.Router do
   use MyProjectWeb, :router
   use Coherence.Router
 
