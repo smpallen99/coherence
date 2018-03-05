@@ -690,7 +690,7 @@ config :coherence,
 
 config :coherence, CoherenceDemoWeb.Coherence.Mailer,
   adapter: Swoosh.Adapters.Sendgrid,
-  api_key: "Add api key here"
+  api_key: "SENDGRID_API_KEY"
 ```
 
 You may want to configure the email system to use system environment variables.
@@ -701,7 +701,7 @@ config :coherence,
   email_from_email: {:system, "EMAIL"}
 
 config :coherence, CoherenceDemoWeb.Coherence.Mailer,
-  api_key: {:system, "API_KEY"}
+  api_key: {:system, "SENDGRID_API_KEY"}
 ```
 
 ## Authentication
