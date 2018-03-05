@@ -401,7 +401,7 @@ For security, both a token and series number stored in the cookie on initial log
 
 The following defaults can be changed with the following config entries:
 
-* :rememberable_cookie_expire_hours (2*24)
+* :rememberable_cookie_expire_hours (2\*24)
 * :login_cookie                     ("coherence_login")
 
 The following table is created by the generated `<timestamp>_create_coherence_rememberable.exs` migration:
