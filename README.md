@@ -257,11 +257,13 @@ Add the following option to coherence configuration.
 config :coherence,
   user_token: true
 ```
-Update your socket module
+
+Update your socket module:
 
 ```elixir
 defmodule MyProjectWeb.UserSocket do
   use Phoenix.Socket
+
   def connect(%{"token" => token}, socket) do
     case Coherence.verify_user_token(socket, token, &assign/3) do
       {:error, _} -> :error
@@ -413,6 +415,7 @@ create table(:rememberables) do
 
   timestamps
 end
+
 create index(:rememberables, [:user_id])
 create index(:rememberables, [:series_hash])
 create index(:rememberables, [:token_hash])
@@ -528,6 +531,7 @@ defmodule MyProjectWeb.Router do
     pipe_through :browser
     coherence_routes :protected
   end
+
   # ...
 end
 ```
@@ -566,7 +570,6 @@ See the documentation for further details.
 ### Customizing Responders
 
 To customize how application responds to html or json format, you can override methods in the `lib/my_project_web/controllers/coherence/responders/html.ex` or `lib/my_project_web/controllers/coherence/responders/json.ex`.
-
 
 ### Customizing layout
 
@@ -671,6 +674,7 @@ If the user model is changed after login, a call to `update_login` must be done 
 ```elixir
 apply(Config.auth_module, Config.update_login, [conn, user, [id_key: Config.schema_key]])
 ```
+
 to update the credential store.
 
 This is not needed for registration update page.
