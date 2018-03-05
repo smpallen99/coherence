@@ -8,7 +8,6 @@
 [license]: http://opensource.org/licenses/MIT
 
 > This version is not compatible with previous Phoenix 1.3.0-rc versions. Please use the v0.4.0 version instead.
->
 
 Checkout the [Coherence Demo Project](https://github.com/smpallen99/coherence_demo) to see an example project using Coherence.
 
