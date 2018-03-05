@@ -223,6 +223,7 @@ defmodule MyProjectWeb.ProductController do
   plug Coherence.Authentication.Session, [protected: true] when action != :index
 
   # ...
+end
 ```
 
 ## Default Configuration
@@ -267,6 +268,7 @@ defmodule MyProjectWeb.UserSocket do
       {:ok, socket} -> {:ok, socket}
     end
   end
+end
 ```
 
 ## Localization with Gettext
