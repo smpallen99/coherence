@@ -23,7 +23,6 @@ Coherence is a full featured, configurable authentication system for Phoenix, wi
 * [Lockable](#lockable): locks an account when a specified number of failed sign-in attempts has been exceeded.
 * [Unlockable With Token](#unlockable-with-token): provides a link to send yourself an unlock email.
 * [Rememberable](#remember-me): provides persistent login with 'Remember me?' check box on login page.
-
 Coherence provides flexibility by adding namespaced templates and views for only the options specified by the `mix coh.install` command. This boiler plate code is added to your `lib/my_project/web/templates/coherence` and `lib/my_project/web/views/coherence` directories.
 
 Once the boilerplate has been generated, you are free to customize the source as required.
@@ -235,7 +234,9 @@ defmodule MyProjectWeb.ProductController do
 {:max_failed_login_attempts, 5},
 {:unlock_timeout_minutes, 20},
 {:unlock_token_expire_minutes, 5},
-{:rememberable_cookie_expire_hours, 2*24}
+{:rememberable_cookie_expire_hours, 2*24},
+{:forwarded_invitation_fields, [:email, :name]}
+{:allow_silent_password_recovery_for_unknown_user, false}
 ```
 
 You can override this default configs. For example: you can add the following codes inside `config/config.exs`
@@ -244,6 +245,48 @@ You can override this default configs. For example: you can add the following co
 config :coherence,
   require_current_password: false,
   max_failed_login_attempts: 3
+```
+
+## Custom registration and sessions routes
+
+Coherence supports custom routes for registration and login. These configurations can be set globally or scoped.
+
+Which routes can be custom?
+
+```
+%{
+  registrations_new:  "/registrations/new",
+  registrations:      "/registrations",
+  passwords:          "/passwords",
+  confirmations:      "/confirmations",
+  unlocks:            "/unlocks",
+  invitations:        "/invitations",
+  invitations_create: "/invitations/create",
+  invitations_resend: "/invitations/:id/resend",
+  sessions:           "/sessions",
+  registrations_edit: "/registrations/edit"
+}
+```
+
+To set them globally add the following to you configuration:
+
+
+
+```elixir
+config :coherence,
+  default_routes: %{
+    registrations_edit: "/accounts/edit", ...},
+```
+
+To set them scoped for each mode (protected, public, etc..):
+
+```elixir
+scope "/" do
+  pipe_through :protected
+  coherence_routes :protected, [
+    custom_routes: %{registratons_edit: "/accounts/edit", ...}
+  ]
+end
 ```
 
 ## Phoenix Channel Authentication
@@ -349,6 +392,8 @@ Provides `new`, `create`, `edit`, `update` actions for the `/passwords` route.
 Adds a "Forgot your password?" link to the log-in form. When clicked, the user provides their email address and if found, sends a reset password instructions email with a reset link.
 
 The expiry timeout can be changed with the `:reset_token_expire_days` config entry.
+
+By default, providing an unknown email address will result in a form error. If you want to prevent that and display a confirmation message even if the email isn’t found, set the `:allow_silent_password_recovery_for_unknown_user` to `true`.
 
 ### Trackable
 

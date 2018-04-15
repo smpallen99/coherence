@@ -110,6 +110,8 @@ defmodule Coherence.Config do
     {:unlock_token_expire_minutes, 5},
     {:session_key, "session_auth"},
     {:rememberable_cookie_expire_hours, 2 * 24},
+    {:forwarded_invitation_fields, [:email, :name]},
+    {:allow_silent_password_recovery_for_unknown_user, false},
     {:async_rememberable?, false},
     {:minimum_password_length, 4},
     :messages_backend,
@@ -220,4 +222,26 @@ defmodule Coherence.Config do
     !!Application.get_env(:coherence, Module.concat(web_module(), Coherence.Mailer))
   end
 
+  def default_routes do
+    case Application.get_env(:coherence, :default_routes) do
+      nil -> 
+        %{
+          registrations_new:  "/registrations/new",
+          registrations:      "/registrations",
+          passwords:          "/passwords",
+          confirmations:      "/confirmations",
+          unlocks:            "/unlocks",
+          invitations:        "/invitations",
+          invitations_create: "/invitations/create",
+          invitations_resend: "/invitations/:id/resend",
+          sessions:           "/sessions",
+          registrations_edit: "/registrations/edit"
+        }
+      %{} = config -> 
+        config
+      true -> 
+        Logger.info "The configuration for default_routes must be a map"
+        nil
+    end
+  end
 end

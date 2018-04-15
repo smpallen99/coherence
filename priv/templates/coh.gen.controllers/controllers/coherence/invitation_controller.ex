@@ -107,7 +107,7 @@ defmodule <%= web_base %>.Coherence.InvitationController do
       invite ->
         user_schema = Config.user_schema
         changeset = Controller.changeset(:invitation, user_schema, user_schema.__struct__,
-          %{email: invite.email, name: invite.name})
+          Map.take(invite, Config.forwarded_invitation_fields))
         conn
         |> render(:edit, changeset: changeset, token: invite.token)
     end
