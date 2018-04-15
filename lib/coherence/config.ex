@@ -110,6 +110,7 @@ defmodule Coherence.Config do
     {:unlock_token_expire_minutes, 5},
     {:session_key, "session_auth"},
     {:rememberable_cookie_expire_hours, 2 * 24},
+    {:allow_silent_password_recovery_for_unknown_user, false},
     {:async_rememberable?, false},
     {:minimum_password_length, 4},
     :messages_backend,

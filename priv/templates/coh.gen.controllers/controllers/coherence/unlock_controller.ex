@@ -49,15 +49,19 @@ defmodule <%= web_base %>.Coherence.UnlockController do
       case LockableService.unlock_token(user) do
         {:ok, user} ->
           if user_schema.locked?(user) do
+            info = Messages.backend().unlock_instructions_sent()
+            send_function = fn ->
+              send_user_email :unlock, user, router_helpers().unlock_url(conn, :edit, user.unlock_token)
+            end
+
             conn
-            |> send_unlock_email(user)
+            |> send_email_if_mailer(info, send_function)
             |> respond_with(:unlock_create_success, %{params: params, user: user})
           else
-            respond_with(
-              conn,
-              :unlock_create_error_not_locked,
-              %{params: params, error: Messages.backend().your_account_is_not_locked()}
-            )
+            error = Messages.backend().your_account_is_not_locked()
+
+            conn
+            |> respond_with(:unlock_create_error_not_locked, %{params: params, error: error})
           end
         {:error, changeset} ->
           respond_with(conn, :unlock_create_error, %{changeset: changeset})

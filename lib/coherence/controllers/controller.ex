@@ -178,12 +178,10 @@ defmodule Coherence.Controller do
         current_password: user.password})
       |> Config.repo.update!
 
-      if Config.mailer?() do
-        send_user_email :confirmation, user, url
-        put_flash(conn, :info, Messages.backend().confirmation_email_sent())
-      else
-        put_flash(conn, :error, Messages.backend().mailer_required())
-      end
+      info = Messages.backend().confirmation_email_sent()
+
+      conn
+      |> send_email_if_mailer(info, fn -> send_user_email :confirmation, user, url end)
     else
       conn
       |> put_flash(:info, Messages.backend().registration_created_successfully())
@@ -339,4 +337,15 @@ defmodule Coherence.Controller do
     Module.concat [Config.module, Coherence, schema]
   end
 
+  @doc """
+  Sends an email if the mailer is properly configured and add the appropriate flash.
+  """
+  def send_email_if_mailer(conn, info, send_function) do
+    if Config.mailer?() do
+      send_function.()
+      put_flash(conn, :info, info)
+    else
+      put_flash(conn, :error, Messages.backend().mailer_required())
+    end
+  end
 end

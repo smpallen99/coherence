@@ -9,6 +9,7 @@ defmodule CoherenceTest.PasswordController do
   setup %{conn: conn} do
     Application.put_env :coherence, :opts, [:confirmable, :authenticatable, :recoverable,
       :lockable, :trackable, :unlockable_with_token, :invitable, :registerable]
+    Application.put_env :coherence, :allow_silent_password_recovery_for_unknown_user, false
     user = insert_user()
     {:ok, conn: conn, user: user}
   end
@@ -16,6 +17,15 @@ defmodule CoherenceTest.PasswordController do
   def setup_trackable_table(%{conn: conn}) do
     Application.put_env :coherence, :opts, [:confirmable, :authenticatable, :recoverable,
       :lockable, :trackable_table, :unlockable_with_token, :invitable, :registerable]
+    Application.put_env :coherence, :allow_silent_password_recovery_for_unknown_user, false
+    user = insert_user()
+    {:ok, conn: conn, user: user}
+  end
+
+  def setup_silent_password_recovery(%{conn: conn}) do
+    Application.put_env :coherence, :opts, [:confirmable, :authenticatable, :recoverable,
+      :lockable, :trackable, :unlockable_with_token, :invitable, :registerable]
+    Application.put_env :coherence, :allow_silent_password_recovery_for_unknown_user, true
     user = insert_user()
     {:ok, conn: conn, user: user}
   end
@@ -31,7 +41,25 @@ defmodule CoherenceTest.PasswordController do
     test "can reset password when user exist",  %{conn: conn, user: user} do
       params = %{"password" => %{"email" => user.email, "password" => "123123", "password_confirmation" => "123123"}}
       conn = post conn, password_path(conn, :create), params
-      assert conn.private[:phoenix_flash] == %{"error" => "Mailer configuration required!"}
+      assert conn.private[:phoenix_flash] == %{"error" => "Mailer configuration required!", "info" => "Reset email sent. Check your email for a reset link."}
+      assert html_response(conn, 302)
+    end
+  end
+
+  describe "create with silent password recovery for unknown users" do
+    setup [:setup_silent_password_recovery]
+
+    test "appear to have reset password when user not exist", %{conn: conn} do
+      params = %{"password" => %{"email" => "johndoe@exampl.com", "password" => "123123", "password_confirmation" => "123123"}}
+      conn = post conn, password_path(conn, :create), params
+      assert conn.private[:phoenix_flash] == %{"error" => "Mailer configuration required!", "info" => "Reset email sent. Check your email for a reset link."}
+      assert html_response(conn, 302)
+    end
+
+    test "can reset password when user exist",  %{conn: conn, user: user} do
+      params = %{"password" => %{"email" => user.email, "password" => "123123", "password_confirmation" => "123123"}}
+      conn = post conn, password_path(conn, :create), params
+      assert conn.private[:phoenix_flash] == %{"error" => "Mailer configuration required!", "info" => "Reset email sent. Check your email for a reset link."}
       assert html_response(conn, 302)
     end
   end
