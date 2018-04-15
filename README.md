@@ -236,6 +236,7 @@ defmodule MyProjectWeb.ProductController do
 {:unlock_timeout_minutes, 20},
 {:unlock_token_expire_minutes, 5},
 {:rememberable_cookie_expire_hours, 2*24},
+{:forwarded_invitation_fields, [:email, :name]}
 {:allow_silent_password_recovery_for_unknown_user, false}
 ```
 
