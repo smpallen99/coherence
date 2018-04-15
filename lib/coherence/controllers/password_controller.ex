@@ -44,7 +44,47 @@ defmodule Coherence.PasswordController do
     user_schema = Config.user_schema
     user = Schemas.get_user_by_email(password_params["email"])
 
-    recover_password(conn, user_schema, user, params)
+    case Schemas.get_user_by_email password_params["email"] do
+      nil ->
+        changeset = Controller.changeset :password, user_schema, user_schema.__struct__
+        respond_with(
+          conn,
+          :password_create_error,
+          %{
+            changeset: changeset,
+            error: Messages.backend().could_not_find_that_email_address()
+          }
+        )
+      user ->
+        token = random_string 48
+        uri = %URI{host: conn.host, port: conn.port}
+        url = router_helpers().password_url(uri, :edit, token)
+        # Logger.debug "reset email url: #{inspect url}"
+        dt = NaiveDateTime.utc_now()
+        Config.repo.update! Controller.changeset(:password, user_schema, user,
+          %{reset_password_token: token, reset_password_sent_at: dt})
+
+        if Config.mailer?() do
+          send_user_email :password, user, url
+          respond_with(
+            conn,
+            :password_create_success,
+            %{
+              params: params,
+              info: Messages.backend().reset_email_sent()
+            }
+          )
+        else
+          respond_with(
+            conn,
+            :password_create_success,
+            %{
+              params: params,
+              error: Messages.backend().mailer_required()
+            }
+          )
+        end
+    end
   end
 
   @doc """
