@@ -35,7 +35,7 @@ defmodule CoherenceTest.Schema do
     cs = User.changeset(%User{}, %{name: "test", email: @email, password: "12345", password_confirmation: "99"})
     refute cs.valid?
   end
-  
+
   test "invalidates incorrect password length" do
     cs = User.changeset(%User{}, %{name: "test", email: @email, password: "123", password_confirmation: "123"})
     refute cs.valid?
@@ -67,7 +67,7 @@ defmodule CoherenceTest.Schema do
 
   test "confirmed?" do
     refute User.confirmed?(%User{})
-    assert User.confirmed?(%User{confirmed_at: Ecto.DateTime.utc})
+    assert User.confirmed?(%User{confirmed_at: NaiveDateTime.utc_now()})
   end
 
   test "confirm" do
@@ -78,6 +78,6 @@ defmodule CoherenceTest.Schema do
 
   test "locked?" do
     refute User.locked?(%User{})
-    assert User.locked?(%User{locked_at: Ecto.DateTime.utc})
+    assert User.locked?(%User{locked_at: NaiveDateTime.utc_now()})
   end
 end

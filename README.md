@@ -129,6 +129,7 @@ defmodule MyProjectWeb.Router do
     plug Coherence.Authentication.Session  # Add this
   end
 
+  # Add this block
   pipeline :protected do
     plug :accepts, ["html"]
     plug :fetch_session
@@ -236,6 +237,7 @@ defmodule MyProjectWeb.ProductController do
 {:unlock_token_expire_minutes, 5},
 {:rememberable_cookie_expire_hours, 2*24},
 {:forwarded_invitation_fields, [:email, :name]}
+{:allow_silent_password_recovery_for_unknown_user, false}
 ```
 
 You can override this default configs. For example: you can add the following codes inside `config/config.exs`
@@ -349,6 +351,8 @@ Provides `new`, `create`, `edit`, `update` actions for the `/passwords` route.
 Adds a "Forgot your password?" link to the log-in form. When clicked, the user provides their email address and if found, sends a reset password instructions email with a reset link.
 
 The expiry timeout can be changed with the `:reset_token_expire_days` config entry.
+
+By default, providing an unknown email address will result in a form error. If you want to prevent that and display a confirmation message even if the email isn’t found, set the `:allow_silent_password_recovery_for_unknown_user` to `true`.
 
 ### Trackable
 
@@ -558,6 +562,11 @@ end
 ```
 
 See the documentation for further details.
+
+### Customizing Responders
+
+To customize how application responds to html or json format, you can override methods in the `lib/my_project_web/controllers/coherence/responders/html.ex` or `lib/my_project_web/controllers/coherence/responders/json.ex`.
+
 
 ### Customizing layout
 

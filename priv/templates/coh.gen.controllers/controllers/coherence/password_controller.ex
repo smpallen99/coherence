@@ -42,29 +42,9 @@ defmodule <%= web_base %>.Coherence.PasswordController do
   @spec create(conn, params) :: conn
   def create(conn, %{"password" => password_params} = params) do
     user_schema = Config.user_schema
+    user = Schemas.get_user_by_email(password_params["email"])
 
-    case Schemas.get_user_by_email password_params["email"] do
-      nil ->
-        changeset = Controller.changeset :password, user_schema, user_schema.__struct__
-        conn
-        |> put_flash(:error, Messages.backend().could_not_find_that_email_address())
-        |> render("new.html", changeset: changeset)
-      user ->
-        token = random_string 48
-        url = router_helpers().password_url(conn, :edit, token)
-        # Logger.debug "reset email url: #{inspect url}"
-        dt = Ecto.DateTime.utc
-        Config.repo.update! Controller.changeset(:password, user_schema, user,
-          %{reset_password_token: token, reset_password_sent_at: dt})
-
-        if Config.mailer?() do
-          send_user_email :password, user, url
-          put_flash(conn, :info, Messages.backend().reset_email_sent())
-        else
-          put_flash(conn, :error, Messages.backend().mailer_required())
-        end
-        |> redirect_to(:password_create, params)
-    end
+    recover_password(conn, user_schema, user, params)
   end
 
   @doc """
@@ -106,18 +86,22 @@ defmodule <%= web_base %>.Coherence.PasswordController do
 
     case Schemas.get_by_user reset_password_token: token do
       nil ->
-        conn
-        |> put_flash(:error, Messages.backend().invalid_reset_token())
-        |> redirect(to: logged_out_url(conn))
+        respond_with(
+          conn,
+          :password_update_error,
+          %{error: Messages.backend().invalid_reset_token()}
+        )
       user ->
         if expired? user.reset_password_sent_at, days: Config.reset_token_expire_days do
           :password
           |> Controller.changeset(user_schema, user, clear_password_params())
           |> Schemas.update
 
-          conn
-          |> put_flash(:error, Messages.backend().password_reset_token_expired())
-          |> redirect(to: logged_out_url(conn))
+          respond_with(
+            conn,
+            :password_update_error,
+            %{error: Messages.backend().password_reset_token_expired()}
+          )
         else
           params = clear_password_params password_params
 
@@ -128,10 +112,19 @@ defmodule <%= web_base %>.Coherence.PasswordController do
             {:ok, user} ->
               conn
               |> TrackableService.track_password_reset(user, user_schema.trackable_table?)
-              |> put_flash(:info, Messages.backend().password_updated_successfully())
-              |> redirect_to(:password_update, params)
+              |> respond_with(
+                :password_update_success,
+                %{
+                  params: params,
+                  info: Messages.backend().password_updated_successfully()
+                }
+              )
             {:error, changeset} ->
-              render(conn, "edit.html", changeset: changeset)
+              respond_with(
+                conn,
+                :password_update_error,
+                %{changeset: changeset}
+              )
           end
         end
     end
@@ -141,5 +134,33 @@ defmodule <%= web_base %>.Coherence.PasswordController do
     params
     |> Map.put("reset_password_token", nil)
     |> Map.put("reset_password_sent_at", nil)
+  end
+
+  defp recover_password(conn, user_schema, nil, params) do
+    if Config.allow_silent_password_recovery_for_unknown_user do
+      info = Messages.backend().reset_email_sent()
+
+      conn
+      |> respond_with( :password_create_success, %{params: params, info: info})
+    else
+      changeset = Controller.changeset :password, user_schema, user_schema.__struct__
+      error = Messages.backend().could_not_find_that_email_address()
+
+      conn
+      |> respond_with(:password_create_error, %{changeset: changeset, error: error})
+    end
+  end
+  defp recover_password(conn, user_schema, user, params) do
+    token = random_string 48
+    url = router_helpers().password_url(conn, :edit, token)
+    dt = Ecto.DateTime.utc
+    info = Messages.backend().reset_email_sent()
+
+    Config.repo.update! Controller.changeset(:password, user_schema, user,
+      %{reset_password_token: token, reset_password_sent_at: dt})
+
+    conn
+    |> send_email_if_mailer(info, fn -> send_user_email :password, user, url end)
+    |> respond_with(:password_create_success, %{params: params, info: info})
   end
 end

@@ -111,6 +111,7 @@ defmodule Coherence.Config do
     {:session_key, "session_auth"},
     {:rememberable_cookie_expire_hours, 2 * 24},
     {:forwarded_invitation_fields, [:email, :name]},
+    {:allow_silent_password_recovery_for_unknown_user, false},
     {:async_rememberable?, false},
     {:minimum_password_length, 4},
     :messages_backend,

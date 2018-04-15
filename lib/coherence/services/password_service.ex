@@ -29,7 +29,7 @@ defmodule Coherence.PasswordService do
   """
   def reset_password_token(user) do
     token = Controller.random_string 48
-    dt = Ecto.DateTime.utc
+    dt = NaiveDateTime.utc_now()
     :password
     |> Controller.changeset(user.__struct__, user,
       %{reset_password_token: token, reset_password_sent_at: dt})

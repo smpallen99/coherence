@@ -9,6 +9,7 @@ defmodule CoherenceTest.PasswordController do
   setup %{conn: conn} do
     Application.put_env :coherence, :opts, [:confirmable, :authenticatable, :recoverable,
       :lockable, :trackable, :unlockable_with_token, :invitable, :registerable]
+    Application.put_env :coherence, :allow_silent_password_recovery_for_unknown_user, false
     user = insert_user()
     {:ok, conn: conn, user: user}
   end
@@ -16,6 +17,15 @@ defmodule CoherenceTest.PasswordController do
   def setup_trackable_table(%{conn: conn}) do
     Application.put_env :coherence, :opts, [:confirmable, :authenticatable, :recoverable,
       :lockable, :trackable_table, :unlockable_with_token, :invitable, :registerable]
+    Application.put_env :coherence, :allow_silent_password_recovery_for_unknown_user, false
+    user = insert_user()
+    {:ok, conn: conn, user: user}
+  end
+
+  def setup_silent_password_recovery(%{conn: conn}) do
+    Application.put_env :coherence, :opts, [:confirmable, :authenticatable, :recoverable,
+      :lockable, :trackable, :unlockable_with_token, :invitable, :registerable]
+    Application.put_env :coherence, :allow_silent_password_recovery_for_unknown_user, true
     user = insert_user()
     {:ok, conn: conn, user: user}
   end
@@ -31,7 +41,25 @@ defmodule CoherenceTest.PasswordController do
     test "can reset password when user exist",  %{conn: conn, user: user} do
       params = %{"password" => %{"email" => user.email, "password" => "123123", "password_confirmation" => "123123"}}
       conn = post conn, password_path(conn, :create), params
-      assert conn.private[:phoenix_flash] == %{"error" => "Mailer configuration required!"}
+      assert conn.private[:phoenix_flash] == %{"error" => "Mailer configuration required!", "info" => "Reset email sent. Check your email for a reset link."}
+      assert html_response(conn, 302)
+    end
+  end
+
+  describe "create with silent password recovery for unknown users" do
+    setup [:setup_silent_password_recovery]
+
+    test "appear to have reset password when user not exist", %{conn: conn} do
+      params = %{"password" => %{"email" => "johndoe@exampl.com", "password" => "123123", "password_confirmation" => "123123"}}
+      conn = post conn, password_path(conn, :create), params
+      assert conn.private[:phoenix_flash] == %{"error" => "Mailer configuration required!", "info" => "Reset email sent. Check your email for a reset link."}
+      assert html_response(conn, 302)
+    end
+
+    test "can reset password when user exist",  %{conn: conn, user: user} do
+      params = %{"password" => %{"email" => user.email, "password" => "123123", "password_confirmation" => "123123"}}
+      conn = post conn, password_path(conn, :create), params
+      assert conn.private[:phoenix_flash] == %{"error" => "Mailer configuration required!", "info" => "Reset email sent. Check your email for a reset link."}
       assert html_response(conn, 302)
     end
   end
@@ -46,7 +74,7 @@ defmodule CoherenceTest.PasswordController do
 
     test "valid token has expired", %{conn: conn} do
       token = random_string 48
-      {:ok, sent_at} = Ecto.DateTime.cast("2016-01-01 00:00:00")
+      sent_at = ~N(2016-01-01 00:00:00)
       insert_user(%{reset_password_sent_at: sent_at, reset_password_token: token})
       params = %{"id" => token}
       conn = get conn, password_path(conn, :edit, token), params
@@ -56,7 +84,7 @@ defmodule CoherenceTest.PasswordController do
 
     test "valid token hasn't expired", %{conn: conn} do
       token = random_string 48
-      insert_user(%{reset_password_sent_at: Ecto.DateTime.utc, reset_password_token: token})
+      insert_user(%{reset_password_sent_at: NaiveDateTime.utc_now(), reset_password_token: token})
       params = %{"id" => token}
       conn = get conn, password_path(conn, :edit, token), params
       assert conn.private[:phoenix_template] == "edit.html"
@@ -67,7 +95,7 @@ defmodule CoherenceTest.PasswordController do
   describe "update" do
     test "valid token", %{conn: conn} do
       token = random_string 48
-      user = insert_user(%{reset_password_sent_at: Ecto.DateTime.utc, reset_password_token: token})
+      user = insert_user(%{reset_password_sent_at: NaiveDateTime.utc_now(), reset_password_token: token})
       old_password_hash = user.password_hash
       params = %{"password" => %{reset_password_token: token, password: "123123", password_confirmation: "123123"}}
       put(conn, password_path(conn, :update, user.id), params)
@@ -79,7 +107,7 @@ defmodule CoherenceTest.PasswordController do
 
     test "invalid reset password token", %{conn: conn} do
       token = random_string 48
-      user = insert_user(%{reset_password_sent_at: Ecto.DateTime.utc, reset_password_token: token})
+      user = insert_user(%{reset_password_sent_at: NaiveDateTime.utc_now(), reset_password_token: token})
       old_password_hash = user.password_hash
       old_sent_at = user.reset_password_sent_at
       params = %{"password" => %{reset_password_token: "1234567890", password: "123123", password_confirmation: "123123"}}
@@ -92,7 +120,7 @@ defmodule CoherenceTest.PasswordController do
     end
 
     test "valid token has expired, reset token gets removed", %{conn: conn} do
-      {:ok, sent_at} = Ecto.DateTime.cast("2016-01-01 00:00:00")
+      sent_at = ~N(2016-01-01 00:00:00)
       token = random_string 48
       user = insert_user(%{reset_password_sent_at: sent_at, reset_password_token: token})
       old_password_hash = user.password_hash
