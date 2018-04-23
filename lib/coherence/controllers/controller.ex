@@ -160,6 +160,23 @@ defmodule Coherence.Controller do
     end
   end
 
+  def get_confirmation_url(conn, token) do
+    case Config.confimarion_url do
+      nil -> router_helpers().confirmation_url(conn, :edit, token)
+      url -> url
+        |> external_host
+        |> String.replace(":token", token)
+    end
+  end
+
+  defp external_host(url) do
+    url
+    |> String.replace(":external_hostname", external_hostname(Config.external_hostname))
+  end
+
+  defp external_hostname(nil), do: "http://localhost:4000"
+  defp external_hostname(hostname), do: hostname
+
   @doc """
   Send confirmation email with token.
 
@@ -169,7 +186,7 @@ defmodule Coherence.Controller do
   def send_confirmation(conn, user, user_schema) do
     if user_schema.confirmable? do
       token = random_string 48
-      url = router_helpers().confirmation_url(conn, :edit, token)
+      url = get_confirmation_url(conn, token)
       Logger.debug "confirmation email url: #{inspect url}"
       dt = NaiveDateTime.utc_now()
       user

@@ -32,7 +32,7 @@ defmodule CoherenceTest.TrackableService do
       current_user = conn.assigns[:current_user]
       assert current_user.sign_in_count == 1
       assert current_user.current_sign_in_at
-      assert current_user.current_sign_in_ip == "{127, 0, 0, 1}"
+      assert current_user.current_sign_in_ip == "127.0.0.1"
       assert naive_eq?(current_user.last_sign_in_at, current_user.current_sign_in_at)
       assert current_user.last_sign_in_ip == current_user.current_sign_in_ip
     end
@@ -43,18 +43,18 @@ defmodule CoherenceTest.TrackableService do
       current_user = conn.assigns[:current_user]
       assert current_user.sign_in_count == 2
       assert current_user.current_sign_in_at
-      assert current_user.current_sign_in_ip == "{127, 0, 0, 1}"
+      assert current_user.current_sign_in_ip == "127.0.0.1"
       refute naive_eq?(current_user.last_sign_in_at, current_user.current_sign_in_at)
       assert current_user.last_sign_in_ip == current_user.current_sign_in_ip
     end
     test "different IP", %{conn: conn, user: user} do
       conn = Service.track_login(conn, user, true, false)
       current_user = conn.assigns[:current_user]
-      assert current_user.current_sign_in_ip == "{127, 0, 0, 1}"
+      assert current_user.current_sign_in_ip == "127.0.0.1"
       conn = struct(conn, peer: {{10,10,10,10}, 80})
       conn = Service.track_login(conn, conn.assigns[:current_user], true, false)
       current_user = conn.assigns[:current_user]
-      assert current_user.current_sign_in_ip == "{10, 10, 10, 10}"
+      assert current_user.current_sign_in_ip == "10.10.10.10"
     end
     test "track_logout", %{conn: conn, user: user} do
       conn = Service.track_login(conn, user, true, false)
@@ -73,7 +73,7 @@ defmodule CoherenceTest.TrackableService do
       [trackable] = Trackable |> Repo.all
       assert trackable.sign_in_count == 1
       assert trackable.current_sign_in_at
-      assert trackable.current_sign_in_ip == "{127, 0, 0, 1}"
+      assert trackable.current_sign_in_ip == "127.0.0.1"
       assert naive_eq?(trackable.last_sign_in_at, trackable.current_sign_in_at)
       assert trackable.last_sign_in_ip == trackable.current_sign_in_ip
       assert trackable.user_id == user.id
@@ -108,7 +108,7 @@ defmodule CoherenceTest.TrackableService do
 
       assert t3.action == "login"
       assert t3.current_sign_in_at
-      assert t3.current_sign_in_ip == "{127, 0, 0, 1}"
+      assert t3.current_sign_in_ip == "127.0.0.1"
       assert t3.user_id == user.id
       assert naive_eq?(t2.last_sign_in_at, t3.last_sign_in_at)
       assert t3.last_sign_in_ip == t2.last_sign_in_ip
@@ -116,11 +116,11 @@ defmodule CoherenceTest.TrackableService do
     test "different IP", %{conn: conn, user: user} do
       conn = Service.track_login(conn, user, false, true)
       [t1] = Trackable |> order_by(asc: :id) |> Repo.all
-      assert t1.current_sign_in_ip == "{127, 0, 0, 1}"
+      assert t1.current_sign_in_ip == "127.0.0.1"
       conn = struct(conn, peer: {{10,10,10,10}, 80})
       Service.track_login(conn, user, false, true)
       [_t1, t2] = Trackable |> order_by(asc: :id) |> Repo.all
-      assert t2.current_sign_in_ip == "{10, 10, 10, 10}"
+      assert t2.current_sign_in_ip == "10.10.10.10"
     end
     test "password reset", %{conn: conn, user: user} do
       conn = Service.track_login(conn, user, false, true)

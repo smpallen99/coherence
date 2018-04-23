@@ -13,6 +13,8 @@ defmodule Coherence.Config do
   * :repo: the module name of your Repo (`repo: MyProject.Repo`)
   * :user_schema
   * :schema_key
+  * :external_hostname                                - Can read from env vars with {:system, "HOSTNAME"}
+  * :confimarion_url                                  - Must include :token, can include :external_hostname which deaults to "http://localhost:4000"
   * :logged_out_url
   * :logged_in_url
   * :email_from                                       - Deprecated. Use `email_from_name` and `email_from_email` instead
@@ -78,6 +80,8 @@ defmodule Coherence.Config do
     :repo,
     :user_schema,
     :schema_key,
+    :confimarion_url,
+    :external_hostname,
     :logged_out_url,
     :logged_in_url,
     :email_from_name,

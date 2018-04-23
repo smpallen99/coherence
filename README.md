@@ -387,6 +387,14 @@ Provides `edit` action for the `/confirmations` route.
 
 The confirmation token expiry default of 5 days can be changed with the `:confirmation_token_expire_days` config entry.
 
+It is possible to change the confirmation URL sent in the email with config:
+
+```elixir
+config :coherence,
+  external_hostname: {:system, "EXTERNAL_HOSTNAME"}, # Set external hostname, e.g.: http://localhost:4000
+  confimarion_url: ":external_hostname/#/user/confirm/:token", # Can use either hardcoded hostname or :external_hostname, and use :token to embed the generated token
+  ```
+
 ### Recoverable
 
 Allows users to reset their password using an expiring token send by email.
