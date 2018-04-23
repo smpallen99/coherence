@@ -32,11 +32,12 @@ See the [Docs](https://hexdocs.pm/coherence/Coherence.html) and [Wiki](https://g
 
 ## Installation
 
-  1. Add coherence to your list of dependencies in `mix.exs`:
+  1. Add coherence and gettext `0.13.1` to your list of dependencies in `mix.exs`:
 
       ```elixir
       def deps do
-        [{:coherence, "~> 0.5"}]
+        [{:coherence, "~> 0.5"},
+         {:gettext, "~> 0.13.1"}]
       end
       ```
 
