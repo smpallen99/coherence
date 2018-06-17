@@ -15,6 +15,7 @@ defmodule Coherence.Messages do
   @callback account_already_confirmed() :: binary
   @callback account_is_not_locked() :: binary
   @callback account_updated_successfully() :: binary
+  @callback account_created_successfully() :: binary
   @callback already_logged_in() :: binary
   @callback cant_find_that_token() :: binary
   @callback confirmation_token_expired() :: binary
