@@ -70,7 +70,14 @@ defmodule Coherence.RegistrationController do
   defp redirect_or_login(conn, user, params, _) do
     conn
     |> Controller.login_user(user, params)
-    |> respond_with(:session_create_success, %{params: params, user: user})
+    |> respond_with(
+      :session_create_success,
+      %{
+        params: params,
+        user: user,
+        notice: Messages.backend().account_created_successfully(),
+      }
+    )
   end
 
   @doc """

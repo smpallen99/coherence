@@ -24,6 +24,7 @@ defmodule TestCoherenceWeb.Coherence.Messages do
   def account_already_confirmed, do: dgettext(@domain, "Account already confirmed.")
   def account_is_not_locked, do: dgettext(@domain, "Account is not locked.")
   def account_updated_successfully, do: dgettext(@domain, "Account updated successfully.")
+  def account_created_successfully, do: dgettext(@domain, "Account created successfully.")
   def already_confirmed, do: dgettext(@domain, "already confirmed")
   def already_locked, do: dgettext(@domain, "already locked")
   def already_logged_in, do: dgettext(@domain, "Already logged in.")
