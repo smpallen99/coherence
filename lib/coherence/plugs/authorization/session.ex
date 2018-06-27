@@ -34,38 +34,10 @@ defmodule Coherence.Authentication.Session do
   ## Database Persistence
 
   To enable database persistence, implement [Coherence.DbStore] protocol for your
-  user model. As well, you will need to provide the :db_model option to the plug. For
-  example:
+  user model. As well, you will need to provide the :db_model option to the plug.
 
-      defimpl Coherence.DbStore, for: MyProject.User do
-        alias MyProject.{Session, Repo}
-        
-        def get_user_data(_, creds, _id_key) do
-          case Repo.one from s in Session, where: s.creds == ^creds, preload: :user do
-            %{user: user} -> user
-            _ -> nil
-          end
-        end
-
-        def put_credentials(user, creds , _) do
-          case Repo.one from s in Session, where: s.creds == ^creds do
-            nil -> %Session{creds: creds}
-            session -> session
-          end
-          |> Session.changeset(%{user_id: user.id})
-          |> Repo.insert_or_update
-        end
-
-        def delete_credentials(_, creds) do
-          case Repo.one from s in Session, where: s.creds == ^creds do
-            nil -> nil
-            session ->
-              Repo.delete session
-          end
-        end
-      end
-
-      plug Coherence.Authentication.Session, db_model: MyProject.User, protected: true
+  See the full guide on how to implement this in the project wiki:
+  https://github.com/smpallen99/coherence/wiki/Session-token-Ecto-Persistance
 
   You should be aware that the Server is still used to fetch the user data if can
   be found. If the key is not found, it checks the database. If a record is found
