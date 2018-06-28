@@ -22,6 +22,7 @@ Coherence is a full featured, configurable authentication system for Phoenix, wi
 * [Lockable](#lockable): locks an account when a specified number of failed sign-in attempts has been exceeded.
 * [Unlockable With Token](#unlockable-with-token): provides a link to send yourself an unlock email.
 * [Rememberable](#remember-me): provides persistent login with 'Remember me?' check box on login page.
+
 Coherence provides flexibility by adding namespaced templates and views for only the options specified by the `mix coh.install` command. This boiler plate code is added to your `lib/my_project/web/templates/coherence` and `lib/my_project/web/views/coherence` directories.
 
 Once the boilerplate has been generated, you are free to customize the source as required.
