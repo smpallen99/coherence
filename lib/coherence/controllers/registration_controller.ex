@@ -52,7 +52,8 @@ defmodule Coherence.RegistrationController do
   def create(conn, %{"registration" => registration_params} = params) do
     user_schema = Config.user_schema
     :registration
-    |> Controller.changeset(user_schema, user_schema.__struct__, registration_params)
+    |> Controller.changeset(user_schema, user_schema.__struct__,
+                            %{email: registration_params["email"], name: registration_params["name"], password: registration_params["password"]})
     |> Schemas.create
     |> case do
       {:ok, user} ->
