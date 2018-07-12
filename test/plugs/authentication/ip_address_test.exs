@@ -2,6 +2,7 @@ defmodule CoherenceTest.Authentication.IpAddress do
   use ExUnit.Case, async: true
   use Plug.Test
   alias Coherence.Authentication.IpAddress
+  alias Plug.Adapters.CoherenceTest.Conn, as: TestConn
 
   @error_msg ~s'{"error":"authentication required"}'
 
@@ -32,13 +33,15 @@ defmodule CoherenceTest.Authentication.IpAddress do
   end
 
   defp call(plug, params) do
-    conn(:get, "/", params)
+    :get
+    |> conn("/", params)
     |> plug.call([])
   end
 
   defp call(plug, params, ip_address) do
-    conn(:get, "/", params)
-    |> struct(peer: {ip_address, 4000})
+    :get
+    |> conn("/", params)
+    |> TestConn.set_peer(ip_address, 4000)
     |> plug.call([])
   end
 

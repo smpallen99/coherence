@@ -9,12 +9,14 @@ config :coherence, TestCoherenceWeb.Endpoint,
   secret_key_base: "HL0pikQMxNSA58Dv4mf26O/eh1e4vaJDmX0qLgqBcnS94gbKu9Xn3x114D+mHYcX",
   server: false
 
+config :coherence, ecto_repos: [TestCoherence.Repo]
+
 config :coherence, TestCoherence.Repo,
   adapter: Ecto.Adapters.Postgres,
-  username: "postgres",
-  password: "postgres",
+  username: System.get_env("DB_USERNAME") || "postgres",
+  password: System.get_env("DB_PASSWORD") || "postgres",
   database: "coherence_test",
-  hostname: "localhost",
+  hostname: System.get_env("DB_HOSTNAME") || "localhost",
   pool: Ecto.Adapters.SQL.Sandbox
 
 config :coherence,

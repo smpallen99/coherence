@@ -5,6 +5,7 @@ defmodule CoherenceTest.TrackableService do
 
   alias Coherence.TrackableService, as: Service
   alias TestCoherence.{Repo, User, Coherence.Trackable}
+  alias Plug.Adapters.CoherenceTest.Conn, as: TestConn
 
   @session_opts [
     store: :cookie,
@@ -51,7 +52,7 @@ defmodule CoherenceTest.TrackableService do
       conn = Service.track_login(conn, user, true, false)
       current_user = conn.assigns[:current_user]
       assert current_user.current_sign_in_ip == "{127, 0, 0, 1}"
-      conn = struct(conn, peer: {{10,10,10,10}, 80})
+      conn = TestConn.set_peer(conn, {10,10,10,10}, 80)
       conn = Service.track_login(conn, conn.assigns[:current_user], true, false)
       current_user = conn.assigns[:current_user]
       assert current_user.current_sign_in_ip == "{10, 10, 10, 10}"
@@ -117,7 +118,7 @@ defmodule CoherenceTest.TrackableService do
       conn = Service.track_login(conn, user, false, true)
       [t1] = Trackable |> order_by(asc: :id) |> Repo.all
       assert t1.current_sign_in_ip == "{127, 0, 0, 1}"
-      conn = struct(conn, peer: {{10,10,10,10}, 80})
+      conn = TestConn.set_peer(conn, {10,10,10,10}, 80)
       Service.track_login(conn, user, false, true)
       [_t1, t2] = Trackable |> order_by(asc: :id) |> Repo.all
       assert t2.current_sign_in_ip == "{10, 10, 10, 10}"
