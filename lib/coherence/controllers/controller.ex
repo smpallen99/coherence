@@ -348,4 +348,14 @@ defmodule Coherence.Controller do
       put_flash(conn, :error, Messages.backend().mailer_required())
     end
   end
+  @doc """
+  leaves in params only permitted request parameters.
+
+  Same as Rails permit, prevents mass assignment attacks.
+  """
+  @spec permit(Map.t, List.t) :: Map.t
+  def permit(params,permitted) do
+    params
+    |> Map.take(permitted)
+  end
 end

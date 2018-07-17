@@ -54,6 +54,7 @@ defmodule Coherence.Config do
   * :messages_backend - (MyApp.Coherence.Messages)
   * :router: the module name of your Router (`router: MyProject.Router`)
   * :user_active_field - Include the user active feature
+  * :registration_permitted_attributes - List of strings that are allowed registration parameters
 
   ## Examples
 
@@ -116,7 +117,8 @@ defmodule Coherence.Config do
     {:minimum_password_length, 4},
     :messages_backend,
     :router,
-    :user_active_field
+    :user_active_field,
+    :registration_permitted_attributes
   ]
   |> Enum.each(fn
         {key, default} ->

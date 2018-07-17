@@ -53,7 +53,7 @@ defmodule Coherence.RegistrationController do
     user_schema = Config.user_schema
     :registration
     |> Controller.changeset(user_schema, user_schema.__struct__,
-                            %{email: registration_params["email"], name: registration_params["name"], password: registration_params["password"]})
+                            Controller.permit(registration_params, Config.registration_permitted_attributes))
     |> Schemas.create
     |> case do
       {:ok, user} ->
