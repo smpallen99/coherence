@@ -38,6 +38,10 @@ defmodule Mix.Tasks.Coh.InstallTest do
         "messages_backend: TestCoherenceWeb.Coherence.Messages,",
         "opts: [:authenticatable]",
       ]
+
+      assert_file "config/config.exs", [
+        "registration_permitted_attributes: [\"email\",\"name\",\"password\"],",
+      ]
     end
   end
 
