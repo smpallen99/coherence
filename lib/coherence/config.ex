@@ -54,7 +54,7 @@ defmodule Coherence.Config do
   * :messages_backend - (MyApp.Coherence.Messages)
   * :router: the module name of your Router (`router: MyProject.Router`)
   * :user_active_field - Include the user active feature
-  * :registration_permitted_attributes - List of strings that are allowed registration parameters
+  * :registration_permitted_attributes - List of allowed registration parameter attributes as strings
 
   ## Examples
 

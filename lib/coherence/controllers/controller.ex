@@ -293,7 +293,7 @@ defmodule Coherence.Controller do
     {mod, fun, args} = case Application.get_env :coherence, :changeset do
       nil -> {module, :changeset, [model, params]}
       {mod, fun} -> {mod, fun, [model, params, which]}
-    end
+                       end
     apply mod, fun, args
   end
 
@@ -354,8 +354,6 @@ defmodule Coherence.Controller do
   Same as Rails permit, prevents mass assignment attacks.
   """
   @spec permit(Map.t, List.t) :: Map.t
-  def permit(params,permitted) do
-    params
-    |> Map.take(permitted)
-  end
+  def permit(_, nil), do: %{}
+  def permit(params, permitted), do: params |> Map.take(permitted)
 end

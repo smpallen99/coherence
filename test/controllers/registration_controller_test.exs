@@ -26,12 +26,20 @@ defmodule CoherenceTest.RegistrationController do
   end
 
   describe "create" do
-    test "can create new registration with valid params", %{conn: conn} do
+    test "can create new registration with valid params, password_confirmation is not mandatory", %{conn: conn} do
       conn = assign conn, :current_user, nil
       params = %{"registration" => %{"name" => "John Doe", "email" => "john.doe@example.com", "password" => "123123"}}
       conn = post conn, registration_path(conn, :create), params
       assert conn.private[:phoenix_flash] == %{"error" => "Mailer configuration required!"}
       assert html_response(conn, 302)
+    end
+
+    test "password_confirmation checked only if present", %{conn: conn} do
+      conn = assign conn, :current_user, nil
+      params = %{"registration" => %{"name" => "John Doe", "email" => "john.doe@example.com", "password_confirmation" => "no match", "password" => "123123"}}
+      conn = post conn, registration_path(conn, :create), params
+      errors = conn.assigns.changeset.errors
+      assert errors[:password_confirmation] == {"does not match confirmation", [validation: :confirmation]}
     end
 
     test "can not register with invalid params", %{conn: conn} do

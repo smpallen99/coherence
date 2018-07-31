@@ -40,7 +40,7 @@ defmodule Mix.Tasks.Coh.InstallTest do
       ]
 
       assert_file "config/config.exs", [
-        "registration_permitted_attributes: [\"email\",\"name\",\"password\"],",
+        "registration_permitted_attributes: [\"email\",\"name\",\"password\",\"current_password\",\"password_confirmation\"],",
       ]
     end
   end

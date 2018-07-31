@@ -108,7 +108,7 @@ defmodule Coherence.RegistrationController do
     user_schema = Config.user_schema
     user = Coherence.current_user(conn)
     :registration
-    |> Controller.changeset(user_schema, user, user_params)
+    |> Controller.changeset(user_schema, user, Controller.permit(user_params, Config.registration_permitted_attributes))
     |> Schemas.update
     |> case do
       {:ok, user} ->
