@@ -31,5 +31,6 @@ config :coherence,
   email_from_name: "Your Name",
   email_from_email: "yourname@example.com",
   opts: [:confirmable, :authenticatable, :recoverable, :lockable, :trackable, :unlockable_with_token, :invitable, :registerable, :rememberable],
-  registration_permitted_attributes: ["email","name","password", "password_confirmation","current_password"]
+  registration_permitted_attributes: ["email","name","password", "password_confirmation","current_password"],
+  invitation_permitted_attributes: ["name","email"]
 

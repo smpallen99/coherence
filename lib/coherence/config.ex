@@ -55,6 +55,7 @@ defmodule Coherence.Config do
   * :router: the module name of your Router (`router: MyProject.Router`)
   * :user_active_field - Include the user active feature
   * :registration_permitted_attributes - List of allowed registration parameter attributes as strings
+  * :invitation_permitted_attributes - List of allowed invitation parameter attribues as strings
 
   ## Examples
 
@@ -118,7 +119,8 @@ defmodule Coherence.Config do
     :messages_backend,
     :router,
     :user_active_field,
-    :registration_permitted_attributes
+    :registration_permitted_attributes,
+    :invitation_permitted_attributes
   ]
   |> Enum.each(fn
         {key, default} ->

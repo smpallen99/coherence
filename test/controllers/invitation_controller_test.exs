@@ -25,6 +25,12 @@ defmodule CoherenceTest.InvitationController do
       assert conn.private[:phoenix_flash] == %{"info" => "Invitation sent."}
       assert html_response(conn, 302)
     end
+    test "mass asignment not allowed", %{conn: conn} do
+      params = %{"invitation" => %{"name" => "John Doe", "email" => "john@example.com","token" => "hacker token value"}}
+      post conn, invitation_path(conn, :create), params
+      %{:token => token} = Coherence.Schemas.get_by_invitation email: params["invitation"]["email"]
+      refute token == params["invitation"]["token"]
+    end
   end
 
   describe "new" do
