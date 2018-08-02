@@ -56,6 +56,15 @@ defmodule CoherenceTest.InvitationController do
       conn = post conn, invitation_path(conn, :create_user), params
       assert conn.private[:phoenix_flash] == %{"error" => "Mailer configuration required!"}
       assert html_response(conn, 302)
+      end
     end
-  end
+    test "mass asignment not allowed", %{conn: conn} do
+      invitation = insert_invitation()
+      params = %{"user" => %{"name" => invitation.name, "email" => invitation.email, "password" => "12345678", "current_sign_in_ip" => "mass asignment"}, "token" => invitation.token }
+      conn = post conn, invitation_path(conn, :create_user), params
+      assert conn.private[:phoenix_flash] == %{"error" => "Mailer configuration required!"}
+      assert html_response(conn, 302)
+      %{:current_sign_in_ip => current_sign_in_ip} = get_user_by_email(params["user"]["email"])
+      refute current_sign_in_ip == params["user"]["current_sign_in_ip"]
+    end
 end
