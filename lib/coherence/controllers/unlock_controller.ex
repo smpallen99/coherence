@@ -76,7 +76,7 @@ defmodule Coherence.UnlockController do
   end
 
   @doc """
-  Handle the unlcock link click.
+  Handle the unlock link click.
   """
   @spec edit(conn, params) :: conn
   def edit(conn, params) do
