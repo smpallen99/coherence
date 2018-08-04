@@ -136,7 +136,6 @@ defmodule CoherenceTest.PasswordController do
     test "mass assignment not allowed", %{conn: conn} do
       token = random_string 48
       user = insert_user(%{reset_password_sent_at: NaiveDateTime.utc_now(), reset_password_token: token})
-      old_password_hash = user.password_hash
       params = %{"password" => %{"reset_password_token" => token, "password" => "123123", "password_confirmation" => "123123","current_sign_in_ip" => "mass_asignment"}}
       put(conn, password_path(conn, :update, user.id), params)
       user = Repo.get!(TestCoherence.User, user.id)
