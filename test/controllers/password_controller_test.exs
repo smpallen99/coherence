@@ -44,6 +44,7 @@ defmodule CoherenceTest.PasswordController do
       assert conn.private[:phoenix_flash] == %{"error" => "Mailer configuration required!", "info" => "Reset email sent. Check your email for a reset link."}
       assert html_response(conn, 302)
     end
+    
   end
 
   describe "create with silent password recovery for unknown users" do
@@ -97,7 +98,7 @@ defmodule CoherenceTest.PasswordController do
       token = random_string 48
       user = insert_user(%{reset_password_sent_at: NaiveDateTime.utc_now(), reset_password_token: token})
       old_password_hash = user.password_hash
-      params = %{"password" => %{reset_password_token: token, password: "123123", password_confirmation: "123123"}}
+      params = %{"password" => %{"reset_password_token" => token, "password" => "123123", "password_confirmation" => "123123"}}
       put(conn, password_path(conn, :update, user.id), params)
       user = Repo.get!(TestCoherence.User, user.id)
       refute old_password_hash == user.password_hash
@@ -110,7 +111,7 @@ defmodule CoherenceTest.PasswordController do
       user = insert_user(%{reset_password_sent_at: NaiveDateTime.utc_now(), reset_password_token: token})
       old_password_hash = user.password_hash
       old_sent_at = user.reset_password_sent_at
-      params = %{"password" => %{reset_password_token: "1234567890", password: "123123", password_confirmation: "123123"}}
+      params = %{"password" => %{"reset_password_token" => "1234567890", "password" => "123123", "password_confirmation" => "123123"}}
       put(conn, password_path(conn, :update, user.id), params)
       user = Repo.get!(TestCoherence.User, user.id)
 
@@ -124,13 +125,22 @@ defmodule CoherenceTest.PasswordController do
       token = random_string 48
       user = insert_user(%{reset_password_sent_at: sent_at, reset_password_token: token})
       old_password_hash = user.password_hash
-      params = %{"password" => %{reset_password_token: token, password: "123123", password_confirmation: "123123"}}
+      params = %{"password" => %{"reset_password_token" => token, "password" => "123123", "password_confirmation" => "123123"}}
       put(conn, password_path(conn, :update, user.id), params)
       user = Repo.get!(TestCoherence.User, user.id)
 
       assert old_password_hash == user.password_hash
       assert user.reset_password_token == nil
       assert user.reset_password_sent_at == nil
+    end
+    test "mass assignment not allowed", %{conn: conn} do
+      token = random_string 48
+      user = insert_user(%{reset_password_sent_at: NaiveDateTime.utc_now(), reset_password_token: token})
+      old_password_hash = user.password_hash
+      params = %{"password" => %{"reset_password_token" => token, "password" => "123123", "password_confirmation" => "123123","current_sign_in_ip" => "mass_asignment"}}
+      put(conn, password_path(conn, :update, user.id), params)
+      user = Repo.get!(TestCoherence.User, user.id)
+      refute "mass_assignment" == user.current_sign_in_ip
     end
   end
 
@@ -147,6 +157,5 @@ defmodule CoherenceTest.PasswordController do
       assert t1.action == "password_reset"
       assert t1.user_id == user.id
     end
-
   end
 end

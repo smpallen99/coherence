@@ -120,7 +120,8 @@ defmodule Coherence.Config do
     :router,
     :user_active_field,
     :registration_permitted_attributes,
-    :invitation_permitted_attributes
+    :invitation_permitted_attributes,
+    :password_reset_permitted_attributes,
   ]
   |> Enum.each(fn
         {key, default} ->

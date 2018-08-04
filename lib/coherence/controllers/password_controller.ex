@@ -103,7 +103,7 @@ defmodule Coherence.PasswordController do
             %{error: Messages.backend().password_reset_token_expired()}
           )
         else
-          params = clear_password_params password_params
+          params = clear_password_params Controller.permit(password_params, Config.password_reset_permitted_attributes)
 
           :password
           |> Controller.changeset(user_schema, user, params)
