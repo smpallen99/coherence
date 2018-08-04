@@ -270,7 +270,7 @@ defmodule Mix.Tasks.Coh.Install do
         registration_permitted_attributes: ["email","name","password","current_password","password_confirmation"],
         invitation_permitted_attributes: ["name","email"],
         password_reset_permitted_attributes: ["reset_password_token","password","password_confirmation"],
-        session_permitted_attributes: ["remember",email","password"],
+        session_permitted_attributes: ["remember","email","password"],
       """
     (config_block <> from_email <> "  opts: #{inspect config[:opts]}\n")
     |> swoosh_config(config)
