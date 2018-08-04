@@ -46,8 +46,11 @@ defmodule Mix.Tasks.Coh.InstallTest do
         "invitation_permitted_attributes: [\"name\",\"email\"],",
       ]
       assert_file "config/config.exs", [
-        "password_reset_permitted_attributes: [\"reset_password_token\",\"password\",\"password_confirmation\"],"
-      ] 
+        "password_reset_permitted_attributes: [\"reset_password_token\",\"password\",\"password_confirmation\"],",
+      ]
+      assert_file "config/config.exs", [
+        "session_permitted_attributes: [\"remember\",\"email\",\"password\"],",
+      ]
     end
   end
 

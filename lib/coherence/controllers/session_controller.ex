@@ -83,7 +83,7 @@ defmodule Coherence.SessionController do
     user = Schemas.get_by_user [{login_field, login}]
     if valid_user_login? user, params do
       if confirmed_access? user do
-        do_lockable(conn, login_field, [user, user_schema, remember, lockable?, remember, params],
+        do_lockable(conn, login_field, [user, user_schema, remember, lockable?, remember, Controller.permit(params,Config.session_permitted_attributes)],
           user_schema.lockable?() and user_schema.locked?(user))
       else
         respond_with(

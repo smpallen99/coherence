@@ -56,6 +56,8 @@ defmodule Coherence.Config do
   * :user_active_field - Include the user active feature
   * :registration_permitted_attributes - List of allowed registration parameter attributes as strings
   * :invitation_permitted_attributes - List of allowed invitation parameter attribues as strings
+  * :password_reset_permitted_attributes - List of allowed password reset atributes as stings,
+  * :session_permitted_attributes - List of allowed session attributes as strings
 
   ## Examples
 
@@ -122,6 +124,7 @@ defmodule Coherence.Config do
     :registration_permitted_attributes,
     :invitation_permitted_attributes,
     :password_reset_permitted_attributes,
+    :session_permitted_attributes,
   ]
   |> Enum.each(fn
         {key, default} ->
