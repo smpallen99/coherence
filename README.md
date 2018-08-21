@@ -774,7 +774,7 @@ Coherence.CredentialStore.Server.put_credentials(token, %{id: "USER_ID_HERE", ro
 ### Add IP Credentials Example
 
 ```elixir
-Coherence.CredentialStore.Server.put_credentials({127.0.0.1}, %{id: "USER_ID_HERE", role: :admin})
+Coherence.CredentialStore.Server.put_credentials({127,0,0,1}, %{id: "USER_ID_HERE", role: :admin})
 ```
 
 IpAddress authentication does not require this step. Its optional. If the user_data
