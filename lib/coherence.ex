@@ -159,64 +159,66 @@ defmodule Coherence do
   The `--rememberable` install option is not provided in any of the installer group options. You must provide the `--rememberable` option to install the migration and its support.
 
   ## Mix Tasks
-
+  
+  Backwords compatibility note: For versions of Phoenix previous to 1.3 use `mix coherence.<command>`. The new `mix coh.<command>` better understands the newer Phoenix patterns.
+  
   ### Installer
 
   The following examples illustrate various configuration scenarios for the install mix task:
 
       # Install with only the `authenticatable` option
-      $ mix coherence.install
+      $ mix coh.install
 
       # Install all the options except `confirmable` and `invitable`
-      $ mix coherence.install --full
+      $ mix coh.install --full
 
       # Install all the options except `invitable`
-      $ mix coherence.install --full-confirmable
+      $ mix coh.install --full-confirmable
 
       # Install all the options except `confirmable`
-      $ mix coherence.install --full-invitable
+      $ mix coh.install --full-invitable
 
       # Install the `full` options except `lockable` and `trackable`
-      $ mix coherence.install --full --no-lockable --no-trackable
+      $ mix coh.install --full --no-lockable --no-trackable
 
   And some reinstall examples:
 
       # Reinstall with defaults (--silent --no-migrations --no-config --confirm-once)
-      $ mix coherence.install --reinstall
+      $ mix coh.install --reinstall
 
       # Confirm to overwrite files, show instructions, and generate migrations
-      $ mix coherence.install --reinstall --no-confirm-once --with-migrations
+      $ mix coh.install --reinstall --no-confirm-once --with-migrations
 
-  Run `$ mix help coherence.install` for more information.
+  Run `$ mix help coh.install` for more information.
 
   ### Clean
 
   The following examples illustrate how to remove the files created by the installer:
 
       # Clean all the installed files
-      $ mix coherence.clean --all
+      $ mix coh.clean --all
 
       # Clean only the installed view and template files
-      $ mix coherence.clean --views --templates
+      $ mix coh.clean --views --templates
 
       # Clean all but the models
-      $ mix coherence.clean --all --no-models
+      $ mix coh.clean --all --no-models
 
       # Prompt once to confirm the removal
-      $ mix coherence.clean --all --confirm-once
+      $ mix coh.clean --all --confirm-once
 
   After installation, if you later want to remove one more options, here are a couple examples:
 
       # Clean one option
-      $ mix coherence.clean --options=recoverable
+      $ mix coh.clean --options=recoverable
 
       # Clean several options without confirmation
-      $ mix coherence.clicked --no-confirm --options="recoverable unlockable-with-token"
+      $ mix coh.clicked --no-confirm --options="recoverable unlockable-with-token"
 
       # Test the uninstaller without removing files
-      $ mix coherence.clicked --dry-run --options="recoverable unlockable-with-token"
+      $ mix coh.clicked --dry-run --options="recoverable unlockable-with-token"
 
-  Run `$ mix help coherence.install` or `$ mix help coherence.install` for more information.
+  Run `$ mix help coh.install` or `$ mix help coherence.install` for more information.
   """
   use Application
 
