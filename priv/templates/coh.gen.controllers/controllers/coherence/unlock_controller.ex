@@ -64,7 +64,7 @@ defmodule <%= web_base %>.Coherence.UnlockController do
             |> respond_with(:unlock_create_error_not_locked, %{params: params, error: error})
           end
         {:error, changeset} ->
-          respond_with(conn, :unlock_create_error, %{changeset: changeset})
+          respond_with(conn,:unlock_create_error, %{changeset: changeset})
       end
     else
       respond_with(
@@ -76,7 +76,7 @@ defmodule <%= web_base %>.Coherence.UnlockController do
   end
 
   @doc """
-  Handle the unlcock link click.
+  Handle the unlock link click.
   """
   @spec edit(conn, params) :: conn
   def edit(conn, params) do
@@ -117,14 +117,5 @@ defmodule <%= web_base %>.Coherence.UnlockController do
           :ok
       end
     end
-  end
-
-  defp send_unlock_email(conn, user) do
-	if Config.mailer?() do
-	  send_user_email :unlock, user, router_helpers().unlock_url(conn, :edit, user.unlock_token)
-	  put_flash(conn, :info, Messages.backend().unlock_instructions_sent())
-	else
-	  put_flash(conn, :error, Messages.backend().mailer_required())
-	end
   end
 end

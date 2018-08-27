@@ -9,8 +9,7 @@ defmodule <%= web_base %>.Coherence.ConfirmationController do
   use Timex
 
   alias Coherence.{ConfirmableService, Messages}
-  alias Ecto.DateTime
-  alias Coherence.Schemas
+  alias <%= base %>.Coherence.Schemas
 
   require Logger
 
@@ -108,7 +107,7 @@ defmodule <%= web_base %>.Coherence.ConfirmationController do
         else
           changeset = Controller.changeset(:confirmation, user_schema, user, %{
             confirmation_token: nil,
-            confirmed_at: DateTime.utc,
+            confirmed_at: NaiveDateTime.utc_now(),
           })
           case Config.repo.update(changeset) do
             {:ok, _user} ->

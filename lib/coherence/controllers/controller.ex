@@ -290,10 +290,11 @@ defmodule Coherence.Controller do
     apply module, fun, [model, params, :password]
   end
   def changeset(which, module, model, params) do
-    {mod, fun, args} = case Application.get_env :coherence, :changeset do
-      nil -> {module, :changeset, [model, params]}
-      {mod, fun} -> {mod, fun, [model, params, which]}
-                       end
+    {mod, fun, args} =
+      case Application.get_env :coherence, :changeset do
+        nil -> {module, :changeset, [model, params]}
+        {mod, fun} -> {mod, fun, [model, params, which]}
+      end
     apply mod, fun, args
   end
 

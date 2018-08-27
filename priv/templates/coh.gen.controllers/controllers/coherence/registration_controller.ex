@@ -52,7 +52,8 @@ defmodule <%= web_base %>.Coherence.RegistrationController do
   def create(conn, %{"registration" => registration_params} = params) do
     user_schema = Config.user_schema
     :registration
-    |> Controller.changeset(user_schema, user_schema.__struct__, registration_params)
+    |> Controller.changeset(user_schema, user_schema.__struct__,
+      Controller.permit(registration_params, Config.registration_permitted_attributes))
     |> Schemas.create
     |> case do
       {:ok, user} ->
@@ -70,7 +71,14 @@ defmodule <%= web_base %>.Coherence.RegistrationController do
   defp redirect_or_login(conn, user, params, _) do
     conn
     |> Controller.login_user(user, params)
-    |> respond_with(:session_create_success, %{params: params, user: user})
+    |> respond_with(
+      :session_create_success,
+      %{
+        params: params,
+        user: user,
+        notice: Messages.backend().account_created_successfully(),
+      }
+    )
   end
 
   @doc """
@@ -100,7 +108,8 @@ defmodule <%= web_base %>.Coherence.RegistrationController do
     user_schema = Config.user_schema
     user = Coherence.current_user(conn)
     :registration
-    |> Controller.changeset(user_schema, user, user_params)
+    |> Controller.changeset(user_schema, user, Controller.permit(user_params,
+      Config.registration_permitted_attributes))
     |> Schemas.update
     |> case do
       {:ok, user} ->

@@ -103,7 +103,8 @@ defmodule <%= web_base %>.Coherence.PasswordController do
             %{error: Messages.backend().password_reset_token_expired()}
           )
         else
-          params = clear_password_params password_params
+          params = clear_password_params(Controller.permit(password_params,
+            Config.password_reset_permitted_attributes))
 
           :password
           |> Controller.changeset(user_schema, user, params)
@@ -141,7 +142,8 @@ defmodule <%= web_base %>.Coherence.PasswordController do
       info = Messages.backend().reset_email_sent()
 
       conn
-      |> respond_with( :password_create_success, %{params: params, info: info})
+      |> send_email_if_mailer(info, fn -> true end)
+      |> respond_with(:password_create_success, %{params: params, info: info})
     else
       changeset = Controller.changeset :password, user_schema, user_schema.__struct__
       error = Messages.backend().could_not_find_that_email_address()
@@ -153,7 +155,7 @@ defmodule <%= web_base %>.Coherence.PasswordController do
   defp recover_password(conn, user_schema, user, params) do
     token = random_string 48
     url = router_helpers().password_url(conn, :edit, token)
-    dt = Ecto.DateTime.utc
+    dt = NaiveDateTime.utc_now()
     info = Messages.backend().reset_email_sent()
 
     Config.repo.update! Controller.changeset(:password, user_schema, user,

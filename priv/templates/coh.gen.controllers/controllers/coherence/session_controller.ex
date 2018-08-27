@@ -83,7 +83,8 @@ defmodule <%= web_base %>.Coherence.SessionController do
     user = Schemas.get_by_user [{login_field, login}]
     if valid_user_login? user, params do
       if confirmed_access? user do
-        do_lockable(conn, login_field, [user, user_schema, remember, lockable?, remember, params],
+        do_lockable(conn, login_field, [user, user_schema, remember, lockable?,
+          remember, Controller.permit(params,Config.session_permitted_attributes)],
           user_schema.lockable?() and user_schema.locked?(user))
       else
         respond_with(
@@ -202,7 +203,7 @@ defmodule <%= web_base %>.Coherence.SessionController do
             |> track_lock(user, user.__struct__.trackable_table?())
           {put_flash(new_conn, :error,
             Messages.backend().maximum_login_attempts_exceeded()),
-            %{locked_at: Ecto.DateTime.utc()}}
+            %{locked_at: NaiveDateTime.utc_now()}}
         true ->
           {put_flash(conn, :error,
             Messages.backend().incorrect_login_or_password(login_field:
