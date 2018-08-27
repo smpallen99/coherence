@@ -78,7 +78,12 @@ defmodule <%= web_base %>.Coherence.SessionController do
     login_field_str = to_string login_field
     login = params["session"][login_field_str]
     new_bindings = [{login_field, login}, remember: rememberable_enabled?()]
-    remember = if Config.user_schema.rememberable?(), do: params["remember"], else: false
+    remember =
+      if Config.user_schema.rememberable?() do
+        if params["remember"] in [true, "True", "true"], do: true, else: false
+      else
+        false
+      end
     # user = Config.repo.one(from u in user_schema, where: field(u, ^login_field) == ^login)
     user = Schemas.get_by_user [{login_field, login}]
     if valid_user_login? user, params do
