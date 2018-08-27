@@ -1,5 +1,6 @@
 defmodule TestCoherence.TestHelpers do
   alias TestCoherence.{Coherence.Rememberable}
+  alias Coherence.Config
   import Phoenix.HTML, only: [safe_to_string: 1]
   import Coherence.Controller, only: [random_string: 1]
   import Plug.Conn
@@ -18,6 +19,11 @@ defmodule TestCoherence.TestHelpers do
     %TestCoherence.User{}
     |> TestCoherence.User.changeset(changes)
     |> TestCoherence.Repo.insert!
+  end
+
+  def get_user_by_email(email) do
+    Config.user_schema
+    |> TestCoherence.Repo.get_by!(email: email)
   end
 
   def insert_invitation(attrs \\ %{}) do

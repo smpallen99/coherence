@@ -26,12 +26,20 @@ defmodule CoherenceTest.RegistrationController do
   end
 
   describe "create" do
-    test "can create new registration with valid params", %{conn: conn} do
+    test "can create new registration with valid params, password_confirmation is not mandatory", %{conn: conn} do
       conn = assign conn, :current_user, nil
       params = %{"registration" => %{"name" => "John Doe", "email" => "john.doe@example.com", "password" => "123123"}}
       conn = post conn, registration_path(conn, :create), params
       assert conn.private[:phoenix_flash] == %{"error" => "Mailer configuration required!"}
       assert html_response(conn, 302)
+    end
+
+    test "password_confirmation checked only if present", %{conn: conn} do
+      conn = assign conn, :current_user, nil
+      params = %{"registration" => %{"name" => "John Doe", "email" => "john.doe@example.com", "password_confirmation" => "no match", "password" => "123123"}}
+      conn = post conn, registration_path(conn, :create), params
+      errors = conn.assigns.changeset.errors
+      assert errors[:password_confirmation] == {"does not match confirmation", [validation: :confirmation]}
     end
 
     test "can not register with invalid params", %{conn: conn} do
@@ -42,6 +50,16 @@ defmodule CoherenceTest.RegistrationController do
       assert errors[:password] == {"can't be blank", []}
       assert errors[:email] == {"can't be blank", [validation: :required]}
       assert errors[:name] == {"can't be blank", [validation: :required]}
+    end
+
+    test "mass asignment not allowed", %{conn: conn} do
+      conn = assign conn, :current_user, nil
+      params = %{"registration" => %{"name" => "John Doe", "email" => "john.doe@example.com", "password" => "123123", "current_sign_in_ip" => "mass_asignment"}}
+      conn = post conn, registration_path(conn, :create), params
+      assert conn.private[:phoenix_flash] == %{"error" => "Mailer configuration required!"}
+      assert html_response(conn, 302)
+      %{:current_sign_in_ip => current_sign_in_ip} = get_user_by_email(params["registration"]["email"])
+      refute current_sign_in_ip == params["registration"]["current_sign_in_ip"]
     end
   end
 
@@ -66,5 +84,13 @@ defmodule CoherenceTest.RegistrationController do
       errors = conn.assigns.changeset.errors
       assert errors[:current_password] == {"invalid current password", []}
     end
+    test "mass assignment not allowed", %{conn: conn, user: user} do
+      params = %{"registration" => %{"current_password" => user.password, "current_sign_in_ip" => "mass_asignment"}}
+        conn = put conn, registration_path(conn, :update), params
+        assert conn.private[:phoenix_flash] == %{"info" => "Account updated successfully."}
+        assert html_response(conn, 302)
+        %{:current_sign_in_ip => current_sign_in_ip} = get_user_by_email(user.email)
+        refute current_sign_in_ip == params["registration"]["current_sign_in_ip"]
+      end
   end
 end
