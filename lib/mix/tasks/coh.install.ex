@@ -884,13 +884,12 @@ defmodule Mix.Tasks.Coh.Install do
   defp router_instructions(config) do
     router     = config[:router]
     web_base   = config[:web_base]
-    web_module = config[:web_module]
 
     """
     Add the following to your router.ex file.
 
     defmodule #{router} do
-      use #{web_module}, :router
+      use #{web_base}, :router
       use Coherence.Router         # Add this
 
       pipeline :browser do
