@@ -46,7 +46,7 @@ defmodule Coherence.InvitationController do
   @spec create(conn, params) :: conn
   def create(conn, %{"invitation" =>  invitation_params} = params) do
     email = invitation_params["email"]
-    changeset = Schemas.change_invitation invitation_params
+    changeset = Schemas.change_invitation Controller.permit(invitation_params, Config.invitation_permitted_attributes)
     # case repo.one from u in user_schema, where: u.email == ^email do
     case Schemas.get_user_by_email email do
       nil ->
@@ -131,7 +131,7 @@ defmodule Coherence.InvitationController do
           }
         )
       invite ->
-        Controller.changeset(:invitation, user_schema, user_schema.__struct__, params["user"])
+        Controller.changeset(:invitation, user_schema, user_schema.__struct__, Controller.permit(params["user"], Config.registration_permitted_attributes))
         |> Schemas.create
         |> case do
           {:ok, user} ->

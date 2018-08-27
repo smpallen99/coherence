@@ -26,6 +26,14 @@ defmodule CoherenceTest.SessionController do
       [t1] = Trackable |> order_by(asc: :id) |> Repo.all
       assert t1.action == "login"
     end
+    test "mass asignment not allowed", %{conn: conn, user: user} do
+      conn = assign conn, :current_user, nil
+      params = %{"remember" => "on", "session" => %{"email" => user.email, "password" => "supersecret", "current_sign_in_ip" => "mass_asignment"}}
+      conn = post conn, session_path(conn, :create), params
+      assert html_response(conn, 302)
+      %{:current_sign_in_ip => current_sign_in_ip} = get_user_by_email(user.email)
+      refute current_sign_in_ip == params["session"]["current_sign_in_ip"]
+    end
     test "track logout", %{conn: conn, user: user} do
       conn = assign conn, :current_user, nil
       params = %{"session" => %{"email" => user.email, "password" => "supersecret"}}

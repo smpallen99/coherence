@@ -260,6 +260,10 @@ defmodule Mix.Tasks.Coherence.Install do
         router: #{config[:router]},
         messages_backend: #{config[:base]}.Coherence.Messages,#{layout_field config}
         logged_out_url: "/",#{user_active_field config}
+        registration_permitted_attributes: ["email","name","password","current_password","password_confirmation"],
+        invitation_permitted_attributes: ["name","email],
+        password_reset_permitted_attributes: ["reset_password_token","password","password_confirmation"],
+        session_permitted_attributes: ["remember","email","password"]
       """
     (config_block <> from_email <> "  opts: #{inspect config[:opts]}\n")
     |> swoosh_config(config)
