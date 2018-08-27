@@ -148,7 +148,7 @@ defmodule Coherence.Config do
     end
   end
 
-  @spec email_reply_to() :: {nil, nil} | true | {String.t, String.t} | String.t
+  @spec email_reply_to() :: nil | true | {String.t, String.t} | String.t
   def email_reply_to do
     case get_application_env :email_reply_to do
       nil ->
@@ -232,7 +232,7 @@ defmodule Coherence.Config do
 
   def default_routes do
     case Application.get_env(:coherence, :default_routes) do
-      nil -> 
+      nil ->
         %{
           registrations_new:  "/registrations/new",
           registrations:      "/registrations",
@@ -245,9 +245,9 @@ defmodule Coherence.Config do
           sessions:           "/sessions",
           registrations_edit: "/registrations/edit"
         }
-      %{} = config -> 
+      %{} = config ->
         config
-      true -> 
+      true ->
         Logger.info "The configuration for default_routes must be a map"
         nil
     end
