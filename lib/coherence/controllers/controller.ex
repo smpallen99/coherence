@@ -286,8 +286,12 @@ defmodule Coherence.Controller do
   @spec changeset(atom, module, schema, params) :: changeset
   def changeset(which, module, model, params \\ %{})
   def changeset(:password, module, model, params) do
-    fun = Application.get_env :coherence, :changeset, :changeset
-    apply module, fun, [model, params, :password]
+    fun =
+      case Application.get_env(:coherence, :changeset, {nil, :changeset}) do
+        {_mod, fun} -> fun
+        _ -> :changeset
+      end
+    apply(module, fun, [model, params, :password])
   end
   def changeset(which, module, model, params) do
     {mod, fun, args} =
@@ -295,7 +299,7 @@ defmodule Coherence.Controller do
         nil -> {module, :changeset, [model, params]}
         {mod, fun} -> {mod, fun, [model, params, which]}
       end
-    apply mod, fun, args
+    apply(mod, fun, args)
   end
 
   @doc """
