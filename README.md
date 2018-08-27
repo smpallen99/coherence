@@ -717,7 +717,7 @@ Any of the user model's available data can be accessed this way.
 If the user model is changed after login, a call to `update_login` must be done to update the credential store. For example, in your controller update function, call:
 
 ```elixir
-apply(Coherence.Config.auth_module, Coherence.Config.update_login, [conn, user, [id_key: Coherence.Config.schema_key]])
+Coherence.update_user_login(conn, user)
 ```
 
 to update the credential store.
