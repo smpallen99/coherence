@@ -44,7 +44,7 @@ defmodule Coherence.Mixfile do
       {:timex, "~> 3.3"},
       {:timex_ecto, "~> 3.3"},
       {:floki, "~> 0.19", only: :test},
-      {:ex_doc, "~> 0.18", only: :dev},
+      {:ex_doc, "~> 0.18.0", only: :dev},
       {:earmark, "~> 1.2", only: :dev, override: true},
       {:postgrex, ">= 0.0.0", only: :test},
       {:dialyxir, "~> 0.5", only: [:dev], runtime: false},
