@@ -12,7 +12,7 @@ defmodule <%= web_base %>.Coherence.RegistrationController do
   """
   use CoherenceWeb, :controller
 
-  alias Coherence.Messages
+  alias Coherence.{Messages, Schema}
   alias <%= base %>.Coherence.Schemas
 
   require Logger
@@ -53,7 +53,8 @@ defmodule <%= web_base %>.Coherence.RegistrationController do
     user_schema = Config.user_schema
     :registration
     |> Controller.changeset(user_schema, user_schema.__struct__,
-      Controller.permit(registration_params, Config.registration_permitted_attributes))
+      Controller.permit(registration_params, Config.registration_permitted_attributes() ||
+        Schema.permitted_attributes_default(:registration)))
     |> Schemas.create
     |> case do
       {:ok, user} ->
@@ -109,7 +110,8 @@ defmodule <%= web_base %>.Coherence.RegistrationController do
     user = Coherence.current_user(conn)
     :registration
     |> Controller.changeset(user_schema, user, Controller.permit(user_params,
-      Config.registration_permitted_attributes))
+      Config.registration_permitted_attributes() ||
+        Schema.permitted_attributes_default(:registration)))
     |> Schemas.update
     |> case do
       {:ok, user} ->

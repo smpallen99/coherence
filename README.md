@@ -750,6 +750,22 @@ config :coherence, CoherenceDemoWeb.Coherence.Mailer,
   api_key: {:system, "SENDGRID_API_KEY"}
 ```
 
+## Permitted Attributes
+
+For security, Coherence restricts what fields of a schema can be created or
+updated with several configurable permitted attributes settings. When installing
+a new project these settings are generated in the `:coherence` Config block.
+
+In the case of an upgrade, the following values will be used when the configuration
+is not found:
+
+| Configuration Field | Defaults |
+| --- | --- |
+| `:registration_permitted_attributes` | ["email","name","password", "current_password", "password_confirmation"] |
+| `:invitation_permitted_attributes` | ["name","email"] |
+| `:password_reset_permitted_attributes` | ["reset_password_token","password", "password_confirmation"] |
+| `:session_permitted_attributes` | ["remember","email","password"] |
+
 ## Authentication
 
 Currently Coherence supports three modes of authentication including HTTP Basic, Session, and Token authentication.

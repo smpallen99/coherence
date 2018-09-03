@@ -13,7 +13,7 @@ defmodule Coherence.SessionController do
   # import Coherence.Rememberable, only: [hash: 1, gen_cookie: 3]
 
   # alias Coherence.{Rememberable}
-  alias Coherence.{ConfirmableService, Messages}
+  alias Coherence.{ConfirmableService, Messages, Schema}
   alias Coherence.Schemas
 
   require Logger
@@ -89,7 +89,8 @@ defmodule Coherence.SessionController do
     if valid_user_login? user, params do
       if confirmed_access? user do
         do_lockable(conn, login_field, [user, user_schema, remember, lockable?,
-          remember, Controller.permit(params,Config.session_permitted_attributes)],
+          remember, Controller.permit(params,Config.session_permitted_attributes() ||
+            Schema.permitted_attributes_default(:registration))],
           user_schema.lockable?() and user_schema.locked?(user))
       else
         respond_with(

@@ -15,7 +15,7 @@ defmodule Coherence.InvitationController do
 
   import Ecto.Changeset
 
-  alias Coherence.{Config, Messages}
+  alias Coherence.{Config, Messages, Schema}
   alias Coherence.Schemas
 
   require Logger
@@ -47,7 +47,7 @@ defmodule Coherence.InvitationController do
   def create(conn, %{"invitation" =>  invitation_params} = params) do
     email = invitation_params["email"]
     changeset = Schemas.change_invitation Controller.permit(invitation_params,
-      Config.invitation_permitted_attributes)
+      Config.invitation_permitted_attributes() || Schema.permitted_attributes_default(:invitation))
     # case repo.one from u in user_schema, where: u.email == ^email do
     case Schemas.get_user_by_email email do
       nil ->
@@ -134,7 +134,8 @@ defmodule Coherence.InvitationController do
       invite ->
         :invitation
         |> Controller.changeset(user_schema, user_schema.__struct__,
-          Controller.permit(params["user"], Config.registration_permitted_attributes))
+          Controller.permit(params["user"], Config.registration_permitted_attributes() ||
+            Schema.permitted_attributes_default(:registration)))
         |> Schemas.create
         |> case do
           {:ok, user} ->

@@ -14,7 +14,7 @@ defmodule <%= web_base %>.Coherence.PasswordController do
   use CoherenceWeb, :controller
   use Timex
 
-  alias Coherence.{TrackableService, Messages}
+  alias Coherence.{TrackableService, Messages, Schema}
   alias <%= base %>.Coherence.Schemas
 
   require Logger
@@ -104,7 +104,8 @@ defmodule <%= web_base %>.Coherence.PasswordController do
           )
         else
           params = clear_password_params(Controller.permit(password_params,
-            Config.password_reset_permitted_attributes))
+            Config.password_reset_permitted_attributes() ||
+              Schema.permitted_attributes_default(:password_reset)))
 
           :password
           |> Controller.changeset(user_schema, user, params)

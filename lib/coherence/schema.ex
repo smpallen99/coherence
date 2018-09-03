@@ -86,6 +86,13 @@ defmodule Coherence.Schema do
   """
   use Coherence.Config
 
+  @registration_permitted_attributes ["email","name","password",
+    "current_password", "password_confirmation"]
+  @invitation_permitted_attributes ["name","email"]
+  @password_reset_permitted_attributes ["reset_password_token","password",
+    "password_confirmation"]
+  @session_permitted_attributes ["remember","email","password"]
+
   defmacro __using__(opts \\ []) do
     quote do
       import unquote(__MODULE__)
@@ -442,4 +449,20 @@ defmodule Coherence.Schema do
       fields
     end
   end
+
+  @doc """
+  Default permitted attributes used when they are not configured.
+
+  Defaults to be used when the entry is not found in configuration. These are
+  mainly used when a pre 0.5.1 project is updated.
+  """
+  def permitted_attributes_default(:registration),
+    do: @registration_permitted_attributes
+  def permitted_attributes_default(:invitation),
+    do: @invitation_permitted_attributes
+  def permitted_attributes_default(:password_reset),
+    do: @password_reset_permitted_attributes
+  def permitted_attributes_default(:session),
+    do: @session_permitted_attributes
+
 end
