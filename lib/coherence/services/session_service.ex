@@ -1,9 +1,21 @@
 defmodule Coherence.SessionService do
-  def sign_user_token(conn, user) do
-    Phoenix.Token.sign(conn, "user socket", user.id)
+  @moduledoc """
+  Support functions for Coherence sessions.
+  """
+  require Coherence.Config, as: Config
+
+  @doc """
+  Create a signed Phoenix token for a given user
+  """
+  def sign_user_token(context, user, opts \\ []) do
+    Phoenix.Token.sign(context, Config.token_salt(), user.id, opts)
   end
 
-  def verify_user_token(socket, token) do
-    Phoenix.Token.verify(socket, "user socket", token, max_age: 2 * 7 * 24 * 60 * 60)
+  @doc """
+  Verify a signed Phoenix Token.
+  """
+  def verify_user_token(context, token, opts \\ []) do
+    Phoenix.Token.verify(context, Config.token_salt(), token,
+      Keyword.put_new(opts, :max_age, Config.token_max_age()))
   end
 end

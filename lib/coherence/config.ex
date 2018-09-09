@@ -43,6 +43,8 @@ defmodule Coherence.Config do
   * :layout - Customize the layout template e.g. {MyApp.LayoutView, "app.html"}
   * :async_rememberable? (false) - Don't update rememberable seq_no for ajax requests
   * :user_token (false) - generate tokens for channel authentication
+  * :token_salt ("user socket") - Phoenix.Token salt
+  * :token_max_age (2 * 7 * 24 * 60 * 60) - Phoenix.Token max_age
   * :token_assigns_key (:user_token) - key used to access the channel_token in the conn.assigns map
   * :token_generator   (fn conn, user -> Phoenix.Token.sign(conn, "user socket", user.id) end) - override the default
   *                    may also provide an arity 3 function as a tuple {Module, :function, args}
@@ -93,6 +95,8 @@ defmodule Coherence.Config do
     :layout,
     :user_token,
     :use_binary_id,
+    {:token_salt, "user socket"},
+    {:token_max_age, 2 * 7 * 24 * 60 * 60},
     {:token_assigns_key, :user_token},
     {:token_generator, &Coherence.SessionService.sign_user_token/2},
     {:verify_user_token, &Coherence.SessionService.verify_user_token/2},
