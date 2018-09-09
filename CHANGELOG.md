@@ -11,6 +11,7 @@ See these [0.5.x to 0.6.x upgrade instructions](https://gist.github.com/smpallen
 
 * Bug Fixes
   * Fixed detection of remember me checkbox on session new page
+  * Fixed compiled gettext in view helpers
 
 * Deprecations
   * Removed the coherence.make_templates task since its no longer needed with the new controller design
