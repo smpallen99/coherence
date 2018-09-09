@@ -114,7 +114,7 @@ defmodule Coherence.SessionControllerBase do
         new_bindings = [{login_field, login}, remember: rememberable_enabled?()]
         remember =
           if Config.user_schema.rememberable?() do
-            if params["remember"] in [true, "True", "true"], do: true, else: false
+            if params["remember"] in [true, "True", "true", "on"], do: true, else: false
           else
             false
           end
