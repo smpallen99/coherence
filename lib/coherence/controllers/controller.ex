@@ -353,6 +353,7 @@ defmodule Coherence.Controller do
       put_flash(conn, :error, Messages.backend().mailer_required())
     end
   end
+
   @doc """
   leaves in params only permitted request parameters.
 
