@@ -118,8 +118,8 @@ defmodule Coherence.SessionControllerBase do
           else
             false
           end
-        # user = Config.repo.one(from u in user_schema, where: field(u, ^login_field) == ^login)
-        user = @schemas.get_by_user [{login_field, login}]
+        user = get_login_user(login_field, login, params)
+
         if valid_user_login? user, params do
           if confirmed_access? user do
             do_lockable(conn, login_field, [user, user_schema, remember, lockable?,
@@ -142,6 +142,13 @@ defmodule Coherence.SessionControllerBase do
           |> failed_login(user, lockable?)
           |> respond_with(:session_create_error, %{new_bindings: new_bindings})
         end
+      end
+
+      @doc """
+      Get the user from the database.
+      """
+      def get_login_user(login_field, login, _params) do
+        @schemas.get_by_user [{login_field, login}]
       end
 
       @doc """
@@ -442,7 +449,7 @@ defmodule Coherence.SessionControllerBase do
         do_rememberable_callback: 5, do_valid_login: 4, save_login_cookie: 5,
         save_rememberable: 3, get_rememberables: 1, validate_login: 3,
         get_invalid_login!: 4, delete_expired_tokens!: 1, hash: 1, gen_cookie: 3,
-        user_active?: 1, schema: 1)
+        user_active?: 1, schema: 1, get_login_user: 3)
     end
   end
 end
