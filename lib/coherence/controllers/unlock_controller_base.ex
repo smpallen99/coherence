@@ -8,7 +8,7 @@ defmodule Coherence.UnlockControllerBase do
   Basic locking and unlocking does not use this controller.
   """
   defmacro __using__(opts) do
-    quote do
+    quote location: :keep do
       use Timex
       use Coherence.Config
 

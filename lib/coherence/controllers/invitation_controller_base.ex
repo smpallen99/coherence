@@ -11,7 +11,7 @@ defmodule Coherence.InvitationControllerBase do
   * resend - resend an invitation token email
   """
   defmacro __using__(opts) do
-    quote do
+    quote location: :keep do
       use Timex
 
       import Ecto.Changeset

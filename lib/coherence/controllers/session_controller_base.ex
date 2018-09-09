@@ -40,7 +40,7 @@ defmodule Coherence.SessionControllerBase do
       end
   """
   defmacro __using__(opts) do
-    quote do
+    quote location: :keep do
       use Timex
 
       import Coherence.TrackableService

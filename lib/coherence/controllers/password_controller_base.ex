@@ -12,7 +12,7 @@ defmodule Coherence.PasswordControllerBase do
   * update - verify password, password confirmation, and update the database
   """
   defmacro __using__(opts) do
-    quote do
+    quote location: :keep do
       use Timex
 
       alias Coherence.{TrackableService, Messages, Schema, Controller}

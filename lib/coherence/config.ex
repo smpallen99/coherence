@@ -60,6 +60,7 @@ defmodule Coherence.Config do
   * :invitation_permitted_attributes - List of allowed invitation parameter attribues as strings
   * :password_reset_permitted_attributes - List of allowed password reset atributes as stings,
   * :session_permitted_attributes - List of allowed session attributes as strings
+  * :credential_store - override the credential store module
 
   ## Examples
 
@@ -129,6 +130,7 @@ defmodule Coherence.Config do
     :invitation_permitted_attributes,
     :password_reset_permitted_attributes,
     :session_permitted_attributes,
+    :credential_store
   ]
   |> Enum.each(fn
         {key, default} ->

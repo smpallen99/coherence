@@ -6,7 +6,7 @@ defmodule Coherence.ConfirmationControllerBase do
 
   """
   defmacro __using__(opts) do
-    quote do
+    quote location: :keep do
       use Timex
 
       alias Coherence.{ConfirmableService, Messages, Controller, Schema}

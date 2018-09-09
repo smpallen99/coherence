@@ -48,11 +48,15 @@ defmodule Coherence.Authentication.Utils do
 
   @spec get_credential_store() :: module
   def get_credential_store do
-    case Config.auth_module do
-      Coherence.Authentication.Session ->
-        Coherence.CredentialStore.Session
-      Coherence.Authentication.Basic ->
-        Coherence.CredentialStore.Server
+    if store = Config.credential_store() do
+      store
+    else
+      case Config.auth_module do
+        Coherence.Authentication.Session ->
+          Coherence.CredentialStore.Session
+        Coherence.Authentication.Basic ->
+          Coherence.CredentialStore.Server
+      end
     end
   end
 

@@ -11,7 +11,7 @@ defmodule Coherence.RegistrationControllerBase do
   * delete - delete the user account
   """
   defmacro __using__(opts) do
-    quote do
+    quote location: :keep do
 
       alias Coherence.{Messages, Schema, Config, Controller}
       # alias Coherence.Schemas
