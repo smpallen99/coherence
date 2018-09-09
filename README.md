@@ -37,7 +37,7 @@ See the [Docs](https://hexdocs.pm/coherence/Coherence.html) and [Wiki](https://g
 
       ```elixir
       def deps do
-        [{:coherence, "~> 0.5"}]
+        [{:coherence, "~> 0.6"}]
       end
       ```
 
@@ -581,6 +581,12 @@ defmodule MyProjectWeb.Router do
   # ...
 end
 ```
+
+As of Coherence v0.6.0, the generated controller modules have very little code. All the controller actions and helper functions are included with a `use xxxControllerBase` call.
+
+To change an action, simply define the appropriate function and add your own implementation. You may want to copy over the implementation found in your projects `deps/coherence/lib/coherence/controllers/xxx_controller_base.ex` file as a starting point and customize it as needed.
+
+Alternatively, if can create the action, handle some specify behavior and call `super(conn, params)` so invoke the default action. Depending on your customization, this may be the best approach since its easier to see how changes when upgrading to new versions of Coherence.
 
 ### Customizing Routes
 

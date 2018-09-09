@@ -1,15 +1,46 @@
 # Coherence Changelog
 
-## 0.5.1 (2017-08-xx)
+## 0.6.0 (2018-09-xx)
+
+See these [0.5.x to 0.6.x upgrade instructions](https://gist.github.com/smpallen99/fc59423d521f7f6773a5fa9236512faf) to upgrade your existing apps.
+
+* Enhancements
+  * Moved Controller actions and helpers into a base modules inside __using__ macro to improve upgrades with custom controllers
+  * Added configurable salt and max_age for tokens
+  * Added default opts for token functions
+
+* Bug Fixes
+  * Fixed detection of remember me checkbox on session new page
+
+* Deprecations
+  * Removed the coherence.make_templates task since its no longer needed with the new controller design
+
+## 0.5.2 (2018-09-03)
+
+* Enhancements
+  * Added default permitted attributes to help with upgrades #371
+
+## 0.5.1 (2018-08-28)
 
 * Enhancements
   * Add new `coh.gen.controllers` generator
   * `coh.clean` task now supports phx and phoenix projects
   * Renamed `Coherence.ControllerHelpers` module to `Coherence.Controller`
+  * Update timex and timex_ecto dependency versions. closes #333
+  * Added new update_user_login/1 function
+  * Added new `allowed attributes` feature to protect against allowing accesses to internal schema fields.
+  * Update uuid dependency version
+  * Allow silent password recovery for unknown users
 
 * Bug Fixes
   * Fixed issues with generated controllers
   * Fixed issues with clean tasks
+  * Fixed localization of view helpers. closes #322 and closes #327
+  * Fixed incorrect logic for custom password changeset. closes #351
+  * Fixed config return type for email_reply_to. closes #227
+  * Fixed :peer retrieval issue with new Plug.Conn
+  * Fixed issue attempting to immediately log in after registering an account
+  * Fix in password controller to support subdomains
 
 * Backward incompatible changes
   * `--controllers` option is not supported for the install tasks
