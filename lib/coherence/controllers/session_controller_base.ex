@@ -43,7 +43,7 @@ defmodule Coherence.SessionControllerBase do
     quote location: :keep do
       use Timex
 
-      import Coherence.TrackableService
+      import Coherence.TrackableService, except: [track_login: 4]
       import Ecto.Query
 
       alias Coherence.{ConfirmableService, Messages, Schema, Controller, Config}
@@ -442,6 +442,10 @@ defmodule Coherence.SessionControllerBase do
         Map.get(user, :active, true)
       end
 
+      def track_login(conn, user, trackable?, trackable_table?) do
+        Coherence.TrackableService.track_login(conn, user, trackable?, trackable_table?)
+      end
+
       defoverridable(
         login_cookie: 0, get_login_cookie: 1, new: 2, create: 2, confirmed_access?: 1,
         do_lockable: 4, delete: 2, reset_failed_attempts: 3,
@@ -449,7 +453,7 @@ defmodule Coherence.SessionControllerBase do
         do_rememberable_callback: 5, do_valid_login: 4, save_login_cookie: 5,
         save_rememberable: 3, get_rememberables: 1, validate_login: 3,
         get_invalid_login!: 4, delete_expired_tokens!: 1, hash: 1, gen_cookie: 3,
-        user_active?: 1, schema: 1, get_login_user: 3)
+        user_active?: 1, schema: 1, get_login_user: 3, track_login: 4)
     end
   end
 end
