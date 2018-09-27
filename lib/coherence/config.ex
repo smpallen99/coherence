@@ -58,6 +58,7 @@ defmodule Coherence.Config do
   * :invitation_permitted_attributes - List of allowed invitation parameter attribues as strings
   * :password_reset_permitted_attributes - List of allowed password reset atributes as stings,
   * :session_permitted_attributes - List of allowed session attributes as strings
+  * :confirm_email_updates - All email updates should be confirmed by email (using the unconfirmed_email field)
 
   ## Examples
 
@@ -125,6 +126,7 @@ defmodule Coherence.Config do
     :invitation_permitted_attributes,
     :password_reset_permitted_attributes,
     :session_permitted_attributes,
+    {:confirm_email_updates, false}
   ]
   |> Enum.each(fn
         {key, default} ->

@@ -105,10 +105,19 @@ defmodule <%= web_base %>.Coherence.ConfirmationController do
             }
           )
         else
-          changeset = Controller.changeset(:confirmation, user_schema, user, %{
+          attrs = case Config.get(:confirm_email_updates) do
+            true ->
+              %{
+                email: user.unconfirmed_email,
+                unconfirmed_email: nil
+              }
+            _ ->
+              %{}
+          end
+          changeset = Ecto.Changeset.change(user, Map.merge(attrs, %{
             confirmation_token: nil,
             confirmed_at: NaiveDateTime.utc_now(),
-          })
+          }))
           case Config.repo.update(changeset) do
             {:ok, _user} ->
               conn
