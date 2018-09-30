@@ -104,7 +104,8 @@ defmodule Coherence.Mix.Utils do
         "# confirmable",
         "add :confirmation_token, :string",
         "add :confirmed_at, :utc_datetime",
-        "add :confirmation_sent_at, :utc_datetime"
+        "add :confirmation_sent_at, :utc_datetime",
+        "add :unconfirmed_email, :string"
       ]
     ]
   end

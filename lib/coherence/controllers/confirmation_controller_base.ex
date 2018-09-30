@@ -106,10 +106,20 @@ defmodule Coherence.ConfirmationControllerBase do
                 }
               )
             else
-              changeset = Controller.changeset(:confirmation, user_schema, user, %{
-                confirmation_token: nil,
-                confirmed_at: NaiveDateTime.utc_now(),
-              })
+              attrs =
+                if Config.get(:confirm_email_updates) do
+                  %{
+                    email: user.unconfirmed_email,
+                    unconfirmed_email: nil
+                  }
+                else
+                  %{}
+                end
+                |> Map.merge(%{
+                  confirmation_token: nil,
+                  confirmed_at: NaiveDateTime.utc_now(),
+                })
+              changeset = Controller.changeset(:confirmation, user_schema, user, attrs)
               case Config.repo.update(changeset) do
                 {:ok, _user} ->
                   conn

@@ -20,12 +20,26 @@ defmodule <%= web_base %>.Coherence.UserEmail do
   end
 
   def confirmation(user, url) do
+    {template, subject, email} =
+      if Config.get(:confirm_email_updates) && user.unconfirmed_email do
+        {
+          "reconfirmation.html",
+          dgettext("coherence", "%{site_name} - Confirm your new email", site_name: site_name()),
+          unconfirmed_email(user)
+        }
+      else
+        {
+          "confirmation.html",
+          dgettext("coherence", "%{site_name} - Confirm your new account", site_name: site_name()),
+          user_email(user)
+        }
+      end
     %Email{}
     |> from(from_email())
-    |> to(user_email(user))
+    |> to(email)
     |> add_reply_to()
-    |> subject(dgettext("coherence", "%{site_name} - Confirm your new account", site_name: site_name()))
-    |> render_body("confirmation.html", %{url: url, name: first_name(user.name)})
+    |> subject(subject)
+    |> render_body(template, %{url: url, name: first_name(user.name)})
   end
 
   def invitation(invitation, url) do
@@ -63,6 +77,10 @@ defmodule <%= web_base %>.Coherence.UserEmail do
 
   defp user_email(user) do
     {user.name, user.email}
+  end
+
+  def unconfirmed_email(user) do
+    {user.name, user.unconfirmed_email}
   end
 
   defp from_email do

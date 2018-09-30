@@ -34,5 +34,6 @@ config :coherence,
   registration_permitted_attributes: ["email","name","password", "password_confirmation","current_password"],
   invitation_permitted_attributes: ["name","email"],
   password_reset_permitted_attributes: ["reset_password_token","password","password_confirmation"],
-  session_permitted_attributes: ["remember","email", "password"]
+  session_permitted_attributes: ["remember","email", "password"],
+  confirm_email_updates: true
 

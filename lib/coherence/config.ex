@@ -61,6 +61,7 @@ defmodule Coherence.Config do
   * :password_reset_permitted_attributes - List of allowed password reset atributes as stings,
   * :session_permitted_attributes - List of allowed session attributes as strings
   * :credential_store - override the credential store module
+  * :confirm_email_updates - All email updates should be confirmed by email (using the unconfirmed_email field)
 
   ## Examples
 
@@ -130,7 +131,8 @@ defmodule Coherence.Config do
     :invitation_permitted_attributes,
     :password_reset_permitted_attributes,
     :session_permitted_attributes,
-    :credential_store
+    :credential_store,
+    {:confirm_email_updates, false}
   ]
   |> Enum.each(fn
         {key, default} ->

@@ -246,7 +246,6 @@ defmodule Coherence.Controller do
     end
   end
 
-
   @doc """
   Plug to redirect already logged in users.
   """
@@ -292,6 +291,14 @@ defmodule Coherence.Controller do
         _ -> :changeset
       end
     apply(module, fun, [model, params, :password])
+  end
+  def changeset(:registration, module, model, params) do
+    fun =
+      case Application.get_env(:coherence, :changeset, {nil, :changeset}) do
+        {_mod, fun} -> fun
+        _ -> :changeset
+      end
+    apply(module, fun, [model, params, :registration])
   end
   def changeset(which, module, model, params) do
     {mod, fun, args} =
