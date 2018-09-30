@@ -190,7 +190,14 @@ defmodule Coherence.Authentication.Session do
          [id, series, token] <- String.split(cookie, " ") do
       case opts[:rememberable_callback] do
         nil ->
-          Coherence.SessionController.rememberable_callback(conn, id, series, token, opts)
+          session_controller = Module.concat(Config.web_module(), Coherence.SessionController)
+          session_controller =
+            if function_exported?(session_controller, :create, 2) do
+              session_controller
+            else
+              Coherence.SessionController
+            end
+          apply(session_controller, :rememberable_callback, [conn, id, series, token, opts])
         fun ->
           fun.(conn, id, series, token, opts)
       end
