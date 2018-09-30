@@ -6,8 +6,9 @@ See these [0.5.x to 0.6.x upgrade instructions](https://gist.github.com/smpallen
 
 * Enhancements
   * Moved Controller actions and helpers into a base modules inside __using__ macro to improve upgrades with custom controllers
-  * Added configurable salt and max_age for tokens
-  * Added default opts for token functions
+  * Add configurable salt and max_age for tokens
+  * Add default opts for token functions
+  * Add support for application configurable confirmable
 
 * Bug Fixes
   * Fixed detection of remember me checkbox on session new page

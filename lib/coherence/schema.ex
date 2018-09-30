@@ -49,7 +49,6 @@ defmodule Coherence.Schema do
 
   The `coherence_fields/0` function is used to return the validation fields appropriate for the selected options.
 
-
   ## Examples:
 
   The following is an example User module when the :authenticatable is used:
@@ -80,6 +79,41 @@ defmodule Coherence.Schema do
           model
           |> cast(params, ~w(password password_confirmation reset_password_token reset_password_sent_at))
           |> validate_coherence_password_reset(params)
+        end
+      end
+
+  ## Configurable confirmable
+
+  You may have an application that has its own setting for enabling/disabling confirmable
+  accounts at runtime. To enable this:
+
+      defmodule MyProject.User do
+        use MyProject.Web, :model
+        use Coherence.Schema
+        # ...
+        def confirmable? do
+          # test if confirmation is enable
+        end
+
+        def changeset(schema, params) do
+          schema
+          |> cast(params, @all_params ++ coherence_fields())
+          # ...
+          |> prepare_changes(&prepare_confirmation/1)
+        end
+
+        def prepare_confirmation(%{valid?: true} = changeset) do
+          if local_settings_require_confirmation? do
+            changeset
+          else
+            changeset
+            |> put_change(:confirmed_at, Ecto.DateTime.utc)
+            |> put_change(:confirmation_token, nil)
+          end
+        end
+
+        def prepare_confirmation(changeset) do
+          changeset
         end
       end
 

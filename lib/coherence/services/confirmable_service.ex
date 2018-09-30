@@ -82,7 +82,9 @@ defmodule Coherence.ConfirmableService do
           else
             Config.repo.update changeset
           end
+          defoverridable(confirm!: 1, confirm: 1, confirmed?: 1)
         end
+        defoverridable(confirmable?: 0)
       end
     end
   end
