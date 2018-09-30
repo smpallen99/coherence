@@ -107,14 +107,18 @@ defmodule Coherence.RegistrationController do
   @spec update(conn, params) :: conn
   def update(conn, %{"registration" => user_params} = params) do
     user_schema = Config.user_schema
-    user = Coherence.current_user(conn)
+    initial_user = Coherence.current_user(conn)
     :registration
-    |> Controller.changeset(user_schema, user, Controller.permit(user_params,
+    |> Controller.changeset(user_schema, initial_user, Controller.permit(user_params,
       Config.registration_permitted_attributes() ||
         Schema.permitted_attributes_default(:registration)))
     |> Schemas.update
     |> case do
       {:ok, user} ->
+        if Config.get(:confirm_email_updates) &&
+          user.unconfirmed_email != initial_user.unconfirmed_email do
+          send_confirmation(conn, user, user_schema)
+        end
         Config.auth_module
         |> apply(Config.update_login, [conn, user, [id_key: Config.schema_key]])
         |> respond_with(
@@ -126,7 +130,7 @@ defmodule Coherence.RegistrationController do
           }
         )
       {:error, changeset} ->
-        respond_with(conn, :registration_update_error, %{user: user, changeset: changeset})
+        respond_with(conn, :registration_update_error, %{user: initial_user, changeset: changeset})
     end
   end
 

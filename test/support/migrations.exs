@@ -24,6 +24,7 @@ defmodule TestCoherence.Migrations do
       add :confirmation_token, :string
       add :confirmed_at, :utc_datetime
       add :confirmation_sent_at, :utc_datetime
+      add :unconfirmed_email, :string
       # rememberable
       add :remember_created_at, :utc_datetime
       timestamps()

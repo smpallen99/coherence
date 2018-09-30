@@ -26,6 +26,11 @@ defmodule TestCoherence.TestHelpers do
     |> TestCoherence.Repo.get_by!(email: email)
   end
 
+  def get_user_by_name(name) do
+    Config.user_schema
+    |> TestCoherence.Repo.get_by!(name: name)
+  end
+
   def insert_invitation(attrs \\ %{}) do
     token = random_string 48
     changes = Map.merge(%{

@@ -30,4 +30,17 @@ defmodule <%= user_schema %> do
     |> cast(params, ~w(password password_confirmation reset_password_token reset_password_sent_at))
     |> validate_coherence_password_reset(params)
   end
+
+  def changeset(model, params, :registration) do
+    changeset =
+      model
+      |> changeset(params)
+    if Config.get(:confirm_email_updates) && Map.get(params, "email", false) && model.id do
+      changeset
+      |> put_change(:unconfirmed_email, get_change(changeset, :email))
+      |> delete_change(:email)
+    else
+      changeset
+    end
+  end
 end

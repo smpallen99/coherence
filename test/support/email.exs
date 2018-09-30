@@ -22,9 +22,14 @@ defmodule TestCoherenceWeb.Coherence.UserEmail do
 
 
   def confirmation(user, url) do
+    email = if Config.get(:confirm_email_updates) && user.unconfirmed_email do
+      unconfirmed_email(user)
+    else
+      user_email(user)
+    end
     %Email{}
     |> from(from_email())
-    |> to(user_email(user))
+    |> to(email)
     |> add_reply_to
     |> subject("#{site_name()} - Confirm your new account")
     |> render_body("confirmation.html", %{url: url, name: first_name(user.name)})
@@ -71,6 +76,10 @@ defmodule TestCoherenceWeb.Coherence.UserEmail do
 
   defp user_email(user) do
     {user.name, user.email}
+  end
+
+  def unconfirmed_email(user) do
+    {user.name, user.unconfirmed_email}
   end
 
   defp from_email do

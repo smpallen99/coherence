@@ -394,7 +394,9 @@ defmodule Coherence.Schema do
         field :confirmation_token, :string
         field :confirmed_at, :naive_datetime
         field :confirmation_sent_at, :naive_datetime
-        # field :unconfirmed_email, :string
+        if Coherence.Config.get(:confirm_email_updates) do
+          field :unconfirmed_email, :string
+        end
       end
     end
   end
