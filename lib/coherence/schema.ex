@@ -107,7 +107,7 @@ defmodule Coherence.Schema do
             changeset
           else
             changeset
-            |> put_change(:confirmed_at, Ecto.DateTime.utc)
+            |> put_change(:confirmed_at, NaiveDateTime.utc_now())
             |> put_change(:confirmation_token, nil)
           end
         end
