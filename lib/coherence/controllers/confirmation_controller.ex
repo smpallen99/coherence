@@ -52,7 +52,7 @@ defmodule Coherence.ConfirmationController do
           }
         )
       user ->
-        if user_schema.confirmed?(user) do
+        if user_schema.confirmed?(user) && !(Config.get(:confirm_email_updates) && user.unconfirmed_email) do
           conn
           |> respond_with(
             :confirmation_create_error,
@@ -119,8 +119,9 @@ defmodule Coherence.ConfirmationController do
             confirmed_at: NaiveDateTime.utc_now(),
           }))
           case Config.repo.update(changeset) do
-            {:ok, _user} ->
-              conn
+            {:ok, user} ->
+              Config.auth_module
+              |> apply(Config.update_login, [conn, user, [id_key: Config.schema_key]])
               |> respond_with(
                 :confirmation_update_success,
                 %{
