@@ -4,6 +4,7 @@ defmodule CoherenceTest.ConfirmationController do
 
   setup %{conn: conn} do
     Application.put_env :coherence, :opts, [:confirmable, :registerable]
+    Application.put_env :coherence, :confirm_email_updates, false
     user = %TestCoherence.User{
       name: "John Doe",
       email: "user@example.com",
@@ -13,6 +14,34 @@ defmodule CoherenceTest.ConfirmationController do
       confirmation_sent_at: Timex.now
     } |> TestCoherence.Repo.insert!
     {:ok, conn: conn, user: user}
+  end
+
+  describe "create" do
+    test "should respond with success if user is not confirmed", %{conn: conn, user: user} do
+      user
+      |> Ecto.Changeset.change(%{confirmed_at: nil})
+      |> TestCoherence.Repo.update!()
+      conn = post conn, confirmation_path(conn, :create), %{"confirmation" => %{"email" => "user@example.com"}}
+      assert html_response(conn, 302)
+    end
+
+    test "should respond with error if user is confirmed", %{conn: conn, user: user} do
+      user
+      |> Ecto.Changeset.change(%{confirmed_at: Timex.now})
+      |> TestCoherence.Repo.update!()
+      conn = post conn, confirmation_path(conn, :create), %{"confirmation" => %{"email" => "user@example.com"}}
+      assert html_response(conn, 200)
+      assert conn.private[:phoenix_template] == "new.html"
+    end
+
+    test "should respond with success if user is confirmed but have an unconfirmed email", %{conn: conn, user: user} do
+      Application.put_env :coherence, :confirm_email_updates, true
+      user
+      |> Ecto.Changeset.change(%{confirmed_at: Timex.now, unconfirmed_email: "unconfirmed@example.com"})
+      |> TestCoherence.Repo.update!()
+      conn = post conn, confirmation_path(conn, :create), %{"confirmation" => %{"email" => "user@example.com"}}
+      assert html_response(conn, 302)
+    end
   end
 
   describe "edit" do

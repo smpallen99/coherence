@@ -52,7 +52,7 @@ defmodule Coherence.ConfirmationController do
           }
         )
       user ->
-        if user_schema.confirmed?(user) do
+        if user_schema.confirmed?(user) && !(Config.get(:confirm_email_updates) && user.unconfirmed_email) do
           conn
           |> respond_with(
             :confirmation_create_error,
