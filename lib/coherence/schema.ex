@@ -243,6 +243,8 @@ defmodule Coherence.Schema do
             _ -> false
           end
         end
+        
+        defoverridable [checkpw: 2]
 
         def encrypt_password(password) do
           Comeonin.Bcrypt.hashpwsalt(password)
