@@ -122,6 +122,9 @@ defmodule Coherence.PasswordController do
                 }
               )
             {:error, changeset} ->
+              changes = changeset.changes
+                        |> Map.put(:reset_password_token, user.reset_password_token)
+              changeset = Map.put(changeset, :changes, changes)
               respond_with(
                 conn,
                 :password_update_error,
