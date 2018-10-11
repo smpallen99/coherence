@@ -11,7 +11,7 @@ defmodule CoherenceTest.RegistrationController do
   end
 
   describe "show" do
-    test "can visit show registraion page", %{conn: conn} do
+    test "can visit show registration page", %{conn: conn} do
       conn = get conn, registration_path(conn, :show)
       assert html_response(conn, 200)
       assert conn.private[:phoenix_template] == "show.html"
@@ -19,10 +19,19 @@ defmodule CoherenceTest.RegistrationController do
   end
 
   describe "edit" do
-    test "can visit edit registraion page", %{conn: conn} do
+    test "can visit edit registration page", %{conn: conn} do
       conn = get conn, registration_path(conn, :edit)
       assert html_response(conn, 200)
       assert conn.private[:phoenix_template] == "edit.html"
+    end
+  end
+
+  describe "new" do
+    test "can visit new registration page", %{conn: conn} do
+      conn = assign conn, :current_user, nil
+      conn = get conn, registration_path(conn, :new)
+      assert html_response(conn, 200)
+      assert conn.private[:phoenix_template] == "new.html"
     end
   end
 
