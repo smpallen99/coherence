@@ -9,6 +9,8 @@ See these [0.5.x to 0.6.x upgrade instructions](https://gist.github.com/smpallen
   * Add configurable salt and max_age for tokens
   * Add default opts for token functions
   * Add support for application configurable confirmable
+  * Support code formatter formatter
+  * Add logging to the mailer template
 
 * Bug Fixes
   * Fixed detection of remember me checkbox on session new page
