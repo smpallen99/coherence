@@ -11,6 +11,9 @@ See these [0.5.x to 0.6.x upgrade instructions](https://gist.github.com/smpallen
   * Add support for application configurable confirmable
   * Support code formatter formatter
   * Add logging to the mailer template
+  * Updated to Comeonin 4.0
+  * Add support for configurable password hashing algorithms
+  * Speed up tests by configuring the Bcrypt algorithm
 
 * Bug Fixes
   * Fixed detection of remember me checkbox on session new page
@@ -18,6 +21,11 @@ See these [0.5.x to 0.6.x upgrade instructions](https://gist.github.com/smpallen
 
 * Deprecations
   * Removed the coherence.make_templates task since its no longer needed with the new controller design
+
+* Hard Deprecations
+  * Removed support for erlang < 20.0
+  * Removed support for pre Phoenix 1.3 project structure
+    * removed `coherence.install` and `coherence.gen.controllers` mix tasks
 
 ## 0.5.2 (2018-09-03)
 

@@ -57,3 +57,5 @@ config :coherence,
   ],
   session_permitted_attributes: ["remember", "email", "password"],
   confirm_email_updates: true
+
+config :bcrypt_elixir, log_rounds: 4

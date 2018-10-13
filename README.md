@@ -7,8 +7,6 @@
 [license-img]: http://img.shields.io/badge/license-MIT-brightgreen.svg
 [license]: http://opensource.org/licenses/MIT
 
-> This version is not compatible with previous Phoenix 1.3.0-rc versions. Please use the v0.4.0 version instead.
-
 Checkout the [Coherence Demo Project](https://github.com/smpallen99/coherence_demo) to see an example project using Coherence.
 
 Coherence is a full featured, configurable authentication system for Phoenix, with the following modules:
@@ -75,13 +73,6 @@ For projects created with `mix phx.new`, use the following mix tasks:
 For projects created with `mix phx.new --umbrella`, ensure you are in the app directory and use the following options for the install:
 * `cd apps/my_project`
 * `coh.install --web-module MyProjectWeb --web-path ../my_project_web/lib/my_project_web`
-
-And for projects created with `mix phoenix.new`, use the following:
-
-* `coherence.install`
-* `coh.clean`
-
-The documentation below assumes a phx project. If you are working with a phoenix project, replace `mix coh.task` with `mix coherence.task`.
 
 ## Getting Started
 
@@ -554,7 +545,6 @@ Also, checkout the Coherence.Config module for a list of config items you can us
 By default, controller boilerplate is not generated. To add controllers, use the controller generators.
 
 * For phx projects, use the `mix coh.gen.controllers` task.
-* For phoenix projects, use the `mix coherence.gen.controllers` task.
 
 The generated controllers are named `MyProjectWeb.Coherence.SessionController` as an example. Generated controllers are located in `lib/my_project_web/controllers/coherence/`
 
