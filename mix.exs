@@ -48,7 +48,8 @@ defmodule Coherence.Mixfile do
   defp deps do
     [
       {:ecto, "~> 2.0"},
-      {:comeonin, "~> 3.0"},
+      {:comeonin, "~> 4.0"},
+      {:bcrypt_elixir, "~> 1.1"},
       {:phoenix, "~> 1.3"},
       {:phoenix_html, "~> 2.10"},
       {:gettext, "~> 0.14"},

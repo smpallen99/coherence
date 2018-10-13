@@ -40,6 +40,7 @@ defmodule Coherence.Config do
   * :module - the name of project module (`module: MyProject`)
   * :opts ([])
   * :password_hash_field (:password_hash) - The field used to save the hashed password
+  * :password_hashing_alg (Comeonin.Bcrypt) - Password hashing algorithm to use.
   * :password_reset_permitted_attributes - List of allowed password reset atributes as stings,
   * :registration_permitted_attributes - List of allowed registration parameter attributes as strings
   * :repo: the module name of your Repo (`repo: MyProject.Repo`)
@@ -114,6 +115,7 @@ defmodule Coherence.Config do
     :module,
     {:opts, []},
     {:password_hash_field, :password_hash},
+    {:password_hashing_alg, Comeonin.Bcrypt},
     :password_reset_permitted_attributes,
     :registration_permitted_attributes,
     {:rememberable_cookie_expire_hours, 48},

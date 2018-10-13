@@ -21,6 +21,7 @@ config :coherence, TestCoherence.Repo,
 
 config :coherence,
   user_schema: TestCoherence.User,
+  password_hashing_alg: Comeonin.Bcrypt,
   repo: TestCoherence.Repo,
   router: TestCoherenceWeb.Router,
   module: TestCoherence,

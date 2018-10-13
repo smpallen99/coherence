@@ -1,14 +1,4 @@
 defmodule Mix.Tasks.Coh.Install do
-  use Mix.Task
-
-  import Macro, only: [camelize: 1, underscore: 1]
-  import Mix.Generator
-  import Mix.Ecto
-  # import Coherence.Config, only: [use_binary_id?: 0]
-  import Coherence.Mix.Utils
-
-  @shortdoc "Configure the Coherence Package"
-
   @moduledoc """
   Configure the Coherence User Model for your Phoenix application. Coherence
   is composed of a number of modules that can be enabled with this installer.
@@ -109,6 +99,8 @@ defmodule Mix.Tasks.Coh.Install do
 
   A `--user-active-field` (false) add active field to user schema and disable logins when set to false.
 
+  A `--password-hashing-alg (Comeonin.Bcrypt) add a different password hashing algorithm
+
   ## Disable Options
 
   * `--no-config` -- Don't append to your `config/config.exs` file.
@@ -175,7 +167,8 @@ defmodule Mix.Tasks.Coh.Install do
               web_module: :string,
               binary_id: :boolean,
               layout: :boolean,
-              user_active_field: :boolean
+              user_active_field: :boolean,
+              password_hashing_alg: :string
             ] ++ Enum.map(@boolean_options, &{String.to_atom(&1), :boolean})
 
   @switch_names Enum.map(@switches, &elem(&1, 0))
@@ -183,6 +176,7 @@ defmodule Mix.Tasks.Coh.Install do
   @new_user_migration_fields ["add :name, :string", "add :email, :string"]
   @new_user_constraints ["create unique_index(:users, [:email])"]
 
+  @spec run(command_line_args :: [binary]) :: any
   def run(args) do
     {opts, parsed, unknown} = OptionParser.parse(args, switches: @switches)
 
@@ -292,6 +286,7 @@ defmodule Mix.Tasks.Coh.Install do
       module: #{config[:base]},
       web_module: #{config[:web_base]},
       router: #{config[:router]},
+      password_hashing_alg: #{config[:password_hashing_alg]},
       messages_backend: #{config[:web_base]}.Coherence.Messages,#{layout_field(config)}
       logged_out_url: "/",#{user_active_field(config)}
       registration_permitted_attributes: ["email","name","password","current_password","password_confirmation"],
@@ -1184,6 +1179,7 @@ defmodule Mix.Tasks.Coh.Install do
     router = opts[:router] || "#{web_base}.Router"
     web_path = opts[:web_path] || web_path()
     web_module = web_base <> ".Coherence"
+    password_hashing_alg = opts[:password_hashing_alg] || "Comeonin.Bcrypt"
 
     binding =
       binding
@@ -1227,7 +1223,8 @@ defmodule Mix.Tasks.Coh.Install do
       web_module: web_module,
       use_binary_id?: binding[:use_binary_id?],
       layout: opts[:layout] || false,
-      user_active_field?: binding[:user_active_field?]
+      user_active_field?: binding[:user_active_field?],
+      password_hashing_alg: password_hashing_alg
     ]
     |> Enum.into(opts_map)
     |> do_default_config(opts)
@@ -1295,25 +1292,9 @@ defmodule Mix.Tasks.Coh.Install do
 
   defp parse_options(opts) do
     {opts_bin, opts} = Enum.reduce(opts, {[], []}, &option_reduce(&1, &2))
-    # {:default, true}, {acc_bin, acc} ->
-    #   {list_to_atoms(@default_options) ++ acc_bin, acc}
-    # {:full, true}, {acc_bin, acc} ->
-    #   {list_to_atoms(@full_options) ++ acc_bin, acc}
-    # {:full_confirmable, true}, {acc_bin, acc} ->
-    #   {list_to_atoms(@full_confirmable) ++ acc_bin, acc}
-    # {:full_invitable, true}, {acc_bin, acc} ->
-    #   {list_to_atoms(@full_invitable) ++ acc_bin, acc}
-    # {:trackable_table, true}, {acc_bin, acc} ->
-    #   {[:trackable_table | acc_bin] -- [:trackable], acc}
-    # {name, true}, {acc_bin, acc} when name in @all_options_atoms ->
-    #   {[name | acc_bin], acc}
-    # {name, false}, {acc_bin, acc} when name in @all_options_atoms ->
-    #   {acc_bin -- [name], acc}
-    # opt, {acc_bin, acc} ->
-    #   {acc_bin, [opt | acc]}
-    # end
 
     opts_bin = Enum.uniq(opts_bin)
+
     opts_names = Enum.map(opts, &elem(&1, 0))
 
     with [] <- Enum.filter(opts_bin, &(not (&1 in @switch_names))),
@@ -1325,27 +1306,6 @@ defmodule Mix.Tasks.Coh.Install do
   end
 
   def all_options, do: @all_options_atoms
-
-  # def get_layout(opts) do
-  #   get_layout_template opts[:layout] || false
-  # end
-
-  # defp get_layout_template(true), do: {true, nil}
-  # defp get_layout_template(_) do
-  #   case Path.wildcard web_path("templates/layout/app.html.*") do
-  #     []          -> {true, nil}
-  #     [first | _] -> get_layout_view(first)
-  #   end
-  # end
-
-  # defp get_layout_template(templ) do
-  #   with {:ok, file} <- File.read(web_path("views/layout_view.ex")),
-  #        [_, module] <- Regex.run(~r//, file) do
-  #     {false, {module, Path.rootname(templ)}}
-  #   else
-  #     {true, nil}
-  #   end
-  # end
 
   def print_installed_options(_config) do
     ["mix coh.install"]

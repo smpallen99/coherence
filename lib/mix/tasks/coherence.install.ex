@@ -1,13 +1,4 @@
 defmodule Mix.Tasks.Coherence.Install do
-  use Mix.Task
-
-  import Macro, only: [camelize: 1, underscore: 1]
-  import Mix.Generator
-  import Mix.Ecto
-  import Coherence.Mix.Utils
-
-  @shortdoc "Configure the Coherence Package"
-
   @moduledoc """
   Configure the Coherence User Model for your Phoenix application. Coherence
   is composed of a number of modules that can be enabled with this installer.
@@ -176,6 +167,7 @@ defmodule Mix.Tasks.Coherence.Install do
   @new_user_migration_fields ["add :name, :string", "add :email, :string"]
   @new_user_constraints ["create unique_index(:users, [:email])"]
 
+  @spec run(command_line_args :: [binary]) :: any
   def run(args) do
     {opts, parsed, unknown} = OptionParser.parse(args, switches: @switches)
 
