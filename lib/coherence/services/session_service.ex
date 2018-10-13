@@ -15,7 +15,11 @@ defmodule Coherence.SessionService do
   Verify a signed Phoenix Token.
   """
   def verify_user_token(context, token, opts \\ []) do
-    Phoenix.Token.verify(context, Config.token_salt(), token,
-      Keyword.put_new(opts, :max_age, Config.token_max_age()))
+    Phoenix.Token.verify(
+      context,
+      Config.token_salt(),
+      token,
+      Keyword.put_new(opts, :max_age, Config.token_max_age())
+    )
   end
 end

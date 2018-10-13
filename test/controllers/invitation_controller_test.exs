@@ -4,10 +4,19 @@ defmodule CoherenceTest.InvitationController do
   import Coherence.Controller, only: [random_string: 1]
 
   setup %{conn: conn} do
-    Application.put_env :coherence, :opts, [:confirmable, :authenticatable, :recoverable,
-      :lockable, :trackable, :unlockable_with_token, :invitable, :registerable]
+    Application.put_env(:coherence, :opts, [
+      :confirmable,
+      :authenticatable,
+      :recoverable,
+      :lockable,
+      :trackable,
+      :unlockable_with_token,
+      :invitable,
+      :registerable
+    ])
+
     user = insert_user()
-    conn = assign conn, :current_user, user
+    conn = assign(conn, :current_user, user)
     {:ok, conn: conn, user: user}
   end
 
@@ -25,46 +34,77 @@ defmodule CoherenceTest.InvitationController do
       assert conn.private[:phoenix_flash] == %{"info" => "Invitation sent."}
       assert html_response(conn, 302)
     end
+
     test "mass asignment not allowed", %{conn: conn} do
-      params = %{"invitation" => %{"name" => "John Doe", "email" => "john@example.com","token" => "hacker token value"}}
+      params = %{
+        "invitation" => %{
+          "name" => "John Doe",
+          "email" => "john@example.com",
+          "token" => "hacker token value"
+        }
+      }
+
       post conn, invitation_path(conn, :create), params
-      %{:token => token} = Coherence.Schemas.get_by_invitation email: params["invitation"]["email"]
+
+      %{:token => token} =
+        Coherence.Schemas.get_by_invitation(email: params["invitation"]["email"])
+
       refute token == params["invitation"]["token"]
     end
   end
 
   describe "new" do
     test "can visit registration page", %{conn: conn} do
-      conn = assign conn, :current_user, nil
-      conn = get conn, invitation_path(conn, :new)
+      conn = assign(conn, :current_user, nil)
+      conn = get(conn, invitation_path(conn, :new))
       assert html_response(conn, 200)
     end
   end
 
   describe "create_user" do
     test "can't create new user when invitation token not exist", %{conn: conn} do
-      token = random_string 48
-      params = %{"user" => %{}, "token" => token }
+      token = random_string(48)
+      params = %{"user" => %{}, "token" => token}
       conn = post conn, invitation_path(conn, :create_user), params
-      assert conn.private[:phoenix_flash] == %{"error" => "Invalid Invitation. Please contact the site administrator."}
+
+      assert conn.private[:phoenix_flash] == %{
+               "error" => "Invalid Invitation. Please contact the site administrator."
+             }
+
       assert html_response(conn, 302)
     end
 
     test "can create new user when invitation token exist", %{conn: conn} do
       invitation = insert_invitation()
-      params = %{"user" => %{"name" => invitation.name, "email" => invitation.email, password: "12345678"}, "token" => invitation.token }
+
+      params = %{
+        "user" => %{"name" => invitation.name, "email" => invitation.email, password: "12345678"},
+        "token" => invitation.token
+      }
+
       conn = post conn, invitation_path(conn, :create_user), params
       assert conn.private[:phoenix_flash] == %{"error" => "Mailer configuration required!"}
       assert html_response(conn, 302)
-      end
     end
-    test "mass asignment not allowed", %{conn: conn} do
-      invitation = insert_invitation()
-      params = %{"user" => %{"name" => invitation.name, "email" => invitation.email, "password" => "12345678", "current_sign_in_ip" => "mass asignment"}, "token" => invitation.token }
-      conn = post conn, invitation_path(conn, :create_user), params
-      assert conn.private[:phoenix_flash] == %{"error" => "Mailer configuration required!"}
-      assert html_response(conn, 302)
-      %{:current_sign_in_ip => current_sign_in_ip} = get_user_by_email(params["user"]["email"])
-      refute current_sign_in_ip == params["user"]["current_sign_in_ip"]
-    end
+  end
+
+  test "mass asignment not allowed", %{conn: conn} do
+    invitation = insert_invitation()
+
+    params = %{
+      "user" => %{
+        "name" => invitation.name,
+        "email" => invitation.email,
+        "password" => "12345678",
+        "current_sign_in_ip" => "mass asignment"
+      },
+      "token" => invitation.token
+    }
+
+    conn = post conn, invitation_path(conn, :create_user), params
+    assert conn.private[:phoenix_flash] == %{"error" => "Mailer configuration required!"}
+    assert html_response(conn, 302)
+    %{:current_sign_in_ip => current_sign_in_ip} = get_user_by_email(params["user"]["email"])
+    refute current_sign_in_ip == params["user"]["current_sign_in_ip"]
+  end
 end

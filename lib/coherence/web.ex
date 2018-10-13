@@ -14,7 +14,7 @@ defmodule CoherenceWeb do
       import Ecto.Changeset
       import Ecto.Query, only: [from: 1, from: 2]
 
-      if Coherence.Config.use_binary_id? do
+      if Coherence.Config.use_binary_id?() do
         @primary_key {:id, :binary_id, autogenerate: true}
         @foreign_key_type :binary_id
       end

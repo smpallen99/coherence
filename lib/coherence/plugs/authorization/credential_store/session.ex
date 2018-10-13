@@ -17,7 +17,7 @@ defmodule Coherence.CredentialStore.Session do
   """
   @behaviour Coherence.CredentialStore
 
-  @type t :: Ecto.Schema.t | Map.t
+  @type t :: Ecto.Schema.t() | Map.t()
 
   require Logger
   alias Coherence.DbStore
@@ -33,31 +33,35 @@ defmodule Coherence.CredentialStore.Session do
   Gets the user data for the given credentials
   """
 
-  @spec get_user_data({T.credentials, nil | struct, integer | nil}) :: any
+  @spec get_user_data({T.credentials(), nil | struct, integer | nil}) :: any
   def get_user_data({credentials, nil, _}) do
-    get_data credentials
+    get_data(credentials)
   end
+
   def get_user_data({credentials, db_model, id_key}) do
-    case get_data credentials do
+    case get_data(credentials) do
       nil ->
         case DbStore.get_user_data(db_model.__struct__, credentials, id_key) do
-          nil -> nil
+          nil ->
+            nil
+
           user_data ->
             Server.put_credentials(credentials, user_data)
             user_data
         end
+
       other ->
         other
     end
   end
 
-  @spec get_data(T.credentials) :: any
+  @spec get_data(T.credentials()) :: any
   defp get_data(credentials), do: Server.get_user_data(credentials)
 
   @doc """
   Puts the `user_data` for the given `credentials`.
   """
-  @spec put_credentials({T.credentials, any, atom}) :: any
+  @spec put_credentials({T.credentials(), any, atom}) :: any
   def put_credentials({credentials, user_data, id_key}) do
     Server.put_credentials(credentials, user_data)
     DbStore.put_credentials(user_data, credentials, id_key)
@@ -68,12 +72,14 @@ defmodule Coherence.CredentialStore.Session do
 
   Returns the current value of `credentials`, if `credentials` exists.
   """
-  @spec delete_credentials(T.credentials) :: any
+  @spec delete_credentials(T.credentials()) :: any
   def delete_credentials(credentials) do
-    case get_data credentials do
-      nil -> nil
+    case get_data(credentials) do
+      nil ->
+        nil
+
       user_data ->
-        DbStore.delete_credentials user_data, credentials
+        DbStore.delete_credentials(user_data, credentials)
         Server.delete_credentials(credentials)
     end
   end
@@ -83,7 +89,7 @@ defmodule Coherence.CredentialStore.Session do
   """
   @spec delete_user_logins(any) :: no_return
   def delete_user_logins(user_data) do
-    Server.delete_user_logins user_data
-    DbStore.delete_user_logins user_data
+    Server.delete_user_logins(user_data)
+    DbStore.delete_user_logins(user_data)
   end
 end

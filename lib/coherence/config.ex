@@ -135,38 +135,50 @@ defmodule Coherence.Config do
     {:confirm_email_updates, false}
   ]
   |> Enum.each(fn
-        {key, default} ->
-          def unquote(key)(opts \\ unquote(default)) do
-            get_application_env unquote(key), opts
-          end
-        key ->
-          def unquote(key)(opts \\ nil) do
-            get_application_env unquote(key), opts
-          end
-     end)
+    {key, default} ->
+      def unquote(key)(opts \\ unquote(default)) do
+        get_application_env(unquote(key), opts)
+      end
 
-  @spec email_from() :: {nil, nil} | {String.t, String.t} | String.t
+    key ->
+      def unquote(key)(opts \\ nil) do
+        get_application_env(unquote(key), opts)
+      end
+  end)
+
+  @spec email_from() :: {nil, nil} | {String.t(), String.t()} | String.t()
   def email_from do
-    case get_application_env :email_from do
+    case get_application_env(:email_from) do
       nil ->
         {get_application_env(:email_from_name), get_application_env(:email_from_email)}
+
       email ->
-        Logger.info "email_from config is deprecated. Use email_from_name and email_from_email instead"
+        Logger.info(
+          "email_from config is deprecated. Use email_from_name and email_from_email instead"
+        )
+
         email
     end
   end
 
-  @spec email_reply_to() :: nil | true | {String.t, String.t} | String.t
+  @spec email_reply_to() :: nil | true | {String.t(), String.t()} | String.t()
   def email_reply_to do
-    case get_application_env :email_reply_to do
+    case get_application_env(:email_reply_to) do
       nil ->
-        case {get_application_env(:email_reply_to_name), get_application_env(:email_reply_to_email)} do
+        case {get_application_env(:email_reply_to_name),
+              get_application_env(:email_reply_to_email)} do
           {nil, nil} -> nil
           email -> email
         end
-      true -> true
+
+      true ->
+        true
+
       email ->
-        Logger.info "email_reply_to {name, email} config is deprecated. Use email_reply_to_name and email_reply_to_email instead"
+        Logger.info(
+          "email_reply_to {name, email} config is deprecated. Use email_reply_to_name and email_reply_to_email instead"
+        )
+
         email
     end
   end
@@ -174,7 +186,7 @@ defmodule Coherence.Config do
   @doc """
   Get title
   """
-  @spec title() :: String.t | nil
+  @spec title() :: String.t() | nil
   def title, do: get_application_env(:title, get(:module))
 
   @doc """
@@ -182,7 +194,7 @@ defmodule Coherence.Config do
   """
   @spec get(atom, any) :: any
   def get(key, default \\ nil) do
-    get_application_env key, default
+    get_application_env(key, default)
   end
 
   @doc """
@@ -190,7 +202,7 @@ defmodule Coherence.Config do
   """
   @spec has_option(atom) :: boolean
   def has_option(option) do
-    has_any_option?(fn({name, _actions}) -> name == option end)
+    has_any_option?(fn {name, _actions} -> name == option end)
   end
 
   @doc """
@@ -198,7 +210,7 @@ defmodule Coherence.Config do
   """
   @spec has_action?(atom, atom) :: boolean
   def has_action?(option, action) do
-    has_any_option?(fn({name, actions}) ->
+    has_any_option?(fn {name, actions} ->
       name == option and (actions == :all or action in actions)
     end)
   end
@@ -208,14 +220,15 @@ defmodule Coherence.Config do
   """
   @spec use_binary_id?() :: boolean
   def use_binary_id? do
-    !!Application.get_env(:phoenix, :generators, [])[:binary_id] || Application.get_env(:coherence, :use_binary_id)
+    !!Application.get_env(:phoenix, :generators, [])[:binary_id] ||
+      Application.get_env(:coherence, :use_binary_id)
   end
 
   defp has_any_option?(fun) do
     if opts() == :all do
       true
     else
-      Enum.any?(opts(), &(fun.(standardize_option(&1))))
+      Enum.any?(opts(), &fun.(standardize_option(&1)))
     end
   end
 
@@ -223,13 +236,13 @@ defmodule Coherence.Config do
   defp standardize_option(option), do: option
 
   defmacro password_hash do
-    field = Application.get_env :coherence, :password_hash_field, :password_hash
+    field = Application.get_env(:coherence, :password_hash_field, :password_hash)
     quote do: unquote(field)
   end
 
   defp get_application_env(key, default \\ nil) do
-    case Application.get_env :coherence, key, default do
-      {:system, env_var} -> System.get_env env_var
+    case Application.get_env(:coherence, key, default) do
+      {:system, env_var} -> System.get_env(env_var)
       value -> value
     end
   end
@@ -242,21 +255,23 @@ defmodule Coherence.Config do
     case Application.get_env(:coherence, :default_routes) do
       nil ->
         %{
-          registrations_new:  "/registrations/new",
-          registrations:      "/registrations",
-          passwords:          "/passwords",
-          confirmations:      "/confirmations",
-          unlocks:            "/unlocks",
-          invitations:        "/invitations",
+          registrations_new: "/registrations/new",
+          registrations: "/registrations",
+          passwords: "/passwords",
+          confirmations: "/confirmations",
+          unlocks: "/unlocks",
+          invitations: "/invitations",
           invitations_create: "/invitations/create",
           invitations_resend: "/invitations/:id/resend",
-          sessions:           "/sessions",
+          sessions: "/sessions",
           registrations_edit: "/registrations/edit"
         }
+
       %{} = config ->
         config
+
       true ->
-        Logger.info "The configuration for default_routes must be a map"
+        Logger.info("The configuration for default_routes must be a map")
         nil
     end
   end

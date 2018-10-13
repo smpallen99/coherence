@@ -30,12 +30,10 @@ defmodule TestCoherence.ConnCase do
       import TestCoherence.TestHelpers
       alias Coherence.Config
 
-
       # The default endpoint for testing
       @endpoint TestCoherenceWeb.Endpoint
     end
   end
-
 
   setup tags do
     unless tags[:async] do

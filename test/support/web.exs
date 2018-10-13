@@ -1,5 +1,4 @@
 defmodule TestCoherenceWeb.Coherence do
-
   def view do
     quote do
       use Phoenix.View, root: "test/support/templates"
@@ -12,9 +11,9 @@ defmodule TestCoherenceWeb.Coherence do
       import TestCoherenceWeb.Gettext
       import TestCoherenceWeb.Router.Helpers
       import TestCoherenceWeb.ViewHelpers
-
     end
   end
+
   defmacro __using__(which) when is_atom(which) do
     apply(__MODULE__, which, [])
   end

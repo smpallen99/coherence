@@ -1,5 +1,4 @@
 defmodule Coherence.CredentialStore.Server do
-
   alias Coherence.CredentialStore.Types, as: T
 
   @name __MODULE__
@@ -16,41 +15,41 @@ defmodule Coherence.CredentialStore.Server do
 
   @spec start_link() :: {:ok, pid}
   def start_link do
-    GenServer.start_link __MODULE__, [], name: @name
+    GenServer.start_link(__MODULE__, [], name: @name)
   end
 
-  @spec update_user_logins(T.user_data) :: no_return
+  @spec update_user_logins(T.user_data()) :: no_return
   def update_user_logins(%{id: _} = user_data) do
-    GenServer.cast @name, {:update_user_logins, user_data}
+    GenServer.cast(@name, {:update_user_logins, user_data})
   end
 
-    # If the user_data doesn't contain an ID, there are no sessions belonging to the user
-    # There is no need to update anything and we just return an empty list
+  # If the user_data doesn't contain an ID, there are no sessions belonging to the user
+  # There is no need to update anything and we just return an empty list
   def update_user_logins(_), do: []
 
-  @spec delete_user_logins(T.user_data) :: no_return
+  @spec delete_user_logins(T.user_data()) :: no_return
   def delete_user_logins(%{id: _} = user_data) do
-    GenServer.cast @name, {:delete_user_logins, user_data}
+    GenServer.cast(@name, {:delete_user_logins, user_data})
   end
 
-  @spec get_user_data(T.credentials) :: T.user_data
+  @spec get_user_data(T.credentials()) :: T.user_data()
   def get_user_data(credentials) do
-    GenServer.call @name, {:get_user_data, credentials}
+    GenServer.call(@name, {:get_user_data, credentials})
   end
 
-  @spec put_credentials(T.credentials, T.user_data) :: no_return
+  @spec put_credentials(T.credentials(), T.user_data()) :: no_return
   def put_credentials(credentials, user_data) do
-    GenServer.cast @name, {:put_credentials, credentials, user_data}
+    GenServer.cast(@name, {:put_credentials, credentials, user_data})
   end
 
-  @spec delete_credentials(T.credentials) :: no_return
+  @spec delete_credentials(T.credentials()) :: no_return
   def delete_credentials(credentials) do
-    GenServer.cast @name, {:delete_credentials, credentials}
+    GenServer.cast(@name, {:delete_credentials, credentials})
   end
 
   @spec stop() :: no_return
   def stop do
-    GenServer.cast @name, :stop
+    GenServer.cast(@name, :stop)
   end
 
   ###################
@@ -64,11 +63,13 @@ defmodule Coherence.CredentialStore.Server do
   @doc false
   def handle_call({:get_user_data, credentials}, _from, state) do
     id = state.store[credentials]
+
     user_data =
       case state.user_data[id] do
         nil -> nil
         {user_data, _} -> user_data
       end
+
     {:reply, user_data, state}
   end
 
@@ -76,10 +77,11 @@ defmodule Coherence.CredentialStore.Server do
   def handle_cast({:put_credentials, credentials, %{id: id} = user_data}, state) do
     state =
       update_in(state, [:user_data, id], fn
-        nil              -> {user_data, 1}
+        nil -> {user_data, 1}
         {_, cnt} -> {user_data, cnt + 1}
       end)
       |> put_in([:store, credentials], id)
+
     {:noreply, state}
   end
 
@@ -91,9 +93,11 @@ defmodule Coherence.CredentialStore.Server do
   def handle_cast({:update_user_logins, %{id: id} = user_data}, state) do
     # TODO:
     # Maybe support updating ths user's ID.
-    state = update_in(state, [:user_data, id], fn {_, inx} ->
-      {user_data, inx}
-    end)
+    state =
+      update_in(state, [:user_data, id], fn {_, inx} ->
+        {user_data, inx}
+      end)
+
     {:noreply, state}
   end
 
@@ -102,13 +106,15 @@ defmodule Coherence.CredentialStore.Server do
     state =
       state
       |> remove_all_users_from_store(id)
-      |> update_in([:user_data], & Map.delete(&1, id))
+      |> update_in([:user_data], &Map.delete(&1, id))
+
     {:noreply, state}
   end
 
   @doc false
   def handle_cast({:delete_credentials, credentials}, state) do
     id = state.store[credentials]
+
     state =
       state
       |> update_in([:store], &Map.delete(&1, credentials))
@@ -116,6 +122,7 @@ defmodule Coherence.CredentialStore.Server do
         {_, 1} -> nil
         {user_data, inx} -> {user_data, inx - 1}
       end)
+
     {:noreply, state}
   end
 
@@ -134,5 +141,4 @@ defmodule Coherence.CredentialStore.Server do
       for val = {_, v} <- store, v != id, into: %{}, do: val
     end)
   end
-
 end

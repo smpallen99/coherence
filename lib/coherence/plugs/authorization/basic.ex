@@ -14,11 +14,11 @@ defmodule Coherence.Authentication.Basic do
     {:nowarn_function, verify_creds: 2},
     {:nowarn_function, assert_creds: 4},
     {:nowarn_function, init: 1},
-    {:nowarn_function, halt_with_login: 3},
+    {:nowarn_function, halt_with_login: 3}
   ]
 
-  @type t :: Ecto.Schema.t | Map.t
-  @type conn :: Plug.Conn.t
+  @type t :: Ecto.Schema.t() | Map.t()
+  @type conn :: Plug.Conn.t()
 
   @behaviour Plug
   import Plug.Conn
@@ -30,10 +30,10 @@ defmodule Coherence.Authentication.Basic do
   @doc """
     Returns the encoded form for the given `user` and `password` combination.
   """
-  @spec encode_credentials(atom | String.t, String.t | nil) :: T.credentials
+  @spec encode_credentials(atom | String.t(), String.t() | nil) :: T.credentials()
   def encode_credentials(user, password), do: Base.encode64("#{user}:#{password}")
 
-  @spec create_login(String.t, String.t, t, Keyword.t) :: t
+  @spec create_login(String.t(), String.t(), t, Keyword.t()) :: t
   def create_login(email, password, user_data, _opts \\ []) do
     creds = encode_credentials(email, password)
     store = get_credential_store()
@@ -43,8 +43,8 @@ defmodule Coherence.Authentication.Basic do
   @doc """
     Update login store for a user. `user_data` can be any term but must not be `nil`.
   """
-  @spec update_login(String.t, String.t, t, Keyword.t) :: t
-  def update_login(email, password, user_data, opts  \\ []) do
+  @spec update_login(String.t(), String.t(), t, Keyword.t()) :: t
+  def update_login(email, password, user_data, opts \\ []) do
     create_login(email, password, user_data, opts)
   end
 
@@ -54,7 +54,7 @@ defmodule Coherence.Authentication.Basic do
       realm: Keyword.get(opts, :realm, Messages.backend().restricted_area()),
       error: Keyword.get(opts, :error, Messages.backend().http_authentication_required()),
       store: Keyword.get(opts, :store, Coherence.CredentialStore.Server),
-      assigns_key: Keyword.get(opts, :assigns_key, :current_user),
+      assigns_key: Keyword.get(opts, :assigns_key, :current_user)
     }
   end
 
@@ -68,7 +68,9 @@ defmodule Coherence.Authentication.Basic do
 
   defp get_auth_header(conn), do: {conn, get_first_req_header(conn, "authorization")}
 
-  defp verify_creds({conn, << "Basic ", creds::binary >>}, store), do: {conn, store.get_user_data(creds)}
+  defp verify_creds({conn, <<"Basic ", creds::binary>>}, store),
+    do: {conn, store.get_user_data(creds)}
+
   defp verify_creds({conn, _}, _), do: {conn, nil}
 
   defp assert_creds({conn, nil}, realm, error, _), do: halt_with_login(conn, realm, error)

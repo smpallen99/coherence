@@ -12,19 +12,18 @@ defmodule Coherence.RegistrationControllerBase do
   """
   defmacro __using__(opts) do
     quote location: :keep do
-
       alias Coherence.{Messages, Schema, Config, Controller}
       # alias Coherence.Schemas
 
       require Config
       require Logger
 
-      @type schema :: Ecto.Schema.t
-      @type conn :: Plug.Conn.t
-      @type params :: Map.t
+      @type schema :: Ecto.Schema.t()
+      @type conn :: Plug.Conn.t()
+      @type params :: Map.t()
 
       @dialyzer [
-        {:nowarn_function, update: 2},
+        {:nowarn_function, update: 2}
       ]
 
       @schemas unquote(opts)[:schemas] || raise("Schemas option required")
@@ -43,7 +42,7 @@ defmodule Coherence.RegistrationControllerBase do
       """
       @spec new(conn, params) :: conn
       def new(conn, _params) do
-        user_schema = Config.user_schema
+        user_schema = Config.user_schema()
         changeset = Controller.changeset(:registration, user_schema, user_schema.__struct__)
         render(conn, :new, email: "", changeset: changeset)
       end
@@ -56,17 +55,25 @@ defmodule Coherence.RegistrationControllerBase do
       """
       @spec create(conn, params) :: conn
       def create(conn, %{"registration" => registration_params} = params) do
-        user_schema = Config.user_schema
+        user_schema = Config.user_schema()
+
         :registration
-        |> Controller.changeset(user_schema, user_schema.__struct__,
-          Controller.permit(registration_params, Config.registration_permitted_attributes() ||
-            Schema.permitted_attributes_default(:registration)))
+        |> Controller.changeset(
+          user_schema,
+          user_schema.__struct__,
+          Controller.permit(
+            registration_params,
+            Config.registration_permitted_attributes() ||
+              Schema.permitted_attributes_default(:registration)
+          )
+        )
         |> @schemas.create
         |> case do
           {:ok, user} ->
             conn
             |> send_confirmation(user, user_schema)
-            |> redirect_or_login(user, params, Config.allow_unconfirmed_access_for)
+            |> redirect_or_login(user, params, Config.allow_unconfirmed_access_for())
+
           {:error, changeset} ->
             respond_with(conn, :registration_create_error, %{changeset: changeset})
         end
@@ -75,6 +82,7 @@ defmodule Coherence.RegistrationControllerBase do
       def redirect_or_login(conn, user, params, 0) do
         respond_with(conn, :registration_create_success, %{params: params, user: user})
       end
+
       def redirect_or_login(conn, user, params, _) do
         conn
         |> Controller.login_user(user, params)
@@ -83,7 +91,7 @@ defmodule Coherence.RegistrationControllerBase do
           %{
             params: params,
             user: user,
-            notice: Messages.backend().account_created_successfully(),
+            notice: Messages.backend().account_created_successfully()
           }
         )
       end
@@ -112,22 +120,29 @@ defmodule Coherence.RegistrationControllerBase do
       """
       @spec update(conn, params) :: conn
       def update(conn, %{"registration" => user_params} = params) do
-        user_schema = Config.user_schema
+        user_schema = Config.user_schema()
         initial_user = Coherence.current_user(conn)
+
         :registration
-        |> Controller.changeset(user_schema, initial_user, Controller.permit(user_params,
-          Config.registration_permitted_attributes() ||
-            Schema.permitted_attributes_default(:registration)))
+        |> Controller.changeset(
+          user_schema,
+          initial_user,
+          Controller.permit(
+            user_params,
+            Config.registration_permitted_attributes() ||
+              Schema.permitted_attributes_default(:registration)
+          )
+        )
         |> @schemas.update
         |> case do
           {:ok, user} ->
             if Config.get(:confirm_email_updates) &&
-              user.unconfirmed_email != initial_user.unconfirmed_email do
-
+                 user.unconfirmed_email != initial_user.unconfirmed_email do
               send_confirmation(conn, user, user_schema)
             end
-            Config.auth_module
-            |> apply(Config.update_login, [conn, user, [id_key: Config.schema_key]])
+
+            Config.auth_module()
+            |> apply(Config.update_login(), [conn, user, [id_key: Config.schema_key()]])
             |> respond_with(
               :registration_update_success,
               %{
@@ -136,8 +151,12 @@ defmodule Coherence.RegistrationControllerBase do
                 info: Messages.backend().account_updated_successfully()
               }
             )
+
           {:error, changeset} ->
-            respond_with(conn, :registration_update_error, %{user: initial_user, changeset: changeset})
+            respond_with(conn, :registration_update_error, %{
+              user: initial_user,
+              changeset: changeset
+            })
         end
       end
 
@@ -148,12 +167,18 @@ defmodule Coherence.RegistrationControllerBase do
       def delete(conn, params) do
         user = Coherence.current_user(conn)
         conn = Controller.logout_user(conn)
-        @schemas.delete! user
+        @schemas.delete!(user)
         respond_with(conn, :registration_delete_success, %{params: params})
       end
 
       defoverridable(
-        delete: 2, update: 2, edit: 2, show: 2, create: 2, new: 2, redirect_or_login: 4
+        delete: 2,
+        update: 2,
+        edit: 2,
+        show: 2,
+        create: 2,
+        new: 2,
+        redirect_or_login: 4
       )
     end
   end

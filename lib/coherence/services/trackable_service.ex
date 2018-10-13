@@ -49,9 +49,9 @@ defmodule Coherence.TrackableService do
   require Logger
   require Ecto.Query
 
-  @type schema :: Ecto.Schema.t
-  @type conn :: Plug.Conn.t
-  @type params :: Map.t
+  @type schema :: Ecto.Schema.t()
+  @type conn :: Plug.Conn.t()
+  @type params :: Map.t()
 
   @doc """
   Track user login details.
@@ -64,11 +64,12 @@ defmodule Coherence.TrackableService do
   """
   @spec track_login(conn, schema, boolean, boolean) :: conn
   def track_login(conn, _, false, false), do: conn
+
   def track_login(conn, user, true, false) do
     {last_at, last_ip, ip, _now} = last_at_and_ip(conn, user)
 
-    changeset = Controller.changeset(:session, user.__struct__, user,
-      %{
+    changeset =
+      Controller.changeset(:session, user.__struct__, user, %{
         sign_in_count: user.sign_in_count + 1,
         current_sign_in_at: NaiveDateTime.utc_now(),
         current_sign_in_ip: ip,
@@ -76,13 +77,14 @@ defmodule Coherence.TrackableService do
         last_sign_in_ip: last_ip
       })
 
-    case Schemas.update changeset do
+    case Schemas.update(changeset) do
       {:ok, user} ->
-        Config.auth_module
-        |> apply(Config.update_login, [conn, user, [id_key: Config.schema_key]])
-        |> Conn.assign(Config.assigns_key, user)
+        Config.auth_module()
+        |> apply(Config.update_login(), [conn, user, [id_key: Config.schema_key()]])
+        |> Conn.assign(Config.assigns_key(), user)
+
       {:error, _changeset} ->
-        Logger.error ("Failed to update tracking!")
+        Logger.error("Failed to update tracking!")
         conn
     end
   end
@@ -90,9 +92,10 @@ defmodule Coherence.TrackableService do
   def track_login(conn, user, false, true) do
     trackable = last_trackable(user.id)
     {last_at, last_ip, ip, _now} = last_at_and_ip(conn, trackable)
-    schema = schema Trackable
-    changeset = Controller.changeset(:session, schema, schema.__struct__,
-      %{
+    schema = schema(Trackable)
+
+    changeset =
+      Controller.changeset(:session, schema, schema.__struct__, %{
         action: "login",
         sign_in_count: trackable.sign_in_count + 1,
         current_sign_in_at: NaiveDateTime.utc_now(),
@@ -102,11 +105,12 @@ defmodule Coherence.TrackableService do
         user_id: user.id
       })
 
-    case Schemas.create changeset do
+    case Schemas.create(changeset) do
       {:ok, _user} ->
         conn
+
       {:error, changeset} ->
-        Logger.error ("Failed to update tracking! #{inspect changeset.errors}")
+        Logger.error("Failed to update tracking! #{inspect(changeset.errors)}")
         conn
     end
   end
@@ -123,34 +127,36 @@ defmodule Coherence.TrackableService do
   """
   @spec track_logout(conn, schema, boolean, boolean) :: conn
   def track_logout(conn, _, false, false), do: conn
+
   def track_logout(conn, user, true, false) do
-    changeset = Controller.changeset(:session, user.__struct__, user,
-      %{
+    changeset =
+      Controller.changeset(:session, user.__struct__, user, %{
         last_sign_in_at: user.current_sign_in_at,
         last_sign_in_ip: user.current_sign_in_ip,
         current_sign_in_at: nil,
         current_sign_in_ip: nil
       })
 
-    Schemas.update! changeset
+    Schemas.update!(changeset)
     conn
   end
 
   def track_logout(conn, user, false, true) do
     trackable = last_trackable(user.id)
-    schema = schema Trackable
-    changeset = Controller.changeset(:session, schema, trackable,
-      %{
+    schema = schema(Trackable)
+
+    changeset =
+      Controller.changeset(:session, schema, trackable, %{
         last_sign_in_at: trackable.current_sign_in_at,
         last_sign_in_ip: trackable.current_sign_in_ip,
         current_sign_in_at: nil,
-        current_sign_in_ip: nil,
+        current_sign_in_ip: nil
       })
 
-    Schemas.update! changeset
+    Schemas.update!(changeset)
 
-    changeset = Controller.changeset(:session, schema, schema.__struct__,
-      %{
+    changeset =
+      Controller.changeset(:session, schema, schema.__struct__, %{
         action: "logout",
         sign_in_count: trackable.sign_in_count,
         last_sign_in_at: trackable.current_sign_in_at,
@@ -160,37 +166,42 @@ defmodule Coherence.TrackableService do
         user_id: user.id
       })
 
-    Schemas.create! changeset
+    Schemas.create!(changeset)
     conn
   end
 
   @spec track_password_reset(conn, schema, boolean) :: conn
   def track_password_reset(conn, _user, false),
     do: conn
+
   def track_password_reset(conn, user, true),
     do: track(conn, user, "password_reset")
 
   @spec track_failed_login(conn, schema, boolean) :: conn
   def track_failed_login(conn, %{} = user, true),
     do: track(conn, user, "failed_login")
+
   def track_failed_login(conn, _user, _),
     do: conn
 
   @spec track_lock(conn, schema, boolean) :: conn
   def track_lock(conn, _user, false),
     do: conn
+
   def track_lock(conn, user, true),
     do: track(conn, user, "lock")
 
   @spec track_unlock(conn, schema, boolean) :: conn
   def track_unlock(conn, _user, false),
     do: conn
+
   def track_unlock(conn, user, true),
     do: track(conn, user, "unlock")
 
   @spec track_unlock_token(conn, schema, boolean) :: conn
   def track_unlock_token(conn, _user, false),
     do: conn
+
   def track_unlock_token(conn, user, true),
     do: track(conn, user, "unlock_token")
 
@@ -199,33 +210,38 @@ defmodule Coherence.TrackableService do
 
   def track(conn, user, action) do
     trackable = last_trackable(user.id)
-    schema = schema Trackable
-    changeset = Controller.changeset(:session, schema, schema.__struct__,
-      %{
+    schema = schema(Trackable)
+
+    changeset =
+      Controller.changeset(:session, schema, schema.__struct__, %{
         action: action,
         sign_in_count: trackable.sign_in_count,
         last_sign_in_at: trackable.last_sign_in_at,
         last_sign_in_ip: trackable.last_sign_in_ip,
         user_id: user.id
       })
-    Schemas.create! changeset
+
+    Schemas.create!(changeset)
     conn
   end
 
   defp last_at_and_ip(conn, schema) do
     now = NaiveDateTime.utc_now()
     ip = Plug.Conn.get_peer_data(conn) |> Map.get(:address) |> inspect()
+
     cond do
       is_nil(schema.last_sign_in_at) and is_nil(schema.current_sign_in_at) ->
         {now, ip, ip, now}
+
       !!schema.current_sign_in_at ->
         {schema.current_sign_in_at, schema.current_sign_in_ip, ip, now}
+
       true ->
         {schema.last_sign_in_at, schema.last_sign_in_ip, ip, now}
     end
   end
 
   defp last_trackable(user_id) do
-    Schemas.last_trackable user_id
+    Schemas.last_trackable(user_id)
   end
 end

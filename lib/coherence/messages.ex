@@ -68,4 +68,3 @@ defmodule Coherence.Messages do
     Coherence.Config.messages_backend()
   end
 end
-

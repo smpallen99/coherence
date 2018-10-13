@@ -2,53 +2,57 @@ defmodule Coherence.Mix.Utils do
   @moduledoc false
 
   @dialyzer [
-    {:nowarn_function, raise_option_errors: 1},
+    {:nowarn_function, raise_option_errors: 1}
   ]
 
-  @spec rm_dir!(String.t) :: any
+  @spec rm_dir!(String.t()) :: any
   def rm_dir!(dir) do
-    if File.dir? dir do
-      File.rm_rf dir
+    if File.dir?(dir) do
+      File.rm_rf(dir)
     end
   end
 
-  @spec rm!(String.t) :: any
+  @spec rm!(String.t()) :: any
   def rm!(file) do
-    if File.exists? file do
-      File.rm! file
+    if File.exists?(file) do
+      File.rm!(file)
     end
   end
 
-  @spec raise_option_errors([:atom]) :: String.t
+  @spec raise_option_errors([:atom]) :: String.t()
   def raise_option_errors(list) do
-    list = Enum.map(list, fn option ->
-      "--" <> Atom.to_string(option) |> String.replace("_", "-")
-    end)
+    list =
+      Enum.map(list, fn option ->
+        ("--" <> Atom.to_string(option)) |> String.replace("_", "-")
+      end)
 
     list = Enum.join(list, ", ")
 
-    Mix.raise """
+    Mix.raise("""
     The following option(s) are not supported:
-        #{inspect list}
-    """
+        #{inspect(list)}
+    """)
   end
 
-  @spec verify_args!([String.t] | [], [String.t] | []) :: String.t | nil
+  @spec verify_args!([String.t()] | [], [String.t()] | []) :: String.t() | nil
   def verify_args!(parsed, unknown) do
     unless parsed == [] do
-      opts = Enum.join parsed, ", "
-      Mix.raise """
+      opts = Enum.join(parsed, ", ")
+
+      Mix.raise("""
       Invalid argument(s) #{opts}
-      """
+      """)
     end
+
     unless unknown == [] do
       opts =
         unknown
-        |> Enum.map(&(elem(&1,0)))
+        |> Enum.map(&elem(&1, 0))
         |> Enum.join(", ")
-      Mix.raise """
+
+      Mix.raise("""
       Invalid argument(s) #{opts}
-      """
+      """)
     end
   end
 
@@ -69,11 +73,13 @@ defmodule Coherence.Mix.Utils do
       else
         []
       end
+
     [
-      authenticatable: [
-        "# authenticatable",
-        "add :password_hash, :string",
-      ] ++ active_field,
+      authenticatable:
+        [
+          "# authenticatable",
+          "add :password_hash, :string"
+        ] ++ active_field,
       recoverable: [
         "# recoverable",
         "add :reset_password_token, :string",
@@ -94,11 +100,11 @@ defmodule Coherence.Mix.Utils do
       lockable: [
         "# lockable",
         "add :failed_attempts, :integer, default: 0",
-        "add :locked_at, :utc_datetime",
+        "add :locked_at, :utc_datetime"
       ],
       unlockable_with_token: [
         "# unlockable_with_token",
-        "add :unlock_token, :string",
+        "add :unlock_token, :string"
       ],
       confirmable: [
         "# confirmable",
@@ -110,13 +116,13 @@ defmodule Coherence.Mix.Utils do
     ]
   end
 
-  def controller_files, do: [
-    confirmable: "confirmation_controller.ex",
-    invitable: "invitation_controller.ex",
-    recoverable: "password_controller.ex",
-    registerable: "registration_controller.ex",
-    authenticatable: "session_controller.ex",
-    unlockable_with_token: "unlock_controller.ex"
-  ]
-
+  def controller_files,
+    do: [
+      confirmable: "confirmation_controller.ex",
+      invitable: "invitation_controller.ex",
+      recoverable: "password_controller.ex",
+      registerable: "registration_controller.ex",
+      authenticatable: "session_controller.ex",
+      unlockable_with_token: "unlock_controller.ex"
+    ]
 end

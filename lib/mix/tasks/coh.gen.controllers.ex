@@ -50,8 +50,7 @@ defmodule Mix.Tasks.Coh.Gen.Controllers do
   ]
   @default_booleans ~w(confirm)
 
-  @switches [web_path: :string] ++
-    Enum.map(@default_booleans, & {String.to_atom(&1), :boolean} )
+  @switches [web_path: :string] ++ Enum.map(@default_booleans, &{String.to_atom(&1), :boolean})
 
   def run(args) do
     {opts, parsed, _unknown} = OptionParser.parse(args, switches: @switches)
@@ -70,17 +69,23 @@ defmodule Mix.Tasks.Coh.Gen.Controllers do
     files =
       @controller_files
       |> Enum.filter(&installed_option?(config, elem0(&1)))
-      |> Enum.map(& {:eex, elem1(&1), elem1(&1)})
+      |> Enum.map(&{:eex, elem1(&1), elem1(&1)})
 
-    copy_from paths(), "priv/templates/coh.gen.controllers/controllers/coherence",
-      web_path("controllers/coherence"), binding, files, config
+    copy_from(
+      paths(),
+      "priv/templates/coh.gen.controllers/controllers/coherence",
+      web_path("controllers/coherence"),
+      binding,
+      files,
+      config
+    )
   end
 
   defp router_instructions(config) do
     web_base = ", " <> config.binding[:web_base]
     router = Application.get_env(:coherence, :router) |> inspect
 
-    Mix.shell.info """
+    Mix.shell().info("""
     Modify your router.ex file and change the name spaces as indicated below:
 
     defmodule #{router} do
@@ -100,34 +105,38 @@ defmodule Mix.Tasks.Coh.Gen.Controllers do
 
       # ...
     end
-    """
+    """)
+
     config
   end
 
   defp do_config(opts, _parsed) do
     binding =
-      Mix.Project.config
+      Mix.Project.config()
       |> Keyword.fetch!(:app)
-      |> Atom.to_string
-      |> Mix.Phoenix.inflect
+      |> Atom.to_string()
+      |> Mix.Phoenix.inflect()
 
-    base     = opts[:module] || binding[:base]
+    base = opts[:module] || binding[:base]
     web_base = opts[:web_module] || base <> "Web"
 
     binding =
-      Enum.into [
-        base: base,
-        web_base: web_base,
-        opts: Keyword.put(opts, :base, base),
-        web_path: opts[:web_path] || web_path(),
-        web_module: web_base <> ".Coherence",
-      ], binding
+      Enum.into(
+        [
+          base: base,
+          web_base: web_base,
+          opts: Keyword.put(opts, :base, base),
+          web_path: opts[:web_path] || web_path(),
+          web_module: web_base <> ".Coherence"
+        ],
+        binding
+      )
 
     %{
       binding: binding,
       config_opts: get_config_opts()
-     }
-     |> do_default_opts(opts)
+    }
+    |> do_default_opts(opts)
   end
 
   def do_default_opts(config, opts) do
@@ -135,7 +144,7 @@ defmodule Mix.Tasks.Coh.Gen.Controllers do
     |> Enum.map(&String.to_atom/1)
     |> Enum.reduce(config, fn opt, config ->
       value = if opts[opt] == false, do: false, else: true
-      Map.put config, opt, value
+      Map.put(config, opt, value)
     end)
   end
 
@@ -157,18 +166,22 @@ defmodule Mix.Tasks.Coh.Gen.Controllers do
         end) || raise("could not find #{source_file_path} in any of the sources")
 
       target = Path.join(target_dir, target_file_path)
+
       contents =
         case format do
           :text -> File.read!(source)
-          :eex  -> EEx.eval_file(source, binding)
+          :eex -> EEx.eval_file(source, binding)
         end
+
       Mix.Generator.create_file(target, contents, create_opts)
     end
+
     config
   end
 
   defp to_app_source(path, source_dir) when is_binary(path),
     do: Path.join(path, source_dir)
+
   defp to_app_source(app, source_dir) when is_atom(app),
     do: Application.app_dir(app, source_dir)
 
@@ -178,7 +191,7 @@ defmodule Mix.Tasks.Coh.Gen.Controllers do
 
   defp web_path(path \\ "") do
     otp_app = to_string(Mix.Phoenix.otp_app())
-    Path.join ["lib", otp_app <> "_web", path]
+    Path.join(["lib", otp_app <> "_web", path])
   end
 
   defp get_config_opts do
@@ -186,7 +199,7 @@ defmodule Mix.Tasks.Coh.Gen.Controllers do
     |> Application.get_env(:opts, [])
     |> Enum.map(fn
       {opt, _} -> opt
-      opt      -> opt
+      opt -> opt
     end)
   end
 
@@ -196,6 +209,4 @@ defmodule Mix.Tasks.Coh.Gen.Controllers do
 
   defp elem0(tuple), do: elem(tuple, 0)
   defp elem1(tuple), do: elem(tuple, 1)
-
 end
-

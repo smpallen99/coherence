@@ -4,13 +4,14 @@ defmodule Coherence.Mixfile do
   @version "0.6.0"
 
   def project do
-    [ app: :coherence,
+    [
+      app: :coherence,
       version: @version,
       elixir: "~> 1.3",
-      elixirc_paths: elixirc_paths(Mix.env),
-      compilers: [:phoenix, :gettext] ++ Mix.compilers,
-      build_embedded: Mix.env == :prod,
-      start_permanent: Mix.env == :prod,
+      elixirc_paths: elixirc_paths(Mix.env()),
+      compilers: [:phoenix, :gettext] ++ Mix.compilers(),
+      build_embedded: Mix.env() == :prod,
+      start_permanent: Mix.env() == :prod,
       docs: [extras: ["README.md"], main: "Coherence"],
       deps: deps(),
       package: package(),
@@ -24,13 +25,25 @@ defmodule Coherence.Mixfile do
 
   # Configuration for the OTP application
   def application do
-    [mod: {Coherence, []},
-     applications: [:logger, :comeonin, :ecto, :elixir_uuid, :phoenix_swoosh,
-                    :timex_ecto, :tzdata, :plug, :phoenix, :phoenix_html]]
+    [
+      mod: {Coherence, []},
+      applications: [
+        :logger,
+        :comeonin,
+        :ecto,
+        :elixir_uuid,
+        :phoenix_swoosh,
+        :timex_ecto,
+        :tzdata,
+        :plug,
+        :phoenix,
+        :phoenix_html
+      ]
+    ]
   end
 
   defp elixirc_paths(:test), do: ["lib", "web", "test/support"]
-  defp elixirc_paths(_),     do: ["lib", "web"]
+  defp elixirc_paths(_), do: ["lib", "web"]
 
   defp deps do
     [
@@ -49,14 +62,16 @@ defmodule Coherence.Mixfile do
       {:postgrex, ">= 0.0.0", only: :test},
       {:dialyxir, "~> 0.5", only: [:dev], runtime: false},
       {:credo, "~> 0.8", only: [:dev, :test]},
-      {:plug, "~> 1.6"},
+      {:plug, "~> 1.6"}
     ]
   end
 
   defp package do
-    [ maintainers: ["Stephen Pallen"],
+    [
+      maintainers: ["Stephen Pallen"],
       licenses: ["MIT"],
-      links: %{ "Github" => "https://github.com/smpallen99/coherence" },
-      files: ~w(lib priv README.md mix.exs LICENSE)]
+      links: %{"Github" => "https://github.com/smpallen99/coherence"},
+      files: ~w(lib priv README.md mix.exs LICENSE)
+    ]
   end
 end

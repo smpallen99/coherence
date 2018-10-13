@@ -3,16 +3,22 @@ defmodule CoherenceTest.RegistrationController do
   import TestCoherenceWeb.Router.Helpers
 
   setup %{conn: conn} = context do
-    Application.put_env :coherence, :opts, [:confirmable, :registerable]
-    Application.put_env :coherence, :confirm_email_updates, Map.get(context, :confirm_email_updates, false)
+    Application.put_env(:coherence, :opts, [:confirmable, :registerable])
+
+    Application.put_env(
+      :coherence,
+      :confirm_email_updates,
+      Map.get(context, :confirm_email_updates, false)
+    )
+
     user = insert_user(%{name: "John Doe"})
-    conn = assign conn, :current_user, user
+    conn = assign(conn, :current_user, user)
     {:ok, conn: conn, user: user}
   end
 
   describe "show" do
     test "can visit show registration page", %{conn: conn} do
-      conn = get conn, registration_path(conn, :show)
+      conn = get(conn, registration_path(conn, :show))
       assert html_response(conn, 200)
       assert conn.private[:phoenix_template] == "show.html"
     end
@@ -20,7 +26,7 @@ defmodule CoherenceTest.RegistrationController do
 
   describe "edit" do
     test "can visit edit registration page", %{conn: conn} do
-      conn = get conn, registration_path(conn, :edit)
+      conn = get(conn, registration_path(conn, :edit))
       assert html_response(conn, 200)
       assert conn.private[:phoenix_template] == "edit.html"
     end
@@ -28,32 +34,52 @@ defmodule CoherenceTest.RegistrationController do
 
   describe "new" do
     test "can visit new registration page", %{conn: conn} do
-      conn = assign conn, :current_user, nil
-      conn = get conn, registration_path(conn, :new)
+      conn = assign(conn, :current_user, nil)
+      conn = get(conn, registration_path(conn, :new))
       assert html_response(conn, 200)
       assert conn.private[:phoenix_template] == "new.html"
     end
   end
 
   describe "create" do
-    test "can create new registration with valid params, password_confirmation is not mandatory", %{conn: conn} do
-      conn = assign conn, :current_user, nil
-      params = %{"registration" => %{"name" => "John Doe", "email" => "john.doe@example.com", "password" => "123123"}}
+    test "can create new registration with valid params, password_confirmation is not mandatory",
+         %{conn: conn} do
+      conn = assign(conn, :current_user, nil)
+
+      params = %{
+        "registration" => %{
+          "name" => "John Doe",
+          "email" => "john.doe@example.com",
+          "password" => "123123"
+        }
+      }
+
       conn = post conn, registration_path(conn, :create), params
       assert conn.private[:phoenix_flash] == %{"error" => "Mailer configuration required!"}
       assert html_response(conn, 302)
     end
 
     test "password_confirmation checked only if present", %{conn: conn} do
-      conn = assign conn, :current_user, nil
-      params = %{"registration" => %{"name" => "John Doe", "email" => "john.doe@example.com", "password_confirmation" => "no match", "password" => "123123"}}
+      conn = assign(conn, :current_user, nil)
+
+      params = %{
+        "registration" => %{
+          "name" => "John Doe",
+          "email" => "john.doe@example.com",
+          "password_confirmation" => "no match",
+          "password" => "123123"
+        }
+      }
+
       conn = post conn, registration_path(conn, :create), params
       errors = conn.assigns.changeset.errors
-      assert errors[:password_confirmation] == {"does not match confirmation", [validation: :confirmation]}
+
+      assert errors[:password_confirmation] ==
+               {"does not match confirmation", [validation: :confirmation]}
     end
 
     test "can not register with invalid params", %{conn: conn} do
-      conn = assign conn, :current_user, nil
+      conn = assign(conn, :current_user, nil)
       params = %{"registration" => %{}}
       conn = post conn, registration_path(conn, :create), params
       errors = conn.assigns.changeset.errors
@@ -63,12 +89,24 @@ defmodule CoherenceTest.RegistrationController do
     end
 
     test "mass asignment not allowed", %{conn: conn} do
-      conn = assign conn, :current_user, nil
-      params = %{"registration" => %{"name" => "John Doe", "email" => "john.doe@example.com", "password" => "123123", "current_sign_in_ip" => "mass_asignment"}}
+      conn = assign(conn, :current_user, nil)
+
+      params = %{
+        "registration" => %{
+          "name" => "John Doe",
+          "email" => "john.doe@example.com",
+          "password" => "123123",
+          "current_sign_in_ip" => "mass_asignment"
+        }
+      }
+
       conn = post conn, registration_path(conn, :create), params
       assert conn.private[:phoenix_flash] == %{"error" => "Mailer configuration required!"}
       assert html_response(conn, 302)
-      %{:current_sign_in_ip => current_sign_in_ip} = get_user_by_email(params["registration"]["email"])
+
+      %{:current_sign_in_ip => current_sign_in_ip} =
+        get_user_by_email(params["registration"]["email"])
+
       refute current_sign_in_ip == params["registration"]["current_sign_in_ip"]
     end
   end
@@ -90,14 +128,27 @@ defmodule CoherenceTest.RegistrationController do
     end
 
     test "can not update registration without valid current password", %{conn: conn} do
-      params = %{"registration" => %{current_password: "123456", password: "123123", password_confirmation: "123123"}}
+      params = %{
+        "registration" => %{
+          current_password: "123456",
+          password: "123123",
+          password_confirmation: "123123"
+        }
+      }
+
       conn = put conn, registration_path(conn, :update), params
       errors = conn.assigns.changeset.errors
       assert errors[:current_password] == {"invalid current password", []}
     end
 
     test "mass assignment not allowed", %{conn: conn, user: user} do
-      params = %{"registration" => %{"current_password" => user.password, "current_sign_in_ip" => "mass_asignment"}}
+      params = %{
+        "registration" => %{
+          "current_password" => user.password,
+          "current_sign_in_ip" => "mass_asignment"
+        }
+      }
+
       conn = put conn, registration_path(conn, :update), params
       assert conn.private[:phoenix_flash] == %{"info" => "Account updated successfully."}
       assert html_response(conn, 302)

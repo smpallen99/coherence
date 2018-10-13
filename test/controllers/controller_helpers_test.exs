@@ -7,8 +7,13 @@ defmodule CoherenceTest.Controller do
   doctest Coherence.Controller
 
   setup do
-    Application.put_env :coherence, :opts, [:authenticatable, :recoverable,
-      :confirmable, :invitable, :registerable]
+    Application.put_env(:coherence, :opts, [
+      :authenticatable,
+      :recoverable,
+      :confirmable,
+      :invitable,
+      :registerable
+    ])
   end
 
   test "confirm!" do
@@ -45,24 +50,44 @@ defmodule CoherenceTest.Controller do
   end
 
   test "permit only permitted map keys" do
-    params = %{"id" => 1, "email" => "example@example.com", "name" => "tester", "password" => "super secret"}
+    params = %{
+      "id" => 1,
+      "email" => "example@example.com",
+      "name" => "tester",
+      "password" => "super secret"
+    }
+
     permitted = ["email", "name", "password"]
-    assert %{"email" => "example@example.com", "name" => "tester", "password" => "super secret"} == Controller.permit(params,permitted)
+
+    assert %{"email" => "example@example.com", "name" => "tester", "password" => "super secret"} ==
+             Controller.permit(params, permitted)
   end
 
   test "permit permitted and params keys do not match in type" do
-    params = %{:id => 1, :email => "example@example.com", :name => "tester", :password => "super secret"}
+    params = %{
+      :id => 1,
+      :email => "example@example.com",
+      :name => "tester",
+      :password => "super secret"
+    }
+
     permitted = ["email", "name", "password"]
-    assert %{} == Controller.permit(params,permitted)
+    assert %{} == Controller.permit(params, permitted)
   end
 
   test "permit with not defined permitted" do
-    params = %{:id => 1, :email => "example@example.com", :name => "tester", :password => "super secret"}
-    assert %{} == Controller.permit(params,nil)
+    params = %{
+      :id => 1,
+      :email => "example@example.com",
+      :name => "tester",
+      :password => "super secret"
+    }
+
+    assert %{} == Controller.permit(params, nil)
   end
 
   test "extra permitted attribute" do
-      params = %{"email" => "example@example.com", "name" => "tester", "password" => "super secret"}
-      assert  params == Controller.permit(params,["extra", "email", "name", "password"])
+    params = %{"email" => "example@example.com", "name" => "tester", "password" => "super secret"}
+    assert params == Controller.permit(params, ["extra", "email", "name", "password"])
   end
 end

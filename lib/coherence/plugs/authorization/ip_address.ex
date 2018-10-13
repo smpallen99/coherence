@@ -54,17 +54,17 @@ defmodule Coherence.Authentication.IpAddress do
     # {:nowarn_function, get_auth_header: 1},
     # {:nowarn_function, verify_creds: 2},
     # {:nowarn_function, assert_creds: 4},
-    {:nowarn_function, init: 1},
+    {:nowarn_function, init: 1}
     # {:nowarn_function, halt_with_login: 3},
   ]
 
-  @type t :: Ecto.Schema.t | Map.t
-  @type conn :: Plug.Conn.t
+  @type t :: Ecto.Schema.t() | Map.t()
+  @type conn :: Plug.Conn.t()
 
   @doc """
     Add the credentials for a `token`. `user_data` can be any term but must not be `nil`.
   """
-  @spec add_credentials(String.t, t, module) :: t
+  @spec add_credentials(String.t(), t, module) :: t
   def add_credentials(ip, user_data, store \\ Coherence.CredentialStore.Server) do
     store.put_credentials(ip, user_data)
   end
@@ -72,42 +72,49 @@ defmodule Coherence.Authentication.IpAddress do
   @doc """
     Remove the credentials for a `token`.
   """
-  @spec remove_credentials(String.t, module) :: t
+  @spec remove_credentials(String.t(), module) :: t
   def remove_credentials(ip, store \\ Coherence.CredentialStore.Server) do
     store.delete_credentials(ip)
   end
 
-  @spec init(Keyword.t) :: [tuple]
+  @spec init(Keyword.t()) :: [tuple]
   def init(opts) do
     %{
       allow: Keyword.get(opts, :allow, []),
       deny: Keyword.get(opts, :deny, []),
       error: Keyword.get(opts, :error, Messages.backend().unauthorized_ip_address()),
       store: Keyword.get(opts, :store, Coherence.CredentialStore.Server),
-      assign_key: Keyword.get(opts, :assign_key, :current_user),
+      assign_key: Keyword.get(opts, :assign_key, :current_user)
     }
   end
 
-  @spec call(conn, Keyword.t) :: conn
+  @spec call(conn, Keyword.t()) :: conn
   def call(conn, opts) do
     ip = conn |> Plug.Conn.get_peer_data() |> Map.get(:address)
+
     conn
     |> verify_ip(ip, opts)
     |> fetch_user_data(opts)
     |> assert_ip(opts)
   end
 
-  defp verify_ip(conn, ip, %{allow: allow, deny: deny}), do: {conn, ip, in?(ip, allow) && !in?(ip, deny)}
+  defp verify_ip(conn, ip, %{allow: allow, deny: deny}),
+    do: {conn, ip, in?(ip, allow) && !in?(ip, deny)}
 
-  defp fetch_user_data({conn, ip, true}, %{store: store}), do: {conn, true, store.get_user_data(ip)}
+  defp fetch_user_data({conn, ip, true}, %{store: store}),
+    do: {conn, true, store.get_user_data(ip)}
+
   defp fetch_user_data({conn, _ip, valid?}, _), do: {conn, valid?, nil}
 
   defp assert_ip({conn, true, nil}, _), do: conn
-  defp assert_ip({conn, true, user_data}, %{assign_key: assign_key}), do: assign(conn, assign_key, user_data)
+
+  defp assert_ip({conn, true, user_data}, %{assign_key: assign_key}),
+    do: assign(conn, assign_key, user_data)
+
   defp assert_ip({conn, _, _}, %{error: error}), do: halt_with_error(conn, error)
 
   defp in?(ip, list) do
-    Enum.any? list, &(matches? String.split(&1, "/"), ip)
+    Enum.any?(list, &matches?(String.split(&1, "/"), ip))
   end
 
   defp matches?([item], ip), do: Utils.to_string(ip) == item
@@ -117,20 +124,21 @@ defmodule Coherence.Authentication.IpAddress do
     if String.contains?(string, ".") do
       string |> to_tuple |> subnet
     else
-      string |> String.to_integer |> subnet
+      string |> String.to_integer() |> subnet
     end
   end
-  defp subnet(num) when is_integer(num) do
-    Enum.reduce(0..31, 0, &(if &1 < num, do: (&2 ||| 1) <<< 1, else: &2 <<< 1)) >>> 1
-  end
-  defp subnet(tuple) when is_tuple(tuple), do: to_integer(tuple)
 
+  defp subnet(num) when is_integer(num) do
+    Enum.reduce(0..31, 0, &if(&1 < num, do: (&2 ||| 1) <<< 1, else: &2 <<< 1)) >>> 1
+  end
+
+  defp subnet(tuple) when is_tuple(tuple), do: to_integer(tuple)
 
   defp in_subnet?(source_ip, target_ip, subnet) do
     to_integer(source_ip) == (to_integer(target_ip) &&& subnet(subnet))
   end
 
-  defp to_integer({a,b,c,d}) do
+  defp to_integer({a, b, c, d}) do
     a <<< 24 ||| b <<< 16 ||| c <<< 8 ||| d
   end
 
@@ -138,6 +146,6 @@ defmodule Coherence.Authentication.IpAddress do
     string
     |> String.split(".")
     |> Enum.map(&String.to_integer/1)
-    |> List.to_tuple
+    |> List.to_tuple()
   end
 end

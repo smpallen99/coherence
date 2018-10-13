@@ -56,8 +56,8 @@ defmodule Coherence.Authentication.Session do
 
   require Logger
 
-  @type t :: Ecto.Schema.t | Map.t
-  @type conn :: Plug.Conn.t
+  @type t :: Ecto.Schema.t() | Map.t()
+  @type conn :: Plug.Conn.t()
 
   @session_key Application.get_env(:coherence, :session_key, "session_auth")
 
@@ -67,17 +67,17 @@ defmodule Coherence.Authentication.Session do
     {:nowarn_function, verify_rememberable: 2},
     {:nowarn_function, verify_auth_key: 3},
     {:nowarn_function, assert_login: 3},
-    {:nowarn_function, init: 1},
+    {:nowarn_function, init: 1}
   ]
 
   @doc """
     Create a login for a user. `user_data` can be any term but must not be `nil`.
   """
-  @spec create_login(conn, t, Keyword.t) :: conn
-  def create_login(conn, user_data, opts  \\ []) do
+  @spec create_login(conn, t, Keyword.t()) :: conn
+  def create_login(conn, user_data, opts \\ []) do
     id_key = Keyword.get(opts, :id_key, :id)
     store = Keyword.get(opts, :store, Coherence.CredentialStore.Session)
-    id = UUID.uuid1
+    id = UUID.uuid1()
 
     store.put_credentials({id, user_data, id_key})
     put_session(conn, @session_key, id)
@@ -86,8 +86,8 @@ defmodule Coherence.Authentication.Session do
   @doc """
     Update login store for a user. `user_data` can be any term but must not be `nil`.
   """
-  @spec update_login(conn, t, Keyword.t) :: conn
-  def update_login(conn, user_data, opts  \\ []) do
+  @spec update_login(conn, t, Keyword.t()) :: conn
+  def update_login(conn, user_data, opts \\ []) do
     id_key = Keyword.get(opts, :id_key, :id)
     store = Keyword.get(opts, :store, Coherence.CredentialStore.Session)
     id = get_session(conn, @session_key)
@@ -99,7 +99,7 @@ defmodule Coherence.Authentication.Session do
   @doc """
     Delete a login.
   """
-  @spec delete_login(conn, Keyword.t) :: conn
+  @spec delete_login(conn, Keyword.t()) :: conn
   def delete_login(conn, opts \\ []) do
     if opts[:all] do
       delete_user_logins(conn, opts)
@@ -110,9 +110,11 @@ defmodule Coherence.Authentication.Session do
 
   defp delete_current_login(conn, opts) do
     store = Keyword.get(opts, :store, Coherence.CredentialStore.Session)
+
     case get_session(conn, @session_key) do
       nil ->
         conn
+
       key ->
         store.delete_credentials(key)
 
@@ -131,13 +133,16 @@ defmodule Coherence.Authentication.Session do
   end
 
   @doc false
-  @spec init(Keyword.t) :: [tuple]
+  @spec init(Keyword.t()) :: [tuple]
   def init(opts) do
     login =
       case opts[:login] do
-        true  -> true
+        true ->
+          true
+
         fun when is_function(fun) ->
           fun
+
         other ->
           case opts[:protected] do
             nil -> other
@@ -148,7 +153,7 @@ defmodule Coherence.Authentication.Session do
 
     rememberable? =
       if Config.has_option(:rememberable) do
-        Config.user_schema.rememberable?
+        Config.user_schema().rememberable?
       else
         false
       end
@@ -160,15 +165,17 @@ defmodule Coherence.Authentication.Session do
       id_key: Keyword.get(opts, :id, :id),
       store: Keyword.get(opts, :store, Coherence.CredentialStore.Session),
       assigns_key: Keyword.get(opts, :assigns_key, :current_user),
-      login_key: Keyword.get(opts, :login_cookie, Config.login_cookie),
+      login_key: Keyword.get(opts, :login_cookie, Config.login_cookie()),
       rememberable: Keyword.get(opts, :rememberable, rememberable?),
-      cookie_expire: Keyword.get(opts, :login_cookie_expire_hours, Config.rememberable_cookie_expire_hours) * 60 * 60,
+      cookie_expire:
+        Keyword.get(opts, :login_cookie_expire_hours, Config.rememberable_cookie_expire_hours()) *
+          60 * 60,
       rememberable_callback: Keyword.get(opts, :rememberable_callback)
     }
   end
 
   @doc false
-  @spec call(conn, Keyword.t) :: conn
+  @spec call(conn, Keyword.t()) :: conn
   def call(conn, opts) do
     if get_authenticated_user(conn) do
       conn
@@ -185,19 +192,22 @@ defmodule Coherence.Authentication.Session do
     {conn, get_session(conn, @session_key)}
   end
 
-  defp verify_rememberable({conn, nil}, %{rememberable: true, login_key: key} = opts)  do
+  defp verify_rememberable({conn, nil}, %{rememberable: true, login_key: key} = opts) do
     with cookie when not is_nil(cookie) <- conn.cookies[key],
          [id, series, token] <- String.split(cookie, " ") do
       case opts[:rememberable_callback] do
         nil ->
           session_controller = Module.concat(Config.web_module(), Coherence.SessionController)
+
           session_controller =
             if function_exported?(session_controller, :create, 2) do
               session_controller
             else
               Coherence.SessionController
             end
+
           apply(session_controller, :rememberable_callback, [conn, id, series, token, opts])
+
         fun ->
           fun.(conn, id, series, token, opts)
       end
@@ -209,10 +219,12 @@ defmodule Coherence.Authentication.Session do
   defp verify_rememberable(other, _opts), do: other
 
   defp verify_auth_key({conn, nil}, _, _), do: {conn, nil}
+
   defp verify_auth_key({conn, auth_key}, %{db_model: db_model, id_key: id_key}, store),
     do: {conn, store.get_user_data({auth_key, db_model, id_key})}
 
-  defp assert_login({%{private: %{ phoenix_format: format }} = conn, nil}, login, _opts) when format == "json" and (login == true or is_function(login)) do
+  defp assert_login({%{private: %{phoenix_format: format}} = conn, nil}, login, _opts)
+       when format == "json" and (login == true or is_function(login)) do
     conn
     |> send_resp(401, "")
     |> halt
@@ -224,9 +236,11 @@ defmodule Coherence.Authentication.Session do
         "" -> conn.request_path
         _ -> conn.request_path <> "?" <> conn.query_string
       end
-    conn =  put_session(conn, "user_return_to",  user_return_to)
+
+    conn = put_session(conn, "user_return_to", user_return_to)
+
     if login == true do
-      Phoenix.Controller.redirect conn, to: Config.logged_out_url || new_session_path(conn)
+      Phoenix.Controller.redirect(conn, to: Config.logged_out_url() || new_session_path(conn))
     else
       login.(conn)
     end
@@ -235,9 +249,11 @@ defmodule Coherence.Authentication.Session do
 
   defp assert_login({conn, user_data}, _, opts) do
     assign_key = opts[:assigns_key]
+
     conn
     |> assign_user_data(user_data, assign_key)
-    |> create_user_token(user_data, Config.user_token, assign_key)
+    |> create_user_token(user_data, Config.user_token(), assign_key)
   end
+
   defp assert_login(conn, _, _), do: conn
 end

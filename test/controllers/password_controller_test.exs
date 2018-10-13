@@ -7,60 +7,129 @@ defmodule CoherenceTest.PasswordController do
   alias Coherence.PasswordService
 
   setup %{conn: conn} do
-    Application.put_env :coherence, :opts, [:confirmable, :authenticatable, :recoverable,
-      :lockable, :trackable, :unlockable_with_token, :invitable, :registerable]
-    Application.put_env :coherence, :allow_silent_password_recovery_for_unknown_user, false
+    Application.put_env(:coherence, :opts, [
+      :confirmable,
+      :authenticatable,
+      :recoverable,
+      :lockable,
+      :trackable,
+      :unlockable_with_token,
+      :invitable,
+      :registerable
+    ])
+
+    Application.put_env(:coherence, :allow_silent_password_recovery_for_unknown_user, false)
     user = insert_user()
     {:ok, conn: conn, user: user}
   end
 
   def setup_trackable_table(%{conn: conn}) do
-    Application.put_env :coherence, :opts, [:confirmable, :authenticatable, :recoverable,
-      :lockable, :trackable_table, :unlockable_with_token, :invitable, :registerable]
-    Application.put_env :coherence, :allow_silent_password_recovery_for_unknown_user, false
+    Application.put_env(:coherence, :opts, [
+      :confirmable,
+      :authenticatable,
+      :recoverable,
+      :lockable,
+      :trackable_table,
+      :unlockable_with_token,
+      :invitable,
+      :registerable
+    ])
+
+    Application.put_env(:coherence, :allow_silent_password_recovery_for_unknown_user, false)
     user = insert_user()
     {:ok, conn: conn, user: user}
   end
 
   def setup_silent_password_recovery(%{conn: conn}) do
-    Application.put_env :coherence, :opts, [:confirmable, :authenticatable, :recoverable,
-      :lockable, :trackable, :unlockable_with_token, :invitable, :registerable]
-    Application.put_env :coherence, :allow_silent_password_recovery_for_unknown_user, true
+    Application.put_env(:coherence, :opts, [
+      :confirmable,
+      :authenticatable,
+      :recoverable,
+      :lockable,
+      :trackable,
+      :unlockable_with_token,
+      :invitable,
+      :registerable
+    ])
+
+    Application.put_env(:coherence, :allow_silent_password_recovery_for_unknown_user, true)
     user = insert_user()
     {:ok, conn: conn, user: user}
   end
 
   describe "create" do
     test "can not reset password when user not exist", %{conn: conn} do
-      params = %{"password" => %{"email" => "johndoe@exampl.com", "password" => "123123", "password_confirmation" => "123123"}}
+      params = %{
+        "password" => %{
+          "email" => "johndoe@exampl.com",
+          "password" => "123123",
+          "password_confirmation" => "123123"
+        }
+      }
+
       conn = post conn, password_path(conn, :create), params
       assert conn.private[:phoenix_flash] == %{"error" => "Could not find that email address"}
       assert conn.private[:phoenix_template] == "new.html"
     end
 
-    test "can reset password when user exist",  %{conn: conn, user: user} do
-      params = %{"password" => %{"email" => user.email, "password" => "123123", "password_confirmation" => "123123"}}
+    test "can reset password when user exist", %{conn: conn, user: user} do
+      params = %{
+        "password" => %{
+          "email" => user.email,
+          "password" => "123123",
+          "password_confirmation" => "123123"
+        }
+      }
+
       conn = post conn, password_path(conn, :create), params
-      assert conn.private[:phoenix_flash] == %{"error" => "Mailer configuration required!", "info" => "Reset email sent. Check your email for a reset link."}
+
+      assert conn.private[:phoenix_flash] == %{
+               "error" => "Mailer configuration required!",
+               "info" => "Reset email sent. Check your email for a reset link."
+             }
+
       assert html_response(conn, 302)
     end
-    
   end
 
   describe "create with silent password recovery for unknown users" do
     setup [:setup_silent_password_recovery]
 
     test "appear to have reset password when user not exist", %{conn: conn} do
-      params = %{"password" => %{"email" => "johndoe@exampl.com", "password" => "123123", "password_confirmation" => "123123"}}
+      params = %{
+        "password" => %{
+          "email" => "johndoe@exampl.com",
+          "password" => "123123",
+          "password_confirmation" => "123123"
+        }
+      }
+
       conn = post conn, password_path(conn, :create), params
-      assert conn.private[:phoenix_flash] == %{"error" => "Mailer configuration required!", "info" => "Reset email sent. Check your email for a reset link."}
+
+      assert conn.private[:phoenix_flash] == %{
+               "error" => "Mailer configuration required!",
+               "info" => "Reset email sent. Check your email for a reset link."
+             }
+
       assert html_response(conn, 302)
     end
 
-    test "can reset password when user exist",  %{conn: conn, user: user} do
-      params = %{"password" => %{"email" => user.email, "password" => "123123", "password_confirmation" => "123123"}}
+    test "can reset password when user exist", %{conn: conn, user: user} do
+      params = %{
+        "password" => %{
+          "email" => user.email,
+          "password" => "123123",
+          "password_confirmation" => "123123"
+        }
+      }
+
       conn = post conn, password_path(conn, :create), params
-      assert conn.private[:phoenix_flash] == %{"error" => "Mailer configuration required!", "info" => "Reset email sent. Check your email for a reset link."}
+
+      assert conn.private[:phoenix_flash] == %{
+               "error" => "Mailer configuration required!",
+               "info" => "Reset email sent. Check your email for a reset link."
+             }
+
       assert html_response(conn, 302)
     end
   end
@@ -74,7 +143,7 @@ defmodule CoherenceTest.PasswordController do
     end
 
     test "valid token has expired", %{conn: conn} do
-      token = random_string 48
+      token = random_string(48)
       sent_at = ~N(2016-01-01 00:00:00)
       insert_user(%{reset_password_sent_at: sent_at, reset_password_token: token})
       params = %{"id" => token}
@@ -84,7 +153,7 @@ defmodule CoherenceTest.PasswordController do
     end
 
     test "valid token hasn't expired", %{conn: conn} do
-      token = random_string 48
+      token = random_string(48)
       insert_user(%{reset_password_sent_at: NaiveDateTime.utc_now(), reset_password_token: token})
       params = %{"id" => token}
       conn = get conn, password_path(conn, :edit, token), params
@@ -95,10 +164,24 @@ defmodule CoherenceTest.PasswordController do
 
   describe "update" do
     test "valid token", %{conn: conn} do
-      token = random_string 48
-      user = insert_user(%{reset_password_sent_at: NaiveDateTime.utc_now(), reset_password_token: token})
+      token = random_string(48)
+
+      user =
+        insert_user(%{
+          reset_password_sent_at: NaiveDateTime.utc_now(),
+          reset_password_token: token
+        })
+
       old_password_hash = user.password_hash
-      params = %{"password" => %{"reset_password_token" => token, "password" => "123123", "password_confirmation" => "123123"}}
+
+      params = %{
+        "password" => %{
+          "reset_password_token" => token,
+          "password" => "123123",
+          "password_confirmation" => "123123"
+        }
+      }
+
       put(conn, password_path(conn, :update, user.id), params)
       user = Repo.get!(TestCoherence.User, user.id)
       refute old_password_hash == user.password_hash
@@ -107,11 +190,25 @@ defmodule CoherenceTest.PasswordController do
     end
 
     test "invalid reset password token", %{conn: conn} do
-      token = random_string 48
-      user = insert_user(%{reset_password_sent_at: NaiveDateTime.utc_now(), reset_password_token: token})
+      token = random_string(48)
+
+      user =
+        insert_user(%{
+          reset_password_sent_at: NaiveDateTime.utc_now(),
+          reset_password_token: token
+        })
+
       old_password_hash = user.password_hash
       old_sent_at = user.reset_password_sent_at
-      params = %{"password" => %{"reset_password_token" => "1234567890", "password" => "123123", "password_confirmation" => "123123"}}
+
+      params = %{
+        "password" => %{
+          "reset_password_token" => "1234567890",
+          "password" => "123123",
+          "password_confirmation" => "123123"
+        }
+      }
+
       put(conn, password_path(conn, :update, user.id), params)
       user = Repo.get!(TestCoherence.User, user.id)
 
@@ -122,10 +219,18 @@ defmodule CoherenceTest.PasswordController do
 
     test "valid token has expired, reset token gets removed", %{conn: conn} do
       sent_at = ~N(2016-01-01 00:00:00)
-      token = random_string 48
+      token = random_string(48)
       user = insert_user(%{reset_password_sent_at: sent_at, reset_password_token: token})
       old_password_hash = user.password_hash
-      params = %{"password" => %{"reset_password_token" => token, "password" => "123123", "password_confirmation" => "123123"}}
+
+      params = %{
+        "password" => %{
+          "reset_password_token" => token,
+          "password" => "123123",
+          "password_confirmation" => "123123"
+        }
+      }
+
       put(conn, password_path(conn, :update, user.id), params)
       user = Repo.get!(TestCoherence.User, user.id)
 
@@ -133,10 +238,25 @@ defmodule CoherenceTest.PasswordController do
       assert user.reset_password_token == nil
       assert user.reset_password_sent_at == nil
     end
+
     test "mass assignment not allowed", %{conn: conn} do
-      token = random_string 48
-      user = insert_user(%{reset_password_sent_at: NaiveDateTime.utc_now(), reset_password_token: token})
-      params = %{"password" => %{"reset_password_token" => token, "password" => "123123", "password_confirmation" => "123123","current_sign_in_ip" => "mass_asignment"}}
+      token = random_string(48)
+
+      user =
+        insert_user(%{
+          reset_password_sent_at: NaiveDateTime.utc_now(),
+          reset_password_token: token
+        })
+
+      params = %{
+        "password" => %{
+          "reset_password_token" => token,
+          "password" => "123123",
+          "password_confirmation" => "123123",
+          "current_sign_in_ip" => "mass_asignment"
+        }
+      }
+
       put(conn, password_path(conn, :update, user.id), params)
       user = Repo.get!(TestCoherence.User, user.id)
       refute "mass_assignment" == user.current_sign_in_ip
@@ -148,7 +268,16 @@ defmodule CoherenceTest.PasswordController do
 
     test "reset password creates rememberable", %{conn: conn, user: user} do
       {:ok, user} = PasswordService.reset_password_token(user)
-      params = %{"password" => %{"reset_password_token" => user.reset_password_token, "password" => "secret2", "password_confirmation" => "secret2", "current_password" => "supersecret"}}
+
+      params = %{
+        "password" => %{
+          "reset_password_token" => user.reset_password_token,
+          "password" => "secret2",
+          "password_confirmation" => "secret2",
+          "current_password" => "supersecret"
+        }
+      }
+
       conn = put conn, password_path(conn, :update, user), params
       assert conn.private[:phoenix_flash] == %{"info" => "Password updated successfully."}
       assert html_response(conn, 302)

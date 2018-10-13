@@ -39,13 +39,10 @@ defmodule Coherence.ConfirmableService do
       alias Coherence.Schemas
 
       def confirmable? do
-        Config.has_option(:confirmable) and
-          Keyword.get(unquote(opts), :confirmable, true)
+        Config.has_option(:confirmable) and Keyword.get(unquote(opts), :confirmable, true)
       end
 
-      if Config.has_option(:confirmable) and
-            Keyword.get(unquote(opts), :confirmable, true) do
-
+      if Config.has_option(:confirmable) and Keyword.get(unquote(opts), :confirmable, true) do
         @doc """
         Checks if the user has been confirmed.
 
@@ -63,7 +60,10 @@ defmodule Coherence.ConfirmableService do
         Returns a changeset ready for Repo.update
         """
         def confirm(user) do
-          Schemas.change_user(user, %{confirmed_at: NaiveDateTime.utc_now(), confirmation_token: nil})
+          Schemas.change_user(user, %{
+            confirmed_at: NaiveDateTime.utc_now(),
+            confirmation_token: nil
+          })
         end
 
         @doc """
@@ -74,21 +74,36 @@ defmodule Coherence.ConfirmableService do
         deprecated! Please use Coherence.ControllerHelpers.unlock!/1.
         """
         def confirm!(user) do
-          IO.warn "#{inspect Config.user_schema}.confirm!/1 has been deprecated. Please use Coherence.ControllerHelpers.confirm!/1 instead."
-          changeset = Schemas.change_user(user, %{confirmed_at: NaiveDateTime.utc_now(), confirmation_token: nil})
-          if confirmed? user do
-            changeset = Ecto.Changeset.add_error changeset, :confirmed_at, Messages.backend().already_confirmed()
+          IO.warn(
+            "#{inspect(Config.user_schema())}.confirm!/1 has been deprecated. Please use Coherence.ControllerHelpers.confirm!/1 instead."
+          )
+
+          changeset =
+            Schemas.change_user(user, %{
+              confirmed_at: NaiveDateTime.utc_now(),
+              confirmation_token: nil
+            })
+
+          if confirmed?(user) do
+            changeset =
+              Ecto.Changeset.add_error(
+                changeset,
+                :confirmed_at,
+                Messages.backend().already_confirmed()
+              )
+
             {:error, changeset}
           else
-            Config.repo.update changeset
+            Config.repo().update(changeset)
           end
+
           defoverridable(confirm!: 1, confirm: 1, confirmed?: 1)
         end
+
         defoverridable(confirmable?: 0)
       end
     end
   end
-
 
   @doc """
   Confirm a user account.
@@ -97,7 +112,7 @@ defmodule Coherence.ConfirmableService do
 
   deprecated! Please use Coherence.ControllerHelpers.unlock!/1.
   """
-  @spec confirm(Ecto.Schema.t) :: Ecto.Changeset.t
+  @spec confirm(Ecto.Schema.t()) :: Ecto.Changeset.t()
   def confirm(user) do
     Schemas.change_user(user, %{confirmed_at: NaiveDateTime.utc_now(), confirmation_token: nil})
   end
@@ -109,29 +124,31 @@ defmodule Coherence.ConfirmableService do
 
   deprecated! Please use Coherence.ControllerHelpers.unlock!/1.
   """
-  @spec confirm!(Ecto.Schema.t) :: Ecto.Changeset.t | {:error, Ecto.Changeset.t}
+  @spec confirm!(Ecto.Schema.t()) :: Ecto.Changeset.t() | {:error, Ecto.Changeset.t()}
   def confirm!(user) do
-    changeset = Schemas.change_user(user, %{confirmed_at: NaiveDateTime.utc_now(), confirmation_token: nil})
+    changeset =
+      Schemas.change_user(user, %{confirmed_at: NaiveDateTime.utc_now(), confirmation_token: nil})
 
-    if confirmed? user do
-      changeset = Ecto.Changeset.add_error changeset, :confirmed_at, Messages.backend().already_confirmed()
+    if confirmed?(user) do
+      changeset =
+        Ecto.Changeset.add_error(changeset, :confirmed_at, Messages.backend().already_confirmed())
+
       {:error, changeset}
     else
-      Schemas.update changeset
+      Schemas.update(changeset)
     end
   end
-
 
   @doc """
   Checks if the user has been confirmed.
 
   Returns true if confirmed, false otherwise
   """
-  @spec confirmed?(Ecto.Schema.t) :: boolean
+  @spec confirmed?(Ecto.Schema.t()) :: boolean
   def confirmed?(user) do
-    for_option true, fn ->
+    for_option(true, fn ->
       !!user.confirmed_at
-    end
+    end)
   end
 
   @doc """
@@ -139,11 +156,11 @@ defmodule Coherence.ConfirmableService do
 
   Returns true when the confirmation has expired.
   """
-  @spec expired?(Ecto.Schema.t) :: boolean
+  @spec expired?(Ecto.Schema.t()) :: boolean
   def expired?(user) do
-    for_option fn ->
-      expired?(user.confirmation_sent_at, days: Config.confirmation_token_expire_days)
-    end
+    for_option(fn ->
+      expired?(user.confirmation_sent_at, days: Config.confirmation_token_expire_days())
+    end)
   end
 
   @doc """
@@ -151,14 +168,14 @@ defmodule Coherence.ConfirmableService do
 
   Returns true if the unconfirmed access has not expired.
   """
-  @spec unconfirmed_access?(Ecto.Schema.t) :: boolean
+  @spec unconfirmed_access?(Ecto.Schema.t()) :: boolean
   def unconfirmed_access?(user) do
-    for_option fn ->
-      case Config.allow_unconfirmed_access_for do
+    for_option(fn ->
+      case Config.allow_unconfirmed_access_for() do
         0 -> false
         days -> not expired?(user.confirmation_sent_at, days: days)
       end
-    end
+    end)
   end
 
   defp for_option(other \\ false, fun) do
@@ -168,5 +185,4 @@ defmodule Coherence.ConfirmableService do
       other
     end
   end
-
 end

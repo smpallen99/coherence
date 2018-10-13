@@ -28,12 +28,14 @@ defmodule Coherence.PasswordService do
   current time and date.
   """
   def reset_password_token(user) do
-    token = Controller.random_string 48
+    token = Controller.random_string(48)
     dt = NaiveDateTime.utc_now()
-    :password
-    |> Controller.changeset(user.__struct__, user,
-      %{reset_password_token: token, reset_password_sent_at: dt})
-    |> Schemas.update
-  end
 
+    :password
+    |> Controller.changeset(user.__struct__, user, %{
+      reset_password_token: token,
+      reset_password_sent_at: dt
+    })
+    |> Schemas.update()
+  end
 end

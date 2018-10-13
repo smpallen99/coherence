@@ -38,36 +38,37 @@ defmodule Coherence.Authentication.Basic.Test do
     "Admin"
     |> Coherence.Authentication.Basic.encode_credentials("SecretPass")
     |> Coherence.CredentialStore.Server.put_credentials(%{id: 1, role: :admin})
+
     :ok
   end
 
   test "request without credentials" do
     connection = conn(:get, "/", []) |> TestPlug.call([])
-    assert_unauthorized connection, "Secret"
+    assert_unauthorized(connection, "Secret")
   end
 
   test "request with invalid user" do
     conn = call(TestPlug, auth_header("Hacker:SecretPass"))
-    assert_unauthorized conn, "Secret"
+    assert_unauthorized(conn, "Secret")
   end
 
   test "request with invalid password" do
     conn = call(TestPlug, auth_header("Admin:ASecretPass"))
-    assert_unauthorized conn, "Secret"
+    assert_unauthorized(conn, "Secret")
   end
 
   test "request with valid credentials" do
     conn = call(TestPlug, auth_header("Admin:SecretPass"))
-    assert_authorized conn, "Authorized"
+    assert_authorized(conn, "Authorized")
   end
 
   test "request with malformed credentials" do
     conn = call(TestPlug, "Basic Zm9)")
-    assert_unauthorized conn, "Secret"
+    assert_unauthorized(conn, "Secret")
   end
 
   test "request with wrong scheme" do
     conn = call(TestPlug, "Bearer #{Base.encode64("Admin:SecretPass")}")
-    assert_unauthorized conn, "Secret"
+    assert_unauthorized(conn, "Secret")
   end
 end

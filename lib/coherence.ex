@@ -159,9 +159,9 @@ defmodule Coherence do
   The `--rememberable` install option is not provided in any of the installer group options. You must provide the `--rememberable` option to install the migration and its support.
 
   ## Mix Tasks
-  
+
   Backwords compatibility note: For versions of Phoenix previous to 1.3 use `mix coherence.<command>`. The new `mix coh.<command>` better understands the newer Phoenix patterns.
-  
+
   ### Installer
 
   The following examples illustrate various configuration scenarios for the install mix task:
@@ -232,7 +232,7 @@ defmodule Coherence do
   @doc """
   Get the currently logged in user data.
   """
-  def current_user(conn), do: conn.assigns[Config.assigns_key]
+  def current_user(conn), do: conn.assigns[Config.assigns_key()]
 
   @doc """
   Updates the user login data in the current sessions.
@@ -242,9 +242,11 @@ defmodule Coherence do
   To update all session belonging to the user see `t:update_user_login/1`.
   """
   def update_user_login(conn, user) do
-    apply(Config.auth_module,
-          Config.update_login,
-          [conn, user, [id_key: Config.schema_key]])
+    apply(
+      Config.auth_module(),
+      Config.update_login(),
+      [conn, user, [id_key: Config.schema_key()]]
+    )
   end
 
   @doc """
@@ -269,20 +271,28 @@ defmodule Coherence do
   @doc """
   Get the currently assigned user_token
   """
-  def user_token(conn), do: conn.assigns[Config.token_assigns_key]
+  def user_token(conn), do: conn.assigns[Config.token_assigns_key()]
 
   @doc """
   Verify a user token for channel authentication.
   """
   def verify_user_token(socket, token, assign_fun) do
-    result = case Config.verify_user_token do
-      fun when is_function(fun) ->
-        fun.(socket, token)
-      {mod, fun, args} ->
-        apply(mod, fun, args)
-      error ->
-        {:error, Messages.backend().verify_user_token(user_token: Config.verify_user_token(), error: error)}
-    end
+    result =
+      case Config.verify_user_token() do
+        fun when is_function(fun) ->
+          fun.(socket, token)
+
+        {mod, fun, args} ->
+          apply(mod, fun, args)
+
+        error ->
+          {:error,
+           Messages.backend().verify_user_token(
+             user_token: Config.verify_user_token(),
+             error: error
+           )}
+      end
+
     case result do
       {:ok, user_id} -> {:ok, assign_fun.(socket, :user_id, user_id)}
       error -> error
@@ -293,5 +303,4 @@ defmodule Coherence do
   Check if user is logged in.
   """
   def logged_in?(conn), do: !!current_user(conn)
-
 end
