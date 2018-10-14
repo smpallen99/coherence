@@ -8,12 +8,10 @@ defmodule <%= base %>.Coherence.Trackable do
   alias Coherence.Config
 
   @fields ~w(action sign_in_count current_sign_in_ip current_sign_in_at last_sign_in_ip last_sign_in_at user_id)a
-
   <%= if use_binary_id? do %>
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
-  <% end %>
-
+  <% else %><% end %>
   schema "trackables" do
     field(:action, :string, null: false)
     field(:sign_in_count, :integer, default: 0)
@@ -32,7 +30,7 @@ defmodule <%= base %>.Coherence.Trackable do
   If no params are provided, an invalid changeset is returned
   with no validation performed.
   """
-  @spec changeset(Ecto.Schema.t, Map.t) :: Ecto.Changeset.t
+  @spec changeset(Ecto.Schema.t(), Map.t()) :: Ecto.Changeset.t()
   def changeset(model, params \\ %{}) do
     model
     |> cast(params, @fields)
@@ -42,7 +40,7 @@ defmodule <%= base %>.Coherence.Trackable do
   @doc """
   Creates a changeset for a new schema
   """
-  @spec new_changeset(Map.t) :: Ecto.Changeset.t
+  @spec new_changeset(Map.t()) :: Ecto.Changeset.t()
   def new_changeset(params \\ %{}) do
     changeset(%__MODULE__{}, params)
   end

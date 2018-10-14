@@ -985,13 +985,19 @@ defmodule Mix.Tasks.Coh.Install do
     block = """
     You might want to add the following to your priv/repo/seeds.exs file.
 
-    #{repo}.delete_all #{user_schema}
+    #{repo}.delete_all(#{user_schema})
 
-    #{user_schema}.changeset(%#{user_schema}{}, %{name: "Test User", email: "testuser@example.com", password: "secret", password_confirmation: "secret"})
-    |> #{repo}.insert!
+    %#{user_schema}{}
+    |> #{user_schema}.changeset(%{
+      name: "Test User",
+      email: "testuser@example.com",
+      password: "secret",
+      password_confirmation: "secret"
+    })
+    |> #{repo}.insert!()
     """
 
-    confirm = if config[:confirmable], do: "|> Coherence.Controller.confirm!\n", else: ""
+    confirm = if config[:confirmable], do: "|> Coherence.Controller.confirm!()\n", else: ""
     block <> confirm
   end
 
@@ -1003,12 +1009,14 @@ defmodule Mix.Tasks.Coh.Install do
 
     defmodule #{base}.User do
       use Ecto.Schema
-      use Coherence.Schema     # Add this
+      # Add this
+      use Coherence.Schema
 
       schema "users" do
         field :name, :string
         field :email, :string
-        coherence_schema()       # Add this
+        # Add this
+        coherence_schema()
 
         timestamps()
       end
@@ -1018,12 +1026,16 @@ defmodule Mix.Tasks.Coh.Install do
         |> cast(params, [:name, :email] ++ coherence_fields)
         |> validate_required([:name, :email])
         |> unique_constraint(:email)
-        |> validate_coherence(params)             # Add this
+        # Add this
+        |> validate_coherence(params)
       end
 
       def changeset(model, params, :password) do
         model
-        |> cast(params, ~w(password password_confirmation reset_password_token reset_password_sent_at))
+        |> cast(
+          params,
+          ~w(password password_confirmation reset_password_token reset_password_sent_at)
+        )
         |> validate_coherence_password_reset(params)
       end
     end
@@ -1050,7 +1062,8 @@ defmodule Mix.Tasks.Coh.Install do
 
     defmodule #{router} do
       use #{web_base}, :router
-      use Coherence.Router         # Add this
+      # Add this
+      use Coherence.Router
 
       pipeline :browser do
         plug(:accepts, ["html"])
@@ -1058,16 +1071,18 @@ defmodule Mix.Tasks.Coh.Install do
         plug(:fetch_flash)
         plug(:protect_from_forgery)
         plug(:put_secure_browser_headers)
-        plug(Coherence.Authentication.Session)  # Add this
+        # Add this
+        plug(Coherence.Authentication.Session)
       end
 
+      # Add this block
       pipeline :protected do
         plug(:accepts, ["html"])
         plug(:fetch_session)
         plug(:fetch_flash)
         plug(:protect_from_forgery)
         plug(:put_secure_browser_headers)
-        plug(Coherence.Authentication.Session, protected: true)  # Add this
+        plug(Coherence.Authentication.Session, protected: true)
       end
 
       # Add this block

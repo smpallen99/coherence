@@ -6,7 +6,7 @@ defmodule <%= web_base %>.Coherence.Messages do
   messages used in the coherence application except those in other generated
   files like the view and templates.
 
-  To assist in upgrading Coherence, the `Coherence.Messages behaviour will
+  To assist in upgrading Coherence, the `Coherence.Messages` behaviour will
   alway contain every message for the current version.  This will help in upgrades
   to ensure the user had added new the new messages from the current version.
   """

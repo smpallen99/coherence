@@ -6,12 +6,10 @@ defmodule <%= base %>.Coherence.Rememberable do
   import Ecto.Query
 
   alias Coherence.Config
-
   <%= if use_binary_id? do %>
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
-  <% end %>
-
+  <% else %><% end %>
   schema "rememberables" do
     field(:series_hash, :string)
     field(:token_hash, :string)
@@ -29,7 +27,7 @@ defmodule <%= base %>.Coherence.Rememberable do
   If no params are provided, an invalid changeset is returned
   with no validation performed.
   """
-  @spec changeset(Ecto.Schema.t, Map.t) :: Ecto.Changeset.t
+  @spec changeset(Ecto.Schema.t(), Map.t()) :: Ecto.Changeset.t()
   def changeset(model, params \\ %{}) do
     model
     |> cast(params, ~w(series_hash token_hash token_created_at user_id))
@@ -39,7 +37,7 @@ defmodule <%= base %>.Coherence.Rememberable do
   @doc """
   Creates a changeset for a new schema
   """
-  @spec new_changeset(Map.t) :: Ecto.Changeset.t
+  @spec new_changeset(Map.t()) :: Ecto.Changeset.t()
   def new_changeset(params \\ %{}) do
     changeset(%Rememberable{}, params)
   end

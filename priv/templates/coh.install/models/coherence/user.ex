@@ -2,12 +2,10 @@ defmodule <%= user_schema %> do
   @moduledoc false
   use Ecto.Schema
   use Coherence.Schema
-
   <%= if use_binary_id? do %>
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
-  <% end %>
-
+  <% else %><% end %>
   schema "<%= user_table_name %>" do
     field(:name, :string)
     field(:email, :string)
@@ -16,6 +14,8 @@ defmodule <%= user_schema %> do
     timestamps()
   end
 
+  @doc false
+  @spec changeset(Ecto.Schema.t(), Map.t()) :: Ecto.Changeset.t()
   def changeset(model, params \\ %{}) do
     model
     |> cast(params, [:name, :email] ++ coherence_fields())
@@ -25,6 +25,8 @@ defmodule <%= user_schema %> do
     |> validate_coherence(params)
   end
 
+  @doc false
+  @spec changeset(Ecto.Schema.t(), Map.t(), atom) :: Ecto.Changeset.t()
   def changeset(model, params, :password) do
     model
     |> cast(
