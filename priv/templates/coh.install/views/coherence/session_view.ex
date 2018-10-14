@@ -16,6 +16,7 @@ defmodule <%= web_base %>.Coherence.SessionView do
       error: error
     }
   end
+
   def render("error.json", _opts) do
     %{
       error: "Invalid credentials"

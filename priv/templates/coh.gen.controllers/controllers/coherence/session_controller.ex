@@ -9,6 +9,6 @@ defmodule <%= web_base %>.Coherence.SessionController do
   use CoherenceWeb, :controller
   use Coherence.SessionControllerBase, schemas: <%= base %>.Coherence.Schemas
 
-  plug :layout_view, view: Coherence.SessionView, caller: __MODULE__
-  plug :redirect_logged_in when action in [:new, :create]
+  plug(:layout_view, view: Coherence.SessionView, caller: __MODULE__)
+  plug(:redirect_logged_in when action in [:new, :create])
 end

@@ -42,19 +42,19 @@ defmodule Mix.Tasks.Coh.InstallTest do
       ])
 
       assert_file("config/config.exs", [
-        "registration_permitted_attributes: [\"email\",\"name\",\"password\",\"current_password\",\"password_confirmation\"],"
+        "registration_permitted_attributes: [\n    \"email\",\n    \"name\",\n    \"password\",\n    \"current_password\",\n    \"password_confirmation\"\n  ],\n"
       ])
 
       assert_file("config/config.exs", [
-        "invitation_permitted_attributes: [\"name\",\"email\"],"
+        "invitation_permitted_attributes: [\"name\", \"email\"],\n"
       ])
 
       assert_file("config/config.exs", [
-        "password_reset_permitted_attributes: [\"reset_password_token\",\"password\",\"password_confirmation\"],"
+        "password_reset_permitted_attributes: [\n    \"reset_password_token\",\n    \"password\",\n    \"password_confirmation\"\n  ],\n"
       ])
 
       assert_file("config/config.exs", [
-        "session_permitted_attributes: [\"remember\",\"email\",\"password\"],"
+        "session_permitted_attributes: [\"remember\", \"email\", \"password\"],"
       ])
     end)
   end
@@ -69,7 +69,9 @@ defmodule Mix.Tasks.Coh.InstallTest do
 
       assert_file(file_name, [
         "def get_user(id) do",
-        "Enum.each [], fn module"
+        "Enum.each(",
+        "[],",
+        "fn module"
       ])
     end)
   end
@@ -84,7 +86,9 @@ defmodule Mix.Tasks.Coh.InstallTest do
 
       assert_file(file_name, [
         "def get_user(id) do",
-        "Enum.each [TestCoherence.Coherence.Invitation], fn module"
+        "Enum.each(",
+        "[TestCoherence.Coherence.Invitation],",
+        "fn module"
       ])
     end)
   end
@@ -99,7 +103,9 @@ defmodule Mix.Tasks.Coh.InstallTest do
 
       assert_file(file_name, [
         "def get_user(id) do",
-        "Enum.each [TestCoherence.Coherence.Rememberable], fn module"
+        "Enum.each(",
+        "[TestCoherence.Coherence.Rememberable],",
+        "fn module"
       ])
     end)
   end
@@ -114,7 +120,9 @@ defmodule Mix.Tasks.Coh.InstallTest do
 
       assert_file(file_name, [
         "def get_user(id) do",
-        "Enum.each [TestCoherence.Coherence.Trackable], fn module"
+        "Enum.each(",
+        "[TestCoherence.Coherence.Trackable],",
+        "fn module"
       ])
     end)
   end
@@ -129,7 +137,9 @@ defmodule Mix.Tasks.Coh.InstallTest do
 
       assert_file(file_name, [
         "def get_user(id) do",
-        "Enum.each [TestCoherence.Coherence.Rememberable], fn module"
+        "Enum.each(",
+        "[TestCoherence.Coherence.Rememberable],",
+        "fn module"
       ])
     end)
   end

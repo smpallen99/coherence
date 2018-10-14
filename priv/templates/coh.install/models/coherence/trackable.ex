@@ -15,13 +15,13 @@ defmodule <%= base %>.Coherence.Trackable do
   <% end %>
 
   schema "trackables" do
-    field :action, :string, null: false
-    field :sign_in_count, :integer, default: 0
-    field :current_sign_in_at, :naive_datetime
-    field :last_sign_in_at, :naive_datetime
-    field :current_sign_in_ip, :string
-    field :last_sign_in_ip, :string
-    belongs_to :user, Config.user_schema()<%= if use_binary_id?, do: ", type: :binary_id", else: "" %>
+    field(:action, :string, null: false)
+    field(:sign_in_count, :integer, default: 0)
+    field(:current_sign_in_at, :naive_datetime)
+    field(:last_sign_in_at, :naive_datetime)
+    field(:current_sign_in_ip, :string)
+    field(:last_sign_in_ip, :string)
+    belongs_to(:user, Config.user_schema()<%= if use_binary_id?, do: ", type: :binary_id", else: "" %>)
 
     timestamps()
   end
@@ -44,7 +44,7 @@ defmodule <%= base %>.Coherence.Trackable do
   """
   @spec new_changeset(Map.t) :: Ecto.Changeset.t
   def new_changeset(params \\ %{}) do
-    changeset %__MODULE__{}, params
+    changeset(%__MODULE__{}, params)
   end
 
 end

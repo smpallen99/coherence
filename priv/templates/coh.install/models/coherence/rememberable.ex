@@ -13,10 +13,10 @@ defmodule <%= base %>.Coherence.Rememberable do
   <% end %>
 
   schema "rememberables" do
-    field :series_hash, :string
-    field :token_hash, :string
-    field :token_created_at, :naive_datetime
-    belongs_to :user, Config.user_schema()<%= if use_binary_id?, do: ", type: :binary_id", else: "" %>
+    field(:series_hash, :string)
+    field(:token_hash, :string)
+    field(:token_created_at, :naive_datetime)
+    belongs_to(:user, Config.user_schema()<%= if use_binary_id?, do: ", type: :binary_id", else: "" %>)
 
     timestamps()
   end
@@ -41,7 +41,7 @@ defmodule <%= base %>.Coherence.Rememberable do
   """
   @spec new_changeset(Map.t) :: Ecto.Changeset.t
   def new_changeset(params \\ %{}) do
-    changeset %Rememberable{}, params
+    changeset(%Rememberable{}, params)
   end
 
 end

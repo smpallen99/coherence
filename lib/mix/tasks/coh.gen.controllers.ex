@@ -93,14 +93,14 @@ defmodule Mix.Tasks.Coh.Gen.Controllers do
 
       # Change this block
       scope "/"#{web_base} do
-        pipe_through :browser
+        pipe_through(:browser)
         coherence_routes()
       end
 
       # Change this block
       scope "/"#{web_base} do
-        pipe_through :protected
-        coherence_routes :protected
+        pipe_through(:protected)
+        coherence_routes(:protected)
       end
 
       # ...

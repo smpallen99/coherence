@@ -15,6 +15,7 @@ defmodule <%= web_base %>.Coherence.InvitationView do
 
     %{error: changeset}
   end
+
   def render("error.json", %{error: error}) do
     %{error: error}
   end

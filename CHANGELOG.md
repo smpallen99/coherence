@@ -14,10 +14,12 @@ See these [0.5.x to 0.6.x upgrade instructions](https://gist.github.com/smpallen
   * Updated to Comeonin 4.0
   * Add support for configurable password hashing algorithms
   * Speed up tests by configuring the Bcrypt algorithm
+  * Format may generator templates to align with code formatter
 
 * Bug Fixes
   * Fixed detection of remember me checkbox on session new page
   * Fixed compiled gettext in view helpers
+  * Fix new session screen issue on newly generated project #390
 
 * Deprecations
   * Removed the coherence.make_templates task since its no longer needed with the new controller design

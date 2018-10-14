@@ -288,7 +288,6 @@ defmodule Mix.Tasks.Coh.Install do
       router: #{config[:router]},
       password_hashing_alg: #{config[:password_hashing_alg]},
       messages_backend: #{config[:web_base]}.Coherence.Messages,#{layout_field(config)}
-      logged_out_url: "/",#{user_active_field(config)}
       registration_permitted_attributes: ["email","name","password","current_password","password_confirmation"],
       invitation_permitted_attributes: ["name","email"],
       password_reset_permitted_attributes: ["reset_password_token","password","password_confirmation"],
@@ -308,11 +307,11 @@ defmodule Mix.Tasks.Coh.Install do
   defp layout_field(_),
     do: ""
 
-  defp user_active_field(%{user_active_field?: true}),
-    do: "\n  user_active_field: true,"
+  # defp user_active_field(%{user_active_field?: true}),
+  #   do: "\n  user_active_field: true,"
 
-  defp user_active_field(_),
-    do: ""
+  # defp user_active_field(_),
+  #   do: ""
 
   defp swoosh_config(string, %{web_base: web_base, use_email?: true}) do
     string <>
@@ -346,7 +345,8 @@ defmodule Mix.Tasks.Coh.Install do
           end
 
         if confirmed do
-          File.write!(@config_file, source <> "\n" <> string)
+          # File.write!(@config_file, source <> "\n" <> string)
+          File.write!(@config_file, Code.format_string!(source <> "\n" <> string))
           shell_info(config, "Your config/config.exs file was updated.")
           false
         else
@@ -1053,43 +1053,43 @@ defmodule Mix.Tasks.Coh.Install do
       use Coherence.Router         # Add this
 
       pipeline :browser do
-        plug :accepts, ["html"]
-        plug :fetch_session
-        plug :fetch_flash
-        plug :protect_from_forgery
-        plug :put_secure_browser_headers
-        plug Coherence.Authentication.Session  # Add this
+        plug(:accepts, ["html"])
+        plug(:fetch_session)
+        plug(:fetch_flash)
+        plug(:protect_from_forgery)
+        plug(:put_secure_browser_headers)
+        plug(Coherence.Authentication.Session)  # Add this
       end
 
       pipeline :protected do
-        plug :accepts, ["html"]
-        plug :fetch_session
-        plug :fetch_flash
-        plug :protect_from_forgery
-        plug :put_secure_browser_headers
-        plug Coherence.Authentication.Session, protected: true  # Add this
+        plug(:accepts, ["html"])
+        plug(:fetch_session)
+        plug(:fetch_flash)
+        plug(:protect_from_forgery)
+        plug(:put_secure_browser_headers)
+        plug(Coherence.Authentication.Session, protected: true)  # Add this
       end
 
       # Add this block
       scope "/" do
-        pipe_through :browser
+        pipe_through(:browser)
         coherence_routes()
       end
 
       # Add this block
       scope "/" do
-        pipe_through :protected
-        coherence_routes :protected
+        pipe_through(:protected)
+        coherence_routes(:protected)
       end
 
       scope "/", #{web_base} do
-        pipe_through :browser
-        get "/", PageController, :index
+        pipe_through(:browser)
+        get("/", PageController, :index)
         # Add public routes below
       end
 
       scope "/", #{web_base} do
-        pipe_through :protected
+        pipe_through(:protected)
         # Add protected routes below
       end
     end
@@ -1170,8 +1170,6 @@ defmodule Mix.Tasks.Coh.Install do
       |> Atom.to_string()
       |> Mix.Phoenix.inflect()
 
-    # IO.puts "binding: #{inspect binding}"
-
     base = opts[:module] || binding[:base]
     web_base = opts[:web_module] || base <> "Web"
     opts = Keyword.put(opts, :base, base)
@@ -1228,8 +1226,6 @@ defmodule Mix.Tasks.Coh.Install do
     ]
     |> Enum.into(opts_map)
     |> do_default_config(opts)
-
-    # |> IO.inspect(label: "config")
   end
 
   defp do_bin_opts(bin_opts) do

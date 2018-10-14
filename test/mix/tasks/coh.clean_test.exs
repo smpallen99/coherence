@@ -9,7 +9,7 @@ defmodule Mix.Tasks.Coh.CleanTest do
   alias Mix.Tasks.Coh.Install
   alias Mix.Tasks.Coh.Clean
 
-  @default_args ~w(--repo=TestCoherence.Repo --module="TestCoherence" --log-only)
+  @default_args ~w(--repo=TestCoherence.Repo --module=TestCoherence --log-only)
 
   describe "coh" do
     test "cleans all" do

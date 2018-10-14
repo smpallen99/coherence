@@ -14,6 +14,6 @@ defmodule <%= web_base %>.Coherence.PasswordController do
   use CoherenceWeb, :controller
   use Coherence.PasswordControllerBase, schemas: <%= base %>.Coherence.Schemas
 
-  plug :layout_view, view: Coherence.PasswordView, caller: __MODULE__
-  plug :redirect_logged_in when action in [:new, :create, :edit, :update]
+  plug(:layout_view, view: Coherence.PasswordView, caller: __MODULE__)
+  plug(:redirect_logged_in when action in [:new, :create, :edit, :update])
 end

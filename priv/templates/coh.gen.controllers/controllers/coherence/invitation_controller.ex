@@ -13,7 +13,7 @@ defmodule <%= web_base %>.Coherence.InvitationController do
   use CoherenceWeb, :controller
   use Coherence.InvitationControllerBase, schemas: <%= base %>.Coherence.Schemas
 
-  plug Coherence.ValidateOption, :invitable
-  plug :scrub_params, "user" when action in [:create_user]
-  plug :layout_view, view: Coherence.InvitationView, caller: __MODULE__
+  plug(Coherence.ValidateOption, :invitable)
+  plug(:scrub_params, "user" when action in [:create_user])
+  plug(:layout_view, view: Coherence.InvitationView, caller: __MODULE__)
 end

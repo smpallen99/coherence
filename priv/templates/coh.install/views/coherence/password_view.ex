@@ -4,6 +4,7 @@ defmodule <%= web_base %>.Coherence.PasswordView do
   def render("password.json", %{info: info}) do
     %{info: info}
   end
+
   def render("password.json", %{error: error}) do
     %{error: error}
   end
@@ -11,6 +12,7 @@ defmodule <%= web_base %>.Coherence.PasswordView do
   def render("error.json", %{error: error}) do
     %{error: error}
   end
+
   def render("error.json", %{changeset: changeset}) do
     changeset =
       cond do

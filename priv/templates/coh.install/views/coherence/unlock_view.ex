@@ -21,6 +21,7 @@ defmodule <%= web_base %>.Coherence.UnlockView do
       error: error
     }
   end
+
   def render("error.json", %{changeset: changeset}) do
     changeset =
       cond do

@@ -11,9 +11,9 @@ defmodule <%= base %>.Coherence.Invitation do
   <% end %>
 
   schema "invitations" do
-    field :name, :string
-    field :email, :string
-    field :token, :string
+    field(:name, :string)
+    field(:email, :string)
+    field(:token, :string)
 
     timestamps()
   end
@@ -38,6 +38,6 @@ defmodule <%= base %>.Coherence.Invitation do
   """
   @spec new_changeset(Map.t) :: Ecto.Changeset.t
   def new_changeset(params \\ %{}) do
-    changeset %__MODULE__{}, params
+    changeset(%__MODULE__{}, params)
   end
 end
