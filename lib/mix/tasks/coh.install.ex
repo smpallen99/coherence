@@ -346,7 +346,7 @@ defmodule Mix.Tasks.Coh.Install do
 
         if confirmed do
           # File.write!(@config_file, source <> "\n" <> string)
-          File.write!(@config_file, Code.format_string!(source <> "\n" <> string))
+          File.write!(@config_file, format_string!(source <> "\n" <> string))
           shell_info(config, "Your config/config.exs file was updated.")
           false
         else

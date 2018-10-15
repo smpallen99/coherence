@@ -30,32 +30,41 @@ defmodule Mix.Tasks.Coh.InstallTest do
       ~w(--emails --repo=TestCoherence.Repo --log-only --no-migrations --module=TestCoherence)
       |> Mix.Tasks.Coh.Install.run()
 
-      assert_file("config/config.exs", [
-        "config :coherence,",
-        "user_schema: TestCoherence.Coherence.User,",
-        "repo: TestCoherence.Repo,",
-        "module: TestCoherence",
-        "router: TestCoherenceWeb.Router",
-        "web_module: TestCoherenceWeb",
-        "messages_backend: TestCoherenceWeb.Coherence.Messages,",
-        "opts: [:authenticatable]"
-      ])
+      assert_file("config/config.exs", fn file ->
+        expected =
+          [
+            "config :coherence,",
+            "user_schema: TestCoherence.Coherence.User,",
+            "repo: TestCoherence.Repo,",
+            "module: TestCoherence",
+            "router: TestCoherenceWeb.Router",
+            "web_module: TestCoherenceWeb",
+            "messages_backend: TestCoherenceWeb.Coherence.Messages,",
+            "opts: [:authenticatable]"
+          ]
+          |> Enum.join("")
 
-      assert_file("config/config.exs", [
-        "registration_permitted_attributes: [\n    \"email\",\n    \"name\",\n    \"password\",\n    \"current_password\",\n    \"password_confirmation\"\n  ],\n"
-      ])
+        String.replace(file, "\n", "") =~ expected
+      end)
 
-      assert_file("config/config.exs", [
-        "invitation_permitted_attributes: [\"name\", \"email\"],\n"
-      ])
+      assert_file("config/config.exs", fn file ->
+        String.replace(file, "\n\s+", "") =~
+          ~s(registration_permitted_attributes: ["email","name","password","current_password","password_confirmation"])
+      end)
 
-      assert_file("config/config.exs", [
-        "password_reset_permitted_attributes: [\n    \"reset_password_token\",\n    \"password\",\n    \"password_confirmation\"\n  ],\n"
-      ])
+      assert_file("config/config.exs", fn file ->
+        String.replace(file, "\n\s+", "") =~ ~s(invitation_permitted_attributes: ["name","email"])
+      end)
 
-      assert_file("config/config.exs", [
-        "session_permitted_attributes: [\"remember\", \"email\", \"password\"],"
-      ])
+      assert_file("config/config.exs", fn file ->
+        String.replace(file, "\n\s+", "") =~
+          ~s(password_reset_permitted_attributes: ["reset_password_token","password","password_confirmation"])
+      end)
+
+      assert_file("config/config.exs", fn file ->
+        String.replace(file, "\n\s+", "") =~
+          ~s(session_permitted_attributes: ["remember","email","password"])
+      end)
     end)
   end
 

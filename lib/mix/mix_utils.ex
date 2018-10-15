@@ -125,4 +125,12 @@ defmodule Coherence.Mix.Utils do
       authenticatable: "session_controller.ex",
       unlockable_with_token: "unlock_controller.ex"
     ]
+
+  def format_string!(string) do
+    if function_exported?(Code, :format_string!, 1) do
+      Code.format_string!(string)
+    else
+      string
+    end
+  end
 end
