@@ -221,7 +221,7 @@ defmodule Coherence.Authentication.Session do
   defp verify_auth_key({conn, nil}, _, _), do: {conn, nil}
 
   defp verify_auth_key({conn, auth_key}, %{db_model: db_model, id_key: id_key}, store),
-    do: {conn, store.get_user_data({auth_key, db_model, id_key})}
+    do: {conn, store.get_user_data(db_model, auth_key, id_key)}
 
   defp assert_login({%{private: %{phoenix_format: format}} = conn, nil}, login, _opts)
        when format == "json" and (login == true or is_function(login)) do

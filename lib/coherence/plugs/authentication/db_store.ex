@@ -13,7 +13,7 @@ defprotocol Coherence.DbStore do
   Get authenticated user data.
   """
   @spec get_user_data(schema, HashDict.t(), atom) :: schema
-  def get_user_data(resource, credentials, id_key)
+  def get_user_data(schema, credentials, id_key)
 
   @doc """
   Save authenticated user data in the database.
