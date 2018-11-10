@@ -33,12 +33,12 @@ defmodule Coherence.CredentialStore.Session do
   Gets the user data for the given credentials
   """
 
-  @spec get_user_data({struct, integer | T.credentials(), nil | nil}) :: any
-  def get_user_data({nil, credentials, _}) do
+  @spec get_user_data(struct, integer | T.credentials(), nil | nil) :: any
+  def get_user_data(nil, credentials, _) do
     get_data(credentials)
   end
 
-  def get_user_data({db_model, credentials, id_key}) do
+  def get_user_data(db_model, credentials, id_key) do
     case get_data(credentials) do
       nil ->
         case DbStore.get_user_data(db_model.__struct__, credentials, id_key) do
