@@ -33,7 +33,6 @@ defmodule Coherence.Mixfile do
         :ecto,
         :elixir_uuid,
         :phoenix_swoosh,
-        :timex_ecto,
         :tzdata,
         :plug,
         :phoenix,

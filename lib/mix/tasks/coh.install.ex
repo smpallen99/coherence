@@ -666,6 +666,8 @@ defmodule Mix.Tasks.Coh.Install do
 
   defp gen_trackable_migration(config), do: config
 
+  defp migrations_path(repo), do: "priv/repo/migrations/"
+
   defp do_gen_migration(%{timestamp: current_timestamp} = config, name, fun) do
     repo =
       config[:repo]
