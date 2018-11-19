@@ -9,7 +9,7 @@ defmodule TestCoherenceWeb.ViewHelpers do
   @type conn :: Plug.Conn.t()
   @type schema :: Ecto.Schema.t()
 
-  @seperator {:safe, "&nbsp; | &nbsp;"}
+  @separator {:safe, "&nbsp; | &nbsp;"}
   @helpers Module.concat(Application.get_env(:coherence, :web_module), Router.Helpers)
 
   @recover_link Messages.backend().forgot_your_password()
@@ -142,7 +142,7 @@ defmodule TestCoherenceWeb.ViewHelpers do
 
   defp concat([], acc), do: Enum.reverse(acc)
   defp concat([h | t], []), do: concat(t, [h])
-  defp concat([h | t], acc), do: concat(t, [h, @seperator | acc])
+  defp concat([h | t], acc), do: concat(t, [h, @separator | acc])
 
   @spec recover_link(conn, module, false | String.t()) :: [any] | []
   def recover_link(_conn, _user_schema, false), do: []

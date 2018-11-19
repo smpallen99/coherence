@@ -3,7 +3,7 @@ defmodule Coherence.CoherenceView do
   use Phoenix.View, root: "web/templates/coherence"
   import TestCoherenceWeb.Router.Helpers
 
-  @seperator {:safe, "&nbsp; | &nbsp;"}
+  @separator {:safe, "&nbsp; | &nbsp;"}
 
   def coherence_links(conn, :new_session) do
     user_schema = Coherence.Config.user_schema()
@@ -18,7 +18,7 @@ defmodule Coherence.CoherenceView do
 
   defp concat([], acc), do: Enum.reverse(acc)
   defp concat([h | t], []), do: concat(t, [h])
-  defp concat([h | t], acc), do: concat(t, [h, @seperator | acc])
+  defp concat([h | t], acc), do: concat(t, [h, @separator | acc])
 
   defp recovery_link(conn, user_schema) do
     if user_schema.recoverable? do

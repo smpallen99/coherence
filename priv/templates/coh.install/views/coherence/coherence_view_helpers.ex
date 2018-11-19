@@ -21,7 +21,7 @@ defmodule <%= web_base %>.Coherence.ViewHelpers do
   @type conn :: Plug.Conn.t()
   @type schema :: Ecto.Schema.t()
 
-  @seperator {:safe, "&nbsp; | &nbsp;"}
+  @separator {:safe, "&nbsp; | &nbsp;"}
   @helpers <%= web_base %>.Router.Helpers
 
   @recover_link_text "Forgot your password?"
@@ -189,7 +189,7 @@ defmodule <%= web_base %>.Coherence.ViewHelpers do
 
   defp concat([], acc), do: Enum.reverse(acc)
   defp concat([h | t], []), do: concat(t, [h])
-  defp concat([h | t], acc), do: concat(t, [h, @seperator | acc])
+  defp concat([h | t], acc), do: concat(t, [h, @separator | acc])
 
   @doc """
   Generate the recover password link.
