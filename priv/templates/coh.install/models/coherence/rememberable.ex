@@ -30,7 +30,7 @@ defmodule <%= base %>.Coherence.Rememberable do
   @spec changeset(Ecto.Schema.t(), Map.t()) :: Ecto.Changeset.t()
   def changeset(model, params \\ %{}) do
     model
-    |> cast(params, ~w(series_hash token_hash token_created_at user_id))
+    |> cast(params, ~w(series_hash token_hash token_created_at user_id)a)
     |> validate_required(~w(series_hash token_hash token_created_at user_id)a)
   end
 

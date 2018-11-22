@@ -30,10 +30,9 @@ defmodule Coherence.Mixfile do
       applications: [
         :logger,
         :comeonin,
-        :ecto,
+        :ecto_sql,
         :elixir_uuid,
         :phoenix_swoosh,
-        :timex_ecto,
         :tzdata,
         :plug,
         :phoenix,
@@ -47,7 +46,7 @@ defmodule Coherence.Mixfile do
 
   defp deps do
     [
-      {:ecto, "~> 2.0"},
+      {:ecto_sql, "~> 3.0"},
       {:comeonin, "~> 4.0"},
       {:bcrypt_elixir, "~> 1.1"},
       {:phoenix, "~> 1.3"},
@@ -56,11 +55,10 @@ defmodule Coherence.Mixfile do
       {:elixir_uuid, "~> 1.2"},
       {:phoenix_swoosh, "~> 0.2"},
       {:timex, "~> 3.3"},
-      {:timex_ecto, "~> 3.3"},
       {:floki, "~> 0.19", only: :test},
       {:ex_doc, "~> 0.18.0", only: :dev},
       {:earmark, "~> 1.2", only: :dev, override: true},
-      {:postgrex, ">= 0.0.0", only: :test},
+      {:postgrex, "~> 0.14.0", only: :test},
       {:dialyxir, "~> 0.5", only: [:dev], runtime: false},
       {:credo, "~> 0.8", only: [:dev, :test]},
       {:plug, "~> 1.6"}
