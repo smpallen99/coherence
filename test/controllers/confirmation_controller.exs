@@ -1,6 +1,6 @@
 defmodule CoherenceTest.ConfirmationController do
   use TestCoherence.ConnCase
-  import TestCoherenceWeb.Router.Helpers
+  import TestCoherenceWeb.Router.Helpers, as: Routes
 
   setup %{conn: conn} do
     Application.put_env(:coherence, :opts, [:confirmable, :registerable])
@@ -27,7 +27,7 @@ defmodule CoherenceTest.ConfirmationController do
       |> TestCoherence.Repo.update!()
 
       conn =
-        post conn, confirmation_path(conn, :create), %{
+        post conn, Routes.confirmation_path(conn, :create), %{
           "confirmation" => %{"email" => "user@example.com"}
         }
 
@@ -40,7 +40,7 @@ defmodule CoherenceTest.ConfirmationController do
       |> TestCoherence.Repo.update!()
 
       conn =
-        post conn, confirmation_path(conn, :create), %{
+        post conn, Routes.confirmation_path(conn, :create), %{
           "confirmation" => %{"email" => "user@example.com"}
         }
 
@@ -62,7 +62,7 @@ defmodule CoherenceTest.ConfirmationController do
       |> TestCoherence.Repo.update!()
 
       conn =
-        post conn, confirmation_path(conn, :create), %{
+        post conn, Routes.confirmation_path(conn, :create), %{
           "confirmation" => %{"email" => "user@example.com"}
         }
 
@@ -72,7 +72,7 @@ defmodule CoherenceTest.ConfirmationController do
 
   describe "edit" do
     test "should confirm valid confirmation token", %{conn: conn} do
-      conn = get(conn, confirmation_path(conn, :edit, "foobar"))
+      conn = get(conn, Routes.confirmation_path(conn, :edit, "foobar"))
       assert html_response(conn, 302)
       user = get_user_by_email("user@example.com")
       assert user.confirmation_token == nil
@@ -81,7 +81,7 @@ defmodule CoherenceTest.ConfirmationController do
 
     test "should set email from unconfirmed_email if confirm_email_updates is true", %{conn: conn} do
       Application.put_env(:coherence, :confirm_email_updates, true)
-      conn = get(conn, confirmation_path(conn, :edit, "foobar"))
+      conn = get(conn, Routes.confirmation_path(conn, :edit, "foobar"))
       assert html_response(conn, 302)
       user = get_user_by_email("unconfirmed@example.com")
       assert user.unconfirmed_email == nil
@@ -93,7 +93,7 @@ defmodule CoherenceTest.ConfirmationController do
       conn: conn
     } do
       Application.put_env(:coherence, :confirm_email_updates, false)
-      conn = get(conn, confirmation_path(conn, :edit, "foobar"))
+      conn = get(conn, Routes.confirmation_path(conn, :edit, "foobar"))
       assert html_response(conn, 302)
       user = get_user_by_email("user@example.com")
       refute user.unconfirmed_email == nil
