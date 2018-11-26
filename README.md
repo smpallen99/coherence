@@ -30,7 +30,9 @@ As well, a `lib/my_project/web/coherence_web.ex` is added. Migrations are also g
 See the [Docs](https://hexdocs.pm/coherence/Coherence.html) and [Wiki](https://github.com/smpallen99/coherence/wiki) for more information.
 
 ## Installation
-
+https://github.com/oscarg933/universe.git
+https://github.com/oscarg933/transactional-email-templates.git
+Dio.ros
   1. Add coherence to your list of dependencies in `mix.exs`:
 
       ```elixir
