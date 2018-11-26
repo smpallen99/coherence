@@ -41,5 +41,4 @@ defmodule Coherence.RememberableServer do
   # defp schedule_daily_work do
   #   Process.send_after(self(), :daily_work, 24 * 60 * 60 * 1000)  # 1 day
   # end
-
 end

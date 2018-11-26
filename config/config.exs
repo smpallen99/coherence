@@ -6,5 +6,4 @@ config :coherence, Coherence.Mailer,
   adapter: Swoosh.Adapters.Sendgrid,
   api_key: ""
 
-import_config "#{Mix.env}.exs"
-
+import_config "#{Mix.env()}.exs"

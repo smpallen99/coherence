@@ -1,14 +1,4 @@
 defmodule Mix.Tasks.Coh.Install do
-  use Mix.Task
-
-  import Macro, only: [camelize: 1, underscore: 1]
-  import Mix.Generator
-  import Mix.Ecto
-  import Coherence.Config, only: [use_binary_id?: 0]
-  import Coherence.Mix.Utils
-
-  @shortdoc "Configure the Coherence Package"
-
   @moduledoc """
   Configure the Coherence User Model for your Phoenix application. Coherence
   is composed of a number of modules that can be enabled with this installer.
@@ -91,8 +81,6 @@ defmodule Mix.Tasks.Coh.Install do
 
   A `--migration-path` option to set the migration path
 
-  A `--controllers` option to generate controllers boilerplate (not default)
-
   A `--module` option to override the module
 
   A `--web-module` option to override the web module
@@ -106,6 +94,12 @@ defmodule Mix.Tasks.Coh.Install do
   A `--confirm-once` option to only confirm overwriting existing files once
 
   A `--with-migrations` option to reinstall migrations. only valid for --reinstall option
+
+  A `--layout` (false) generate layout template and view
+
+  A `--user-active-field` (false) add active field to user schema and disable logins when set to false.
+
+  A `--password-hashing-alg (Comeonin.Bcrypt) add a different password hashing algorithm
 
   ## Disable Options
 
@@ -129,45 +123,64 @@ defmodule Mix.Tasks.Coh.Install do
 
   @shortdoc "Configure the Coherence Package"
 
-  @all_options       ~w(authenticatable recoverable lockable trackable trackable_table rememberable) ++
-                       ~w(unlockable_with_token confirmable invitable registerable)
-  @all_options_atoms Enum.map(@all_options, &(String.to_atom(&1)))
+  @all_options ~w(authenticatable recoverable lockable trackable trackable_table rememberable) ++
+                 ~w(unlockable_with_token confirmable invitable registerable)
+  @all_options_atoms Enum.map(@all_options, &String.to_atom(&1))
 
-  @default_options   ~w(authenticatable)
-  @full_options      @all_options -- ~w(confirmable invitable rememberable trackable_table)
-  @full_confirmable  @all_options -- ~w(invitable rememberable trackable_table)
-  @full_invitable    @all_options -- ~w(confirmable rememberable trackable_table)
+  @default_options ~w(authenticatable)
+  @full_options @all_options -- ~w(confirmable invitable rememberable trackable_table)
+  @full_confirmable @all_options -- ~w(invitable rememberable trackable_table)
+  @full_invitable @all_options -- ~w(confirmable rememberable trackable_table)
 
   # the options that default to true, and can be disabled with --no-option
-  @default_booleans  ~w(config web messages views migrations templates models emails boilerplate confirm)
+  @default_booleans ~w(config web messages views migrations templates models emails boilerplate confirm)
 
   # all boolean_options
-  @boolean_options   @default_booleans ++ ~w(default full full_confirmable full_invitable) ++ @all_options
+  @boolean_options @default_booleans ++
+                     ~w(default full full_confirmable full_invitable) ++ @all_options
 
   # options that will set use_email? to true
-  @email_options     Enum.map(~w(recoverable unlockable_with_token confirmable invitable), &(String.to_atom(&1)))
+  @email_options Enum.map(
+                   ~w(recoverable unlockable_with_token confirmable invitable),
+                   &String.to_atom(&1)
+                 )
 
   @config_file "config/config.exs"
 
   @config_marker_start "%% Coherence Configuration %%"
-  @config_marker_end   "%% End Coherence Configuration %%"
+  @config_marker_end "%% End Coherence Configuration %%"
 
   @switches [
-    user: :string, repo: :string, migration_path: :string, model: :string,
-    log_only: :boolean, confirm_once: :boolean, controllers: :boolean,
-    module: :string, installed_options: :boolean, reinstall: :boolean,
-    silent: :boolean, with_migrations: :boolean, router: :string,
-    web_path: :string, web_module: :string
-  ] ++ Enum.map(@boolean_options, &({String.to_atom(&1), :boolean}))
+              user: :string,
+              repo: :string,
+              migration_path: :string,
+              model: :string,
+              log_only: :boolean,
+              confirm_once: :boolean,
+              module: :string,
+              installed_options: :boolean,
+              reinstall: :boolean,
+              silent: :boolean,
+              with_migrations: :boolean,
+              router: :string,
+              web_path: :string,
+              web_module: :string,
+              binary_id: :boolean,
+              layout: :boolean,
+              user_active_field: :boolean,
+              password_hashing_alg: :string
+            ] ++ Enum.map(@boolean_options, &{String.to_atom(&1), :boolean})
 
-  @switch_names Enum.map(@switches, &(elem(&1, 0)))
+  @switch_names Enum.map(@switches, &elem(&1, 0))
 
   @new_user_migration_fields ["add :name, :string", "add :email, :string"]
-  @new_user_constraints      ["create unique_index(:users, [:email])"]
+  @new_user_constraints ["create unique_index(:users, [:email])"]
 
+  @spec run(command_line_args :: [binary]) :: any
   def run(args) do
     {opts, parsed, unknown} = OptionParser.parse(args, switches: @switches)
 
+    verify_deprecated!(opts)
     verify_args!(parsed, unknown)
 
     {bin_opts, opts} = parse_options(opts)
@@ -185,18 +198,23 @@ defmodule Mix.Tasks.Coh.Install do
     |> get_config_options()
     |> run
   end
+
   defp do_run(%{installed_options: true} = config) do
-    print_installed_options config
+    print_installed_options(config)
   end
+
   defp do_run(%{confirm_once: true} = config) do
-    if Mix.shell.yes? "Are you sure you want overwrite any existing files?" do
+    if Mix.shell().yes?("Are you sure you want overwrite any existing files?") do
       config
       |> Map.put(:confirm, false)
       |> Map.delete(:confirm_once)
       |> do_run
     end
   end
-  defp do_run(%{with_migrations: true}), do: Mix.raise("--with-migrations only valid with --reinstall")
+
+  defp do_run(%{with_migrations: true}),
+    do: Mix.raise("--with-migrations only valid with --reinstall")
+
   defp do_run(config) do
     config
     |> validate_project_structure
@@ -204,17 +222,23 @@ defmodule Mix.Tasks.Coh.Install do
     |> gen_coherence_config
     |> gen_migration
     |> gen_model
+    |> gen_layout_template
     |> gen_invitable_migration
     |> gen_rememberable_migration
     |> gen_trackable_migration
+    |> gen_invitable_schema
+    |> gen_rememberable_schema
+    |> gen_trackable_schema
+    |> gen_schemas_module
     |> gen_coherence_web
     |> gen_coherence_messages
     |> gen_coherence_views
     |> gen_coherence_templates
     |> gen_coherence_mailer
     |> gen_redirects
-    |> gen_coherence_controllers
-    |> touch_config                # work around for config file not getting recompiled
+    |> gen_responders
+    # work around for config file not getting recompiled
+    |> touch_config
     |> print_instructions
   end
 
@@ -222,18 +246,24 @@ defmodule Mix.Tasks.Coh.Install do
     case File.lstat(web_path) do
       {:ok, %{type: :directory}} ->
         config
+
       _ ->
-        if Mix.shell.yes?("Cannot find web path #{web_path}. Are you sure you want to continue?") do
+        if Mix.shell().yes?(
+             "Cannot find web path #{web_path}. Are you sure you want to continue?"
+           ) do
           config
         else
-          Mix.raise "Cannot find web path #{web_path}"
+          Mix.raise("Cannot find web path #{web_path}")
         end
     end
   end
 
   defp check_confirm(options, %{confirm: true}), do: options
   defp check_confirm(options, _), do: ["--no-confirm" | options]
-  defp check_confirm_once(options, %{confirm_once: false} = config), do: check_confirm(options, config)
+
+  defp check_confirm_once(options, %{confirm_once: false} = config),
+    do: check_confirm(options, config)
+
   defp check_confirm_once(options, _), do: ["--confirm-once" | options]
   defp check_silent(options, %{silent: false}), do: options
   defp check_silent(options, _), do: ["--silent" | options]
@@ -241,39 +271,58 @@ defmodule Mix.Tasks.Coh.Install do
   defp check_migrations(options, _), do: ["--no-migrations" | options]
 
   defp gen_coherence_config(config) do
-    from_email = if config[:use_email?] do
-      ~s|  email_from_name: "Your Name",\n| <>
-      ~s|  email_from_email: "yourname@example.com",\n|
-    else
-      ""
-    end
+    from_email =
+      if config[:use_email?] do
+        ~s|  email_from_name: "Your Name",\n| <> ~s|  email_from_email: "yourname@example.com",\n|
+      else
+        ""
+      end
 
     config_block = """
-      # #{@config_marker_start}   Don't remove this line
-      config :coherence,
-        user_schema: #{config[:user_schema]},
-        repo: #{config[:repo]},
-        module: #{config[:base]},
-        web_module: #{config[:web_base]},
-        router: #{config[:router]},
-        messages_backend: #{config[:web_base]}.Coherence.Messages,
-        logged_out_url: "/",
-      """
-    (config_block <> from_email <> "  opts: #{inspect config[:opts]}\n")
+    # #{@config_marker_start}   Don't remove this line
+    config :coherence,
+      user_schema: #{config[:user_schema]},
+      repo: #{config[:repo]},
+      module: #{config[:base]},
+      web_module: #{config[:web_base]},
+      router: #{config[:router]},
+      password_hashing_alg: #{config[:password_hashing_alg]},
+      messages_backend: #{config[:web_base]}.Coherence.Messages,#{layout_field(config)}
+      registration_permitted_attributes: ["email","name","password","current_password","password_confirmation"],
+      invitation_permitted_attributes: ["name","email"],
+      password_reset_permitted_attributes: ["reset_password_token","password","password_confirmation"],
+      session_permitted_attributes: ["remember","email","password"],
+    """
+
+    (config_block <> from_email <> "  opts: #{inspect(config[:opts])}\n")
     |> swoosh_config(config)
     |> add_end_marker
     |> write_config(config)
     |> log_config
   end
 
+  defp layout_field(%{layout: true} = config),
+    do: ~s(\n  layout: {#{config.web_base}.Coherence.LayoutView, "app.html"},)
+
+  defp layout_field(_),
+    do: ""
+
+  # defp user_active_field(%{user_active_field?: true}),
+  #   do: "\n  user_active_field: true,"
+
+  # defp user_active_field(_),
+  #   do: ""
+
   defp swoosh_config(string, %{web_base: web_base, use_email?: true}) do
-    string <> "\n" <>
+    string <>
+      "\n" <>
       """
       config :coherence, #{web_base}.Coherence.Mailer,
         adapter: Swoosh.Adapters.Sendgrid,
         api_key: "your api key here"
       """
   end
+
   defp swoosh_config(string, _), do: string
 
   defp add_end_marker(string) do
@@ -282,61 +331,71 @@ defmodule Mix.Tasks.Coh.Install do
 
   defp write_config(string, %{config: true, confirm: confirm?} = config) do
     log_config? =
-      if File.exists? @config_file do
+      if File.exists?(@config_file) do
         source = File.read!(@config_file)
 
         confirmed =
-          if String.contains? source, @config_marker_start do
-            confirm? && Mix.shell.yes?("Your config file already contains Coherence configuration. Are you sure you want to add another?")
+          if String.contains?(source, @config_marker_start) do
+            confirm? &&
+              Mix.shell().yes?(
+                "Your config file already contains Coherence configuration. Are you sure you want to add another?"
+              )
           else
             true
           end
 
         if confirmed do
-          File.write!(@config_file, source <> "\n" <> string)
-          shell_info config, "Your config/config.exs file was updated."
+          # File.write!(@config_file, source <> "\n" <> string)
+          File.write!(@config_file, format_string!(source <> "\n" <> string))
+          shell_info(config, "Your config/config.exs file was updated.")
           false
         else
-          shell_info config, "Configuration was not added!"
+          shell_info(config, "Configuration was not added!")
           true
         end
       else
-        shell_info config, "Could not find #{@config_file}. Configuration was not added!"
+        shell_info(config, "Could not find #{@config_file}. Configuration was not added!")
         true
       end
-    Enum.into [config_string: string, log_config?: log_config?], config
+
+    Enum.into([config_string: string, log_config?: log_config?], config)
   end
-  defp write_config(string, config), do: Enum.into([log_config?: true, config_string: string], config)
+
+  defp write_config(string, config),
+    do: Enum.into([log_config?: true, config_string: string], config)
 
   defp shell_info(%{silent: true} = config, _message), do: config
+
   defp shell_info(config, message) do
-    Mix.shell.info message
+    Mix.shell().info(message)
     config
   end
+
   defp log_config(%{log_config?: false} = config) do
-    save_instructions config, ""
+    save_instructions(config, "")
   end
+
   defp log_config(%{config_string: string} = config) do
     verb = if config[:log_config] == :appended, do: "has been", else: "should be"
-    instructions =
-      """
 
-      The following #{verb} added to your #{@config_file} file.
+    instructions = """
 
-      """
+    The following #{verb} added to your #{@config_file} file.
 
-    save_instructions config, instructions <> string
+    """
+
+    save_instructions(config, instructions <> string)
   end
 
   defp touch_config(config) do
-    File.touch @config_file
+    File.touch(@config_file)
     config
   end
 
   defp module_to_string(module) when is_atom(module) do
     module
-    |> Module.split
-    |> Enum.reverse
+    |> Module.split()
+    |> Enum.reverse()
     |> hd
     |> to_string
   end
@@ -344,7 +403,7 @@ defmodule Mix.Tasks.Coh.Install do
   defp module_to_string(module) when is_binary(module) do
     module
     |> String.split(".")
-    |> Enum.reverse
+    |> Enum.reverse()
     |> hd
   end
 
@@ -356,45 +415,53 @@ defmodule Mix.Tasks.Coh.Install do
     |> get_compiled_model
     |> find_existing_model(lib_path())
   end
+
   defp get_existing_model(config), do: config
 
   defp get_compiled_model(%{user_schema: user_schema} = config) do
-    user_schema = Module.concat user_schema, nil
+    user_schema = Module.concat(user_schema, nil)
     Map.put(config, :model_found?, Code.ensure_compiled?(user_schema))
   end
 
   def find_existing_model(%{model_found?: false, user_schema: user_schema} = config, path) do
-    user_schema = Module.concat user_schema, nil
+    user_schema = Module.concat(user_schema, nil)
+
     model =
       user_schema
       |> Module.split()
-      |> List.last
+      |> List.last()
+
     [path, "**", "user.ex"]
     |> Path.join()
     |> Path.wildcard()
     |> model_file_and_module(model)
     |> set_user_schema(config)
   end
+
   def find_existing_model(config, _path), do: config
 
   defp model_file_and_module(files, model) do
-    Enum.reduce files, [], fn fname, acc ->
-      case File.read fname do
+    Enum.reduce(files, [], fn fname, acc ->
+      case File.read(fname) do
         {:ok, contents} ->
-          case Regex.run ~r/defmodule\s*(.+\.#{model}) /, contents do
+          case Regex.run(~r/defmodule\s*(.+\.#{model}) /, contents) do
             nil -> acc
             [_, module] -> [{contents, module} | acc]
           end
-        {:error, _} -> acc
+
+        {:error, _} ->
+          acc
       end
-    end
+    end)
   end
 
   defp set_user_schema([], config), do: config
+
   defp set_user_schema([{contents, module} | list], config) do
-    case Regex.run ~r/schema\s+"(.*)"/, contents do
+    case Regex.run(~r/schema\s+"(.*)"/, contents) do
       nil ->
         set_user_schema(list, config)
+
       [_, table_name] ->
         config
         |> Map.put(:model_found?, true)
@@ -403,19 +470,34 @@ defmodule Mix.Tasks.Coh.Install do
     end
   end
 
-  defp gen_model(%{user_schema: user_schema, boilerplate: true, models: true,
-    model_found?: false, web_path: web_path} = config) do
+  defp gen_model(
+         %{
+           user_schema: user_schema,
+           boilerplate: true,
+           models: true,
+           model_found?: false,
+           web_path: web_path
+         } = config
+       ) do
     name =
       user_schema
       |> String.split(".")
       |> List.last()
-      |> String.downcase
+      |> String.downcase()
 
-    binding = Kernel.binding() ++ [base: config[:base], user_table_name: config[:user_table_name]]
-    copy_from paths(),
-      "priv/templates/coh.install/models/coherence", "", binding, [
+    binding = Kernel.binding() ++ [user_table_name: config[:user_table_name]] ++ config.binding
+
+    copy_from(
+      paths(),
+      "priv/templates/coh.install/models/coherence",
+      "",
+      binding,
+      [
         {:eex, "user.ex", Path.join([lib_path(), "coherence", "#{name}.ex"])}
-      ], config
+      ],
+      config
+    )
+
     config
   end
 
@@ -427,14 +509,20 @@ defmodule Mix.Tasks.Coh.Install do
   defp create_or_alter_model(config, name) do
     table_name = config[:user_table_name]
     # user_schema = Module.concat user_schema, nil
-    if  config[:model_found?] do
+    if config[:model_found?] do
       {:alter, "add_coherence_to_#{name}", [], []}
     else
-      fields = Enum.map @new_user_migration_fields,
-        &(String.replace(&1, ":users", ":#{table_name}"))
+      fields =
+        Enum.map(
+          @new_user_migration_fields,
+          &String.replace(&1, ":users", ":#{table_name}")
+        )
 
-      constraints = Enum.map @new_user_constraints,
-        &(String.replace(&1, ":users", ":#{table_name}"))
+      constraints =
+        Enum.map(
+          @new_user_constraints,
+          &String.replace(&1, ":users", ":#{table_name}")
+        )
 
       {:create, "create_coherence_#{name}", fields, constraints}
     end
@@ -447,7 +535,8 @@ defmodule Mix.Tasks.Coh.Install do
   defp add_timestamp(acc, _), do: acc
 
   defp get_field_list(initial_fields, config) do
-    schema_fields = Coherence.Schema.schema_fields()
+    schema_fields = schema_fields(config)
+
     Enum.reduce(config[:opts], initial_fields, fn opt, acc ->
       case schema_fields[opt] do
         nil -> acc
@@ -458,14 +547,15 @@ defmodule Mix.Tasks.Coh.Install do
 
   defp gen_migration(%{migrations: true, boilerplate: true} = config) do
     table_name = config[:user_table_name]
+
     name =
       config[:user_schema]
       |> module_to_string
-      |> String.downcase
+      |> String.downcase()
 
     {verb, migration_name, initial_fields, constraints} = create_or_alter_model(config, name)
 
-    do_gen_migration config, migration_name, fn repo, _path, file, name ->
+    do_gen_migration(config, migration_name, fn repo, _path, file, name ->
       field_list = get_field_list(initial_fields, config)
 
       adds =
@@ -479,10 +569,11 @@ defmodule Mix.Tasks.Coh.Install do
         |> Enum.map(&("    " <> &1))
         |> Enum.join("\n")
 
-      statement = case verb do
-                    :alter -> "#{verb} table(:#{table_name}) do"
-                    :create -> gen_table_statement(table_name)
-                  end
+      statement =
+        case verb do
+          :alter -> "#{verb} table(:#{table_name}) do"
+          :create -> gen_table_statement(table_name)
+        end
 
       change = """
           #{statement}
@@ -490,37 +581,40 @@ defmodule Mix.Tasks.Coh.Install do
           end
       #{constraints}
       """
-      assigns = [mod: Module.concat([repo, Migrations, camelize(name)]),
-                       change: change]
-      create_file file, migration_template(assigns)
-    end
+
+      assigns = [mod: Module.concat([repo, Migrations, camelize(name)]), change: change]
+      create_file(file, migration_template(assigns))
+    end)
   end
 
   defp gen_migration(config), do: config
 
   defp gen_invitable_migration(%{invitable: true, migrations: true, boilerplate: true} = config) do
-    do_gen_migration config, "create_coherence_invitable", fn repo, _path, file, name ->
+    do_gen_migration(config, "create_coherence_invitable", fn repo, _path, file, name ->
       change = """
           #{gen_table_statement(:invitations)}
             add :name, :string
             add :email, :string
             add :token, :string
-            timestamps
+            timestamps()
           end
           create unique_index(:invitations, [:email])
           create index(:invitations, [:token])
       """
-      assigns = [mod: Module.concat([repo, Migrations, camelize(name)]),
-                       change: change]
-      create_file file, migration_template(assigns)
-    end
+
+      assigns = [mod: Module.concat([repo, Migrations, camelize(name)]), change: change]
+      create_file(file, migration_template(assigns))
+    end)
   end
 
   defp gen_invitable_migration(config), do: config
 
-  defp gen_rememberable_migration(%{rememberable: true, migrations: true, boilerplate: true} = config) do
+  defp gen_rememberable_migration(
+         %{rememberable: true, migrations: true, boilerplate: true} = config
+       ) do
     table_name = config[:user_table_name]
-    do_gen_migration config, "create_coherence_rememberable", fn repo, _path, file, name ->
+
+    do_gen_migration(config, "create_coherence_rememberable", fn repo, _path, file, name ->
       change = """
           #{gen_table_statement(:rememberables)}
             add :series_hash, :string
@@ -528,24 +622,27 @@ defmodule Mix.Tasks.Coh.Install do
             add :token_created_at, :utc_datetime
             add :user_id, #{gen_reference(table_name)}
 
-            timestamps
+            timestamps()
           end
           create index(:rememberables, [:user_id])
           create index(:rememberables, [:series_hash])
           create index(:rememberables, [:token_hash])
           create unique_index(:rememberables, [:user_id, :series_hash, :token_hash])
       """
-      assigns = [mod: Module.concat([repo, Migrations, camelize(name)]),
-                       change: change]
-      create_file file, migration_template(assigns)
-    end
+
+      assigns = [mod: Module.concat([repo, Migrations, camelize(name)]), change: change]
+      create_file(file, migration_template(assigns))
+    end)
   end
 
   defp gen_rememberable_migration(config), do: config
 
-  defp gen_trackable_migration(%{trackable_table: true, migrations: true, boilerplate: true} = config) do
+  defp gen_trackable_migration(
+         %{trackable_table: true, migrations: true, boilerplate: true} = config
+       ) do
     table_name = config[:user_table_name]
-    do_gen_migration config, "create_coherence_trackable", fn repo, _path, file, name ->
+
+    do_gen_migration(config, "create_coherence_trackable", fn repo, _path, file, name ->
       change = """
           #{gen_table_statement(:trackables)}
             add :action, :string
@@ -556,15 +653,15 @@ defmodule Mix.Tasks.Coh.Install do
             add :last_sign_in_ip, :string
             add :user_id, #{gen_reference(table_name)}
 
-            timestamps
+            timestamps()
           end
           create index(:trackables, [:user_id])
           create index(:trackables, [:action])
       """
-      assigns = [mod: Module.concat([repo, Migrations, camelize(name)]),
-                       change: change]
-      create_file file, migration_template(assigns)
-    end
+
+      assigns = [mod: Module.concat([repo, Migrations, camelize(name)]), change: change]
+      create_file(file, migration_template(assigns))
+    end)
   end
 
   defp gen_trackable_migration(config), do: config
@@ -573,16 +670,19 @@ defmodule Mix.Tasks.Coh.Install do
     repo =
       config[:repo]
       |> String.split(".")
-      |> Module.concat
+      |> Module.concat()
 
     ensure_repo(repo, [])
 
     path =
       case config[:migration_path] do
-        path when is_binary(path) -> path
+        path when is_binary(path) ->
+          path
+
         _ ->
-          Path.relative_to(migrations_path(repo), Mix.Project.app_path)
+          Path.relative_to(migrations_path(repo), Mix.Project.app_path())
       end
+
     file = Path.join(path, "#{current_timestamp}_#{underscore(name)}.exs")
     fun.(repo, path, file, name)
     Map.put(config, :timestamp, current_timestamp + 1)
@@ -607,13 +707,89 @@ defmodule Mix.Tasks.Coh.Install do
   end
 
   ################
+  # Schema
+
+  defp gen_trackable_schema(%{trackable_table: true, boilerplate: true, models: true} = config) do
+    gen_schema_schema(config, "trackable.ex")
+  end
+
+  defp gen_trackable_schema(config), do: config
+
+  defp gen_invitable_schema(%{invitable: true, boilerplate: true, models: true} = config) do
+    gen_schema_schema(config, "invitation.ex")
+  end
+
+  defp gen_invitable_schema(config), do: config
+
+  defp gen_rememberable_schema(%{rememberable: true, boilerplate: true, models: true} = config) do
+    gen_schema_schema(config, "rememberable.ex")
+  end
+
+  defp gen_rememberable_schema(config), do: config
+
+  def gen_schema_schema(config, file_name) do
+    copy_from(
+      paths(),
+      "priv/templates/coh.install/models/coherence",
+      lib_path("coherence"),
+      config.binding,
+      [
+        {:eex, file_name, file_name}
+      ],
+      config
+    )
+
+    config
+  end
+
+  def gen_schemas_module(%{boilerplate: true, models: true} = config) do
+    schema_list =
+      [
+        {Invitation, config[:invitable]},
+        {Rememberable, config[:rememberable]},
+        {Trackable, config[:trackable_table]}
+      ]
+      |> Enum.filter(&elem(&1, 1))
+      |> Enum.map(&Module.concat([config.base, Coherence, elem(&1, 0)]))
+
+    binding = [
+      {:schema_list, schema_list |> inspect},
+      {:trackable?, config[:trackable_table]} | config.binding
+    ]
+
+    copy_from(
+      paths(),
+      "priv/templates/coh.install/models/coherence",
+      lib_path("coherence"),
+      binding,
+      [
+        {:eex, "schemas.ex", "schemas.ex"}
+      ],
+      config
+    )
+
+    config
+  end
+
+  def gen_schemas_module(config), do: config
+
+  ################
   # Web
 
-  defp gen_coherence_web(%{web: true, boilerplate: true, binding: binding, web_path: web_path} = config) do
-    copy_from paths(),
-      "priv/templates/coh.install", "", binding, [
-        {:eex, "coherence_web.ex", Path.join(web_path, "coherence_web.ex")},
-      ], config
+  defp gen_coherence_web(
+         %{web: true, boilerplate: true, binding: binding, web_path: web_path} = config
+       ) do
+    copy_from(
+      paths(),
+      "priv/templates/coh.install",
+      "",
+      binding,
+      [
+        {:eex, "coherence_web.ex", Path.join(web_path, "coherence_web.ex")}
+      ],
+      config
+    )
+
     config
   end
 
@@ -622,25 +798,59 @@ defmodule Mix.Tasks.Coh.Install do
   ################
   # Messages
 
-  defp gen_coherence_messages(%{messages: true, boilerplate: true, binding: binding, web_path: web_path} = config) do
-    copy_from paths(),
-      "priv/templates/coh.install", "", binding, [
-        {:eex, "coherence_messages.ex", Path.join(web_path, "coherence_messages.ex")},
-      ], config
+  defp gen_coherence_messages(
+         %{messages: true, boilerplate: true, binding: binding, web_path: web_path} = config
+       ) do
+    copy_from(
+      paths(),
+      "priv/templates/coh.install",
+      "",
+      binding,
+      [
+        {:eex, "coherence_messages.ex", Path.join(web_path, "coherence_messages.ex")}
+      ],
+      config
+    )
+
     config
   end
 
   defp gen_coherence_messages(config), do: config
 
   defp gen_redirects(%{boilerplate: true, binding: binding, web_path: web_path} = config) do
-    copy_from paths(),
-      "priv/templates/coh.install/controllers/coherence", "", binding, [
-        {:eex, "redirects.ex", Path.join(web_path, "controllers/coherence/redirects.ex")},
-      ], config
+    copy_from(
+      paths(),
+      "priv/templates/coh.install/controllers/coherence",
+      "",
+      binding,
+      [
+        {:eex, "redirects.ex", Path.join(web_path, "controllers/coherence/redirects.ex")}
+      ],
+      config
+    )
+
     config
   end
 
   defp gen_redirects(config), do: config
+
+  defp gen_responders(%{boilerplate: true, binding: binding, web_path: web_path} = config) do
+    copy_from(
+      paths(),
+      "priv/templates/coh.install/controllers/coherence/responders",
+      "",
+      binding,
+      [
+        {:eex, "html.ex", Path.join(web_path, "controllers/coherence/responders/html.ex")},
+        {:eex, "json.ex", Path.join(web_path, "controllers/coherence/responders/json.ex")}
+      ],
+      config
+    )
+
+    config
+  end
+
+  defp gen_responders(config), do: config
 
   ################
   # Views
@@ -660,14 +870,24 @@ defmodule Mix.Tasks.Coh.Install do
 
   def view_files, do: @view_files
 
-  def gen_coherence_views(%{views: true, boilerplate: true, binding: binding, web_path: web_path} = config) do
+  def gen_coherence_views(
+        %{views: true, boilerplate: true, binding: binding, web_path: web_path} = config
+      ) do
     files =
-    @view_files
-    |> Enum.filter(&(validate_option(config, elem(&1, 0))))
-    |> Enum.map(&(elem(&1, 1)))
-    |> Enum.map(&({:eex, &1, Path.join(web_path, "views/coherence/#{&1}")}))
+      @view_files
+      |> Enum.filter(&validate_option(config, elem(&1, 0)))
+      |> Enum.map(&elem(&1, 1))
+      |> Enum.map(&{:eex, &1, Path.join(web_path, "views/coherence/#{&1}")})
 
-    copy_from paths(), "priv/templates/coh.install/views/coherence", "", [{:otp_app, Mix.Phoenix.otp_app()} | binding], files, config
+    copy_from(
+      paths(),
+      "priv/templates/coh.install/views/coherence",
+      "",
+      [{:otp_app, Mix.Phoenix.otp_app()} | binding],
+      files,
+      config
+    )
+
     config
   end
 
@@ -676,7 +896,8 @@ defmodule Mix.Tasks.Coh.Install do
   @template_files [
     email: {:use_email?, ~w(confirmation invitation password unlock)},
     invitation: {:invitable, ~w(edit new)},
-    layout: {:all, ~w(app email)},
+    # layout: {:all, ~w(app email)},
+    layout: {:all, ~w(email)},
     password: {:recoverable, ~w(edit new)},
     registration: {:registerable, ~w(new edit form show)},
     session: {:authenticatable, ~w(new)},
@@ -688,6 +909,7 @@ defmodule Mix.Tasks.Coh.Install do
 
   defp validate_option(_, :all), do: true
   defp validate_option(%{use_email?: true}, :use_email?), do: true
+
   defp validate_option(%{opts: opts}, opt) do
     if opt in opts, do: true, else: false
   end
@@ -699,96 +921,104 @@ defmodule Mix.Tasks.Coh.Install do
     for {name, {opt, files}} <- @template_files do
       if validate_option(config, opt), do: copy_templates(binding, name, files, config)
     end
+
     config
   end
 
   def gen_coherence_templates(config), do: config
 
-  defp copy_templates(binding, name, file_list, %{web_path: web_path} = config) do
-    files = for fname <- file_list do
-      fname = "#{fname}.html.eex"
-      {:eex, fname, Path.join(web_path, "templates/coherence/#{name}/#{fname}")}
-    end
+  def gen_layout_template(%{layout: true, templates: true, boilerplate: true} = config) do
+    copy_templates(config.binding, :layout, ["app"], config)
+    config
+  end
 
-    copy_from paths(),
-      "priv/templates/coh.install/templates/coherence/#{name}", "", binding, files, config
+  def gen_layout_template(config), do: config
+
+  defp copy_templates(binding, name, file_list, %{web_path: web_path} = config) do
+    files =
+      for fname <- file_list do
+        fname = "#{fname}.html.eex"
+        {:eex, fname, Path.join(web_path, "templates/coherence/#{name}/#{fname}")}
+      end
+
+    copy_from(
+      paths(),
+      "priv/templates/coh.install/templates/coherence/#{name}",
+      "",
+      binding,
+      files,
+      config
+    )
   end
 
   ################
   # Mailer
 
-  defp gen_coherence_mailer(%{binding: binding, use_email?: true, boilerplate: true, web_path: web_path} = config) do
-    copy_from paths(),
-      "priv/templates/coh.install/emails/coherence", "", binding, [
-        {:eex, "coherence_mailer.ex", Path.join(web_path, "emails/coherence/coherence_mailer.ex")},
-        {:eex, "user_email.ex", Path.join(web_path, "emails/coherence/user_email.ex")},
-      ], config
+  defp gen_coherence_mailer(
+         %{binding: binding, use_email?: true, boilerplate: true, web_path: web_path} = config
+       ) do
+    copy_from(
+      paths(),
+      "priv/templates/coh.install/emails/coherence",
+      "",
+      binding,
+      [
+        {:eex, "coherence_mailer.ex",
+         Path.join(web_path, "emails/coherence/coherence_mailer.ex")},
+        {:eex, "user_email.ex", Path.join(web_path, "emails/coherence/user_email.ex")}
+      ],
+      config
+    )
+
     config
   end
 
   defp gen_coherence_mailer(config), do: config
 
   ################
-  # Controllers
-
-  @controller_files [
-    confirmable: "confirmation_controller.ex",
-    invitable: "invitation_controller.ex",
-    recoverable: "password_controller.ex",
-    registerable: "registration_controller.ex",
-    authenticatable: "session_controller.ex",
-    unlockable_with_token: "unlock_controller.ex"
-  ]
-
-  def controller_files, do: @controller_files
-
-  defp gen_coherence_controllers(%{controllers: true, boilerplate: true, binding: binding, web_path: web_path} = config) do
-    files =
-    @controller_files
-    |> Enum.filter(&(validate_option(config, elem(&1,0))))
-    |> Enum.map(&(elem(&1, 1)))
-    |> Enum.map(&({:eex, &1, Path.join(web_path, "controllers/coherence/#{&1}")}))
-
-    copy_from paths(), "priv/templates/coh.install/controllers/coherence", "", binding, files, config
-    config
-  end
-
-  defp gen_coherence_controllers(config), do: config
-
-  ################
   # Instructions
 
   defp seeds_instructions(%{repo: repo, user_schema: user_schema, authenticatable: true} = config) do
-    user_schema = to_string user_schema
-    repo = to_string repo
-    block =
-      """
-      You might want to add the following to your priv/repo/seeds.exs file.
+    user_schema = to_string(user_schema)
+    repo = to_string(repo)
 
-      #{repo}.delete_all #{user_schema}
+    block = """
+    You might want to add the following to your priv/repo/seeds.exs file.
 
-      #{user_schema}.changeset(%#{user_schema}{}, %{name: "Test User", email: "testuser@example.com", password: "secret", password_confirmation: "secret"})
-      |> #{repo}.insert!
-      """
-      confirm = if config[:confirmable], do: "|> Coherence.ControllerHelpers.confirm!\n", else: ""
-      block <> confirm
+    #{repo}.delete_all(#{user_schema})
+
+    %#{user_schema}{}
+    |> #{user_schema}.changeset(%{
+      name: "Test User",
+      email: "testuser@example.com",
+      password: "secret",
+      password_confirmation: "secret"
+    })
+    |> #{repo}.insert!()
+    """
+
+    confirm = if config[:confirmable], do: "|> Coherence.Controller.confirm!()\n", else: ""
+    block <> confirm
   end
 
   defp seeds_instructions(_config), do: ""
 
-  defp schema_instructions(%{base: base, found_model?: false}), do: """
+  defp schema_instructions(%{base: base, found_model?: false}),
+    do: """
     Add the following items to your User model (Phoenix v1.2).
 
     defmodule #{base}.User do
       use Ecto.Schema
-      use Coherence.Schema     # Add this
+      # Add this
+      use Coherence.Schema
 
       schema "users" do
         field :name, :string
         field :email, :string
-        coherence_schema()       # Add this
+        # Add this
+        coherence_schema()
 
-        timestamps
+        timestamps()
       end
 
       def changeset(model, params \\ %{}) do
@@ -796,12 +1026,16 @@ defmodule Mix.Tasks.Coh.Install do
         |> cast(params, [:name, :email] ++ coherence_fields)
         |> validate_required([:name, :email])
         |> unique_constraint(:email)
-        |> validate_coherence(params)             # Add this
+        # Add this
+        |> validate_coherence(params)
       end
 
       def changeset(model, params, :password) do
         model
-        |> cast(params, ~w(password password_confirmation reset_password_token reset_password_sent_at))
+        |> cast(
+          params,
+          ~w(password password_confirmation reset_password_token reset_password_sent_at)
+        )
         |> validate_coherence_password_reset(params)
       end
     end
@@ -809,67 +1043,68 @@ defmodule Mix.Tasks.Coh.Install do
 
   defp schema_instructions(_), do: ""
 
-  defp mix_instructions(%{base: base}), do: """
-    Add :coherence to your applications list in mix.exs.
+  defp mix_instructions(%{base: base}),
+    do: """
+      Add :coherence to your applications list in mix.exs.
 
-    def application do
-      [mod: {#{base}, []},
-       extra_applications: [..., :coherence]]
-    end
-  """
+      def application do
+        [mod: {#{base}, []},
+         extra_applications: [..., :coherence]]
+      end
+    """
 
   defp router_instructions(config) do
-    controllers = config[:controllers]
-    web_base = config[:web_base]
-    namespace = if controllers, do: ", #{web_base}", else: ""
-    web_module = config[:web_module]
     router = config[:router]
+    web_base = config[:web_base]
 
     """
     Add the following to your router.ex file.
 
     defmodule #{router} do
-      use #{web_module}, :router
-      use Coherence.Router         # Add this
+      use #{web_base}, :router
+      # Add this
+      use Coherence.Router
 
       pipeline :browser do
-        plug :accepts, ["html"]
-        plug :fetch_session
-        plug :fetch_flash
-        plug :protect_from_forgery
-        plug :put_secure_browser_headers
-        plug Coherence.Authentication.Session  # Add this
-      end
-
-      pipeline :protected do
-        plug :accepts, ["html"]
-        plug :fetch_session
-        plug :fetch_flash
-        plug :protect_from_forgery
-        plug :put_secure_browser_headers
-        plug Coherence.Authentication.Session, protected: true  # Add this
+        plug(:accepts, ["html"])
+        plug(:fetch_session)
+        plug(:fetch_flash)
+        plug(:protect_from_forgery)
+        plug(:put_secure_browser_headers)
+        # Add this
+        plug(Coherence.Authentication.Session)
       end
 
       # Add this block
-      scope "/"#{namespace} do
-        pipe_through :browser
+      pipeline :protected do
+        plug(:accepts, ["html"])
+        plug(:fetch_session)
+        plug(:fetch_flash)
+        plug(:protect_from_forgery)
+        plug(:put_secure_browser_headers)
+        plug(Coherence.Authentication.Session, protected: true)
+      end
+
+      # Add this block
+      scope "/" do
+        pipe_through(:browser)
         coherence_routes()
       end
 
       # Add this block
-      scope "/"#{namespace} do
-        pipe_through :protected
-        coherence_routes :protected
+      scope "/" do
+        pipe_through(:protected)
+        coherence_routes(:protected)
       end
 
       scope "/", #{web_base} do
-        pipe_through :browser
-        get "/", PageController, :index
+        pipe_through(:browser)
+        get("/", PageController, :index)
         # Add public routes below
       end
 
       scope "/", #{web_base} do
-        pipe_through :protected
+        pipe_through(:protected)
         # Add protected routes below
       end
     end
@@ -886,13 +1121,14 @@ defmodule Mix.Tasks.Coh.Install do
   defp migrate_instructions(_), do: ""
 
   defp print_instructions(%{silent: true} = config), do: config
+
   defp print_instructions(%{instructions: instructions} = config) do
-    Mix.shell.info instructions
-    Mix.shell.info mix_instructions(config)
-    Mix.shell.info router_instructions(config)
-    Mix.shell.info schema_instructions(config)
-    Mix.shell.info seeds_instructions(config)
-    Mix.shell.info migrate_instructions(config)
+    Mix.shell().info(instructions)
+    Mix.shell().info(mix_instructions(config))
+    Mix.shell().info(router_instructions(config))
+    Mix.shell().info(schema_instructions(config))
+    Mix.shell().info(seeds_instructions(config))
+    Mix.shell().info(migrate_instructions(config))
 
     config
   end
@@ -902,37 +1138,37 @@ defmodule Mix.Tasks.Coh.Install do
     "#{y}#{pad(m)}#{pad(d)}#{pad(hh)}#{pad(mm)}#{pad(ss)}"
   end
 
-  embed_template :migration, """
-    defmodule <%= inspect @mod %> do
-      use Ecto.Migration
-      def change do
-    <%= @change %>
-      end
+  embed_template(:migration, """
+  defmodule <%= inspect @mod %> do
+    use Ecto.Migration
+    def change do
+  <%= @change %>
     end
-    """
+  end
+  """)
 
   ################
   # Utilities
 
-  defp pad(i) when i < 10, do: << ?0, ?0 + i >>
+  defp pad(i) when i < 10, do: <<?0, ?0 + i>>
   defp pad(i), do: to_string(i)
 
   defp do_default_config(config, opts) do
     @default_booleans
     |> list_to_atoms
     |> Enum.reduce(config, fn opt, acc ->
-      Map.put acc, opt, Keyword.get(opts, opt, true)
+      Map.put(acc, opt, Keyword.get(opts, opt, true))
     end)
   end
 
-  defp list_to_atoms(list), do: Enum.map(list, &(String.to_atom(&1)))
+  defp list_to_atoms(list), do: Enum.map(list, &String.to_atom(&1))
 
   defp paths do
     [".", :coherence]
   end
 
   defp save_instructions(config, instructions) do
-    update_in config, [:instructions], &(&1 <> instructions)
+    update_in(config, [:instructions], &(&1 <> instructions))
   end
 
   ################
@@ -944,25 +1180,19 @@ defmodule Mix.Tasks.Coh.Install do
 
   defp do_config(opts, bin_opts) do
     binding =
-      Mix.Project.config
+      Mix.Project.config()
       |> Keyword.fetch!(:app)
-      |> Atom.to_string
-      |> Mix.Phoenix.inflect
-
-    # IO.puts "binding: #{inspect binding}"
+      |> Atom.to_string()
+      |> Mix.Phoenix.inflect()
 
     base = opts[:module] || binding[:base]
     web_base = opts[:web_module] || base <> "Web"
     opts = Keyword.put(opts, :base, base)
-    repo = (opts[:repo] || "#{base}.Repo")
-    router = (opts[:router] || "#{web_base}.Router")
+    repo = opts[:repo] || "#{base}.Repo"
+    router = opts[:router] || "#{web_base}.Router"
     web_path = opts[:web_path] || web_path()
     web_module = web_base <> ".Coherence"
-
-    # unless File.exists?(web_path) do
-    #   raise "Could not find web_path: #{web_path}"
-    # end
-
+    password_hashing_alg = opts[:password_hashing_alg] || "Comeonin.Bcrypt"
 
     binding =
       binding
@@ -971,13 +1201,15 @@ defmodule Mix.Tasks.Coh.Install do
       |> Keyword.put(:web_path, web_path)
       |> Keyword.put(:web_module, web_module)
       |> Keyword.put(:otp_app, Mix.Phoenix.otp_app())
+      |> Keyword.put(:use_binary_id?, use_binary_id?())
+      |> Keyword.put(:user_active_field?, opts[:user_active_field])
 
     {user_schema, user_table_name} = parse_model(opts[:model], base, opts)
 
     opts_map = do_bin_opts(bin_opts)
 
     user_email = Enum.any?(bin_opts, &(&1 in @email_options))
-    the_timestamp = String.to_integer timestamp()
+    the_timestamp = String.to_integer(timestamp())
 
     [
       instructions: "",
@@ -990,7 +1222,6 @@ defmodule Mix.Tasks.Coh.Install do
       opts: bin_opts,
       binding: binding,
       log_only: opts[:log_only],
-      controllers: opts[:controllers],
       migration_path: opts[:migration_path],
       module: opts[:module],
       timestamp: the_timestamp,
@@ -1003,15 +1234,18 @@ defmodule Mix.Tasks.Coh.Install do
       web_path: web_path,
       web_base: web_base,
       web_module: web_module,
+      use_binary_id?: binding[:use_binary_id?],
+      layout: opts[:layout] || false,
+      user_active_field?: binding[:user_active_field?],
+      password_hashing_alg: password_hashing_alg
     ]
     |> Enum.into(opts_map)
     |> do_default_config(opts)
-    # |> IO.inspect(label: "config")
   end
 
   defp do_bin_opts(bin_opts) do
     bin_opts
-    |> Enum.map(&({&1, true}))
+    |> Enum.map(&{&1, true})
     |> Enum.into(%{})
   end
 
@@ -1019,13 +1253,13 @@ defmodule Mix.Tasks.Coh.Install do
     case String.split(model, " ", trim: true) do
       [model, table] ->
         {prefix_model(model, opts), String.to_atom(table)}
-      [_] ->
-        Mix.raise(
-          """
-          The mix coh.install --model option expects both singular and plural names. For example:
 
-              mix coh.install --model="Account accounts"
-          """)
+      [_] ->
+        Mix.raise("""
+        The mix coh.install --model option expects both singular and plural names. For example:
+
+            mix coh.install --model="Account accounts"
+        """)
     end
   end
 
@@ -1035,55 +1269,47 @@ defmodule Mix.Tasks.Coh.Install do
 
   defp prefix_model(model, opts) do
     module = opts[:module] || opts[:base]
-    if String.starts_with? model, module do
+
+    if String.starts_with?(model, module) do
       model
     else
-      module <> "." <>  model
+      module <> "." <> model
     end
   end
 
   defp option_reduce({:default, true}, {acc_bin, acc}),
     do: {list_to_atoms(@default_options) ++ acc_bin, acc}
+
   defp option_reduce({:full, true}, {acc_bin, acc}),
     do: {list_to_atoms(@full_options) ++ acc_bin, acc}
+
   defp option_reduce({:full_confirmable, true}, {acc_bin, acc}),
     do: {list_to_atoms(@full_confirmable) ++ acc_bin, acc}
+
   defp option_reduce({:full_invitable, true}, {acc_bin, acc}),
     do: {list_to_atoms(@full_invitable) ++ acc_bin, acc}
+
   defp option_reduce({:trackable_table, true}, {acc_bin, acc}),
     do: {[:trackable_table | acc_bin] -- [:trackable], acc}
+
   defp option_reduce({name, true}, {acc_bin, acc}) when name in @all_options_atoms,
     do: {[name | acc_bin], acc}
+
   defp option_reduce({name, false}, {acc_bin, acc}) when name in @all_options_atoms,
     do: {acc_bin -- [name], acc}
+
   defp option_reduce(opt, {acc_bin, acc}),
     do: {acc_bin, [opt | acc]}
 
   defp parse_options(opts) do
-    {opts_bin, opts} = Enum.reduce opts, {[], []}, &(option_reduce(&1, &2))
-        # {:default, true}, {acc_bin, acc} ->
-        #   {list_to_atoms(@default_options) ++ acc_bin, acc}
-        # {:full, true}, {acc_bin, acc} ->
-        #   {list_to_atoms(@full_options) ++ acc_bin, acc}
-        # {:full_confirmable, true}, {acc_bin, acc} ->
-        #   {list_to_atoms(@full_confirmable) ++ acc_bin, acc}
-        # {:full_invitable, true}, {acc_bin, acc} ->
-        #   {list_to_atoms(@full_invitable) ++ acc_bin, acc}
-        # {:trackable_table, true}, {acc_bin, acc} ->
-        #   {[:trackable_table | acc_bin] -- [:trackable], acc}
-        # {name, true}, {acc_bin, acc} when name in @all_options_atoms ->
-        #   {[name | acc_bin], acc}
-        # {name, false}, {acc_bin, acc} when name in @all_options_atoms ->
-        #   {acc_bin -- [name], acc}
-        # opt, {acc_bin, acc} ->
-        #   {acc_bin, [opt | acc]}
-      # end
+    {opts_bin, opts} = Enum.reduce(opts, {[], []}, &option_reduce(&1, &2))
 
     opts_bin = Enum.uniq(opts_bin)
-    opts_names = Enum.map opts, &(elem(&1, 0))
 
-    with  [] <- Enum.filter(opts_bin, &(not &1 in @switch_names)),
-          [] <- Enum.filter(opts_names, &(not &1 in @switch_names)) do
+    opts_names = Enum.map(opts, &elem(&1, 0))
+
+    with [] <- Enum.filter(opts_bin, &(not (&1 in @switch_names))),
+         [] <- Enum.filter(opts_names, &(not (&1 in @switch_names))) do
       {opts_bin, opts}
     else
       list -> raise_option_errors(list)
@@ -1095,9 +1321,9 @@ defmodule Mix.Tasks.Coh.Install do
   def print_installed_options(_config) do
     ["mix coh.install"]
     |> list_config_options(Application.get_env(:coherence, :opts, []))
-    |> Enum.reverse
+    |> Enum.reverse()
     |> Enum.join(" ")
-    |> Mix.shell.info
+    |> Mix.shell().info
   end
 
   def list_config_options(acc, opts) do
@@ -1105,10 +1331,9 @@ defmodule Mix.Tasks.Coh.Install do
   end
 
   def get_config_options([]) do
-    Mix.raise(
-      """
-      Could not find coherence configuration.
-      """)
+    Mix.raise("""
+    Could not find coherence configuration.
+    """)
   end
 
   def get_config_options(opts) do
@@ -1118,10 +1343,9 @@ defmodule Mix.Tasks.Coh.Install do
   end
 
   def get_config_options([], _opts) do
-    Mix.raise(
-      """
-      Could not find coherence configuration for re-installation. Please remove the --reinstall option to do a fresh install.
-      """)
+    Mix.raise("""
+    Could not find coherence configuration for re-installation. Please remove the --reinstall option to do a fresh install.
+    """)
   end
 
   def get_config_options(config_opts, opts) do
@@ -1129,12 +1353,12 @@ defmodule Mix.Tasks.Coh.Install do
   end
 
   defp config_option(opt, acc) when is_atom(opt) do
-    str = opt |> Atom.to_string |> String.replace("_", "-")
+    str = opt |> Atom.to_string() |> String.replace("_", "-")
     ["--" <> str | acc]
   end
 
   defp config_option(opt, acc) when is_tuple(opt) do
-    str = opt |> elem(0) |> Atom.to_string |> String.replace("_", "-")
+    str = opt |> elem(0) |> Atom.to_string() |> String.replace("_", "-")
     ["--" <> str | acc]
   end
 
@@ -1157,25 +1381,45 @@ defmodule Mix.Tasks.Coh.Install do
         end) || raise("could not find #{source_file_path} in any of the sources")
 
       target = Path.join(target_dir, target_file_path)
+
       contents =
         case format do
           :text -> File.read!(source)
-          :eex  -> EEx.eval_file(source, binding)
+          :eex -> EEx.eval_file(source, binding)
         end
+
       Mix.Generator.create_file(target, contents, create_opts)
     end
   end
 
   defp to_app_source(path, source_dir) when is_binary(path),
     do: Path.join(path, source_dir)
+
   defp to_app_source(app, source_dir) when is_atom(app),
     do: Application.app_dir(app, source_dir)
 
   defp lib_path(path \\ "") do
-    Path.join ["lib", to_string(Mix.Phoenix.otp_app()), path]
+    Path.join(["lib", to_string(Mix.Phoenix.otp_app()), path])
   end
-  defp web_path() do
+
+  defp web_path(path \\ "") do
     otp_app = to_string(Mix.Phoenix.otp_app())
-    Path.join ["lib", otp_app <> "_web"]
+    Path.join(["lib", otp_app <> "_web", path])
+  end
+
+  defp use_binary_id? do
+    binary_ids? =
+      Mix.Phoenix.otp_app()
+      |> Application.get_env(:generators, [])
+      |> Keyword.get(:binary_id)
+
+    Coherence.Config.use_binary_id?() || binary_ids?
+  end
+
+  defp verify_deprecated!(opts) do
+    if opts[:controllers] do
+      Mix.raise("--controllers not supported.
+         Please use mix coh.gen.controllers instead.")
+    end
   end
 end

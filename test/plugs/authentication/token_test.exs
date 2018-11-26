@@ -8,7 +8,11 @@ defmodule CoherenceTest.Authentication.Token do
     use Plug.Builder
     import Plug.Conn
 
-    plug Coherence.Authentication.Token, source: :params, param: "auth_token", error: ~s'{"error":"authentication required"}'
+    plug Coherence.Authentication.Token,
+      source: :params,
+      param: "auth_token",
+      error: ~s'{"error":"authentication required"}'
+
     plug :index
 
     defp index(conn, _opts), do: send_resp(conn, 200, "Authorized")
@@ -18,7 +22,11 @@ defmodule CoherenceTest.Authentication.Token do
     use Plug.Builder
     import Plug.Conn
 
-    plug Coherence.Authentication.Token, source: :header, param: "x-auth-token", error: ~s'{"error":"authentication required"}'
+    plug Coherence.Authentication.Token,
+      source: :header,
+      param: "x-auth-token",
+      error: ~s'{"error":"authentication required"}'
+
     plug :index
 
     defp index(conn, _opts), do: send_resp(conn, 200, "Authorized")
@@ -28,14 +36,20 @@ defmodule CoherenceTest.Authentication.Token do
     use Plug.Builder
     import Plug.Conn
 
-    plug Coherence.Authentication.Token, source: :params, param: "auth_token", error: &TestCoherence.TestHelpers.handler/1
+    plug Coherence.Authentication.Token,
+      source: :params,
+      param: "auth_token",
+      error: &TestCoherence.TestHelpers.handler/1
   end
 
   defmodule HeaderErrorHandlerPlug do
     use Plug.Builder
     import Plug.Conn
 
-    plug Coherence.Authentication.Token, source: :header, param: "x-auth-token", error: &TestCoherence.TestHelpers.handler/1
+    plug Coherence.Authentication.Token,
+      source: :header,
+      param: "x-auth-token",
+      error: &TestCoherence.TestHelpers.handler/1
   end
 
   defp call(plug, params) do
@@ -76,32 +90,32 @@ defmodule CoherenceTest.Authentication.Token do
 
   test "request without credentials using header-based auth" do
     conn = call(HeaderPlug, [])
-    assert_unauthorized conn, @error_msg
+    assert_unauthorized(conn, @error_msg)
   end
 
   test "request with invalid credentials using header-based auth" do
     conn = call(HeaderPlug, [], "invalid_token")
-    assert_unauthorized conn, @error_msg
+    assert_unauthorized(conn, @error_msg)
   end
 
   test "request with valid credentials using header-based auth" do
     conn = call(HeaderPlug, [], "secret_token")
-    assert_authorized conn, "Authorized"
+    assert_authorized(conn, "Authorized")
   end
 
   test "request without credentials using params-based auth" do
     conn = call(ParamPlug, [])
-    assert_unauthorized conn, @error_msg
+    assert_unauthorized(conn, @error_msg)
   end
 
   test "request with invalid credentials using params-based auth" do
     conn = call(ParamPlug, [auth_param("invalid_token")])
-    assert_unauthorized conn, @error_msg
+    assert_unauthorized(conn, @error_msg)
   end
 
   test "request with valid credentials using params-based auth" do
     conn = call(ParamPlug, [auth_param("secret_token")])
-    assert_authorized conn, "Authorized"
+    assert_authorized(conn, "Authorized")
   end
 
   test "request without credentials using header-based auth and error handler" do

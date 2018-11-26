@@ -1,4 +1,4 @@
-defmodule Coherence.Web do
+defmodule CoherenceWeb do
   @moduledoc """
   Coherence setting for web resources.
 
@@ -14,7 +14,7 @@ defmodule Coherence.Web do
       import Ecto.Changeset
       import Ecto.Query, only: [from: 1, from: 2]
 
-      if Coherence.Config.use_binary_id? do
+      if Coherence.Config.use_binary_id?() do
         @primary_key {:id, :binary_id, autogenerate: true}
         @foreign_key_type :binary_id
       end
@@ -25,12 +25,13 @@ defmodule Coherence.Web do
   def controller do
     quote do
       use Phoenix.Controller
-      import Coherence.ControllerHelpers
-
+      import Coherence.Controller
       import Ecto
       import Ecto.Query
 
       alias Coherence.Config
+      alias Coherence.Controller
+
       require Redirects
     end
   end

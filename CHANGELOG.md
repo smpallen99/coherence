@@ -1,6 +1,90 @@
 # Coherence Changelog
 
-## 0.4.0-dev (2017-04-xx)
+## 0.6.0 (2018-09-xx)
+
+See these [0.5.x to 0.6.x upgrade instructions](https://gist.github.com/smpallen99/fc59423d521f7f6773a5fa9236512faf) to upgrade your existing apps.
+
+* Enhancements
+  * Moved Controller actions and helpers into a base modules inside __using__ macro to improve upgrades with custom controllers
+  * Add configurable salt and max_age for tokens
+  * Add default opts for token functions
+  * Add support for application configurable confirmable
+  * Support code formatter formatter
+  * Add logging to the mailer template
+  * Updated to Comeonin 4.0
+  * Add support for configurable password hashing algorithms
+  * Speed up tests by configuring the Bcrypt algorithm
+  * Format may generator templates to align with code formatter
+
+* Bug Fixes
+  * Fixed detection of remember me checkbox on session new page
+  * Fixed compiled gettext in view helpers
+  * Fix new session screen issue on newly generated project #390
+  * Add back the gettext fix in ViewHelpers
+
+* Deprecations
+  * Removed the coherence.make_templates task since its no longer needed with the new controller design
+
+* Hard Deprecations
+  * Removed support for erlang < 20.0
+  * Removed support for pre Phoenix 1.3 project structure
+    * removed `coherence.install` and `coherence.gen.controllers` mix tasks
+
+## 0.5.2 (2018-09-03)
+
+* Enhancements
+  * Added default permitted attributes to help with upgrades #371
+
+## 0.5.1 (2018-08-28)
+
+* Enhancements
+  * Add new `coh.gen.controllers` generator
+  * `coh.clean` task now supports phx and phoenix projects
+  * Renamed `Coherence.ControllerHelpers` module to `Coherence.Controller`
+  * Update timex and timex_ecto dependency versions. closes #333
+  * Added new update_user_login/1 function
+  * Added new `allowed attributes` feature to protect against allowing accesses to internal schema fields.
+  * Update uuid dependency version
+  * Allow silent password recovery for unknown users
+
+* Bug Fixes
+  * Fixed issues with generated controllers
+  * Fixed issues with clean tasks
+  * Fixed localization of view helpers. closes #322 and closes #327
+  * Fixed incorrect logic for custom password changeset. closes #351
+  * Fixed config return type for email_reply_to. closes #227
+  * Fixed :peer retrieval issue with new Plug.Conn
+  * Fixed issue attempting to immediately log in after registering an account
+  * Fix in password controller to support subdomains
+
+* Backward incompatible changes
+  * `--controllers` option is not supported for the install tasks
+  * removed the `coherence.clean` task
+  * Need to update `seeds.exs` if your using confirmable option
+
+## 0.5.0 (2017-08-03)
+
+* Enhancements
+  * Support the released Version of Phoenix 1.3 project structure
+  * Project name spaced generated view modules
+  * GenServer based Session Store
+    * Single user model stored for multiple logins of the same user
+    * Support to update user model for all logged in sessions
+  * add --web-module installer option
+  * Generate Invitation, Rememberable, and Trackable schemas
+  * Use app's layout by default. Use --layout option to generate and use a specific layout for coherence. #186
+  * Remove login callback and replace with Phoenix.Controller.redirect. #254
+  # Add support for active field in user schema. #201
+
+* Bug Fixes
+  * Fixed incorrect reference to CoherenceDemo in Config.mailer?
+  * Proper support for binary_ids
+
+* Backward incompatible changes
+  * Does not support Phoenix 1.3.0-rc versions with lib/my_project/web project structure
+  * Previous generated controllers and views must be updated
+
+## 0.4.0 (2017-07-03)
 
 See these `0.3.1` to `0.4.0` [upgrade instructions](https://gist.github.com/smpallen99/92d826b6f523edd83b4a358cf05e97e7) to bring your existing app up to speed.
 

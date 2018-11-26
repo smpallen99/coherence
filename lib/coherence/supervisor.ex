@@ -18,10 +18,11 @@ defmodule Coherence.Supervisor do
     import Supervisor.Spec
     use Coherence.Config
 
-    children = [
-      worker(get_credential_store(), [])
-    ]
-    |> build_children(Config.has_option(:rememberable))
+    children =
+      [
+        worker(get_credential_store(), [])
+      ]
+      |> build_children(Config.has_option(:rememberable))
 
     supervise(children, strategy: :one_for_one)
   end
@@ -30,6 +31,6 @@ defmodule Coherence.Supervisor do
     import Supervisor.Spec
     [worker(Coherence.RememberableServer, []) | children]
   end
-  defp build_children(children, _), do: children
 
+  defp build_children(children, _), do: children
 end

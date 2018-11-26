@@ -1,0 +1,11 @@
+<div>
+  <p><%%= dgettext "coherence", "Hello %{name}!", name: @name %><p>
+  <p>
+    <%%= dgettext "coherence", "Your new email has been correctly saved. Click the link below to confirm you new email." %>
+  </p>
+  <p>
+    <a href="<%%= @url %>"><%%= dgettext "coherence", "Confirm my Email" %></a>
+  </p>
+  <p><%%= dgettext "coherence", "Thank you!" %></p>
+</div>
+

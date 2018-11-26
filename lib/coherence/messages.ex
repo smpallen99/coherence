@@ -15,6 +15,7 @@ defmodule Coherence.Messages do
   @callback account_already_confirmed() :: binary
   @callback account_is_not_locked() :: binary
   @callback account_updated_successfully() :: binary
+  @callback account_created_successfully() :: binary
   @callback already_logged_in() :: binary
   @callback cant_find_that_token() :: binary
   @callback confirmation_token_expired() :: binary
@@ -58,6 +59,7 @@ defmodule Coherence.Messages do
   @callback required() :: binary
   @callback verify_user_token([{atom, any}]) :: binary
   @callback mailer_required() :: binary
+  @callback account_is_inactive() :: binary
 
   @doc """
   Returns the Messages module from the users app's configuration
@@ -66,4 +68,3 @@ defmodule Coherence.Messages do
     Coherence.Config.messages_backend()
   end
 end
-

@@ -7,8 +7,8 @@ defmodule TestCoherence.User do
   schema "users" do
     coherence_schema()
 
-    field :email, :string
-    field :name, :string
+    field(:email, :string)
+    field(:name, :string)
     timestamps()
   end
 
@@ -26,8 +26,25 @@ defmodule TestCoherence.User do
 
   def changeset(model, params, :password) do
     model
-    |> cast(params, ~w(password password_confirmation reset_password_token reset_password_sent_at))
+    |> cast(
+      params,
+      ~w(password password_confirmation reset_password_token reset_password_sent_at)
+    )
     |> validate_coherence_password_reset(params)
+  end
+
+  def changeset(model, params, :registration) do
+    changeset =
+      model
+      |> changeset(params)
+
+    if Config.get(:confirm_email_updates) && Map.get(params, "email", false) && model.id do
+      changeset
+      |> put_change(:unconfirmed_email, get_change(changeset, :email))
+      |> delete_change(:email)
+    else
+      changeset
+    end
   end
 end
 
@@ -37,9 +54,9 @@ defmodule TestCoherence.Invitation do
   import Ecto.Changeset
 
   schema "invitations" do
-    field :email, :string
-    field :name, :string
-    field :token, :string
+    field(:email, :string)
+    field(:name, :string)
+    field(:token, :string)
 
     timestamps()
   end
@@ -59,8 +76,8 @@ defmodule TestCoherence.Account do
   import Ecto.Changeset
 
   schema "accounts" do
-    field :email, :string
-    field :name, :string
+    field(:email, :string)
+    field(:name, :string)
     coherence_schema()
 
     timestamps()
@@ -79,32 +96,11 @@ defmodule TestCoherence.Account do
 
   def changeset(model, params, :password) do
     model
-    |> cast(params, ~w(password password_confirmation reset_password_token reset_password_sent_at))
+    |> cast(
+      params,
+      ~w(password password_confirmation reset_password_token reset_password_sent_at)
+    )
     |> validate_coherence_password_reset(params)
-  end
-end
-
-defmodule TestCoherence.Rememberable do
-  use Ecto.Schema
-  use Coherence.Schema
-  import Ecto.Changeset
-  alias Coherence.Config
-
-  schema "rememberables" do
-    field :series_hash, :string
-    field :token_hash, :string
-    field :token_created_at, Timex.Ecto.DateTime
-    belongs_to :user, Module.concat(Config.module, Config.user_schema)
-    timestamps()
-  end
-
-  @required_fields ~w(series_hash token_hash token_created_at user_id)a
-  @optional_fields ~w()
-
-  def changeset(model, params \\ %{}) do
-    model
-    |> cast(params, @required_fields ++ @optional_fields)
-    |> validate_required(@required_fields)
   end
 end
 
@@ -117,8 +113,8 @@ defmodule TestCoherence.Coherence.User do
   schema "users" do
     coherence_schema()
 
-    field :email, :string
-    field :name, :string
+    field(:email, :string)
+    field(:name, :string)
     timestamps()
   end
 
@@ -136,7 +132,10 @@ defmodule TestCoherence.Coherence.User do
 
   def changeset(model, params, :password) do
     model
-    |> cast(params, ~w(password password_confirmation reset_password_token reset_password_sent_at))
+    |> cast(
+      params,
+      ~w(password password_confirmation reset_password_token reset_password_sent_at)
+    )
     |> validate_coherence_password_reset(params)
   end
 end
@@ -147,9 +146,9 @@ defmodule TestCoherence.Coherence.Invitation do
   import Ecto.Changeset
 
   schema "invitations" do
-    field :email, :string
-    field :name, :string
-    field :token, :string
+    field(:email, :string)
+    field(:name, :string)
+    field(:token, :string)
 
     timestamps()
   end
@@ -161,6 +160,10 @@ defmodule TestCoherence.Coherence.Invitation do
     |> unique_constraint(:email)
     |> validate_format(:email, ~r/@/)
   end
+
+  def new_changeset(params \\ %{}) do
+    changeset(__MODULE__.__struct__(), params)
+  end
 end
 
 defmodule TestCoherence.Coherence.Account do
@@ -169,8 +172,8 @@ defmodule TestCoherence.Coherence.Account do
   import Ecto.Changeset
 
   schema "accounts" do
-    field :email, :string
-    field :name, :string
+    field(:email, :string)
+    field(:name, :string)
     coherence_schema()
 
     timestamps()
@@ -189,31 +192,82 @@ defmodule TestCoherence.Coherence.Account do
 
   def changeset(model, params, :password) do
     model
-    |> cast(params, ~w(password password_confirmation reset_password_token reset_password_sent_at))
+    |> cast(
+      params,
+      ~w(password password_confirmation reset_password_token reset_password_sent_at)
+    )
     |> validate_coherence_password_reset(params)
   end
 end
 
 defmodule TestCoherence.Coherence.Rememberable do
   use Ecto.Schema
-  use Coherence.Schema
+
+  import Ecto.Query
   import Ecto.Changeset
+
   alias Coherence.Config
 
   schema "rememberables" do
-    field :series_hash, :string
-    field :token_hash, :string
-    field :token_created_at, Timex.Ecto.DateTime
-    belongs_to :user, Module.concat(Config.module, Coherence.User)
+    field(:series_hash, :string)
+    field(:token_hash, :string)
+    field(:token_created_at, :naive_datetime)
+    belongs_to(:user, Config.user_schema())
     timestamps()
   end
 
-  @required_fields ~w(series_hash token_hash token_created_at user_id)a
-  @optional_fields ~w()
+  use Coherence.Rememberable
 
   def changeset(model, params \\ %{}) do
     model
-    |> cast(params, @required_fields ++ @optional_fields)
-    |> validate_required(@required_fields)
+    |> cast(params, ~w(series_hash token_hash token_created_at user_id))
+    |> validate_required(~w(series_hash token_hash token_created_at user_id)a)
+  end
+
+  def new_changeset(params \\ %{}) do
+    changeset(%Rememberable{}, params)
+  end
+end
+
+defmodule TestCoherence.Coherence.Trackable do
+  @moduledoc """
+  Schema responsible for saving user tracking data for the --trackable-table option.
+  """
+  use Ecto.Schema
+  import Ecto.Changeset
+
+  alias Coherence.Config
+
+  @fields ~w(action sign_in_count current_sign_in_ip current_sign_in_at last_sign_in_ip last_sign_in_at user_id)a
+
+  schema "trackables" do
+    field(:action, :string, null: false)
+    field(:sign_in_count, :integer, default: 0)
+    field(:current_sign_in_at, :naive_datetime)
+    field(:last_sign_in_at, :naive_datetime)
+    field(:current_sign_in_ip, :string)
+    field(:last_sign_in_ip, :string)
+    belongs_to(:user, Config.user_schema())
+
+    timestamps()
+  end
+
+  @doc """
+  Creates a changeset based on the `model` and `params`.
+
+  If no params are provided, an invalid changeset is returned
+  with no validation performed.
+  """
+  def changeset(model, params \\ %{}) do
+    model
+    |> cast(params, @fields)
+    |> validate_required([:action, :user_id])
+  end
+
+  @doc """
+  Creates a changeset for a new schema
+  """
+  def new_changeset(params \\ %{}) do
+    changeset(%__MODULE__{}, params)
   end
 end

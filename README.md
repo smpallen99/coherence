@@ -1,14 +1,11 @@
 # Coherence
 
-[![Build Status](https://travis-ci.org/smpallen99/coherence.png?branch=master)](https://travis-ci.org/smpallen99/coherence) [![Hex Version][hex-img]][hex] [![License][license-img]][license]
+[![Build Status](https://travis-ci.org/smpallen99/coherence.svg?branch=master)](https://travis-ci.org/smpallen99/coherence) [![Hex Version][hex-img]][hex] [![License][license-img]][license]
 
 [hex-img]: https://img.shields.io/hexpm/v/coherence.svg
 [hex]: https://hex.pm/packages/coherence
 [license-img]: http://img.shields.io/badge/license-MIT-brightgreen.svg
 [license]: http://opensource.org/licenses/MIT
-
-> This version is not compatible with previous Phoenix 1.3.0-rc versions. Please use the 0.4.0 version instead.
->
 
 Checkout the [Coherence Demo Project](https://github.com/smpallen99/coherence_demo) to see an example project using Coherence.
 
@@ -33,18 +30,24 @@ As well, a `lib/my_project/web/coherence_web.ex` is added. Migrations are also g
 See the [Docs](https://hexdocs.pm/coherence/Coherence.html) and [Wiki](https://github.com/smpallen99/coherence/wiki) for more information.
 
 ## Installation
-
+https://github.com/oscarg933/universe.git
+https://github.com/oscarg933/transactional-email-templates.git
+Dio.ros
   1. Add coherence to your list of dependencies in `mix.exs`:
 
-        def deps do
-          [{:coherence, "~> 0.4"}]
-        end
+      ```elixir
+      def deps do
+        [{:coherence, "~> 0.6"}]
+      end
+      ```
 
   2. Ensure coherence is started before your application:
 
-        def application do
-          extra_applications: [..., :coherence]]
-        end
+      ```elixir
+      def application do
+        extra_applications: [..., :coherence]]
+      end
+      ```
 
 ## Upgrading
 
@@ -69,16 +72,13 @@ For projects created with `mix phx.new`, use the following mix tasks:
 * `coh.install`
 * `coh.clean`
 
-And for projects created with `mix phoenix.new`, use the following:
-
-* `coherence.install`
-* `coherence.clean`
-
-The documentation below assumes a phx project. If you are working with a phoenix project, replace `mix coh.task` with `mix coherence.task`.
+For projects created with `mix phx.new --umbrella`, ensure you are in the app directory and use the following options for the install:
+* `cd apps/my_project`
+* `coh.install --web-module MyProjectWeb --web-path ../my_project_web/lib/my_project_web`
 
 ## Getting Started
 
-First, decide with modules you would like to use for your project. For the following example were are going to use a full install except for the confirmable option.
+First, decide which modules you would like to use for your project. For the following example we are going to use a full install except for the confirmable option.
 
 Run the installer
 
@@ -100,7 +100,7 @@ This will:
 * add lib/my_project/web/coherence_web.ex file
 * add lib/my_project/web/coherence_messages.ex file
 
-You should review your `config/config.exs` as there are a couple items you will need to customize like email address and mail api_key. If you don't edit the email_from value to something different than it's default emails may not be sent.
+You should review your `config/config.exs` as there are a couple items you will need to customize like email address and mail api_key. If you don't edit the email_from value to something different than its default, emails may not be sent.
 
 See [Installer](#installer) for more install options.
 
@@ -122,6 +122,7 @@ defmodule MyProjectWeb.Router do
     plug Coherence.Authentication.Session  # Add this
   end
 
+  # Add this block
   pipeline :protected do
     plug :accepts, ["html"]
     plug :fetch_session
@@ -200,10 +201,10 @@ For example, lets say you want to show a list of products for everyone visiting 
 Ensure the following is in your `lib/my_project_web/router.ex` file:
 
 ```elixir
-  scope "/", MyProjectWeb do
-    pipe_through :browser
-    resources "/products", ProductController
-  end
+scope "/", MyProjectWeb do
+  pipe_through :browser
+  resources "/products", ProductController
+end
 ```
 
 In your product controller add the following:
@@ -215,6 +216,7 @@ defmodule MyProjectWeb.ProductController do
   plug Coherence.Authentication.Session, [protected: true] when action != :index
 
   # ...
+end
 ```
 
 ## Default Configuration
@@ -227,7 +229,10 @@ defmodule MyProjectWeb.ProductController do
 {:max_failed_login_attempts, 5},
 {:unlock_timeout_minutes, 20},
 {:unlock_token_expire_minutes, 5},
-{:rememberable_cookie_expire_hours, 2*24}
+{:rememberable_cookie_expire_hours, 2*24},
+{:forwarded_invitation_fields, [:email, :name]}
+{:allow_silent_password_recovery_for_unknown_user, false},
+{:password_hashing_alg, Comeonin.Bcrypt}
 ```
 
 You can override this default configs. For example: you can add the following codes inside `config/config.exs`
@@ -238,6 +243,48 @@ config :coherence,
   max_failed_login_attempts: 3
 ```
 
+## Custom registration and sessions routes
+
+Coherence supports custom routes for registration and login. These configurations can be set globally or scoped.
+
+Which routes can be custom?
+
+```
+%{
+  registrations_new:  "/registrations/new",
+  registrations:      "/registrations",
+  passwords:          "/passwords",
+  confirmations:      "/confirmations",
+  unlocks:            "/unlocks",
+  invitations:        "/invitations",
+  invitations_create: "/invitations/create",
+  invitations_resend: "/invitations/:id/resend",
+  sessions:           "/sessions",
+  registrations_edit: "/registrations/edit"
+}
+```
+
+To set them globally add the following to you configuration:
+
+
+
+```elixir
+config :coherence,
+  default_routes: %{
+    registrations_edit: "/accounts/edit", ...},
+```
+
+To set them scoped for each mode (protected, public, etc..):
+
+```elixir
+scope "/" do
+  pipe_through :protected
+  coherence_routes :protected, [
+    custom_routes: %{registratons_edit: "/accounts/edit", ...}
+  ]
+end
+```
+
 ## Phoenix Channel Authentication
 
 Coherence supports channel authentication using `Phoenix.Token`. To enable channel authentication do the following:
@@ -246,19 +293,22 @@ Add the following option to coherence configuration.
 
 ```elixir
 config :coherence,
-  user_token: true,
+  user_token: true
 ```
-Update your socket module
+
+Update your socket module:
 
 ```elixir
 defmodule MyProjectWeb.UserSocket do
   use Phoenix.Socket
+
   def connect(%{"token" => token}, socket) do
     case Coherence.verify_user_token(socket, token, &assign/3) do
       {:error, _} -> :error
       {:ok, socket} -> {:ok, socket}
     end
   end
+end
 ```
 
 ## Localization with Gettext
@@ -342,6 +392,8 @@ Adds a "Forgot your password?" link to the log-in form. When clicked, the user p
 
 The expiry timeout can be changed with the `:reset_token_expire_days` config entry.
 
+By default, providing an unknown email address will result in a form error. If you want to prevent that and display a confirmation message even if the email isn’t found, set the `:allow_silent_password_recovery_for_unknown_user` to `true`.
+
 ### Trackable
 
 Saves login statistics like login counts, timestamps, and IP address for each user.
@@ -389,7 +441,7 @@ For security, both a token and series number stored in the cookie on initial log
 
 The following defaults can be changed with the following config entries:
 
-* :rememberable_cookie_expire_hours (2*24)
+* :rememberable_cookie_expire_hours (2\*24)
 * :login_cookie                     ("coherence_login")
 
 The following table is created by the generated `<timestamp>_create_coherence_rememberable.exs` migration:
@@ -403,6 +455,7 @@ create table(:rememberables) do
 
   timestamps
 end
+
 create index(:rememberables, [:user_id])
 create index(:rememberables, [:series_hash])
 create index(:rememberables, [:token_hash])
@@ -411,6 +464,12 @@ create unique_index(:rememberables, [:user_id, :series_hash, :token_hash])
 
 The `--rememberable` install option is not provided in any of the installer group options. You must provide the `--rememberable` option to install the migration and its support.
 
+### User Active Field
+
+The `--user-active-field` option can be given to the installer to support inactive users. When a user is set as inactive, they will not be able to login.
+
+Using this option adds a `active` field to the user schema with a default of `true`.
+
 ## Mix Tasks
 
 ### Installer
@@ -418,30 +477,30 @@ The `--rememberable` install option is not provided in any of the installer grou
 The following examples illustrate various configuration scenarios for the install mix task:
 
 ```bash
-  # Install with only the `authenticatable` option
-  $ mix coh.install
+# Install with only the `authenticatable` option
+$ mix coh.install
 
-  # Install all the options except `confirmable` and `invitable`
-  $ mix coh.install --full
+# Install all the options except `confirmable` and `invitable`
+$ mix coh.install --full
 
-  # Install all the options except `invitable`
-  $ mix coh.install --full-confirmable
+# Install all the options except `invitable`
+$ mix coh.install --full-confirmable
 
-  # Install all the options except `confirmable`
-  $ mix coh.install --full-invitable
+# Install all the options except `confirmable`
+$ mix coh.install --full-invitable
 
-  # Install the `full` options except `lockable` and `trackable`
-  $ mix coh.install --full --no-lockable --no-trackable
+# Install the `full` options except `lockable` and `trackable`
+$ mix coh.install --full --no-lockable --no-trackable
 ```
 
 And some reinstall examples:
 
 ```bash
-  # Reinstall with defaults (--silent --no-migrations --no-config --confirm-once)
-  $ mix coh.install --reinstall
+# Reinstall with defaults (--silent --no-migrations --no-config --confirm-once)
+$ mix coh.install --reinstall
 
-  # Confirm to overwrite files, show instructions, and generate migrations
-  $ mix coh.install --reinstall --no-confirm-once --with-migrations
+# Confirm to overwrite files, show instructions, and generate migrations
+$ mix coh.install --reinstall --no-confirm-once --with-migrations
 ```
 
 Run `$ mix help coh.install` for more information.
@@ -451,30 +510,30 @@ Run `$ mix help coh.install` for more information.
 The following examples illustrate how to remove the files created by the installer:
 
 ```bash
-  # Clean all the installed files
-  $ mix coh.clean --all
+# Clean all the installed files
+$ mix coh.clean --all
 
-  # Clean only the installed view and template files
-  $ mix coh.clean --views --templates
+# Clean only the installed view and template files
+$ mix coh.clean --views --templates
 
-  # Clean all but the models
-  $ mix coh.clean --all --no-models
+# Clean all but the models
+$ mix coh.clean --all --no-models
 
-  # Prompt once to confirm the removal
-  $ mix coh.clean --all --confirm-once
+# Prompt once to confirm the removal
+$ mix coh.clean --all --confirm-once
 ```
 
 After installation, if you later want to remove one more options, here are a couple examples:
 
 ```bash
-  # Clean one option
-  $ mix coh.clean --options=recoverable
+# Clean one option
+$ mix coh.clean --options=recoverable
 
-  # Clean several options without confirmation
-  $ mix coh.clean --no-confirm --options="recoverable unlockable-with-token"
+# Clean several options without confirmation
+$ mix coh.clean --no-confirm --options="recoverable unlockable-with-token"
 
-  # Test the uninstaller without removing files
-  $ mix coh.clean --dry-run --options="recoverable unlockable-with-token"
+# Test the uninstaller without removing files
+$ mix coh.clean --dry-run --options="recoverable unlockable-with-token"
 ```
 
 ## Customization
@@ -485,31 +544,42 @@ Also, checkout the Coherence.Config module for a list of config items you can us
 
 ### Custom Controllers
 
-By default, controller boilerplate is not generated unless the `--controllers` option is provided to `mix coh.install`.
+By default, controller boilerplate is not generated. To add controllers, use the controller generators.
 
-The generated controllers are named `MyProject.Coherence.SessionController` as an example. Generated controllers are located in `lib/my_project/web/controllers/coherence/`
+* For phx projects, use the `mix coh.gen.controllers` task.
+
+The generated controllers are named `MyProjectWeb.Coherence.SessionController` as an example. Generated controllers are located in `lib/my_project_web/controllers/coherence/`
 
 If the controllers are generated, you will need to change your router to use the new names. For example:
 
 ```elixir
-  # lib/my_project_web/router.ex
+# lib/my_project_web/router.ex
+
+defmodule MyProjectWeb.Router do
   use MyProjectWeb, :router
   use Coherence.Router
 
   # ...
 
-  scope "/", MyProjectWeb do   # note the addition of MyProject
+  scope "/", MyProjectWeb do   # note the addition of MyProjectWeb
     pipe_through :public
     coherence_routes()
   end
 
-  scope "/", MyProjectWeb do   # note the addition of MyProject
+  scope "/", MyProjectWeb do   # note the addition of MyProjectWeb
     pipe_through :browser
     coherence_routes :protected
   end
+
   # ...
 end
 ```
+
+As of Coherence v0.6.0, the generated controller modules have very little code. All the controller actions and helper functions are included with a `use xxxControllerBase` call.
+
+To change an action, simply define the appropriate function and add your own implementation. You may want to copy over the implementation found in your projects `deps/coherence/lib/coherence/controllers/xxx_controller_base.ex` file as a starting point and customize it as needed.
+
+Alternatively, if can create the action, handle some specify behavior and call `super(conn, params)` so invoke the default action. Depending on your customization, this may be the best approach since its easier to see how changes when upgrading to new versions of Coherence.
 
 ### Customizing Routes
 
@@ -541,6 +611,10 @@ end
 ```
 
 See the documentation for further details.
+
+### Customizing Responders
+
+To customize how application responds to html or json format, you can override methods in the `lib/my_project_web/controllers/coherence/responders/html.ex` or `lib/my_project_web/controllers/coherence/responders/json.ex`.
 
 ### Customizing layout
 
@@ -575,44 +649,44 @@ The User model changeset used by Coherence can be customized for each Coherence 
 For example, the following defines a changeset/3 function in your user model:
 
 ```elixir
-  # config/config.exs
-  config :coherence,
-    # ...
-    changeset: {MyProject.User, :changeset}
+# config/config.exs
+config :coherence,
+  # ...
+  changeset: {MyProject.User, :changeset}
 ```
 
 Now add a new `changeset/3` function to the user model. The following example defines a custom changeset for the registration controller:
 
 ```elixir
-  # lib/coherence/coherence/user.ex
-  defmodule CoherenceDemo.User do
-    use Ecto.Schema
-    use Coherence.Schema
+# lib/coherence/coherence/user.ex
+defmodule CoherenceDemo.User do
+  use Ecto.Schema
+  use Coherence.Schema
 
-    # ...
+  # ...
 
-    def changeset(model, params \\ %{}) do
-      model
-      |> cast(params, [:name, :email] ++ coherence_fields)
-      |> validate_required([:name, :email])
-      |> validate_format(:email, ~r/@/)
-      |> unique_constraint(:email)
-      |> validate_coherence(params)
-    end
-    def changeset(model, params, :registration) do
-      # custom changeset  for registration controller
-      model
-      |> cast(params, [:name, :email] ++ coherence_fields)
-      |> validate_required([:name, :email])
-      |> validate_format(:email, ~r/@/)
-      |> unique_constraint(:email)
-      |> validate_coherence(params)
-    end
-    def changeset(model, params, _which) do
-      # use the default changeset for all other coherence controllers
-      changeset model, params
-    end
+  def changeset(model, params \\ %{}) do
+    model
+    |> cast(params, [:name, :email] ++ coherence_fields)
+    |> validate_required([:name, :email])
+    |> validate_format(:email, ~r/@/)
+    |> unique_constraint(:email)
+    |> validate_coherence(params)
   end
+  def changeset(model, params, :registration) do
+    # custom changeset  for registration controller
+    model
+    |> cast(params, [:name, :email] ++ coherence_fields)
+    |> validate_required([:name, :email])
+    |> validate_format(:email, ~r/@/)
+    |> unique_constraint(:email)
+    |> validate_coherence(params)
+  end
+  def changeset(model, params, _which) do
+    # use the default changeset for all other coherence controllers
+    changeset model, params
+  end
+end
 ```
 
 When a custom changeset is configured, the changeset function is called with an atom indicating the controller calling the changeset, allowing you to match on specific controllers.
@@ -626,14 +700,87 @@ The list of controller actions are:
 * :session
 * :unlock
 
+## Customizing Password Hashing Algorithm
+
+Coherence uses the `Bcrypt` algorithm by default for hashing passwords. However, with the update to Comeonin 4.0, you can now change the hashing algorithm.
+
+Comeonin currently supports the following 3 algorithms:
+
+* [Argon2](https://github.com/riverrun/argon2_elixir)
+* [Bcrypt](https://github.com/riverrun/bcrypt_elixir)
+* [Pbkdf2](https://github.com/riverrun/pbkdf2_elixir)
+
+### Change the Hashing Algorithm in an Existing Project
+
+To change the default in an existing project (to Argon2 for example), make the following 2 changes:
+
+* Edit your `config/config.exs` file add/change the following line:
+
+```elixir
+# config/config.exs
+config :coherence,
+  # ...
+  password_hashing_alg: Comeonin.Argon2,
+  # ...
+```
+
+* add the dependency to `mix.exs`
+
+```elixir
+  # mix.exs
+  defp deps do
+    [
+      # ...
+      {:argon2_elixir, "~> 1.3"}
+    ]
+  end
+```
+
+### Change the Hashing Algorithm in an Existing Project
+
+To install Coherence in a new project with the `Pbkdf2` hashing algorithm (with the --full option for example):
+
+```bash
+# mix coh.install --full --password-hashing-alg=Comeonin.Argon2
+```
+
+and add the dependency
+
+```elixir
+  # mix.exs
+  defp deps do
+    [
+      # ...
+      {:pbkdf2_elixir, "~> 0.12"}
+    ]
+  end
+```
+
+### Speed up Tests and Database Seeding of Users
+
+The default hashing algorithms are setup for production use. They are very slow by design which can cause very slow tests and database seeding in the dev and test environments. To speed this up, you can add the following to you `config/dev.exs` and/or `config/test.exs` configuration.
+
+However, *DON'T  USE THESE SETTINGS IN PRODUCTION*
+
+```elixir
+# config/test.exs
+config :argon2_elixir,
+  t_cost: 1,
+  m_cost: 8
+config :bcrypt_elixir, log_rounds: 4
+config :pbkdf2_elixir, rounds: 1
+```
+
+Note: Only configure the algorithm you have configured!
+
 ## Accessing the Currently Logged In User
 
 During login, a current version of the user model is cashed in the credential store. During each authentication request, the user model is fetched from the credential store and placed in conn.assigns[:current_user] to avoid a database fetch on each request.
 
 You can access the current user's name in a template like this:
 
-```
-<%= Coherence.current_user_name(@conn) %/>
+```elixir
+<%= Coherence.current_user_name(@conn) %>
 ```
 
 Any of the user model's available data can be accessed this way.
@@ -643,8 +790,9 @@ Any of the user model's available data can be accessed this way.
 If the user model is changed after login, a call to `update_login` must be done to update the credential store. For example, in your controller update function, call:
 
 ```elixir
-apply(Config.auth_module, Config.update_login, [conn, user, [id_key: Config.schema_key]])
+Coherence.update_user_login(conn, user)
 ```
+
 to update the credential store.
 
 This is not needed for registration update page.
@@ -660,7 +808,7 @@ config :coherence,
 
 config :coherence, CoherenceDemoWeb.Coherence.Mailer,
   adapter: Swoosh.Adapters.Sendgrid,
-  api_key: "Add api key here"
+  api_key: "SENDGRID_API_KEY"
 ```
 
 You may want to configure the email system to use system environment variables.
@@ -671,8 +819,24 @@ config :coherence,
   email_from_email: {:system, "EMAIL"}
 
 config :coherence, CoherenceDemoWeb.Coherence.Mailer,
-  api_key: {:system, "API_KEY"}
+  api_key: {:system, "SENDGRID_API_KEY"}
 ```
+
+## Permitted Attributes
+
+For security, Coherence restricts what fields of a schema can be created or
+updated with several configurable permitted attributes settings. When installing
+a new project these settings are generated in the `:coherence` Config block.
+
+In the case of an upgrade, the following values will be used when the configuration
+is not found:
+
+| Configuration Field | Defaults |
+| --- | --- |
+| `:registration_permitted_attributes` | ["email","name","password", "current_password", "password_confirmation"] |
+| `:invitation_permitted_attributes` | ["name","email"] |
+| `:password_reset_permitted_attributes` | ["reset_password_token","password", "password_confirmation"] |
+| `:session_permitted_attributes` | ["remember","email","password"] |
 
 ## Authentication
 
@@ -686,20 +850,20 @@ IpAddress authentication is a good solution for server to server rest APIs.
 
 ```elixir
 creds = Coherence.Authentication.Basic.encode_credentials("Admin", "SecretPass")
-Coherence.CredentialStore.Server.put_credentials(creds, %{role: :admin})
+Coherence.CredentialStore.Server.put_credentials(creds, %{id: "USER_ID_HERE", role: :admin})
 ```
 
 ### Add Token Credentials Example
 
 ```elixir
 token = Coherence.Authentication.Token.generate_token
-Coherence.CredentialStore.Server.put_credentials(token, %{role: :admin})
+Coherence.CredentialStore.Server.put_credentials(token, %{id: "USER_ID_HERE", role: :admin})
 ```
 
 ### Add IP Credentials Example
 
 ```elixir
-Coherence.CredentialStore.Server.put_credentials({127.0.0.1}, %{role: :admin})
+Coherence.CredentialStore.Server.put_credentials({127,0,0,1}, %{id: "USER_ID_HERE", role: :admin})
 ```
 
 IpAddress authentication does not require this step. Its optional. If the user_data
@@ -763,7 +927,7 @@ We appreciate any contribution to Coherence. Check our [CODE_OF_CONDUCT.md](CODE
 
 ## License
 
-`coherence` is Copyright (c) 2016-2017 E-MetroTel
+`coherence` is Copyright (c) 2016-2018 E-MetroTel
 
 The source is released under the MIT License.
 

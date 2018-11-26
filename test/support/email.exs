@@ -1,14 +1,14 @@
-defmodule TestCoherence.Coherence.Email do
+defmodule TestCoherenceWeb.Coherence.Email do
   defstruct [:from, :to, :subject, :reply_to, :template, :params]
 end
-defmodule TestCoherence.Coherence.Mailer do
-  def deliver(email), do: email
 
+defmodule TestCoherenceWeb.Coherence.Mailer do
+  def deliver(email), do: email
 end
 
-defmodule TestCoherence.Coherence.UserEmail do
-  defp site_name, do: Coherence.Config.site_name(inspect Coherence.Config.module)
-  alias TestCoherence.Coherence.Email
+defmodule TestCoherenceWeb.Coherence.UserEmail do
+  defp site_name, do: Coherence.Config.site_name(inspect(Coherence.Config.module()))
+  alias TestCoherenceWeb.Coherence.Email
   require Logger
 
   def password(user, url) do
@@ -20,11 +20,17 @@ defmodule TestCoherence.Coherence.UserEmail do
     |> render_body("password.html", %{url: url, name: first_name(user.name)})
   end
 
-
   def confirmation(user, url) do
+    email =
+      if Config.get(:confirm_email_updates) && user.unconfirmed_email do
+        unconfirmed_email(user)
+      else
+        user_email(user)
+      end
+
     %Email{}
     |> from(from_email())
-    |> to(user_email(user))
+    |> to(email)
     |> add_reply_to
     |> subject("#{site_name()} - Confirm your new account")
     |> render_body("confirmation.html", %{url: url, name: first_name(user.name)})
@@ -55,10 +61,10 @@ defmodule TestCoherence.Coherence.UserEmail do
   defp render_body(email, template, params), do: struct(email, template: template, params: params)
 
   defp add_reply_to(mail) do
-    case Coherence.Config.email_reply_to do
-      nil     -> mail
-      true    -> reply_to mail, from_email()
-      address -> reply_to mail, address
+    case Coherence.Config.email_reply_to() do
+      nil -> mail
+      true -> reply_to(mail, from_email())
+      address -> reply_to(mail, address)
     end
   end
 
@@ -73,14 +79,25 @@ defmodule TestCoherence.Coherence.UserEmail do
     {user.name, user.email}
   end
 
+  def unconfirmed_email(user) do
+    {user.name, user.unconfirmed_email}
+  end
+
   defp from_email do
-    case Coherence.Config.email_from do
+    case Coherence.Config.email_from() do
       nil ->
-        Logger.error ~s|Need to configure :coherence, :email_from_name, "Name", and :email_from_email, "me@example.com"|
+        Logger.error(
+          ~s|Need to configure :coherence, :email_from_name, "Name", and :email_from_email, "me@example.com"|
+        )
+
         nil
+
       {name, email} = email_tuple ->
         if is_nil(name) or is_nil(email) do
-          Logger.error ~s|Need to configure :coherence, :email_from_name, "Name", and :email_from_email, "me@example.com"|
+          Logger.error(
+            ~s|Need to configure :coherence, :email_from_name, "Name", and :email_from_email, "me@example.com"|
+          )
+
           nil
         else
           email_tuple

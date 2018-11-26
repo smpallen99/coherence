@@ -1,4 +1,4 @@
-defmodule TestCoherence.Endpoint do
+defmodule TestCoherenceWeb.Endpoint do
   use Phoenix.Endpoint, otp_app: :coherence
 
   # def config(one, two) do
@@ -10,7 +10,9 @@ defmodule TestCoherence.Endpoint do
   # You should set gzip to true if you are running phoenix.digest
   # when deploying your static files in production.
   plug Plug.Static,
-    at: "/", from: :coherence, gzip: false,
+    at: "/",
+    from: :coherence,
+    gzip: false,
     only: ~w(css fonts images js favicon.ico robots.txt)
 
   # Code reloading can be explicitly enabled under the
@@ -32,5 +34,5 @@ defmodule TestCoherence.Endpoint do
     key: "_binaryid_key",
     signing_salt: "JFbk5iZ6"
 
-  plug TestCoherence.Web.Router
+  plug TestCoherenceWeb.Router
 end

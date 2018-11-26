@@ -11,9 +11,9 @@ defmodule MixHelper do
 
   def in_tmp(which, function) do
     path = Path.join(tmp_path(), which)
-    File.rm_rf! path
-    File.mkdir_p! path
-    File.cd! path, function
+    File.rm_rf!(path)
+    File.mkdir_p!(path)
+    File.cd!(path, function)
   end
 
   def assert_file(file) do
@@ -27,9 +27,11 @@ defmodule MixHelper do
   def assert_file(file, match) do
     cond do
       is_list(match) ->
-        assert_file file, &(Enum.each(match, fn(m) -> assert &1 =~ m end))
+        assert_file(file, &Enum.each(match, fn m -> assert &1 =~ m end))
+
       is_binary(match) or Regex.regex?(match) ->
-        assert_file file, &(assert &1 =~ match)
+        assert_file(file, &assert(&1 =~ match))
+
       is_function(match, 1) ->
         assert_file(file)
         match.(File.read!(file))
@@ -39,6 +41,7 @@ defmodule MixHelper do
   def with_generator_env(new_env, fun) do
     old = Application.get_env(:phoenix, :generators)
     Application.put_env(:phoenix, :generators, new_env)
+
     try do
       fun.()
     after

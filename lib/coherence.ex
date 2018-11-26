@@ -160,63 +160,65 @@ defmodule Coherence do
 
   ## Mix Tasks
 
+  Backwords compatibility note: For versions of Phoenix previous to 1.3 use `mix coherence.<command>`. The new `mix coh.<command>` better understands the newer Phoenix patterns.
+
   ### Installer
 
   The following examples illustrate various configuration scenarios for the install mix task:
 
       # Install with only the `authenticatable` option
-      $ mix coherence.install
+      $ mix coh.install
 
       # Install all the options except `confirmable` and `invitable`
-      $ mix coherence.install --full
+      $ mix coh.install --full
 
       # Install all the options except `invitable`
-      $ mix coherence.install --full-confirmable
+      $ mix coh.install --full-confirmable
 
       # Install all the options except `confirmable`
-      $ mix coherence.install --full-invitable
+      $ mix coh.install --full-invitable
 
       # Install the `full` options except `lockable` and `trackable`
-      $ mix coherence.install --full --no-lockable --no-trackable
+      $ mix coh.install --full --no-lockable --no-trackable
 
   And some reinstall examples:
 
       # Reinstall with defaults (--silent --no-migrations --no-config --confirm-once)
-      $ mix coherence.install --reinstall
+      $ mix coh.install --reinstall
 
       # Confirm to overwrite files, show instructions, and generate migrations
-      $ mix coherence.install --reinstall --no-confirm-once --with-migrations
+      $ mix coh.install --reinstall --no-confirm-once --with-migrations
 
-  Run `$ mix help coherence.install` for more information.
+  Run `$ mix help coh.install` for more information.
 
-### Clean
+  ### Clean
 
-The following examples illustrate how to remove the files created by the installer:
+  The following examples illustrate how to remove the files created by the installer:
 
       # Clean all the installed files
-      $ mix coherence.clean --all
+      $ mix coh.clean --all
 
       # Clean only the installed view and template files
-      $ mix coherence.clean --views --templates
+      $ mix coh.clean --views --templates
 
       # Clean all but the models
-      $ mix coherence.clean --all --no-models
+      $ mix coh.clean --all --no-models
 
       # Prompt once to confirm the removal
-      $ mix coherence.clean --all --confirm-once
+      $ mix coh.clean --all --confirm-once
 
-After installation, if you later want to remove one more options, here are a couple examples:
+  After installation, if you later want to remove one more options, here are a couple examples:
 
-    # Clean one option
-    $ mix coherence.clean --options=recoverable
+      # Clean one option
+      $ mix coh.clean --options=recoverable
 
-    # Clean several options without confirmation
-    $ mix coherence.clicked --no-confirm --options="recoverable unlockable-with-token"
+      # Clean several options without confirmation
+      $ mix coh.clicked --no-confirm --options="recoverable unlockable-with-token"
 
-    # Test the uninstaller without removing files
-    $ mix coherence.clicked --dry-run --options="recoverable unlockable-with-token"
+      # Test the uninstaller without removing files
+      $ mix coh.clicked --dry-run --options="recoverable unlockable-with-token"
 
-Run `$ mix help coherence.install` or `$ mix help coherence.install` for more information.
+  Run `$ mix help coh.install` or `$ mix help coherence.install` for more information.
   """
   use Application
 
@@ -230,7 +232,7 @@ Run `$ mix help coherence.install` or `$ mix help coherence.install` for more in
   @doc """
   Get the currently logged in user data.
   """
-  def current_user(conn), do: conn.assigns[Config.assigns_key]
+  def current_user(conn), do: conn.assigns[Config.assigns_key()]
 
   @doc """
   Updates the user login data in the current sessions.
@@ -240,9 +242,11 @@ Run `$ mix help coherence.install` or `$ mix help coherence.install` for more in
   To update all session belonging to the user see `t:update_user_login/1`.
   """
   def update_user_login(conn, user) do
-    apply(Config.auth_module,
-          Config.update_login,
-          [conn, user, [id_key: Config.schema_key]])
+    apply(
+      Config.auth_module(),
+      Config.update_login(),
+      [conn, user, [id_key: Config.schema_key()]]
+    )
   end
 
   @doc """
@@ -267,20 +271,28 @@ Run `$ mix help coherence.install` or `$ mix help coherence.install` for more in
   @doc """
   Get the currently assigned user_token
   """
-  def user_token(conn), do: conn.assigns[Config.token_assigns_key]
+  def user_token(conn), do: conn.assigns[Config.token_assigns_key()]
 
   @doc """
   Verify a user token for channel authentication.
   """
   def verify_user_token(socket, token, assign_fun) do
-    result = case Config.verify_user_token do
-      fun when is_function(fun) ->
-        fun.(socket, token)
-      {mod, fun, args} ->
-        apply(mod, fun, args)
-      error ->
-        {:error, Messages.backend().verify_user_token(user_token: Config.verify_user_token(), error: error)}
-    end
+    result =
+      case Config.verify_user_token() do
+        fun when is_function(fun) ->
+          fun.(socket, token)
+
+        {mod, fun, args} ->
+          apply(mod, fun, args)
+
+        error ->
+          {:error,
+           Messages.backend().verify_user_token(
+             user_token: Config.verify_user_token(),
+             error: error
+           )}
+      end
+
     case result do
       {:ok, user_id} -> {:ok, assign_fun.(socket, :user_id, user_id)}
       error -> error
@@ -291,5 +303,4 @@ Run `$ mix help coherence.install` or `$ mix help coherence.install` for more in
   Check if user is logged in.
   """
   def logged_in?(conn), do: !!current_user(conn)
-
 end

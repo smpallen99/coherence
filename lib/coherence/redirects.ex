@@ -76,7 +76,7 @@ defmodule Redirects do
       @behaviour Redirects
 
       import Phoenix.Controller, only: [redirect: 2]
-      import Coherence.ControllerHelpers
+      import Coherence.Controller
       import Plug.Conn, only: [get_session: 2, put_session: 3]
 
       @doc false
@@ -84,10 +84,12 @@ defmodule Redirects do
 
       @doc false
       def session_create(conn, _) do
-        url = case get_session(conn, "user_return_to") do
-          nil -> "/"
-          value -> value
-        end
+        url =
+          case get_session(conn, "user_return_to") do
+            nil -> "/"
+            value -> value
+          end
+
         conn
         |> put_session("user_return_to", nil)
         |> redirect(to: url)
@@ -120,8 +122,10 @@ defmodule Redirects do
           Coherence.Config.router()
           |> Module.concat(Helpers)
           |> apply(:registration_path, [conn, :show])
+
         redirect(conn, to: path)
       end
+
       @doc false
       def registration_delete(conn, _), do: redirect(conn, to: logged_out_url(conn))
 
@@ -141,16 +145,26 @@ defmodule Redirects do
       @doc false
       def confirmation_edit_error(conn, _), do: redirect(conn, to: logged_out_url(conn))
 
-      defoverridable [
-        session_create: 2, session_delete: 2, password_create: 2, password_update: 2,
-        unlock_create_not_locked: 2, unlock_create_invalid: 2, unlock_create: 2,
-        unlock_edit_not_locked: 2, unlock_edit: 2, unlock_edit_invalid: 2,
-        registration_create: 2, registration_update: 3, registration_delete: 2,
-        invitation_create: 2, invitation_resend: 2,
-        confirmation_create: 2, confirmation_edit_invalid: 2, confirmation_edit_expired: 2,
-        confirmation_edit: 2, confirmation_edit_error: 2
-      ]
+      defoverridable session_create: 2,
+                     session_delete: 2,
+                     password_create: 2,
+                     password_update: 2,
+                     unlock_create_not_locked: 2,
+                     unlock_create_invalid: 2,
+                     unlock_create: 2,
+                     unlock_edit_not_locked: 2,
+                     unlock_edit: 2,
+                     unlock_edit_invalid: 2,
+                     registration_create: 2,
+                     registration_update: 3,
+                     registration_delete: 2,
+                     invitation_create: 2,
+                     invitation_resend: 2,
+                     confirmation_create: 2,
+                     confirmation_edit_invalid: 2,
+                     confirmation_edit_expired: 2,
+                     confirmation_edit: 2,
+                     confirmation_edit_error: 2
     end
   end
-
 end
