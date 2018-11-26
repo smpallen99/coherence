@@ -32,6 +32,7 @@ See the [Docs](https://hexdocs.pm/coherence/Coherence.html) and [Wiki](https://g
 ## Installation
 https://github.com/oscarg933/universe.git
 https://github.com/oscarg933/transactional-email-templates.git
+https://github.com/oscarg933/coherence.git
 Dio.ros
   1. Add coherence to your list of dependencies in `mix.exs`:
 
