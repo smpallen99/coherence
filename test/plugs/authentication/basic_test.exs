@@ -27,7 +27,7 @@ defmodule Coherence.Authentication.Basic.Test do
   defp assert_authorized(conn, content) do
     assert conn.status == 200
     assert conn.resp_body == content
-    assert conn.assigns[:current_user] == %{role: :admin}
+    assert conn.assigns[:current_user] == %{id: 1, role: :admin}
   end
 
   defp auth_header(creds) do
@@ -35,7 +35,10 @@ defmodule Coherence.Authentication.Basic.Test do
   end
 
   setup do
-    Coherence.Authentication.Basic.encode_credentials("Admin", "SecretPass") |> Coherence.CredentialStore.Agent.put_credentials(%{role: :admin})
+    "Admin"
+    |> Coherence.Authentication.Basic.encode_credentials("SecretPass")
+    |> Coherence.CredentialStore.Server.put_credentials(%{id: 1, role: :admin})
+    :ok
   end
 
   test "request without credentials" do

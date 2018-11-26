@@ -58,7 +58,7 @@ defmodule CoherenceTest.Authentication.IpAddress do
   end
 
   setup do
-    # Coherence.CredentialStore.Agent.put_credentials("secret_token", %{role: :admin})
+    # Coherence.CredentialStore.Server.put_credentials("secret_token", %{id: 1, role: :admin})
     :ok
   end
 
@@ -88,7 +88,7 @@ defmodule CoherenceTest.Authentication.IpAddress do
   end
 
   test "request in allow subnet" do
-    user = %{role: :admin}
+    user = %{id: 1, role: :admin}
     IpAddress.add_credentials {47,21,15,11}, user
     conn = call(IpPlug, [], {47,21,15,11})
     assert_authorized conn, "Authorized"

@@ -1,12 +1,12 @@
 defmodule CoherenceTest.InvitationController do
   use TestCoherence.ConnCase
-  import TestCoherence.Router.Helpers
+  import TestCoherence.Web.Router.Helpers
   import Coherence.ControllerHelpers, only: [random_string: 1]
 
   setup %{conn: conn} do
     Application.put_env :coherence, :opts, [:confirmable, :authenticatable, :recoverable,
       :lockable, :trackable, :unlockable_with_token, :invitable, :registerable]
-    user = insert_user
+    user = insert_user()
     conn = assign conn, :current_user, user
     {:ok, conn: conn, user: user}
   end
@@ -45,10 +45,10 @@ defmodule CoherenceTest.InvitationController do
     end
 
     test "can create new user when invitation token exist", %{conn: conn} do
-      invitation = insert_invitation
+      invitation = insert_invitation()
       params = %{"user" => %{"name" => invitation.name, "email" => invitation.email, password: "12345678"}, "token" => invitation.token }
       conn = post conn, invitation_path(conn, :create_user), params
-      assert conn.private[:phoenix_flash] == %{"info" => "Confirmation email sent."}
+      assert conn.private[:phoenix_flash] == %{"error" => "Mailer configuration required!"}
       assert html_response(conn, 302)
     end
   end

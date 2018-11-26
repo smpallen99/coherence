@@ -1,7 +1,7 @@
 defmodule CoherenceTest.ViewHelpers do
   use TestCoherence.ConnCase
   import Plug.Conn
-  alias Coherence.ViewHelpers
+  alias TestCoherence.ViewHelpers
   alias TestCoherence.User
   import Phoenix.HTML, only: [safe_to_string: 1]
 
@@ -9,7 +9,6 @@ defmodule CoherenceTest.ViewHelpers do
   @unlock_link   "Send an unlock email"
   @register_link "Need An Account?"
   @confirmation_link "Resend confirmation email"
-  @invite_link   "Invite Someone"
   @signin_link   "Sign In"
   @signout_link  "Sign Out"
 
@@ -22,7 +21,7 @@ defmodule CoherenceTest.ViewHelpers do
     {:ok, conn: conn, user: user}
   end
 
-  @helpers Module.concat(Application.get_env(:coherence, :module), Router.Helpers)
+  @helpers Module.concat(Application.get_env(:coherence, :module), Web.Router.Helpers)
 
   test "coherence_path", %{conn: conn} do
     assert ViewHelpers.coherence_path(@helpers, :unlock_path, conn, :new) == "/unlocks/new"
@@ -86,7 +85,7 @@ defmodule CoherenceTest.ViewHelpers do
     result2 = item2 |> safe_to_string
 
     assert Floki.find(result1, "li") |> Floki.text == "test"
-    assert Floki.find(result2, "li form a") |> Floki.text == @signout_link
+    assert Floki.find(result2, "li a") |> Floki.text == @signout_link
   end
 
   test "coherence_links :layout not signed" do

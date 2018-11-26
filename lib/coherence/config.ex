@@ -35,9 +35,23 @@ defmodule Coherence.Config do
   * :unlock_token_expire_minutes (5)
   * :session_key ("session_auth")
   * :rememberable_cookie_expire_hours (2*24)
-  * :password_hash_field (:password_hash)         - The field used to save the hashed password
-  * :login_field (:email)                         - The user model field used to login
-  * :changeset                                    - Custom user changeset
+  * :password_hash_field (:password_hash) - The field used to save the hashed password
+  * :login_field (:email) - The user model field used to login
+  * :changeset - Custom user changeset
+  * :title  - Layout page title
+  * :layout - Customize the layout template e.g. {MyApp.LayoutView, "app.html"}
+  * :async_rememberable? (false) - Don't update rememberable seq_no for ajax requests
+  * :user_token (false) - generate tokens for channel authentication
+  * :token_assigns_key (:user_token) - key used to access the channel_token in the conn.assigns map
+  * :token_generator   (fn conn, user -> Phoenix.Token.sign(conn, "user socket", user.id) end) - override the default
+  *                    may also provide an arity 3 function as a tuple {Module, :function, args}
+  *                    where apply(Module, function, args) will be used
+  * :verify_user_token (fn socket, token -> Phoenix.Token.verify(socket, "user socket", token, max_age: 2 * 7 * 24 * 60 * 60) end
+  *                    can also be a 3 element tuple as described above for :token_generator
+  * :use_binary_id (false) - Use binary ids.
+  * :minimum_password_length The minimum password length to be accepted. Default value is 4.
+  * :messages_backend - (MyApp.Coherence.Messages)
+  * :router: the module name of your Router (`router: MyProject.Router`)
 
   ## Examples
 
@@ -69,6 +83,12 @@ defmodule Coherence.Config do
     :email_reply_to_email,
     :site_name,
     :changeset,
+    :layout,
+    :user_token,
+    :use_binary_id,
+    {:token_assigns_key, :user_token},
+    {:token_generator, &Coherence.SessionService.sign_user_token/2},
+    {:verify_user_token, &Coherence.SessionService.verify_user_token/2},
     {:password_hash_field, :password_hash},
     {:login_field, :email},
     {:login_cookie, "coherence_login"},
@@ -78,6 +98,7 @@ defmodule Coherence.Config do
     {:delete_login, :delete_login},
     {:opts, []},
     {:assigns_key, :current_user},
+    {:require_current_password, true},
     {:reset_token_expire_days, 2},
     {:confirmation_token_expire_days, 5},
     {:allow_unconfirmed_access_for, 0},
@@ -85,7 +106,11 @@ defmodule Coherence.Config do
     {:unlock_timeout_minutes, 20},
     {:unlock_token_expire_minutes, 5},
     {:session_key, "session_auth"},
-    {:rememberable_cookie_expire_hours, 2*24 }
+    {:rememberable_cookie_expire_hours, 2 * 24},
+    {:async_rememberable?, false},
+    {:minimum_password_length, 4},
+    :messages_backend,
+    :router
   ]
   |> Enum.each(fn
         {key, default} ->
@@ -98,6 +123,7 @@ defmodule Coherence.Config do
           end
      end)
 
+  @spec email_from() :: {nil, nil} | {String.t, String.t} | String.t
   def email_from do
     case get_application_env :email_from do
       nil ->
@@ -108,6 +134,7 @@ defmodule Coherence.Config do
     end
   end
 
+  @spec email_reply_to() :: {nil, nil} | true | {String.t, String.t} | String.t
   def email_reply_to do
     case get_application_env :email_reply_to do
       nil ->
@@ -123,8 +150,15 @@ defmodule Coherence.Config do
   end
 
   @doc """
+  Get title
+  """
+  @spec title() :: String.t | nil
+  def title, do: get_application_env(:title, get(:module))
+
+  @doc """
   Get a configuration item.
   """
+  @spec get(atom, any) :: any
   def get(key, default \\ nil) do
     get_application_env key, default
   end
@@ -132,6 +166,7 @@ defmodule Coherence.Config do
   @doc """
   Test if an options is configured.
   """
+  @spec has_option(atom) :: boolean
   def has_option(option) do
     has_any_option?(fn({name, _actions}) -> name == option end)
   end
@@ -139,17 +174,26 @@ defmodule Coherence.Config do
   @doc """
   Test if an option is configured and accepts a specific action
   """
+  @spec has_action?(atom, atom) :: boolean
   def has_action?(option, action) do
     has_any_option?(fn({name, actions}) ->
       name == option and (actions == :all or action in actions)
     end)
   end
 
+  @doc """
+  Test if Phoenix is configured to use binary ids by default
+  """
+  @spec use_binary_id?() :: boolean
+  def use_binary_id? do
+    !!Application.get_env(:phoenix, :generators)[:binary_id] || Application.get_env(:coherence, :use_binary_id)
+  end
+
   defp has_any_option?(fun) do
-    if opts == :all do
+    if opts() == :all do
       true
     else
-      Enum.any?(opts, &(fun.(standardize_option(&1))))
+      Enum.any?(opts(), &(fun.(standardize_option(&1))))
     end
   end
 
@@ -166,6 +210,10 @@ defmodule Coherence.Config do
       {:system, env_var} -> System.get_env env_var
       value -> value
     end
+  end
+
+  def mailer? do
+    !!Application.get_env(:coherence, Module.concat(module(), Coherence.Mailer))
   end
 
 end

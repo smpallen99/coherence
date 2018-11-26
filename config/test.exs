@@ -20,9 +20,12 @@ config :coherence, TestCoherence.Repo,
 config :coherence,
   user_schema: TestCoherence.User,
   repo: TestCoherence.Repo,
+  router: TestCoherence.Web.Router,
   module: TestCoherence,
+  layout: {Coherence.LayoutView, :app},
+  messages_backend: TestCoherence.Coherence.Messages,
   logged_out_url: "/",
   email_from_name: "Your Name",
   email_from_email: "yourname@example.com",
-  opts: [:confirmable, :authenticatable, :recoverable, :lockable, :trackable, :unlockable_with_token, :invitable, :registerable]
+  opts: [:confirmable, :authenticatable, :recoverable, :lockable, :trackable, :unlockable_with_token, :invitable, :registerable, :rememberable]
 

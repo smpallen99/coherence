@@ -1,0 +1,25 @@
+<h2><%%= dgettext "coherence", "Show account" %></h2>
+<ul>
+  <li>
+    <strong><%%= dgettext "coherence", "Name:" %></strong>
+    <%%= @user.name %>
+  </li>
+  <%%= unless (login_field = Coherence.Config.login_field) == :email do %>
+    <li>
+      <strong><%%= humanize login_field %></strong>
+      <%%= Map.get(@user, login_field) %>
+    </li>
+  <%% end %>
+
+  <li>
+    <strong><%%= dgettext "coherence", "Email:" %></strong>
+    <%%= @user.email %>
+  </li>
+
+</ul>
+
+<%%= link dgettext("coherence", "Edit"), to: registration_path(@conn, :edit) %> |
+<%%= link dgettext("coherence", "Delete"),
+        to: registration_path(@conn, :delete),
+        method: :delete,
+        data: [confirm: dgettext("coherence", "Are you sure?")] %>

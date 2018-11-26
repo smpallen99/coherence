@@ -1,7 +1,7 @@
 defmodule Coherence.CoherenceView do
   use Phoenix.HTML
   use Phoenix.View, root: "web/templates/coherence"
-  import TestCoherence.Router.Helpers
+  import TestCoherence.Web.Router.Helpers
 
   @seperator {:safe, "&nbsp; | &nbsp;"}
 
@@ -38,7 +38,7 @@ end
 
 defmodule Coherence.LayoutView do
   use TestCoherence.Coherence.Web, :view
-  # import TestCoherence.Router.Helpers
+  # import TestCoherence.Web.Router.Helpers
 end
 defmodule TestCoherence.Coherence.InvitationView do
   use TestCoherence.Coherence.Web, :view
@@ -46,10 +46,12 @@ defmodule TestCoherence.Coherence.InvitationView do
     "new data: #{inspect params}"
   end
 end
+defmodule TestCoherence.Coherence.SessionView do
+  use TestCoherence.Coherence.Web, :view
+  def render("new.html", _params), do: "new session"
+end
 
 defmodule TestCoherence.ErrorView do
-  # def render("500.html", changeset), do: "500.html: #{inspect changeset}"
-  # def render("400.html", changeset), do: "400.html: #{inspect changeset}"
   def render("500.html", _changeset), do: "500.html"
   def render("400.html", _changeset), do: "400.html"
 end

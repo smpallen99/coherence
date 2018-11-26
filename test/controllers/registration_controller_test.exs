@@ -1,10 +1,10 @@
 defmodule CoherenceTest.RegistrationController do
   use TestCoherence.ConnCase
-  import TestCoherence.Router.Helpers
+  import TestCoherence.Web.Router.Helpers
 
   setup %{conn: conn} do
     Application.put_env :coherence, :opts, [:confirmable, :registerable]
-    user = insert_user
+    user = insert_user()
     conn = assign conn, :current_user, user
     {:ok, conn: conn, user: user}
   end
@@ -30,7 +30,7 @@ defmodule CoherenceTest.RegistrationController do
       conn = assign conn, :current_user, nil
       params = %{"registration" => %{"name" => "John Doe", "email" => "john.doe@example.com", "password" => "123123"}}
       conn = post conn, registration_path(conn, :create), params
-      assert conn.private[:phoenix_flash] == %{"info" => "Confirmation email sent."}
+      assert conn.private[:phoenix_flash] == %{"error" => "Mailer configuration required!"}
       assert html_response(conn, 302)
     end
 
@@ -40,17 +40,31 @@ defmodule CoherenceTest.RegistrationController do
       conn = post conn, registration_path(conn, :create), params
       errors = conn.assigns.changeset.errors
       assert errors[:password] == {"can't be blank", []}
-      assert errors[:email] == {"can't be blank", []}
-      assert errors[:name] == {"can't be blank", []}
+      assert errors[:email] == {"can't be blank", [validation: :required]}
+      assert errors[:name] == {"can't be blank", [validation: :required]}
     end
   end
 
   describe "update" do
-    test "can update registration", %{conn: conn} do
-      params = %{"registration" => %{}}
+    test "can update registration with valid current password", %{conn: conn, user: user} do
+      params = %{"registration" => %{"current_password" => user.password}}
       conn = put conn, registration_path(conn, :update), params
       assert conn.private[:phoenix_flash] == %{"info" => "Account updated successfully."}
       assert html_response(conn, 302)
+    end
+
+    test "can not update registration without current password", %{conn: conn} do
+      params = %{"registration" => %{password: "123123", password_confirmation: "123123"}}
+      conn = put conn, registration_path(conn, :update), params
+      errors = conn.assigns.changeset.errors
+      assert errors[:current_password] == {"can't be blank", []}
+    end
+
+    test "can not update registration without valid current password", %{conn: conn} do
+      params = %{"registration" => %{current_password: "123456", password: "123123", password_confirmation: "123123"}}
+      conn = put conn, registration_path(conn, :update), params
+      errors = conn.assigns.changeset.errors
+      assert errors[:current_password] == {"invalid current password", []}
     end
   end
 end

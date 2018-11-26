@@ -1,5 +1,9 @@
 ExUnit.start()
+Application.ensure_all_started(:coherence)
 
+Code.require_file "./support/gettext.exs", __DIR__
+Code.require_file "./support/messages.exs", __DIR__
+Code.require_file "./support/view_helpers.exs", __DIR__
 Code.require_file "./support/web.exs", __DIR__
 Code.require_file "./support/dummy_controller.exs", __DIR__
 Code.require_file "./support/schema.exs", __DIR__

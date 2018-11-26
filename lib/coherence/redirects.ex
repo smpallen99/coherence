@@ -19,6 +19,7 @@ defmodule Redirects do
   * registration_create/2
   * registration_delete/2
   * invitation_create/2
+  * invitation_resend/2
   * confirmation_create/2
   * confirmation_edit_invalid/2
   * confirmation_edit_expired/2
@@ -34,13 +35,13 @@ defmodule Redirects do
       import MyProject.Router.Helpers
 
       # override the log out action back to the log in page
-      def session_delete(conn, _), do: redirect(conn, session_path(conn, :new))
+      def session_delete(conn, _), do: redirect(conn, to: session_path(conn, :new))
 
       # redirect the user to the login page after registering
-      def registration_create(conn, _), do: redirect(conn, session_path(conn, :new))
+      def registration_create(conn, _), do: redirect(conn, to: session_path(conn, :new))
 
       # disable the user_return_to feature on login
-      def session_create(conn, _), do: redirect(conn, landing_path(conn, :index))
+      def session_create(conn, _), do: redirect(conn, to: landing_path(conn, :index))
 
   """
   @callback session_create(conn :: term, params :: term) :: term
@@ -62,6 +63,7 @@ defmodule Redirects do
   @callback registration_delete(conn :: term, params :: term) :: term
 
   @callback invitation_create(conn :: term, params :: term) :: term
+  @callback invitation_resend(conn :: term, params :: term) :: term
 
   @callback confirmation_create(conn :: term, params :: term) :: term
   @callback confirmation_edit_invalid(conn :: term, params :: term) :: term
@@ -114,9 +116,10 @@ defmodule Redirects do
       def registration_create(conn, _), do: redirect(conn, to: logged_out_url(conn))
       @doc false
       def registration_update(conn, _, user) do
-        path = Application.get_env(:coherence, :module)
-        |> Module.concat(Router.Helpers)
-        |> apply(:registration_path, [conn, :show])
+        path =
+          Coherence.Config.router()
+          |> Module.concat(Helpers)
+          |> apply(:registration_path, [conn, :show])
         redirect(conn, to: path)
       end
       @doc false
@@ -124,6 +127,8 @@ defmodule Redirects do
 
       @doc false
       def invitation_create(conn, _), do: redirect(conn, to: logged_out_url(conn))
+      @doc false
+      def invitation_resend(conn, _), do: redirect(conn, to: logged_out_url(conn))
 
       @doc false
       def confirmation_create(conn, _), do: redirect(conn, to: logged_out_url(conn))
@@ -141,7 +146,7 @@ defmodule Redirects do
         unlock_create_not_locked: 2, unlock_create_invalid: 2, unlock_create: 2,
         unlock_edit_not_locked: 2, unlock_edit: 2, unlock_edit_invalid: 2,
         registration_create: 2, registration_update: 3, registration_delete: 2,
-        invitation_create: 2,
+        invitation_create: 2, invitation_resend: 2,
         confirmation_create: 2, confirmation_edit_invalid: 2, confirmation_edit_expired: 2,
         confirmation_edit: 2, confirmation_edit_error: 2
       ]

@@ -1,0 +1,212 @@
+## This file is a PO Template file.
+##
+## `msgid`s here are often extracted from source code.
+## Add new translations manually only if they're dynamic
+## translations that can't be statically extracted.
+##
+## Run `mix gettext.extract` to bring this file up to
+## date. Leave `msgstr`s empty as changing them here as no
+## effect: edit them in PO (`.po`) files instead.
+msgid ""
+msgstr ""
+
+#: web/controllers/confirmation_controller.ex:54
+msgid "Account already confirmed."
+msgstr ""
+
+#: web/controllers/unlock_controller.ex:100
+msgid "Account is not locked."
+msgstr ""
+
+#: web/controllers/registration_controller.ex:105
+msgid "Account updated successfully."
+msgstr ""
+
+#: web/controllers/controller_helpers.ex:252
+msgid "Already logged in."
+msgstr ""
+
+#: web/controllers/invitation_controller.ex:151
+msgid "Can't find that token"
+msgstr ""
+
+#: web/controllers/controller_helpers.ex:178
+msgid "Confirmation email sent."
+msgstr ""
+
+#: web/controllers/confirmation_controller.ex:88
+msgid "Confirmation token expired."
+msgstr ""
+
+#: web/controllers/confirmation_controller.ex:49
+#: web/controllers/password_controller.ex:54
+msgid "Could not find that email address"
+msgstr ""
+
+#: web/controllers/controller_helpers.ex:11
+msgid "Failed to update lockable attributes "
+msgstr ""
+
+#: web/views/view_helpers.ex:15
+msgid "Forgot your password?"
+msgstr ""
+
+#: lib/coherence/plugs/authorization/basic.ex:53
+msgid "HTTP Authentication Required"
+msgstr ""
+
+#: web/controllers/session_controller.ex:24
+msgid "Incorrect %{login_field} or password."
+msgstr ""
+
+#: web/controllers/invitation_controller.ex:125
+msgid "Invalid Invitation. Please contact the site administrator."
+msgstr ""
+
+#: lib/coherence/plugs/require_login.ex:29
+#: lib/coherence/plugs/validate_option.ex:29
+msgid "Invalid Request."
+msgstr ""
+
+#: web/controllers/confirmation_controller.ex:83
+msgid "Invalid confirmation token."
+msgstr ""
+
+#: web/controllers/unlock_controller.ex:69
+msgid "Invalid email or password."
+msgstr ""
+
+#: web/controllers/invitation_controller.ex:98
+msgid "Invalid invitation token."
+msgstr ""
+
+#: web/controllers/password_controller.ex:121
+msgid "Invalid reset token"
+msgstr ""
+
+#: web/controllers/password_controller.ex:87
+msgid "Invalid reset token."
+msgstr ""
+
+#: web/controllers/unlock_controller.ex:88
+msgid "Invalid unlock token."
+msgstr ""
+
+#: web/controllers/invitation_controller.ex:77
+msgid "Invitation already sent."
+msgstr ""
+
+#: web/controllers/invitation_controller.ex:70
+#: web/controllers/invitation_controller.ex:155
+msgid "Invitation sent."
+msgstr ""
+
+#: web/views/view_helpers.ex:18
+msgid "Invite Someone"
+msgstr ""
+
+#: web/controllers/session_controller.ex:25
+msgid "Maximum Login attempts exceeded. Your account has been locked."
+msgstr ""
+
+#: web/views/view_helpers.ex:17
+msgid "Need An Account?"
+msgstr ""
+
+#: web/controllers/password_controller.ex:96
+#: web/controllers/password_controller.ex:129
+msgid "Password reset token expired."
+msgstr ""
+
+#: web/controllers/password_controller.ex:139
+msgid "Password updated successfully."
+msgstr ""
+
+#: web/controllers/confirmation_controller.ex:102
+msgid "Problem confirming user account. Please contact the system administrator."
+msgstr ""
+
+#: web/controllers/controller_helpers.ex:181
+msgid "Registration created successfully."
+msgstr ""
+
+#: web/views/view_helpers.ex:19
+msgid "Resend confirmation email"
+msgstr ""
+
+#: web/controllers/password_controller.ex:68
+msgid "Reset email sent. Check your email for a reset link."
+msgstr ""
+
+#: lib/coherence/plugs/authorization/basic.ex:52
+msgid "Restricted Area"
+msgstr ""
+
+#: web/views/view_helpers.ex:16
+msgid "Send an unlock email"
+msgstr ""
+
+#: web/views/view_helpers.ex:20
+msgid "Sign In"
+msgstr ""
+
+#: web/views/view_helpers.ex:21
+msgid "Sign Out"
+msgstr ""
+
+#: web/controllers/session_controller.ex:125
+msgid "Signed in successfully."
+msgstr ""
+
+#: web/controllers/session_controller.ex:106
+msgid "Too many failed login attempts. Account has been locked."
+msgstr ""
+
+#: lib/coherence/plugs/authorization/ip_address.ex:82
+msgid "Unauthorized IP Address"
+msgstr ""
+
+#: web/controllers/unlock_controller.ex:57
+msgid "Unlock Instructions sent."
+msgstr ""
+
+#: web/controllers/confirmation_controller.ex:98
+msgid "User account confirmed successfully."
+msgstr ""
+
+#: web/controllers/invitation_controller.ex:57
+msgid "User already has an account!"
+msgstr ""
+
+#: web/controllers/session_controller.ex:237
+msgid "You are using an invalid security token for this site! This security\nviolation has been logged.\n"
+msgstr ""
+
+#: web/controllers/session_controller.ex:91
+msgid "You must confirm your account before you can login."
+msgstr ""
+
+#: web/controllers/unlock_controller.ex:95
+msgid "Your account has been unlocked"
+msgstr ""
+
+#: web/controllers/unlock_controller.ex:61
+msgid "Your account is not locked."
+msgstr ""
+
+#: web/controllers/controller_helpers.ex:197
+#: web/services/confirmable_service.ex:111
+msgid "already confirmed"
+msgstr ""
+
+#: web/controllers/controller_helpers.ex:218
+msgid "already locked"
+msgstr ""
+
+#: web/controllers/controller_helpers.ex:239
+msgid "not locked"
+msgstr ""
+
+#: web/views/view_helpers.ex:189
+msgid "required"
+msgstr ""

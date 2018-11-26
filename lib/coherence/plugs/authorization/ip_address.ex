@@ -11,7 +11,7 @@ defmodule Coherence.Authentication.IpAddress do
 
   If you would like access to the current user you must set each authorized IP address like:
 
-      Coherence.CredentialStore.Agent.put_credentials({127.0.0.1}, %{role: :admin})
+      Coherence.CredentialStore.Server.put_credentials({127.0.0.1}, %{role: :admin})
 
   or use a custom store like:
 
@@ -39,36 +39,56 @@ defmodule Coherence.Authentication.IpAddress do
   """
 
   @behaviour Plug
+  use Bitwise
+
   import Plug.Conn
   import Coherence.Authentication.Utils
-  require Logger
+
   alias Coherence.Authentication.Utils
-  use Bitwise
+  alias Coherence.Messages
+
+  require Logger
+
+  @dialyzer [
+    {:nowarn_function, call: 2},
+    # {:nowarn_function, get_auth_header: 1},
+    # {:nowarn_function, verify_creds: 2},
+    # {:nowarn_function, assert_creds: 4},
+    {:nowarn_function, init: 1},
+    # {:nowarn_function, halt_with_login: 3},
+  ]
+
+  @type t :: Ecto.Schema.t | Map.t
+  @type conn :: Plug.Conn.t
 
   @doc """
     Add the credentials for a `token`. `user_data` can be any term but must not be `nil`.
   """
-  def add_credentials(ip, user_data, store \\ Coherence.CredentialStore.Agent) do
+  @spec add_credentials(String.t, t, module) :: t
+  def add_credentials(ip, user_data, store \\ Coherence.CredentialStore.Server) do
     store.put_credentials(ip, user_data)
   end
 
   @doc """
     Remove the credentials for a `token`.
   """
-  def remove_credentials(ip, store \\ Coherence.CredentialStore.Agent) do
+  @spec remove_credentials(String.t, module) :: t
+  def remove_credentials(ip, store \\ Coherence.CredentialStore.Server) do
     store.delete_credentials(ip)
   end
 
+  @spec init(Keyword.t) :: [tuple]
   def init(opts) do
     %{
       allow: Keyword.get(opts, :allow, []),
       deny: Keyword.get(opts, :deny, []),
-      error: Keyword.get(opts, :error, "Unauthorized IP Address"),
-      store: Keyword.get(opts, :store, Coherence.CredentialStore.Agent),
+      error: Keyword.get(opts, :error, Messages.backend().unauthorized_ip_address()),
+      store: Keyword.get(opts, :store, Coherence.CredentialStore.Server),
       assign_key: Keyword.get(opts, :assign_key, :current_user),
     }
   end
 
+  @spec call(conn, Keyword.t) :: conn
   def call(conn, opts) do
     ip = conn.peer |> elem(0)
     conn
@@ -115,7 +135,8 @@ defmodule Coherence.Authentication.IpAddress do
   end
 
   defp to_tuple(string) when is_binary(string) do
-    String.split(string, ".")
+    string
+    |> String.split(".")
     |> Enum.map(&String.to_integer/1)
     |> List.to_tuple
   end

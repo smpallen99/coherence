@@ -1,7 +1,7 @@
 defmodule Coherence.Mixfile do
   use Mix.Project
 
-  @version "0.3.1"
+  @version "0.5.0"
 
   def project do
     [ app: :coherence,
@@ -12,8 +12,9 @@ defmodule Coherence.Mixfile do
       build_embedded: Mix.env == :prod,
       start_permanent: Mix.env == :prod,
       docs: [extras: ["README.md"], main: "Coherence"],
-      deps: deps,
-      package: package,
+      deps: deps(),
+      package: package(),
+      dialyzer: [plt_add_apps: [:mix]],
       name: "Coherence",
       description: """
       A full featured, configurable authentication and user management system for Phoenix.
@@ -25,7 +26,7 @@ defmodule Coherence.Mixfile do
   def application do
     [mod: {Coherence, []},
      applications: [:logger, :comeonin, :ecto, :uuid, :phoenix_swoosh,
-                    :phoenix_timex, :timex_ecto, :tzdata]]
+                    :timex_ecto, :tzdata, :plug, :phoenix, :phoenix_html]]
   end
 
   defp elixirc_paths(:test), do: ["lib", "web", "test/support"]
@@ -34,18 +35,21 @@ defmodule Coherence.Mixfile do
   defp deps do
     [
       {:ecto, "~> 2.0"},
-      {:comeonin, "~> 2.4"},
-      {:phoenix, "~> 1.2"},
-      {:phoenix_html, "~> 2.6"},
-      {:gettext, "~> 0.11"},
+      {:comeonin, "~> 3.0"},
+      # {:phoenix, "~> 1.3.0-rc", override: true},
+      {:phoenix, "~> 1.3"},
+      {:phoenix_html, "~> 2.10"},
+      {:gettext, "~> 0.13"},
       {:uuid, "~> 1.0"},
-      {:phoenix_swoosh, "~> 0.1.3"},
-      {:phoenix_timex, "~> 1.0.0"},
-      {:timex_ecto, "~> 1.1"},
+      {:phoenix_swoosh, "~> 0.2"},
+      {:timex, "~> 3.1"},
+      {:timex_ecto, "~> 3.1"},
       {:floki, "~> 0.8", only: :test},
-      {:ex_doc, "== 0.11.5", only: :dev},
-      {:earmark, "== 0.2.1", only: :dev, override: true},
+      {:ex_doc, "~> 0.16", only: :dev},
+      {:earmark, "~> 1.2", only: :dev, override: true},
       {:postgrex, ">= 0.0.0", only: :test},
+      {:dialyxir, "~> 0.4", only: [:dev], runtime: false},
+      {:credo, "~> 0.8", only: [:dev, :test]},
     ]
   end
 
@@ -53,6 +57,6 @@ defmodule Coherence.Mixfile do
     [ maintainers: ["Stephen Pallen"],
       licenses: ["MIT"],
       links: %{ "Github" => "https://github.com/smpallen99/coherence" },
-      files: ~w(lib priv web README.md mix.exs LICENSE)]
+      files: ~w(lib priv README.md mix.exs LICENSE)]
   end
 end

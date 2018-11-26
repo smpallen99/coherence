@@ -14,23 +14,14 @@ defmodule CoherenceTest.Plug.Session do
     log: false
   ]
 
-  @session_opts Plug.Session.init @default_opts
-
   @secret String.duplicate("abcdef0123456789", 8)
   @signing_opts Plug.Session.init(Keyword.put(@default_opts, :encrypt, false))
-  @encrypted_opts Plug.Session.init(@default_opts)
 
   def sign_conn(conn, secret \\ @secret) do
     put_in(conn.secret_key_base, secret)
     |> Plug.Session.call(@signing_opts)
     |> fetch_session
   end
-
-  # defp encrypt_conn(conn) do
-  #   put_in(conn.secret_key_base, @secret)
-  #   |> Plug.Session.call(@encrypted_opts)
-  #   |> fetch_session
-  # end
 
   defmodule TestPlug do
     use Plug.Builder
@@ -52,7 +43,7 @@ defmodule CoherenceTest.Plug.Session do
     plug :accepts, ["html"]
     plug :fetch_session
     plug :fetch_flash
-    plug Coherence.Authentication.Session, login: true, rememberable: true
+    plug Coherence.Authentication.Session, login: true, rememberable: true, rememberable_callback: &Coherence.SessionController.do_rememberable_callback/5
     plug :index
 
     defp index(conn, _opts), do: send_resp(conn, 200, "Authorized")
@@ -63,13 +54,15 @@ defmodule CoherenceTest.Plug.Session do
 
   defp call(plug, headers) do
     conn(:get, "/", headers: headers)
+    |> Phoenix.Controller.put_view(TestCoherence.Coherence.SessionView)
     |> sign_conn
     |> plug.call([])
   end
 
   setup do
-    # Coherence.Authentication.Session.add_credentials("Admin", "SecretPass", %{role: :admin})
-    :ok
+    user = %{id: 1, role: :admin}
+    # Coherence.Authentication.Session.add_credentials("Admin", "SecretPass", user)
+    {:ok, user: user}
   end
 
   @user_params %{name: "test", email: "test@test.com", password: "secret", password_confirmation: "secret"}
@@ -83,6 +76,7 @@ defmodule CoherenceTest.Plug.Session do
     conn(:get, "/", headers: headers)
     |> sign_conn
     |> put_resp_cookie("coherence_login", cookie)
+    |> Phoenix.Controller.put_view(TestCoherence.Coherence.SessionView)
     |> plug.call([])
   end
   def save_login_cookie(conn, id, series, token, key, expire) do
@@ -172,12 +166,4 @@ defmodule CoherenceTest.Plug.Session do
     {:ok, r1: r1, user: user, series: series, token: token, cookie: cookie}
   end
 
-  # test "create_login" do
-  #   user = %{id: 1, email: "test@example.com"}
-  #   conn = call(TestPlug, [])
-  #   # |> sign_conn
-  #   |> Session.create_login(user)
-
-  #   assert conn.assigns[:current_user] ==  user
-  # end
 end

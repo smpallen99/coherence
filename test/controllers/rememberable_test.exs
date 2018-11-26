@@ -1,7 +1,7 @@
 defmodule CoherenceTest.Rememberable do
   use TestCoherence.ConnCase
   alias Coherence.{Rememberable, SessionController}
-  import TestCoherence.Router.Helpers
+  import TestCoherence.Web.Router.Helpers
   import Ecto.Query
 
   def with_session(conn) do
@@ -20,7 +20,7 @@ defmodule CoherenceTest.Rememberable do
   end
 
   def login_cookie(%{conn: conn}) do
-    user = insert_user
+    user = insert_user()
     {_, series, token} = rememberable = insert_rememberable(user)
     conn = conn
     |> with_session
@@ -51,13 +51,6 @@ defmodule CoherenceTest.Rememberable do
       assert conn.assigns[:remembered]
       assert conn.assigns[:current_user].id == meta[:user].id
     end
-    # test "logout deletes the login cookie", %{conn: conn} = meta  do
-    #   conn = conn
-    #   |> Coherence.Authentication.Session.create_login(meta[:user])
-    #   |> delete(session_path(conn, :delete, meta[:user].id))
-    #   refute conn.cookies["coherence_login"]
-    #   refute Plug.Conn.fetch_session conn
-    # end
 
     test "expired", %{conn: conn} = meta do
       {rememberable, _, _} = meta[:rememberable]

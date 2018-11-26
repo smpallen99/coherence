@@ -3,9 +3,15 @@ defmodule CoherenceTest.ControllerHelpers do
   alias TestCoherence.User
   alias Coherence.ControllerHelpers, as: Helpers
   import TestCoherence.TestHelpers
+  doctest Coherence.ControllerHelpers
+
+  setup do
+    Application.put_env :coherence, :opts, [:authenticatable, :recoverable,
+      :confirmable, :invitable, :registerable]
+  end
 
   test "confirm!" do
-    user = insert_user
+    user = insert_user()
     refute User.confirmed?(user)
     {:ok, user} = Helpers.confirm!(user)
     assert User.confirmed?(user)
@@ -16,10 +22,11 @@ defmodule CoherenceTest.ControllerHelpers do
   end
 
   test "lock!" do
-    user = insert_user
+    user = insert_user()
     refute User.locked?(user)
     {:ok, user} = Helpers.lock!(user)
     assert User.locked?(user)
+
     {:error, changeset} = Helpers.lock!(user)
     refute changeset.valid?
     assert changeset.errors == [locked_at: {"already locked", []}]
@@ -30,6 +37,7 @@ defmodule CoherenceTest.ControllerHelpers do
     assert User.locked?(user)
     {:ok, user} = Helpers.unlock!(user)
     refute User.locked?(user)
+
     {:error, changeset} = Helpers.unlock!(user)
     refute changeset.valid?
     assert changeset.errors == [locked_at: {"not locked", []}]
