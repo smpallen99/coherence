@@ -27,6 +27,6 @@
       </main>
 
     </div> <!-- /container -->
-    <script src="<%%= static_path(@conn, "/js/app.js") %>"></script>
+    <script src="<%%= Routes.static_path(@conn, "/js/app.js") %>"></script>
   </body>
 </html>

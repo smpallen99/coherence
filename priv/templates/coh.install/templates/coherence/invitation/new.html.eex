@@ -1,4 +1,4 @@
-<%%= form_for @changeset, invitation_path(@conn, :create), [as: :invitation], fn f  -> %>
+<%%= form_for @changeset, Routes.invitation_path(@conn, :create), [as: :invitation], fn f  -> %>
   <%%= if @changeset.action do %>
     <div class="alert alert-danger">
       <p><%%= dgettext "coherence", "Oops, something went wrong! Please check the errors below." %></p>
@@ -20,7 +20,7 @@
     <%%= submit dgettext("coherence", "Send Invitation"), class: "btn btn-primary" %>
     <%%= link dgettext("coherence", "Cancel"), to: Coherence.Config.logged_out_url("/"), class: "btn" %>
     <%%= if invitation = @conn.assigns[:invitation] do %>
-      <%%= link dgettext("coherence", "Resend Invitation!"), to: invitation_path(@conn, :resend, invitation.id), class: "btn" %>
+      <%%= link dgettext("coherence", "Resend Invitation!"), to: Routes.invitation_path(@conn, :resend, invitation.id), class: "btn" %>
     <%% end %>
   </div>
 <%% end %>

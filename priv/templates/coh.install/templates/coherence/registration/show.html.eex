@@ -18,8 +18,8 @@
 
 </ul>
 
-<%%= link dgettext("coherence", "Edit"), to: registration_path(@conn, :edit) %> |
+<%%= link dgettext("coherence", "Edit"), to: Routes.registration_path(@conn, :edit) %> |
 <%%= link dgettext("coherence", "Delete"),
-        to: registration_path(@conn, :delete),
+        to: Routes.registration_path(@conn, :delete),
         method: :delete,
         data: [confirm: dgettext("coherence", "Are you sure?")] %>

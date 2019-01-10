@@ -2,4 +2,4 @@
 
 <%%= render "form.html", changeset: @changeset,
                         label: dgettext("coherence", "Register"), required: [required: ""],
-                        action: registration_path(@conn, :create) %>
+                        action: Routes.registration_path(@conn, :create) %>
