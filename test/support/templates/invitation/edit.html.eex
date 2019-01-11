@@ -1,6 +1,6 @@
 <br \>
 <h2>Create Account</h2>
-<%= form_for @changeset, invitation_path(@conn, :create_user), fn f  -> %>
+<%= form_for @changeset, Routes.invitation_path(@conn, :create_user), fn f  -> %>
 
   <%= if @changeset.action do %>
     <div class="alert alert-danger">

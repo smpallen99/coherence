@@ -29,25 +29,25 @@ defmodule Coherence.Redirects do
 
   ## Examples
 
-      import MyProject.Router.Helpers
+      alias MyProject.Router.Helpers, as: Routes
 
       # override the log out action back to the log in page
-      def session_delete(conn, _), do: redirect(conn, session_path(conn, :new))
+      def session_delete(conn, _), do: redirect(conn, Routes.session_path(conn, :new))
 
       # redirect the user to the login page after registering
-      def registration_create(conn, _), do: redirect(conn, session_path(conn, :new))
+      def registration_create(conn, _), do: redirect(conn, Routes.session_path(conn, :new))
 
       # disable the user_return_to feature on login
-      def session_create(conn, _), do: redirect(conn, landing_path(conn, :index))
+      def session_create(conn, _), do: redirect(conn, Routes.landing_path(conn, :index))
 
   """
   use Redirects
-  # Uncomment the import below if adding overrides
-  # import <%= base %>.Router.Helpers
+  # Uncomment the alias below if adding overrides
+  # alias <%= base %>.Router.Helpers, as: Routes
 
   # Add function overrides below
 
   # Example usage
   # Uncomment the following line to return the user to the login form after logging out
-  # def session_delete(conn, _), do: redirect(conn, session_path(conn, :new))
+  # def session_delete(conn, _), do: redirect(conn, Routes.session_path(conn, :new))
 end

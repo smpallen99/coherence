@@ -8,7 +8,7 @@
     <meta name="author" content="">
 
     <title><%%= Coherence.Config.title() %></title>
-    <link rel="stylesheet" href="<%%= static_path(@conn, "/css/app.css") %>">
+    <link rel="stylesheet" href="<%%= Routes.static_path(@conn, "/css/app.css") %>">
   </head>
 
   <body>
