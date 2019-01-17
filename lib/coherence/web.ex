@@ -31,6 +31,7 @@ defmodule CoherenceWeb do
 
       alias Coherence.Config
       alias Coherence.Controller
+      alias Coherence.Router.Helpers, as: Routes
 
       require Redirects
     end

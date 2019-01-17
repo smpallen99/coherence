@@ -9,7 +9,7 @@ defmodule TestCoherenceWeb.Coherence do
       use Phoenix.HTML
 
       import TestCoherenceWeb.Gettext
-      import TestCoherenceWeb.Router.Helpers
+      alias TestCoherenceWeb.Router.Helpers, as: Routes
       import TestCoherenceWeb.ViewHelpers
     end
   end

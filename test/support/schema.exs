@@ -28,7 +28,7 @@ defmodule TestCoherence.User do
     model
     |> cast(
       params,
-      ~w(password password_confirmation reset_password_token reset_password_sent_at)
+      ~w(password password_confirmation reset_password_token reset_password_sent_at)a
     )
     |> validate_coherence_password_reset(params)
   end
@@ -63,7 +63,7 @@ defmodule TestCoherence.Invitation do
 
   def changeset(model, params \\ %{}) do
     model
-    |> cast(params, ~w(name email token))
+    |> cast(params, ~w(name email token)a)
     |> validate_required([:name, :email])
     |> unique_constraint(:email)
     |> validate_format(:email, ~r/@/)
@@ -98,7 +98,7 @@ defmodule TestCoherence.Account do
     model
     |> cast(
       params,
-      ~w(password password_confirmation reset_password_token reset_password_sent_at)
+      ~w(password password_confirmation reset_password_token reset_password_sent_at)a
     )
     |> validate_coherence_password_reset(params)
   end
@@ -134,7 +134,7 @@ defmodule TestCoherence.Coherence.User do
     model
     |> cast(
       params,
-      ~w(password password_confirmation reset_password_token reset_password_sent_at)
+      ~w(password password_confirmation reset_password_token reset_password_sent_at)a
     )
     |> validate_coherence_password_reset(params)
   end
@@ -155,7 +155,7 @@ defmodule TestCoherence.Coherence.Invitation do
 
   def changeset(model, params \\ %{}) do
     model
-    |> cast(params, ~w(name email token))
+    |> cast(params, ~w(name email token)a)
     |> validate_required([:name, :email])
     |> unique_constraint(:email)
     |> validate_format(:email, ~r/@/)
@@ -194,7 +194,7 @@ defmodule TestCoherence.Coherence.Account do
     model
     |> cast(
       params,
-      ~w(password password_confirmation reset_password_token reset_password_sent_at)
+      ~w(password password_confirmation reset_password_token reset_password_sent_at)a
     )
     |> validate_coherence_password_reset(params)
   end
@@ -220,7 +220,7 @@ defmodule TestCoherence.Coherence.Rememberable do
 
   def changeset(model, params \\ %{}) do
     model
-    |> cast(params, ~w(series_hash token_hash token_created_at user_id))
+    |> cast(params, ~w(series_hash token_hash token_created_at user_id)a)
     |> validate_required(~w(series_hash token_hash token_created_at user_id)a)
   end
 

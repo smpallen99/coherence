@@ -25,7 +25,7 @@ defmodule TestCoherence.ConnCase do
       import Ecto.Changeset
       import Ecto.Query, only: [from: 1, from: 2]
 
-      import TestCoherenceWeb.Router.Helpers
+      alias TestCoherenceWeb.Router.Helpers, as: Routes
 
       import TestCoherence.TestHelpers
       alias Coherence.Config

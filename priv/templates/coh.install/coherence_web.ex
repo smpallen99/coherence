@@ -11,10 +11,11 @@ defmodule <%= web_module %> do
       # Use all HTML functionality (forms, tags, etc)
       use Phoenix.HTML
 
-      import <%= web_base %>.Router.Helpers
       import <%= web_base %>.ErrorHelpers
       import <%= web_base %>.Gettext
       import <%= web_base %>.Coherence.ViewHelpers
+
+      alias <%= web_base %>.Router.Helpers, as: Routes
     end
   end
 
@@ -27,12 +28,12 @@ defmodule <%= web_module %> do
       import Ecto
       import Ecto.Query
       import Plug.Conn
-      import <%= web_base %>.Router.Helpers
       import <%= web_base %>.Gettext
       import Coherence.Controller
 
       alias Coherence.Config
       alias Coherence.Controller
+      alias <%= web_base %>.Router.Helpers, as: Routes
 
       require Redirects
     end

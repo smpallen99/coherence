@@ -1,7 +1,7 @@
 defmodule Coherence.CoherenceView do
   use Phoenix.HTML
   use Phoenix.View, root: "web/templates/coherence"
-  import TestCoherenceWeb.Router.Helpers
+  alias TestCoherenceWeb.Router.Helpers, as: Routes
 
   @seperator {:safe, "&nbsp; | &nbsp;"}
 
@@ -22,7 +22,7 @@ defmodule Coherence.CoherenceView do
 
   defp recovery_link(conn, user_schema) do
     if user_schema.recoverable? do
-      [link("Forgot Your Password?", to: password_path(conn, :new))]
+      [link("Forgot Your Password?", to: Routes.password_path(conn, :new))]
     else
       []
     end
@@ -30,7 +30,7 @@ defmodule Coherence.CoherenceView do
 
   defp unlock_link(conn, _user_schema) do
     if conn.assigns[:locked] do
-      [link("Send an unlock email", to: unlock_path(conn, :new))]
+      [link("Send an unlock email", to: Routes.unlock_path(conn, :new))]
     else
       []
     end

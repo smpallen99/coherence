@@ -2,7 +2,7 @@
 
 <h3><%%= dgettext "coherence", "Create a New Password" %></h3>
 
-<%%= form_for @changeset, password_path(@conn, :update, @changeset.data), [as: :password], fn f  -> %>
+<%%= form_for @changeset, Routes.password_path(@conn, :update, @changeset.data), [as: :password], fn f  -> %>
 
   <%%= hidden_input f, :reset_password_token %>
 
