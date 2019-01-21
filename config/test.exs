@@ -17,6 +17,7 @@ config :coherence, TestCoherence.Repo,
   password: System.get_env("DB_PASSWORD") || "postgres",
   database: "coherence_test",
   hostname: System.get_env("DB_HOSTNAME") || "localhost",
+  port: System.get_env("DB_PORT") || 5432,
   pool: Ecto.Adapters.SQL.Sandbox
 
 config :coherence,
