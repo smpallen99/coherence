@@ -1,5 +1,11 @@
 # Coherence Changelog
 
+## 0.6.1 (2019-11-04)
+
+* Bug Fixes
+  * Fix exception in Coherence.CredentialStore.Server.update_user_logins when invalid id
+
+
 ## 0.6.0 (2018-09-xx)
 
 See these [0.5.x to 0.6.x upgrade instructions](https://gist.github.com/smpallen99/fc59423d521f7f6773a5fa9236512faf) to upgrade your existing apps.
