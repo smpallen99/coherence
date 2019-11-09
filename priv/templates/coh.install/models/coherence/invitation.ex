@@ -25,7 +25,7 @@ defmodule <%= base %>.Coherence.Invitation do
   @spec changeset(Ecto.Schema.t(), Map.t()) :: Ecto.Changeset.t()
   def changeset(model, params \\ %{}) do
     model
-    |> cast(params, ~w(name email token))
+    |> cast(params, ~w(name email token)a)
     |> validate_required([:name, :email])
     |> unique_constraint(:email)
     |> validate_format(:email, ~r/@/)

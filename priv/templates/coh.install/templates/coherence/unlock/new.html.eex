@@ -1,6 +1,6 @@
 <br \>
 
-<%%= form_for @conn, unlock_path(@conn, :create), [as: :unlock], fn f  -> %>
+<%%= form_for @conn, Routes.unlock_path(@conn, :create), [as: :unlock], fn f  -> %>
 
   <div class="form-group">
     <%%= required_label f, dgettext("coherence", "Email"), class: "control-label" %>

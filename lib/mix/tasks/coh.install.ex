@@ -119,6 +119,7 @@ defmodule Mix.Tasks.Coh.Install do
   import Macro, only: [camelize: 1, underscore: 1]
   import Mix.Generator
   import Mix.Ecto
+  import Ecto.Migrator, only: [migrations_path: 1]
   import Coherence.Mix.Utils
 
   @shortdoc "Configure the Coherence Package"

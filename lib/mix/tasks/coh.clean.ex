@@ -47,6 +47,7 @@ defmodule Mix.Tasks.Coh.Clean do
 
   import Coherence.Mix.Utils
   import Mix.Ecto
+  import Ecto.Migrator, only: [migrations_path: 1]
 
   alias Mix.Tasks.Coh.Install
 

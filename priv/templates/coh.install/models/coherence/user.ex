@@ -18,7 +18,7 @@ defmodule <%= user_schema %> do
   @spec changeset(Ecto.Schema.t(), Map.t()) :: Ecto.Changeset.t()
   def changeset(model, params \\ %{}) do
     model
-    |> cast(params, [:name, :email] ++ coherence_fields())
+    |> cast(params, ~w(name email)a ++ coherence_fields())
     |> validate_required([:name, :email])
     |> validate_format(:email, ~r/@/)
     |> unique_constraint(:email)
@@ -31,7 +31,7 @@ defmodule <%= user_schema %> do
     model
     |> cast(
       params,
-      ~w(password password_confirmation reset_password_token reset_password_sent_at)
+      ~w(password password_confirmation reset_password_token reset_password_sent_at)a
     )
     |> validate_coherence_password_reset(params)
   end

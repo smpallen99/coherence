@@ -505,6 +505,7 @@ defmodule Coherence.Schema do
     |> options_fields(:lockable)
     |> options_fields(:unlockable_with_token)
     |> options_fields(:confirmable)
+    |> Enum.map(&String.to_atom/1)
   end
 
   defp options_fields(fields, :authenticatable = key) do

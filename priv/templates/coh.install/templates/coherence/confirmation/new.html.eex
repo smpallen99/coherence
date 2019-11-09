@@ -2,7 +2,7 @@
 
 <h3><%%= dgettext "coherence", "Resend Confirmation Instructions" %></h3>
 
-<%%= form_for @changeset, confirmation_path(@conn, :create), [as: :confirmation], fn f  -> %>
+<%%= form_for @changeset, Routes.confirmation_path(@conn, :create), [as: :confirmation], fn f  -> %>
 
   <div class="form-group">
     <%%= required_label f, dgettext("coherence", "Email"), class: "control-label" %>
