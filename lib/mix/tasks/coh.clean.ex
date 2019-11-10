@@ -304,6 +304,10 @@ defmodule Mix.Tasks.Coh.Clean do
 
   defp remove!(config, _), do: config
 
+  defp migrations_path(repo) do
+    "priv/repo/migrations/"
+  end
+
   defp do_remove!(config, repo) do
     ensure_repo(repo, [])
     path = Path.relative_to(migrations_path(repo), Mix.Project.app_path())
