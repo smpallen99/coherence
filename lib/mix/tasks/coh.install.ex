@@ -680,7 +680,7 @@ defmodule Mix.Tasks.Coh.Install do
           path
 
         _ ->
-          Path.relative_to(migrations_path(repo), Mix.Project.app_path())
+          Path.relative_to(Ecto.Migrator.migrations_path(repo), Mix.Project.app_path())
       end
 
     file = Path.join(path, "#{current_timestamp}_#{underscore(name)}.exs")

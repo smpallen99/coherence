@@ -100,7 +100,7 @@ defmodule CoherenceTest.Schema do
     assert cs.errors == [
              password:
                {"should be at least %{count} character(s)",
-                [count: 4, validation: :length, min: 4]}
+                [count: 4, validation: :length, kind: :min]}
            ]
   end
 
