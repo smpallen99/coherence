@@ -122,10 +122,7 @@ defmodule Coherence.CredentialStore.Server do
     state =
       state
       |> update_in([:store], &Map.delete(&1, credentials))
-      |> update_in([:user_data, id], fn
-        {_, 1} -> nil
-        {user_data, inx} -> {user_data, inx - 1}
-      end)
+      |> remove_user_data(id, credentials)
 
     {:noreply, state}
   end
@@ -143,6 +140,20 @@ defmodule Coherence.CredentialStore.Server do
   defp remove_all_users_from_store(state, id) do
     update_in(state, [:store], fn store ->
       for val = {_, v} <- store, v != id, into: %{}, do: val
+    end)
+  end
+
+  defp remove_user_data(state, id, _credentials) do
+    not_exists? = is_nil(Enum.find(state.store, fn {_, user_id} -> user_id == id end))
+
+    update_in(state, [:user_data], fn user_data ->
+      case user_data[id] do
+        _ when not_exists? ->
+          Map.delete(user_data, id)
+
+        {data, inx} ->
+          Map.put(user_data, id, {data, inx - 1})
+      end
     end)
   end
 end

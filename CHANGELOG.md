@@ -1,5 +1,11 @@
 # Coherence Changelog
 
+## 0.6.2 (2020-02-17)
+
+* Bug Fixes
+  * Clear user_data in Coherence.CredentialStore.Server where there are no entries for that user
+
+
 ## 0.6.1 (2019-11-04)
 
 * Bug Fixes
