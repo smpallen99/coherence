@@ -13,9 +13,20 @@ defmodule Coherence.CredentialStore.Server do
   ###################
   # Public API
 
-  @spec start_link() :: {:ok, pid}
-  def start_link do
-    GenServer.start_link(__MODULE__, [], name: @name)
+  @doc false
+  def child_spec(opts) do
+    %{
+      id: @name,
+      start: {__MODULE__, :start_link, [opts]},
+      type: :worker,
+      restart: :permanent,
+      shutdown: 500
+    }
+  end
+
+  @spec start_link(any) :: {:ok, pid}
+  def start_link(args) do
+    GenServer.start_link(__MODULE__, args, name: @name)
   end
 
   @spec update_user_logins(T.user_data()) :: no_return

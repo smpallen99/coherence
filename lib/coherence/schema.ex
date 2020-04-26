@@ -475,14 +475,14 @@ defmodule Coherence.Schema do
   end
 
   @optional_fields %{
-    authenticatable: ~w(#{Config.password_hash()} password password_confirmation),
-    recoverable: ~w(reset_password_token reset_password_sent_at),
-    rememberable: ~w(remember_created_at),
+    authenticatable: ~w(#{Config.password_hash()} password password_confirmation)a,
+    recoverable: ~w(reset_password_token reset_password_sent_at)a,
+    rememberable: ~w(remember_created_at)a,
     trackable:
-      ~w(sign_in_count current_sign_in_at last_sign_in_at current_sign_in_ip last_sign_in_ip),
-    lockable: ~w(locked_at failed_attempts),
-    unlockable_with_token: ~w(unlock_token),
-    confirmable: ~w(confirmation_token confirmed_at confirmation_sent_at)
+      ~w(sign_in_count current_sign_in_at last_sign_in_at current_sign_in_ip last_sign_in_ip)a,
+    lockable: ~w(locked_at failed_attempts)a,
+    unlockable_with_token: ~w(unlock_token)a,
+    confirmable: ~w(confirmation_token confirmed_at confirmation_sent_at)a
   }
 
   @doc """
@@ -494,7 +494,7 @@ defmodule Coherence.Schema do
   For example, for `Coherence.Config.opts == [:authenticatable, :recoverable]`
   `coherence_fields/0` will return:
 
-      ~w(password_hash password password_confirmation reset_password_token reset_password_sent_at)
+      ~w(password_hash password password_confirmation reset_password_token reset_password_sent_at)a
   """
   def coherence_fields do
     []
@@ -514,7 +514,7 @@ defmodule Coherence.Schema do
           []
 
         Coherence.Config.user_active_field() ->
-          ["active" | @optional_fields[key]]
+          [:active | @optional_fields[key]]
 
         true ->
           @optional_fields[key]

@@ -1,7 +1,7 @@
 defmodule Coherence.Mixfile do
   use Mix.Project
 
-  @version "0.6.2"
+  @version "0.7.0"
 
   def project do
     [
@@ -33,7 +33,6 @@ defmodule Coherence.Mixfile do
         :ecto,
         :elixir_uuid,
         :phoenix_swoosh,
-        :timex_ecto,
         :tzdata,
         :plug,
         :phoenix,
@@ -47,7 +46,7 @@ defmodule Coherence.Mixfile do
 
   defp deps do
     [
-      {:ecto, "~> 2.0"},
+      {:ecto_sql, "~> 3.4"},
       {:comeonin, "~> 4.0"},
       {:bcrypt_elixir, "~> 1.1"},
       {:phoenix, "~> 1.3"},
@@ -55,15 +54,15 @@ defmodule Coherence.Mixfile do
       {:gettext, "~> 0.14"},
       {:elixir_uuid, "~> 1.2"},
       {:phoenix_swoosh, "~> 0.2"},
-      {:timex, "~> 3.3"},
-      {:timex_ecto, "~> 3.3"},
+      {:timex, "~> 3.6"},
       {:floki, "~> 0.19", only: :test},
       {:ex_doc, "~> 0.18.0", only: :dev},
       {:earmark, "~> 1.2", only: :dev, override: true},
       {:postgrex, ">= 0.0.0", only: :test},
       {:dialyxir, "~> 0.5", only: [:dev], runtime: false},
       {:credo, "~> 0.8", only: [:dev, :test]},
-      {:plug, "~> 1.6"}
+      {:plug, "~> 1.6"},
+      {:jason, "~> 1.0"}
     ]
   end
 

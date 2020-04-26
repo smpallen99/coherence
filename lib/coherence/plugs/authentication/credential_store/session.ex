@@ -12,21 +12,32 @@ defmodule Coherence.CredentialStore.Session do
   cache on the Session plug.
   """
 
-  @doc """
-  Starts a new credentials store.
-  """
-  @behaviour Coherence.CredentialStore
-
-  @type t :: Ecto.Schema.t() | Map.t()
-
   require Logger
   alias Coherence.DbStore
   alias Coherence.CredentialStore.Server
   alias Coherence.CredentialStore.Types, as: T
 
-  @spec start_link() :: {:ok, pid} | {:error, atom}
-  def start_link do
-    Server.start_link()
+  @behaviour Coherence.CredentialStore
+
+  @type t :: Ecto.Schema.t() | Map.t()
+
+  @doc false
+  def child_spec(opts) do
+    %{
+      id: __MODULE__,
+      start: {__MODULE__, :start_link, [opts]},
+      type: :worker,
+      restart: :permanent,
+      shutdown: 500
+    }
+  end
+
+  @doc """
+  Starts a new credentials store.
+  """
+  @spec start_link(any) :: {:ok, pid} | {:error, atom}
+  def start_link(args) do
+    Server.start_link(args)
   end
 
   @doc """

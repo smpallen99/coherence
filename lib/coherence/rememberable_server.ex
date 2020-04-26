@@ -5,6 +5,16 @@ defmodule Coherence.RememberableServer do
 
   @name __MODULE__
 
+    @doc false
+    def child_spec(args),
+    do: %{
+      id: @name,
+      start: {__MODULE__, :start_link, args},
+      restart: :permanent,
+      shutdown: 500,
+      type: :worker
+    }
+
   @doc false
   def start_link, do: GenServer.start_link(__MODULE__, [], name: @name)
 

@@ -133,4 +133,6 @@ defmodule Coherence.Mix.Utils do
       string
     end
   end
+
+  defdelegate migrations_path(repo), to: Ecto.Migrator
 end
