@@ -15,7 +15,7 @@ defmodule <%= user_schema %> do
   end
 
   @doc false
-  @spec changeset(Ecto.Schema.t(), Map.t()) :: Ecto.Changeset.t()
+  @spec changeset(Ecto.Schema.t(), map()) :: Ecto.Changeset.t()
   def changeset(model, params \\ %{}) do
     model
     |> cast(params, [:name, :email] ++ coherence_fields())
@@ -26,7 +26,7 @@ defmodule <%= user_schema %> do
   end
 
   @doc false
-  @spec changeset(Ecto.Schema.t(), Map.t(), atom) :: Ecto.Changeset.t()
+  @spec changeset(Ecto.Schema.t(), map(), atom) :: Ecto.Changeset.t()
   def changeset(model, params, :password) do
     model
     |> cast(

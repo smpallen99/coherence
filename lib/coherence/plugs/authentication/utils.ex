@@ -4,7 +4,7 @@ defmodule Coherence.Authentication.Utils do
   alias Coherence.Config
 
   @type conn :: Plug.Conn.t()
-  @type t :: Map.t()
+  @type t :: map()
 
   @param_key Application.get_env(:coherence, :token_param_key, "param_key")
 

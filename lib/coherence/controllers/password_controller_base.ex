@@ -22,7 +22,7 @@ defmodule Coherence.PasswordControllerBase do
 
       @type schema :: Ecto.Schema.t()
       @type conn :: Plug.Conn.t()
-      @type params :: Map.t()
+      @type params :: map()
 
       @schemas unquote(opts)[:schemas] || raise("Schemas option required")
 

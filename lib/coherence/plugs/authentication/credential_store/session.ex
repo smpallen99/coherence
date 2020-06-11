@@ -19,7 +19,7 @@ defmodule Coherence.CredentialStore.Session do
 
   @behaviour Coherence.CredentialStore
 
-  @type t :: Ecto.Schema.t() | Map.t()
+  @type t :: Ecto.Schema.t() | map()
 
   @doc false
   def child_spec(opts) do

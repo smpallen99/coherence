@@ -35,7 +35,7 @@ defmodule Coherence.Authentication.Token do
 
   require Logger
 
-  @type t :: Ecto.Schema.t() | Map.t()
+  @type t :: Ecto.Schema.t() | map()
   @type conn :: Plug.Conn.t()
 
   @behaviour Plug
@@ -75,7 +75,7 @@ defmodule Coherence.Authentication.Token do
     |> Base.url_encode64()
   end
 
-  @spec init(Keyword.t()) :: [tuple]
+  @spec init(keyword()) :: [tuple]
   def init(opts) do
     param = Keyword.get(opts, :param)
 
@@ -103,19 +103,19 @@ defmodule Coherence.Authentication.Token do
        when is_atom(module) and is_atom(fun) and is_list(args),
        do: source
 
-  @spec get_token_from_params(conn, Map.t()) :: {conn, Map.t()}
+  @spec get_token_from_params(conn, map()) :: {conn, map()}
   def get_token_from_params(conn, param),
     do: {conn, conn.params[param]}
 
-  @spec get_token_from_header(conn, Map.t()) :: {conn, Map.t() | String}
+  @spec get_token_from_header(conn, map()) :: {conn, map() | String.t}
   def get_token_from_header(conn, param),
     do: {conn, get_first_req_header(conn, param)}
 
-  @spec get_token_from_session(conn, Map.t()) :: {conn, String.t()}
+  @spec get_token_from_session(conn, map()) :: {conn, String.t()}
   def get_token_from_session(conn, param),
     do: {conn, get_session(conn, param)}
 
-  @spec get_token_from_params_session(conn, Map.t()) :: {conn, nil | String.t()}
+  @spec get_token_from_params_session(conn, map()) :: {conn, nil | String.t()}
   def get_token_from_params_session(conn, param) do
     conn
     |> get_token_from_params(param)
@@ -123,12 +123,12 @@ defmodule Coherence.Authentication.Token do
     |> save_token_in_session(param)
   end
 
-  @spec get_token_from_session({conn, nil | String.t()}, Map.t()) ::
+  @spec get_token_from_session({conn, nil | String.t()}, map()) ::
           String.t() | {conn, String.t()}
   def check_token_from_session({conn, nil}, param), do: get_token_from_session(conn, param)
   def check_token_from_session({conn, creds}, _param), do: {conn, creds}
 
-  @spec save_token_in_session({conn, nil | String.t()}, Map.t()) :: {conn, nil | String.t()}
+  @spec save_token_in_session({conn, nil | String.t()}, map()) :: {conn, nil | String.t()}
   def save_token_in_session({conn, nil}, _), do: {conn, nil}
 
   def save_token_in_session({conn, creds}, param) do
@@ -140,7 +140,7 @@ defmodule Coherence.Authentication.Token do
     {conn, creds}
   end
 
-  @spec call(conn, Keyword.t()) :: conn
+  @spec call(conn, keyword()) :: conn
   def call(conn, opts) do
     if get_authenticated_user(conn) do
       conn

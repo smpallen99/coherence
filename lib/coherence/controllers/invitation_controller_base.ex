@@ -25,7 +25,7 @@ defmodule Coherence.InvitationControllerBase do
 
       @type schema :: Ecto.Schema.t()
       @type conn :: Plug.Conn.t()
-      @type params :: Map.t()
+      @type params :: map()
 
       def schema(which), do: Coherence.Schemas.schema(which)
 

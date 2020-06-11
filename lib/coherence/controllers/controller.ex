@@ -13,14 +13,14 @@ defmodule Coherence.Controller do
   @type changeset :: Ecto.Changeset.t()
   @type schema_or_error :: schema | {:error, changeset}
   @type conn :: Plug.Conn.t()
-  @type params :: Map.t()
+  @type params :: map()
 
   @doc """
   Put LayoutView
 
   Adds Config.layout if set.
   """
-  @spec layout_view(Plug.Conn.t(), Keyword.t()) :: Plug.Conn.t()
+  @spec layout_view(Plug.Conn.t(), keyword()) :: Plug.Conn.t()
   def layout_view(conn, opts) do
     case opts[:layout] || Config.layout() do
       nil ->
@@ -42,7 +42,7 @@ defmodule Coherence.Controller do
   @doc """
   Set view plug
   """
-  @spec set_view(Plug.Conn.t(), Keyword.t()) :: Plug.Conn.t()
+  @spec set_view(Plug.Conn.t(), keyword()) :: Plug.Conn.t()
   def set_view(conn, opts) do
     case opts[:view] do
       nil -> conn
@@ -110,7 +110,7 @@ defmodule Coherence.Controller do
       ...> |> Coherence.Controller.expired?(days: 1)
       true
   """
-  @spec expired?(nil | struct, Keyword.t()) :: boolean
+  @spec expired?(nil | struct, keyword()) :: boolean
   def expired?(nil, _), do: true
 
   def expired?(datetime, opts) do
@@ -127,7 +127,7 @@ defmodule Coherence.Controller do
       ...> |> to_string
       "2016-10-08 10:10:10Z"
   """
-  @spec shift(struct, Keyword.t()) :: struct
+  @spec shift(struct, keyword()) :: struct
   def shift(datetime, opts) do
     datetime
     |> NaiveDateTime.to_erl()
@@ -262,7 +262,7 @@ defmodule Coherence.Controller do
   @doc """
   Plug to redirect already logged in users.
   """
-  @spec redirect_logged_in(conn, params) :: conn
+  @spec redirect_logged_in(conn, any) :: conn
   def redirect_logged_in(conn, _params) do
     if Coherence.logged_in?(conn) do
       conn
@@ -352,7 +352,7 @@ defmodule Coherence.Controller do
 
   Logs out a user and redirects them to the session_delete page.
   """
-  @spec logout_user(conn, Keyword.t()) :: conn
+  @spec logout_user(conn, keyword()) :: conn
   def logout_user(conn, opts \\ []) do
     user = Coherence.current_user(conn)
 
@@ -397,7 +397,7 @@ defmodule Coherence.Controller do
 
   Same as Rails permit, prevents mass assignment attacks.
   """
-  @spec permit(Map.t(), List.t()) :: Map.t()
+  @spec permit(map(), []) :: map()
   def permit(_, nil), do: %{}
   def permit(params, permitted), do: params |> Map.take(permitted)
 end

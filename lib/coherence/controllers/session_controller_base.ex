@@ -53,7 +53,7 @@ defmodule Coherence.SessionControllerBase do
 
       @type schema :: Ecto.Schema.t()
       @type conn :: Plug.Conn.t()
-      @type params :: Map.t()
+      @type params :: map()
 
       @schemas unquote(opts)[:schemas] || raise("Schemas option required")
 
@@ -327,7 +327,7 @@ defmodule Coherence.SessionControllerBase do
       keep the same series number. Update the rememberable database with
       the new token. Save the new cookie.
       """
-      @spec rememberable_callback(conn, integer, String.t(), String.t(), Keyword.t()) :: conn
+      @spec rememberable_callback(conn, integer, String.t(), String.t(), keyword()) :: conn
       def rememberable_callback(conn, id, series, token, opts) do
         Coherence.RememberableServer.callback(fn ->
           do_rememberable_callback(conn, id, series, token, opts)
@@ -401,7 +401,7 @@ defmodule Coherence.SessionControllerBase do
       @doc """
       Save the login cookie.
       """
-      @spec save_login_cookie(conn, Integer.t(), String.t(), String.t(), Keyword.t()) :: conn
+      @spec save_login_cookie(conn, integer(), String.t(), String.t(), keyword()) :: conn
       def save_login_cookie(conn, id, series, token, opts \\ []) do
         key = opts[:login_key] || "coherence_login"
         expire = opts[:cookie_expire] || 2 * 24 * 60 * 60

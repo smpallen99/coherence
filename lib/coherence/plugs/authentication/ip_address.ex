@@ -58,7 +58,7 @@ defmodule Coherence.Authentication.IpAddress do
     # {:nowarn_function, halt_with_login: 3},
   ]
 
-  @type t :: Ecto.Schema.t() | Map.t()
+  @type t :: Ecto.Schema.t() | map()
   @type conn :: Plug.Conn.t()
 
   @doc """
@@ -77,7 +77,7 @@ defmodule Coherence.Authentication.IpAddress do
     store.delete_credentials(ip)
   end
 
-  @spec init(Keyword.t()) :: [tuple]
+  @spec init(keyword()) :: [tuple]
   def init(opts) do
     %{
       allow: Keyword.get(opts, :allow, []),
@@ -88,7 +88,7 @@ defmodule Coherence.Authentication.IpAddress do
     }
   end
 
-  @spec call(conn, Keyword.t()) :: conn
+  @spec call(conn, keyword()) :: conn
   def call(conn, opts) do
     ip = conn |> Plug.Conn.get_peer_data() |> Map.get(:address)
 

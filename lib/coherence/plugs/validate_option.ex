@@ -16,12 +16,12 @@ defmodule Coherence.ValidateOption do
     {:nowarn_function, init: 1}
   ]
 
-  @spec init(Keyword.t() | atom) :: [tuple]
+  @spec init(keyword() | atom) :: [tuple]
   def init(options) do
     %{option: options}
   end
 
-  @spec call(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  @spec call(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def call(conn, opts) do
     if Coherence.Config.has_option(opts[:option]) do
       conn

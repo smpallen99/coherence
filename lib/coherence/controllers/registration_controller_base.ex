@@ -20,7 +20,7 @@ defmodule Coherence.RegistrationControllerBase do
 
       @type schema :: Ecto.Schema.t()
       @type conn :: Plug.Conn.t()
-      @type params :: Map.t()
+      @type params :: map()
 
       @dialyzer [
         {:nowarn_function, update: 2}

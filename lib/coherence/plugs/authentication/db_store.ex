@@ -7,7 +7,7 @@ defprotocol Coherence.DbStore do
   """
   @fallback_to_any true
 
-  @type schema :: Ecto.Schema.t() | Map.t()
+  @type schema :: Ecto.Schema.t() | map()
 
   @doc """
   Get authenticated user data.

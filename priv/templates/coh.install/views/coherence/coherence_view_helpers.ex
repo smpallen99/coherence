@@ -119,7 +119,7 @@ defmodule <%= web_base %>.Coherence.ViewHelpers do
       coherence_links(conn, :layout)             # when not logged in
       Generates: #{@register_link_text}  #{@signin_link_text}
   """
-  @spec coherence_links(conn, atom, Keyword.t()) :: tuple
+  @spec coherence_links(conn, atom, keyword()) :: tuple
   def coherence_links(conn, which, opts \\ [])
 
   def coherence_links(conn, :new_session, opts) do
@@ -272,7 +272,7 @@ defmodule <%= web_base %>.Coherence.ViewHelpers do
   @doc """
   Generate the required label.
   """
-  @spec required_label(atom, String.t() | atom, Keyword.t()) :: tuple
+  @spec required_label(atom, String.t() | atom, keyword()) :: tuple
   def required_label(f, name, opts \\ []) do
     {label, opts} = Keyword.pop(opts, :label)
     label = label || humanize(name)

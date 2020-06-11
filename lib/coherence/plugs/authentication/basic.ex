@@ -17,7 +17,7 @@ defmodule Coherence.Authentication.Basic do
     {:nowarn_function, halt_with_login: 3}
   ]
 
-  @type t :: Ecto.Schema.t() | Map.t()
+  @type t :: Ecto.Schema.t() | map()
   @type conn :: Plug.Conn.t()
 
   @behaviour Plug
@@ -33,7 +33,7 @@ defmodule Coherence.Authentication.Basic do
   @spec encode_credentials(atom | String.t(), String.t() | nil) :: T.credentials()
   def encode_credentials(user, password), do: Base.encode64("#{user}:#{password}")
 
-  @spec create_login(String.t(), String.t(), t, Keyword.t()) :: t
+  @spec create_login(String.t(), String.t(), t, keyword()) :: t
   def create_login(email, password, user_data, _opts \\ []) do
     creds = encode_credentials(email, password)
     store = get_credential_store()
@@ -43,7 +43,7 @@ defmodule Coherence.Authentication.Basic do
   @doc """
     Update login store for a user. `user_data` can be any term but must not be `nil`.
   """
-  @spec update_login(String.t(), String.t(), t, Keyword.t()) :: t
+  @spec update_login(String.t(), String.t(), t, keyword()) :: t
   def update_login(email, password, user_data, opts \\ []) do
     create_login(email, password, user_data, opts)
   end

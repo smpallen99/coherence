@@ -16,7 +16,7 @@ defmodule Coherence.RequireLogin do
     {:nowarn_function, init: 1}
   ]
 
-  @spec init(Keyword.t()) :: [tuple]
+  @spec init(keyword()) :: [tuple]
   def init(options) do
     %{option: options}
   end
