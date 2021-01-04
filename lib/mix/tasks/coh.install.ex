@@ -421,7 +421,7 @@ defmodule Mix.Tasks.Coh.Install do
 
   defp get_compiled_model(%{user_schema: user_schema} = config) do
     user_schema = Module.concat(user_schema, nil)
-    Map.put(config, :model_found?, Code.ensure_compiled?(user_schema))
+    Map.put(config, :model_found?, Code.ensure_compiled(user_schema))
   end
 
   def find_existing_model(%{model_found?: false, user_schema: user_schema} = config, path) do
