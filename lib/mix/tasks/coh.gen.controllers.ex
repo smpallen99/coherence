@@ -121,7 +121,7 @@ defmodule Mix.Tasks.Coh.Gen.Controllers do
     web_base = opts[:web_module] || base <> "Web"
 
     binding =
-      Enum.into(
+      Keyword.merge(
         [
           base: base,
           web_base: web_base,

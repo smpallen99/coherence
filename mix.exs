@@ -27,7 +27,7 @@ defmodule Coherence.Mixfile do
   def application do
     [
       mod: {Coherence, []},
-      applications: [
+      extra_applications: [
         :logger,
         :comeonin,
         :ecto,
@@ -36,13 +36,18 @@ defmodule Coherence.Mixfile do
         :tzdata,
         :plug,
         :phoenix,
-        :phoenix_html
+        :phoenix_html,
+        :ecto_sql,
+        :timex,
+        :crypto,
+        :eex,
+        :plug
       ]
     ]
   end
 
-  defp elixirc_paths(:test), do: ["lib", "web", "test/support"]
-  defp elixirc_paths(_), do: ["lib", "web"]
+  defp elixirc_paths(:test), do: ["lib", "test/support"]
+  defp elixirc_paths(_), do: ["lib"]
 
   defp deps do
     [
@@ -56,12 +61,12 @@ defmodule Coherence.Mixfile do
       {:phoenix_swoosh, "~> 0.2"},
       {:timex, "~> 3.6"},
       {:floki, "~> 0.19", only: :test},
-      {:ex_doc, "~> 0.18.0", only: :dev},
+      {:ex_doc, "~> 0.24.0", only: :dev},
       {:earmark, "~> 1.2", only: :dev, override: true},
       {:postgrex, ">= 0.0.0", only: :test},
-      {:dialyxir, "~> 0.5", only: [:dev], runtime: false},
-      {:credo, "~> 0.8", only: [:dev, :test]},
-      {:plug, "~> 1.6"},
+      {:dialyxir, "~> 1.1", only: [:dev], runtime: false},
+      {:credo, "~> 1.5", only: [:dev, :test]},
+      {:plug, "~> 1.11"},
       {:jason, "~> 1.0"}
     ]
   end

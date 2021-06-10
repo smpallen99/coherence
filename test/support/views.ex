@@ -59,3 +59,17 @@ defmodule TestCoherenceWeb.ErrorView do
   def render("500.html", _changeset), do: "500.html"
   def render("400.html", _changeset), do: "400.html"
 end
+
+defmodule TestCoherenceWeb.Coherence.RegistrationView do
+  use TestCoherenceWeb.Coherence, :view
+  def render("new.html", _params), do: "new registration"
+  def render("show.html", _params), do: "show registration"
+  def render("edit.html", _params), do: "edit registration"
+end
+
+defmodule TestCoherenceWeb.Coherence.PasswordView do
+  use TestCoherenceWeb.Coherence, :view
+  def render("new.html", _params), do: "new password"
+  def render("show.html", _params), do: "show password"
+  def render("edit.html", _params), do: "edit password"
+end
