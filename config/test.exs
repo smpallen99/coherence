@@ -1,4 +1,4 @@
-use Mix.Config
+import Config
 
 # config :coherence, ecto_repos: [TestCoherence.Repo]
 
@@ -25,6 +25,7 @@ config :coherence,
   repo: TestCoherence.Repo,
   router: TestCoherenceWeb.Router,
   module: TestCoherence,
+  # base: TestCoherence,
   web_module: TestCoherenceWeb,
   layout: {Coherence.LayoutView, :app},
   messages_backend: TestCoherenceWeb.Coherence.Messages,
