@@ -3,6 +3,8 @@ defmodule TestCoherence.Coherence.Schemas do
 
   import Ecto.Query
 
+  alias TestCoherence.Coherence.{Rememberable, Invitation, Trackable}
+
   @user_schema Config.user_schema()
   @repo Config.repo()
 
@@ -125,14 +127,14 @@ defmodule TestCoherence.Coherence.Schemas do
   def last_trackable(user_id) do
     schema =
       @repo.one(
-        TestCoherence.Coherence.Trackable
+        Trackable
         |> where([t], t.user_id == ^user_id)
         |> order_by(desc: :id)
         |> limit(1)
       )
 
     case schema do
-      nil -> TestCoherence.Coherence.Trackable.__struct__()
+      nil -> Trackable.__struct__()
       trackable -> trackable
     end
   end

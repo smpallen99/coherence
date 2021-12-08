@@ -19,7 +19,8 @@ defmodule Coherence.Mixfile do
       name: "Coherence",
       description: """
       A full featured, configurable authentication and user management system for Phoenix.
-      """
+      """,
+      xref: [exclude: [:crypto]],
     ]
   end
 
@@ -55,7 +56,7 @@ defmodule Coherence.Mixfile do
       {:comeonin, "~> 4.0"},
       {:bcrypt_elixir, "~> 1.1"},
       {:phoenix, "~> 1.3"},
-      {:phoenix_html, "~> 2.10"},
+      # {:phoenix_html, "~> 2.10"},
       {:gettext, "~> 0.14"},
       {:elixir_uuid, "~> 1.2"},
       {:phoenix_swoosh, "~> 0.2"},

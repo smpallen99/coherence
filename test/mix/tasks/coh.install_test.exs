@@ -36,9 +36,9 @@ defmodule Mix.Tasks.Coh.InstallTest do
             "config :coherence,",
             "user_schema: TestCoherence.Coherence.User,",
             "repo: TestCoherence.Repo,",
-            "module: TestCoherence",
-            "router: TestCoherenceWeb.Router",
-            "web_module: TestCoherenceWeb",
+            "module: TestCoherence,",
+            "router: TestCoherenceWeb.Router,",
+            "web_module: TestCoherenceWeb,",
             "messages_backend: TestCoherenceWeb.Coherence.Messages,",
             "opts: [:authenticatable]"
           ]
@@ -383,7 +383,7 @@ defmodule Mix.Tasks.Coh.InstallTest do
       in_tmp("coh_for_rememberable", fn ->
         mk_web_path()
 
-        ~w(--repo=TestCoherence.Repo  --authenticatable --rememberable --log-only --no-views --no-templates --migration-path=migrations)
+        ~w(--repo=TestCoherence.Repo  --module=TestCoherence --authenticatable --rememberable --log-only --no-views --no-templates --migration-path=migrations)
         |> Mix.Tasks.Coh.Install.run()
 
         assert [migration] = Path.wildcard("migrations/*_create_coherence_rememberable.exs")

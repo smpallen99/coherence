@@ -1193,7 +1193,7 @@ defmodule Mix.Tasks.Coh.Install do
       |> Mix.Phoenix.inflect()
 
     base = opts[:module] || binding[:base]
-    web_base = opts[:web_module] || base <> "Web"
+    web_base = opts[:web_module] || (base <> "Web")
     opts = Keyword.put(opts, :base, base)
     repo = opts[:repo] || "#{base}.Repo"
     router = opts[:router] || "#{web_base}.Router"
@@ -1377,6 +1377,8 @@ defmodule Mix.Tasks.Coh.Install do
   """
   def copy_from(apps, source_dir, target_dir, binding, mapping, config) when is_list(mapping) do
     roots = Enum.map(apps, &to_app_source(&1, source_dir))
+    # skirts around this bug: https://github.com/elixir-lang/elixir/issues/11378
+    binding = Keyword.new(binding)
 
     create_opts = if config[:confirm], do: [], else: [force: true]
 
