@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  ci:
+    name: Run tests (Elixir ${{matrix.elixir}}, OTP ${{matrix.otp}})
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        include:
+          - elixir: 1.13
+            otp: 23.3
+          - elixir: 1.14
+            otp: 25
+            lint: lint
+
+    services:
+      db:
+        image: postgres:14
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: continuous
+          POSTGRES_DB: coherence_test
+        ports: ['5432:5432']
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
+    env:
+      MIX_ENV: test
+    steps:
+      - uses: actions/checkout@v3
+      - uses: erlef/setup-beam@v1
+        with:
+          otp-version: ${{ matrix.otp-version }}
+          elixir-version: ${{ matrix.elixir-version }}
+
+      - name: Restore deps and _build cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            deps
+            _build
+          key: deps-${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ hashFiles('**/mix.lock') }}
+          restore-keys: |
+            deps-${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}
+
+      - name: Install dependencies
+        run: mix deps.get --only test
+
+      - name: Check source code format
+        run: mix format --check-formatted
+        if: ${{ matrix.lint }}
+
+      - name: Remove compiled application files
+        run: mix clean
+
+      - name: Compile dependencies
+        run: mix compile
+        if: ${{ !matrix.lint }}
+
+      - name: Compile & lint dependencies
+        run: mix compile --warnings-as-errors
+        if: ${{ matrix.lint }}
+
+      - name: Run tests
+        run: mix test
