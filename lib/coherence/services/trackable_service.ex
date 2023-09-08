@@ -23,7 +23,7 @@ defmodule Coherence.TrackableService do
 
   This feature provides full audit capability around user logins.
 
-  Use the `--trackable-table installation option to use a separate trackable table/schema.
+  Use the `--trackable-table` installation option to use a separate trackable table/schema.
 
   Trackable-table creates a Trackable schema with the following fields:
 
@@ -51,7 +51,7 @@ defmodule Coherence.TrackableService do
 
   @type schema :: Ecto.Schema.t()
   @type conn :: Plug.Conn.t()
-  @type params :: Map.t()
+  @type params :: map()
 
   @doc """
   Track user login details.
@@ -119,7 +119,7 @@ defmodule Coherence.TrackableService do
   Track user logout.
 
   Updates the `last_sign_in_at` and `last_sign_in_at` fields. Clears the
-  'current_sign_in_at` and current_sign_in_ip' fields.
+  `current_sign_in_at` and `current_sign_in_ip` fields.
 
   A value of true in the third argument indicates that the `:trackable option`
   is configured. A Value of true in the fourth argument indicates that the

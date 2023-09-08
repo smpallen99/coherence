@@ -351,7 +351,7 @@ defmodule Coherence.SessionControllerBase do
 
           {:error, :invalid_token} ->
             # this is a case of potential fraud
-            Logger.warn("Invalid token. Potential Fraud.")
+            Logger.warning("Invalid token #{token} for id: #{id}. Potential Fraud.")
 
             conn
             |> delete_req_header(opts[:login_key])

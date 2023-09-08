@@ -6,7 +6,7 @@ defmodule Coherence.Authentication.Utils do
   @type conn :: Plug.Conn.t()
   @type t :: map()
 
-  @param_key Application.get_env(:coherence, :token_param_key, "param_key")
+  @param_key Application.compile_env(:coherence, :token_param_key, "param_key")
 
   @spec param_key() :: String.t()
   def param_key, do: @param_key

@@ -1,18 +1,18 @@
 defmodule Coherence.Mixfile do
   use Mix.Project
 
-  @version "0.7.0"
+  @version "0.8.0"
 
   def project do
     [
       app: :coherence,
       version: @version,
-      elixir: "~> 1.3",
+      elixir: "~> 1.11",
       elixirc_paths: elixirc_paths(Mix.env()),
-      compilers: [:phoenix, :gettext] ++ Mix.compilers(),
+      compilers: [:phoenix] ++ Mix.compilers(),
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
-      docs: [extras: ["README.md"], main: "Coherence"],
+      docs: [extras: ["README.md", "CODE_OF_CONDUCT.md", "CONTRIBUTING.md", "LICENSE"], main: "Coherence"],
       deps: deps(),
       package: package(),
       dialyzer: [plt_add_apps: [:mix]],
@@ -29,19 +29,10 @@ defmodule Coherence.Mixfile do
       mod: {Coherence, []},
       extra_applications: [
         :logger,
-        :comeonin,
         :ecto,
-        :elixir_uuid,
-        :phoenix_swoosh,
         :tzdata,
-        :plug,
-        :phoenix,
-        :phoenix_html,
-        :ecto_sql,
-        :timex,
         :crypto,
-        :eex,
-        :plug
+        :eex
       ]
     ]
   end
@@ -61,11 +52,11 @@ defmodule Coherence.Mixfile do
       {:phoenix_swoosh, "~> 0.2"},
       {:timex, "~> 3.6"},
       {:floki, "~> 0.19", only: :test},
-      {:ex_doc, "~> 0.24.0", only: :dev},
+      {:ex_doc, "~> 0.30.0", only: :dev},
       {:earmark, "~> 1.2", only: :dev, override: true},
       {:postgrex, ">= 0.0.0", only: :test},
       {:dialyxir, "~> 1.1", only: [:dev], runtime: false},
-      {:credo, "~> 1.5", only: [:dev, :test]},
+      {:credo, "~> 1.5", only: [:dev, :test], runtime: false},
       {:plug, "~> 1.11"},
       {:jason, "~> 1.0"}
     ]

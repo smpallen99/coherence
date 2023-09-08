@@ -22,7 +22,7 @@ defmodule TestCoherenceWeb.Coherence.UserEmail do
 
   def confirmation(user, url) do
     email =
-      if Config.get(:confirm_email_updates) && user.unconfirmed_email do
+      if Coherence.Config.get(:confirm_email_updates) && user.unconfirmed_email do
         unconfirmed_email(user)
       else
         user_email(user)

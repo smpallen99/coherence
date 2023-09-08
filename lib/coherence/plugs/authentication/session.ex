@@ -59,7 +59,7 @@ defmodule Coherence.Authentication.Session do
   @type t :: Ecto.Schema.t() | map()
   @type conn :: Plug.Conn.t()
 
-  @session_key Application.get_env(:coherence, :session_key, "session_auth")
+  @session_key Application.compile_env(:coherence, :session_key, "session_auth")
 
   @dialyzer [
     {:nowarn_function, call: 2},
