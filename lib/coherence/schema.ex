@@ -259,7 +259,7 @@ defmodule Coherence.Schema do
         end
 
         @doc """
-        Lock a use account.
+        Lock a user account.
 
         Sets the `:locked_at` field on the user model to the current date and time unless
         provided a value for the optional parameter.

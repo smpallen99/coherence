@@ -7,10 +7,11 @@ defmodule Coherence.RememberableService do
 
   alias Coherence.Schemas
 
+  require Logger
   @doc """
   Delete a rememberable token.
   """
-  @spec delete_rememberable(Plug.Conn.t(), %{id: integer}) :: Plug.Conn.t()
+  @spec delete_rememberable(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def delete_rememberable(conn, %{id: id}) do
     if Config.has_option(:rememberable) do
       Rememberable
@@ -21,5 +22,10 @@ defmodule Coherence.RememberableService do
     else
       conn
     end
+  end
+
+  def delete_rememberable(conn, user) do
+    Logger.warning("user has no id #{inspect(user)}")
+    conn
   end
 end

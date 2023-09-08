@@ -16,7 +16,7 @@ defmodule Coherence.Authentication.Utils do
     assign(conn, key, user_data)
   end
 
-  @spec get_authenticated_user(conn, atom) :: conn
+  @spec get_authenticated_user(conn, atom) :: any
   def get_authenticated_user(conn, key \\ :current_user) do
     conn.assigns[key]
   end

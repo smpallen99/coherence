@@ -2,7 +2,7 @@ defmodule Coherence.CredentialStore.Session do
   @moduledoc """
   Stores current credential information.
 
-  Uses an Server to save logged in credentials.
+  Uses a Server to save logged in credentials.
 
   Note: If you restart the phoenix server, this information
   is lost, requiring the user to log in again.
@@ -43,8 +43,8 @@ defmodule Coherence.CredentialStore.Session do
   @doc """
   Gets the user data for the given credentials
   """
-
-  @spec get_user_data({T.credentials(), nil | struct, integer | nil}) :: any
+  @dialyzer [{:no_match, get_user_data: 1}]
+  @spec get_user_data({T.credentials(), nil | struct, integer | nil}) :: T.user_data() | nil
   def get_user_data({credentials, nil, _}) do
     get_data(credentials)
   end
@@ -72,7 +72,7 @@ defmodule Coherence.CredentialStore.Session do
   @doc """
   Puts the `user_data` for the given `credentials`.
   """
-  @spec put_credentials({T.credentials(), any, atom}) :: any
+  @spec put_credentials({T.credentials(), any, atom}) :: :ok
   def put_credentials({credentials, user_data, id_key}) do
     Server.put_credentials(credentials, user_data)
     DbStore.put_credentials(user_data, credentials, id_key)
@@ -83,7 +83,7 @@ defmodule Coherence.CredentialStore.Session do
 
   Returns the current value of `credentials`, if `credentials` exists.
   """
-  @spec delete_credentials(T.credentials()) :: any
+  @spec delete_credentials(T.credentials()) :: :ok
   def delete_credentials(credentials) do
     case get_data(credentials) do
       nil ->
@@ -98,7 +98,7 @@ defmodule Coherence.CredentialStore.Session do
   @doc """
   Deletes the sessions for all logged in users.
   """
-  @spec delete_user_logins(any) :: no_return
+  @spec delete_user_logins(any) :: :ok
   def delete_user_logins(user_data) do
     Server.delete_user_logins(user_data)
     DbStore.delete_user_logins(user_data)

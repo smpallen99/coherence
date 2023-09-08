@@ -237,7 +237,7 @@ defmodule Coherence.SessionControllerBase do
       @spec delete(conn, params) :: conn
       def delete(conn, params) do
         conn
-        |> logout_user
+        |> logout_user()
         |> respond_with(:session_delete_success, %{params: params})
       end
 

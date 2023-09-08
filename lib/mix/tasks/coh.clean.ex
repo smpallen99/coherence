@@ -418,7 +418,7 @@ defmodule Mix.Tasks.Coh.Clean do
 
   defp lib_path, do: Path.join("lib", otp_app())
   defp lib_path(path) when is_binary(path), do: Path.join(lib_path(), path)
-  defp lib_path(paths), do: Path.join([lib_path() | paths])
+  # defp lib_path(paths), do: Path.join([lib_path() | paths])
 
   defp otp_app do
     Mix.Project.config()[:app] |> to_string

@@ -22,10 +22,6 @@ defmodule Coherence.RegistrationControllerBase do
       @type conn :: Plug.Conn.t()
       @type params :: map()
 
-      @dialyzer [
-        {:nowarn_function, update: 2}
-      ]
-
       @schemas unquote(opts)[:schemas] || raise("Schemas option required")
 
       def schema(which), do: Coherence.Schemas.schema(which)

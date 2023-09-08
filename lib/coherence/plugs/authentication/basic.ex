@@ -8,15 +8,6 @@ defmodule Coherence.Authentication.Basic do
 
     This module is derived from https://github.com/bitgamma/plug_auth which is derived from https://github.com/lexmag/blaguth
   """
-  @dialyzer [
-    {:nowarn_function, call: 2},
-    {:nowarn_function, get_auth_header: 1},
-    {:nowarn_function, verify_creds: 2},
-    {:nowarn_function, assert_creds: 4},
-    {:nowarn_function, init: 1},
-    {:nowarn_function, halt_with_login: 3}
-  ]
-
   @type t :: Ecto.Schema.t() | map()
   @type conn :: Plug.Conn.t()
 
@@ -48,7 +39,7 @@ defmodule Coherence.Authentication.Basic do
     create_login(email, password, user_data, opts)
   end
 
-  # @spec init(Keyword.t) :: map
+  @spec init(Keyword.t) :: map
   def init(opts) do
     %{
       realm: Keyword.get(opts, :realm, Messages.backend().restricted_area()),
@@ -58,7 +49,7 @@ defmodule Coherence.Authentication.Basic do
     }
   end
 
-  # @spec call(conn, Keyword.t) :: none
+  @spec call(conn, Keyword.t) :: conn
   def call(conn, opts) do
     conn
     |> get_auth_header
