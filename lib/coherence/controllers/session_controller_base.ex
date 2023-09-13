@@ -237,7 +237,7 @@ defmodule Coherence.SessionControllerBase do
       @spec delete(conn, params) :: conn
       def delete(conn, params) do
         conn
-        |> logout_user
+        |> logout_user()
         |> respond_with(:session_delete_success, %{params: params})
       end
 
@@ -351,7 +351,7 @@ defmodule Coherence.SessionControllerBase do
 
           {:error, :invalid_token} ->
             # this is a case of potential fraud
-            Logger.warn("Invalid token. Potential Fraud.")
+            Logger.warning("Invalid token #{token} for id: #{id}. Potential Fraud.")
 
             conn
             |> delete_req_header(opts[:login_key])

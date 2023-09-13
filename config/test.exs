@@ -1,4 +1,4 @@
-use Mix.Config
+import Config
 
 # config :coherence, ecto_repos: [TestCoherence.Repo]
 

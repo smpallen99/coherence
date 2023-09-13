@@ -75,9 +75,9 @@ defmodule Mix.Tasks.Coh.Install do
 
   An `--invitable` option provides support for invitation emails, allowing the new user to create their account including password creation.
 
-  A `--registerable` option provide support for new users to register for an account`
+  A `--registerable` option provides support for new users to register for an account
 
-  A `--rememberable` option provide a remember me? check box for persistent logins`
+  A `--rememberable` option provides a remember me? check box for persistent logins
 
   A `--migration-path` option to set the migration path
 
@@ -99,7 +99,7 @@ defmodule Mix.Tasks.Coh.Install do
 
   A `--user-active-field` (false) add active field to user schema and disable logins when set to false.
 
-  A `--password-hashing-alg (Comeonin.Bcrypt) add a different password hashing algorithm
+  A `--password-hashing-alg` (Comeonin.Bcrypt) add a different password hashing algorithm
 
   ## Disable Options
 

@@ -40,19 +40,10 @@ defmodule Coherence.Authentication.Token do
 
   @behaviour Plug
 
-  @dialyzer [
-    {:nowarn_function, call: 2},
-    {:nowarn_function, get_token_from_header: 2},
-    {:nowarn_function, verify_creds: 2},
-    {:nowarn_function, assert_creds: 2},
-    # {:nowarn_function, assert_login: 3},
-    {:nowarn_function, init: 1}
-  ]
-
   @doc """
     Add the credentials for a `token`. `user_data` can be any term but must not be `nil`.
   """
-  @spec add_credentials(String.t(), t, module) :: t
+  @spec add_credentials(String.t(), t, module) :: :ok
   def add_credentials(token, user_data, store \\ Coherence.CredentialStore.Server) do
     store.put_credentials(token, user_data)
   end
@@ -60,7 +51,7 @@ defmodule Coherence.Authentication.Token do
   @doc """
     Remove the credentials for a `token`.
   """
-  @spec remove_credentials(String.t(), module) :: t
+  @spec remove_credentials(String.t(), module) :: :ok
   def remove_credentials(token, store \\ Coherence.CredentialStore.Server) do
     store.delete_credentials(token)
   end
@@ -75,7 +66,7 @@ defmodule Coherence.Authentication.Token do
     |> Base.url_encode64()
   end
 
-  @spec init(keyword()) :: [tuple]
+  @spec init(keyword()) :: map()
   def init(opts) do
     param = Keyword.get(opts, :param)
 
@@ -103,19 +94,19 @@ defmodule Coherence.Authentication.Token do
        when is_atom(module) and is_atom(fun) and is_list(args),
        do: source
 
-  @spec get_token_from_params(conn, map()) :: {conn, map()}
+  @spec get_token_from_params(conn, atom() | binary()) :: {conn, any()}
   def get_token_from_params(conn, param),
     do: {conn, conn.params[param]}
 
-  @spec get_token_from_header(conn, map()) :: {conn, map() | String.t}
+  @spec get_token_from_header(conn, binary()) :: {conn, String.t}
   def get_token_from_header(conn, param),
     do: {conn, get_first_req_header(conn, param)}
 
-  @spec get_token_from_session(conn, map()) :: {conn, String.t()}
+  @spec get_token_from_session(conn, atom() | binary()) :: {conn, nil | String.t()}
   def get_token_from_session(conn, param),
     do: {conn, get_session(conn, param)}
 
-  @spec get_token_from_params_session(conn, map()) :: {conn, nil | String.t()}
+  @spec get_token_from_params_session(conn, atom() | binary()) :: {conn, nil | String.t()}
   def get_token_from_params_session(conn, param) do
     conn
     |> get_token_from_params(param)
@@ -123,12 +114,11 @@ defmodule Coherence.Authentication.Token do
     |> save_token_in_session(param)
   end
 
-  @spec get_token_from_session({conn, nil | String.t()}, map()) ::
-          String.t() | {conn, String.t()}
+  @spec check_token_from_session({conn, nil | String.t()}, atom() | binary()) :: {conn, nil | String.t()}
   def check_token_from_session({conn, nil}, param), do: get_token_from_session(conn, param)
   def check_token_from_session({conn, creds}, _param), do: {conn, creds}
 
-  @spec save_token_in_session({conn, nil | String.t()}, map()) :: {conn, nil | String.t()}
+  @spec save_token_in_session({conn, nil | String.t()}, atom() | binary()) :: {conn, nil | String.t()}
   def save_token_in_session({conn, nil}, _), do: {conn, nil}
 
   def save_token_in_session({conn, creds}, param) do

@@ -1,7 +1,7 @@
 <div>
   <p><%%= dgettext "coherence", "Hello %{name}!", name: @name %><p>
   <p>
-    <%%= dgettext "coherence", "Your new account is almost ready. Click the link below to confirm you new account." %>
+    <%%= dgettext "coherence", "Your new account is almost ready. Click the link below to confirm your new account." %>
   </p>
   <p>
     <a href="<%%= @url %>"><%%= dgettext "coherence", "Confirm my Account" %></a>

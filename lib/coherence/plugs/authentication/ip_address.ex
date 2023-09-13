@@ -39,8 +39,7 @@ defmodule Coherence.Authentication.IpAddress do
   """
 
   @behaviour Plug
-  use Bitwise
-
+  import Bitwise
   import Plug.Conn
   import Coherence.Authentication.Utils
 
@@ -49,14 +48,7 @@ defmodule Coherence.Authentication.IpAddress do
 
   require Logger
 
-  @dialyzer [
-    {:nowarn_function, call: 2},
-    # {:nowarn_function, get_auth_header: 1},
-    # {:nowarn_function, verify_creds: 2},
-    # {:nowarn_function, assert_creds: 4},
-    {:nowarn_function, init: 1}
-    # {:nowarn_function, halt_with_login: 3},
-  ]
+  @dialyzer [ {:nowarn_function, call: 2} ]
 
   @type t :: Ecto.Schema.t() | map()
   @type conn :: Plug.Conn.t()
@@ -77,7 +69,7 @@ defmodule Coherence.Authentication.IpAddress do
     store.delete_credentials(ip)
   end
 
-  @spec init(keyword()) :: [tuple]
+  @spec init(keyword()) :: map()
   def init(opts) do
     %{
       allow: Keyword.get(opts, :allow, []),

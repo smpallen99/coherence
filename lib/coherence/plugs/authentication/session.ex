@@ -59,16 +59,7 @@ defmodule Coherence.Authentication.Session do
   @type t :: Ecto.Schema.t() | map()
   @type conn :: Plug.Conn.t()
 
-  @session_key Application.get_env(:coherence, :session_key, "session_auth")
-
-  @dialyzer [
-    {:nowarn_function, call: 2},
-    {:nowarn_function, get_session_data: 1},
-    {:nowarn_function, verify_rememberable: 2},
-    {:nowarn_function, verify_auth_key: 3},
-    {:nowarn_function, assert_login: 3},
-    {:nowarn_function, init: 1}
-  ]
+  @session_key Application.compile_env(:coherence, :session_key, "session_auth")
 
   @doc """
     Create a login for a user. `user_data` can be any term but must not be `nil`.
@@ -133,7 +124,7 @@ defmodule Coherence.Authentication.Session do
   end
 
   @doc false
-  @spec init(keyword()) :: [tuple]
+  @spec init(keyword()) :: map()
   def init(opts) do
     login =
       case opts[:login] do

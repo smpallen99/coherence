@@ -22,10 +22,6 @@ defmodule Coherence.RegistrationControllerBase do
       @type conn :: Plug.Conn.t()
       @type params :: map()
 
-      @dialyzer [
-        {:nowarn_function, update: 2}
-      ]
-
       @schemas unquote(opts)[:schemas] || raise("Schemas option required")
 
       def schema(which), do: Coherence.Schemas.schema(which)
@@ -163,7 +159,7 @@ defmodule Coherence.RegistrationControllerBase do
       @doc """
       Delete a registration.
       """
-      @spec update(conn, params) :: conn
+      @spec delete(conn, params) :: conn
       def delete(conn, params) do
         user = Coherence.current_user(conn)
         conn = Controller.logout_user(conn)

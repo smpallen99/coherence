@@ -241,7 +241,7 @@ defmodule TestCoherence.Coherence.Trackable do
   @fields ~w(action sign_in_count current_sign_in_ip current_sign_in_at last_sign_in_ip last_sign_in_at user_id)a
 
   schema "trackables" do
-    field(:action, :string, null: false)
+    field(:action, :string)
     field(:sign_in_count, :integer, default: 0)
     field(:current_sign_in_at, :naive_datetime)
     field(:last_sign_in_at, :naive_datetime)

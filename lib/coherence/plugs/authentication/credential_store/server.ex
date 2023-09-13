@@ -29,7 +29,7 @@ defmodule Coherence.CredentialStore.Server do
     GenServer.start_link(__MODULE__, args, name: @name)
   end
 
-  @spec update_user_logins(T.user_data()) :: no_return
+  @spec update_user_logins(T.user_data()) :: :ok
   def update_user_logins(%{id: _} = user_data) do
     GenServer.cast(@name, {:update_user_logins, user_data})
   end
@@ -38,27 +38,27 @@ defmodule Coherence.CredentialStore.Server do
   # There is no need to update anything and we just return an empty list
   def update_user_logins(_), do: []
 
-  @spec delete_user_logins(T.user_data()) :: no_return
+  @spec delete_user_logins(T.user_data()) :: :ok
   def delete_user_logins(%{id: _} = user_data) do
     GenServer.cast(@name, {:delete_user_logins, user_data})
   end
 
-  @spec get_user_data(T.credentials()) :: T.user_data()
+  @spec get_user_data(T.credentials()) :: T.user_data() | nil
   def get_user_data(credentials) do
     GenServer.call(@name, {:get_user_data, credentials})
   end
 
-  @spec put_credentials(T.credentials(), T.user_data()) :: no_return
+  @spec put_credentials(T.credentials(), T.user_data()) :: :ok
   def put_credentials(credentials, user_data) do
     GenServer.cast(@name, {:put_credentials, credentials, user_data})
   end
 
-  @spec delete_credentials(T.credentials()) :: no_return
+  @spec delete_credentials(T.credentials()) :: :ok
   def delete_credentials(credentials) do
     GenServer.cast(@name, {:delete_credentials, credentials})
   end
 
-  @spec stop() :: no_return
+  @spec stop() :: :ok
   def stop do
     GenServer.cast(@name, :stop)
   end
