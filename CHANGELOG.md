@@ -1,5 +1,20 @@
 # Coherence Changelog
 
+## 0.8.0 (2023-09-22)
+
+* Enhancements
+  * Support Elixir 1.14
+
+* Bug Fixes
+  * Resolve Dialyzer warnings, correct specs and typos
+
+
+## 0.7.0 (2020-04-26)
+
+* Enhancements
+  * Support Elixir 1.10 and ecto 4
+
+
 ## 0.6.2 (2020-02-17)
 
 * Bug Fixes
