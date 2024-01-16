@@ -568,13 +568,11 @@ defmodule Mix.Tasks.Coh.Install do
       adds =
         field_list
         |> add_timestamp(config)
-        |> Enum.map(&("      " <> &1))
-        |> Enum.join("\n")
+        |> Enum.map_join("\n", &("      " <> &1))
 
       constraints =
         constraints
-        |> Enum.map(&("    " <> &1))
-        |> Enum.join("\n")
+        |> Enum.map("\n", &("    " <> &1))
 
       statement =
         case verb do
@@ -1315,8 +1313,8 @@ defmodule Mix.Tasks.Coh.Install do
 
     opts_names = Enum.map(opts, &elem(&1, 0))
 
-    with [] <- Enum.filter(opts_bin, &(not (&1 in @switch_names))),
-         [] <- Enum.filter(opts_names, &(not (&1 in @switch_names))) do
+    with [] <- Enum.filter(opts_bin, &(&1 not in @switch_names)),
+         [] <- Enum.filter(opts_names, &(&1 not in @switch_names)) do
       {opts_bin, opts}
     else
       list -> raise_option_errors(list)

@@ -47,8 +47,7 @@ defmodule Coherence.Mix.Utils do
     unless unknown == [] do
       opts =
         unknown
-        |> Enum.map(&elem(&1, 0))
-        |> Enum.join(", ")
+        |> Enum.map_join(", ", &elem(&1, 0))
 
       Mix.raise("""
       Invalid argument(s) #{opts}
