@@ -141,11 +141,12 @@ defmodule Mix.Tasks.Coh.Gen.Controllers do
 
   def do_default_opts(config, opts) do
     @default_booleans
-    |> Enum.map(&String.to_atom/1)
-    |> Enum.reduce(config, fn opt, config ->
-      value = if opts[opt] == false, do: false, else: true
-      Map.put(config, opt, value)
+    |> Enum.map_reduce(config, fn
+      opt_string, config ->
+        opt = String.to_atom(opt_string)
+        {opt, Map.put(config, opt, opt in opts)}
     end)
+    |> elem(1)
   end
 
   defp paths do
