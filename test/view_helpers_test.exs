@@ -33,7 +33,7 @@ defmodule CoherenceTestWeb.ViewHelpers do
     {:ok, conn: conn, user: user}
   end
 
-  @helpers Module.concat(Application.get_env(:coherence, :web_module), Router.Helpers)
+  @helpers Module.concat(Application.compile_env(:coherence, :web_module), Router.Helpers)
 
   test "coherence_path", %{conn: conn} do
     assert ViewHelpers.coherence_path(@helpers, :unlock_path, conn, :new) == "/unlocks/new"
