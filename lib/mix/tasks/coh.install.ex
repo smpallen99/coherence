@@ -572,7 +572,7 @@ defmodule Mix.Tasks.Coh.Install do
 
       constraints =
         constraints
-        |> Enum.map("\n", &("    " <> &1))
+        |> Enum.map_join("\n", &("    " <> &1))
 
       statement =
         case verb do
